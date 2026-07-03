@@ -12,4 +12,9 @@
 
 | # | 主題 | 題目 | 答案程式 | 狀態 |
 |---|---|---|---|---|
-| - | - | - | - | 待建立 |
+| 1 | 語法基礎（statement/句點/註解/鏈式） | [ex01](ex01_syntax_basics.md) | `ZR_TR01_SYNTAX_BASICS` | 完成 |
+| 2 | 變數與 TYPE/LIKE/CONSTANTS | [ex02](ex02_type_like.md) | `ZR_TR02_TYPE_LIKE` | 完成 |
+| 3 | Local Type 與 Structure | [ex03](ex03_structures.md) | `ZR_TR03_STRUCTURES` | 完成 |
+| 4 | Internal Table 基礎 | - | - | 規劃中 |
+| 5 | Internal Table 進階 | - | - | 規劃中 |
+| 6 | 橋接 SAP Table（SCARR 航班模型） | - | - | 規劃中 |
