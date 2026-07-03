@@ -2,7 +2,7 @@
 
 - 專案類型：純 ABAP 後端開發（Class / Program / Function Module）
 - 命名空間：Z 前綴（標準客戶命名空間）
-- 版控狀態：目前**未使用 abapGit**，程式碼僅存在於 SAP 系統中
+- 版控狀態：**未使用 abapGit**；SAP 原始碼以 git 做**單向快照**，放在 `src/`，檔名採 abapGit 慣例（`<物件名小寫>.<類型>.abap`）。快照由 `sap-adt` MCP 匯出，SAP 端修改後需重新匯出；本地修改要用 `sap_set_source` 寫回系統才算數
 - SAP 系統資訊：請填入 System ID / Client / 語言
   - DEV: <補上>
   - QAS: <補上>
