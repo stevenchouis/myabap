@@ -1,5 +1,11 @@
 # 練習 13：期末綜合實作——航班營收報表
 
+> **本題最後做**：建議授課順序是 ex01–ex12 → ex14 → ex15 → 本題（題號因 SAP 物件已命名而未重編，見 README）。
+
+## 前置條件
+
+已完成 ex14（INCLUDE 拆檔）與 ex15（Function Module）。
+
 ## 目標
 
 整合 ex01～ex12 所有技能，獨立寫出一支結構完整的傳統報表。完成後對照真實程式 `Z_INVENTORY_COST_REPORT`（`src/z_inventory_cost_report.prog.abap`），**能看懂它的每一行**即為結業標準。
@@ -41,6 +47,15 @@
 - [ ] 條件縮小到查無資料：顯示訊息、不噴錯
 - [ ] 取消 checkbox：seatsocc = 0 的航班出現、營收為 0
 - [ ] 讀 `Z_INVENTORY_COST_REPORT` 原始碼，逐段說出對應本題的哪一部分
+
+## 結業要求（整合 ex14 / ex15）
+
+基本版寫完並通過驗收清單後，重構成「實務結構」：
+
+1. **拆檔**（ex14 技能）：拆成 `_TOP`（宣告）與 `_F01`（FORM），主程式只留 INCLUDE 與事件——結構參考答案 `zr_tr14_capstone.prog.abap`
+2. **改呼叫 FM**（ex15 技能）：`get_data` 中的 `revenue = price × seatsocc` 改成 `CALL FUNCTION 'Z_TR15_CALC_REVENUE'`，並處理 `invalid_input` 例外（把該筆記到錯誤清單而不是讓程式 dump）
+
+重構後執行結果必須與基本版完全相同——「重構不改行為」是實務鐵律。
 
 ## 延伸挑戰
 

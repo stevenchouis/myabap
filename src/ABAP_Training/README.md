@@ -30,3 +30,9 @@
 
 > - 本階段不含 OOP（Local Class / Method / cl_salv_table 等），留待 SAP OOP 課程。
 > - 課程目標：完課後能獨立寫出並看懂 `Z_INVENTORY_COST_REPORT` 等級的傳統報表。
+
+## 建議授課順序（題號 ≠ 順序）
+
+**ex01 → … → ex12 → ex14（INCLUDE 拆檔）→ ex15（Function Module）→ ex13（期末綜合實作，最後做）**
+
+ex14/ex15 是後來補的主題，題號在 13 之後，但期末實作 ex13 會用到兩者的技能（拆檔結構、呼叫 FM），請放在最後。SAP 端答案程式已依原題號命名（`ZR_TR13_CAPSTONE` 等），故不重編題號。
