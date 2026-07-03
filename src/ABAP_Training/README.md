@@ -22,5 +22,9 @@
 | 8 | 模組化（FORM/USING/CHANGING） | [ex08](ex08_modularize.md) | `ZR_TR08_MODULARIZE` | 完成 |
 | 9 | Functional ALV 與 MACRO（REUSE_ALV_GRID_DISPLAY/fieldcat/DEFINE） | [ex09](ex09_alv.md) | `ZR_TR09_ALV` | 完成 |
 | 10 | Report Event（INITIALIZATION～AT LINE-SELECTION/HIDE） | [ex10](ex10_events.md) | `ZR_TR10_EVENTS` | 完成 |
+| 11 | 多表 JOIN（INNER/LEFT OUTER、CORRESPONDING FIELDS） | [ex11](ex11_join.md) | `ZR_TR11_JOIN` | 完成 |
+| 12 | 列印排版與頁面規劃（LINE-SIZE/LINE-COUNT/END-OF-PAGE、點矩陣選型） | [ex12](ex12_print_layout.md) | `ZR_TR12_PRINT_LAYOUT` | 完成 |
+| 13 | 期末綜合實作：航班營收報表（含總頁數回填），結業對照 Z_INVENTORY_COST_REPORT | [ex13](ex13_capstone.md) | `ZR_TR13_CAPSTONE` | 完成 |
 
-> 本階段不含 OOP（Local Class / Method / cl_salv_table 等），留待 SAP OOP 課程。
+> - 本階段不含 OOP（Local Class / Method / cl_salv_table 等），留待 SAP OOP 課程。
+> - 課程目標：完課後能獨立寫出並看懂 `Z_INVENTORY_COST_REPORT` 等級的傳統報表。
