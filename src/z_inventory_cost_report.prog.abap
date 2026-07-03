@@ -3,7 +3,6 @@ REPORT z_inventory_cost_report NO STANDARD PAGE HEADING
                                LINE-COUNT 65.
 
 TABLES: mard, makt, mbew, mara, t001.
-TABLES: sscrfields. " 必須宣告這個系統結構，才能捕捉按鈕點擊
 
 *----------------------------------------------------------------------*
 * Data Definition
@@ -37,94 +36,7 @@ SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
   PARAMETERS: p_zero AS CHECKBOX DEFAULT 'X'.
 SELECTION-SCREEN END OF BLOCK b1.
 
-SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE TEXT-002.
-
-* --- 開始定義同一行內容 ---
-SELECTION-SCREEN BEGIN OF LINE.
-
-  " 1. 在第 1 位元位置放置說明文字 (長度 20)
-  SELECTION-SCREEN COMMENT 1(20) text_lbl FOR FIELD p_val1.
-
-  " 2. 在第 25 位元位置放置第一個輸入框
-  SELECTION-SCREEN POSITION 25.
-  PARAMETERS: p_val1 TYPE i.
-
-  " 3. 在第 40 位元位置放置一個簡單的小標籤 (例如 "TO")
-  SELECTION-SCREEN COMMENT 40(2) text_to.
-
-  " 4. 在第 45 位元位置放置第二個輸入框
-  SELECTION-SCREEN POSITION 45.
-  PARAMETERS: p_val2 TYPE i.
-
-SELECTION-SCREEN END OF LINE.
-* --- 結束定義同一行內容 ---
-
-SELECTION-SCREEN END OF BLOCK b2.
-
-SELECTION-SCREEN BEGIN OF BLOCK b3 WITH FRAME TITLE TEXT-003.
-
-* --- 同一行放置兩個按鈕 ---
-SELECTION-SCREEN BEGIN OF LINE.
-  SELECTION-SCREEN POSITION 1.
-  SELECTION-SCREEN PUSHBUTTON 1(15) btn_all USER-COMMAND select_all.
-
-  SELECTION-SCREEN POSITION 20.
-  SELECTION-SCREEN PUSHBUTTON 20(15) btn_none USER-COMMAND deselect_all.
-SELECTION-SCREEN END OF LINE.
-
-* --- 測試用的核取方塊 ---
-PARAMETERS: p_chk1 AS CHECKBOX,
-            p_chk2 AS CHECKBOX,
-            p_chk3 AS CHECKBOX.
-
-
-SELECTION-SCREEN END OF BLOCK b3.
-
-*--- 畫面定義
-SELECTION-SCREEN BEGIN OF BLOCK rad1 WITH FRAME TITLE TEXT-007.
-  PARAMETERS: p_r1_1 RADIOBUTTON GROUP grp1 DEFAULT 'X', " 預設選中
-              p_r1_2 RADIOBUTTON GROUP grp1,
-              p_r1_3 RADIOBUTTON GROUP grp1.
-SELECTION-SCREEN END OF BLOCK rad1.
-
-SELECTION-SCREEN BEGIN OF BLOCK rad2 WITH FRAME TITLE TEXT-008.
-  PARAMETERS: p_r2_a RADIOBUTTON GROUP grp2,
-              p_r2_b RADIOBUTTON GROUP grp2 DEFAULT 'X'.
-SELECTION-SCREEN END OF BLOCK rad2.
-
-
-SELECTION-SCREEN BEGIN OF BLOCK rad3 WITH FRAME TITLE TEXT-009.
-*--- 開始同一列
-SELECTION-SCREEN BEGIN OF LINE.
-
-  " 第一個按鈕與其文字
-  PARAMETERS: r1 RADIOBUTTON GROUP grp3 DEFAULT 'X'.
-  SELECTION-SCREEN COMMENT 3(10) TEXT-010 FOR FIELD r1.
-
-  " 第二個按鈕與其文字 (間隔位置需手動調整，例如從 20 開始)
-  SELECTION-SCREEN POSITION 20.
-  PARAMETERS: r2 RADIOBUTTON GROUP grp3.
-  SELECTION-SCREEN COMMENT 23(10) TEXT-011 FOR FIELD r2.
-
-  " 第三個按鈕與其文字
-  SELECTION-SCREEN POSITION 40.
-  PARAMETERS: r3 RADIOBUTTON GROUP grp3.
-  SELECTION-SCREEN COMMENT 43(10) TEXT-012 FOR FIELD r3.
-
-SELECTION-SCREEN END OF LINE.
-*--- 結束同一列
-SELECTION-SCREEN END OF BLOCK rad3.
-
-
-*----------------------------------------------------------------------*
-* 初始化文字 (因為 COMMENT 建議在程式啟動時賦值)
-*----------------------------------------------------------------------*
-INITIALIZATION.
-  text_lbl = TEXT-003.
-  text_to  = TEXT-004.
-  btn_all = TEXT-005.
-  btn_none = TEXT-006.
-
+* 選擇畫面示範元件（按鈕/核取方塊/radio 排版練習）已移至 ZR_SELSCREEN_DEMO
 
 *----------------------------------------------------------------------*
 * Main Process
@@ -138,16 +50,6 @@ END-OF-SELECTION.
 
 * 重點: 所有的WRITE(例如在TOP-OF-PAGE及START-OF-SELECTION中) 均是先放到List Buffer 中,
 * 一旦執行完END-OF-SELECTION才會由Buffer輪出到畫面
-
-AT SELECTION-SCREEN.
-  " 當按鈕被按下時，對應的 USER-COMMAND 會存放在 sscrfields-ucomm
-  CASE sscrfields-ucomm.
-    WHEN 'SELECT_ALL'.
-      p_chk1 = p_chk2 = p_chk3 = 'X'.
-    WHEN 'DESELECT_ALL'.
-      p_chk1 = p_chk2 = p_chk3 = ' '.
-  ENDCASE.
-
 
 *----------------------------------------------------------------------*
 * TOP-OF-PAGE (座標精確對齊至位置 100)
