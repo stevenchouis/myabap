@@ -37,4 +37,7 @@ define gui_download.
         CONTROL_FLUSH_ERROR           = 21
         OTHERS                        = 22
                 .
+  if sy-subrc <> 0.
+    message s999 with '錯誤檔下載失敗:' filename.
+  endif.
 end-of-definition.
