@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__sap-adt__getObjectSource",
+      "mcp__sap-adt__objectStructure",
+      "mcp__sap-adt__syntaxCheckCode",
+      "mcp__sap-adt__searchObject",
+      "mcp__sap-adt__classComponents",
+      "mcp__sap-adt__classIncludes",
+      "mcp__sap-adt__unitTestRun",
+      "mcp__sap-adt__unitTestEvaluation",
+      "mcp__sap-adt__atcCustomizing",
+      "mcp__sap-adt__atcWorklists",
+      "mcp__sap-adt__findDefinition",
+      "mcp__sap-adt__usageReferences",
+      "mcp__sap-docs__*"
+    ],
+    "ask": [
+      "mcp__sap-adt__setObjectSource",
+      "mcp__sap-adt__createObject",
+      "mcp__sap-adt__activateObjects",
+      "mcp__sap-adt__activateByName",
+      "mcp__sap-adt__lock",
+      "mcp__sap-adt__unLock",
+      "mcp__sap-adt__createTransport",
+      "mcp__sap-adt__createAtcRun"
+    ],
+    "deny": [
+      "mcp__sap-adt__deleteObject",
+      "mcp__sap-adt__transportRelease",
+      "mcp__sap-adt__transportDelete"
+    ]
+  }
+}

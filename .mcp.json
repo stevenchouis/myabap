@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "sap-adt": {
+      "type": "http",
+      "url": "http://192.168.68.56:3000/mcp"
+    },
+    "sap-docs": {
+      "type": "http",
+      "url": "https://mcp-sap-docs.marianzeis.de/mcp"
+    }
+  }
+}

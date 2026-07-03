@@ -1,0 +1,14 @@
+# 機密資訊，絕對不要進版控
+.env
+.env.*
+!.env.example
+
+# Claude Code 本機專屬設定（因人而異，不共用）
+.claude/settings.local.json
+
+# 常見暫存/系統檔案
+*.log
+.DS_Store
+
+# 若之後導入 abapGit，可視需要調整以下規則
+# .abapgit.xml 建議保留進版控，不要忽略
