@@ -15,3 +15,6 @@
 
 # Office 暫存鎖定檔
 ~$*
+
+# 個人筆記，不進版控
+src/ABAP_Training/Claude Code context.docx
