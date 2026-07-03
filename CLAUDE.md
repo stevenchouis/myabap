@@ -6,7 +6,8 @@
 - Repo 結構：
   - `src/`：正式程式快照（ZDQM 系列、Z_INVENTORY_COST_REPORT 等）
   - `src/ABAP_Training/`：基礎 ABAP 教育訓練教材——題目 md + PDF 講義 + 答案程式快照（SAP 端 `ZR_TRnn_*`），見該目錄 README 的題目索引與授課順序
-  - `tools/`：輔助腳本，如 `md2pdf.js`（教材 md 改後重產 PDF 講義，`node tools/md2pdf.js`）
+  - `src/ABAP_Training_OOP/`：OOP 課程（op01–op12，答案物件 `ZCL_OOnn_*` 等），課綱已定稿、出題中，見該目錄 README
+  - `tools/`：輔助腳本，如 `md2pdf.js`（教材 md 改後重產 PDF 講義，`node tools/md2pdf.js [目錄]`）
 - SAP 系統資訊：請填入 System ID / Client / 語言
   - DEV: <補上>
   - QAS: <補上>

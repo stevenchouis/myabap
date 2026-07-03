@@ -1,8 +1,9 @@
 // 訓練教材 md → PDF 講義產生器
 //
 // 用法（在 repo 根目錄）：
-//   node tools/md2pdf.js          只重產「md 比 PDF 新」的檔案（增量）
-//   node tools/md2pdf.js --all    全部重產
+//   node tools/md2pdf.js [目錄] [--all]
+//   目錄預設 src/ABAP_Training；--all 全部重產（預設只重產 md 比 PDF 新的）
+//   例：node tools/md2pdf.js src/ABAP_Training_OOP
 //
 // 相依（皆為本機既有，不需安裝）：
 //   - VS Code extension yzane.markdown-pdf（借用其 CSS 樣式）
@@ -13,7 +14,9 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const DIR = path.join(__dirname, '..', 'src', 'ABAP_Training');
+const dirArg = process.argv.slice(2).find(a => !a.startsWith('--'));
+const DIR = dirArg ? path.resolve(dirArg)
+                   : path.join(__dirname, '..', 'src', 'ABAP_Training');
 
 function findLatest(base, prefix) {
   const hits = fs.readdirSync(base).filter(f => f.startsWith(prefix)).sort();
