@@ -22,9 +22,9 @@
 | op01 | 為什麼要 OOP + 第一個類別 | FORM/FM 的限制（全域變數、無封裝）；CLASS DEFINITION/IMPLEMENTATION、屬性、方法、`NEW` 建立物件 | ex08 的 FORM 痛點當引子 | 已出題（待驗收） |
 | op02 | 方法與參數 | IMPORTING/EXPORTING/CHANGING/RETURNING、函數式呼叫、方法鏈；隨堂引入現代語法（`DATA(...)`、string template） | 把 ex15 的 FM 改寫成 method，FORM/FM/Method 三方對照 | 已出題（待驗收） |
 | op03 | 建構子與封裝 | `constructor`、私有屬性 + 公開方法、`READ-ONLY`、`class_constructor` | — | 已出題（待驗收） |
-| op04 | 靜態 vs 實例 | CLASS-DATA/CLASS-METHODS 使用時機、工具類 vs 有狀態物件 | ex08 已偷跑過 static method | 規劃中 |
-| op05 | 全域類別 | local class 搬成 `ZCL_` 全域類別（ADT/SE24）、可見性、跨程式重用 | 對照 ex15「FM 跨程式共用」定位 | 規劃中 |
-| op06 | 繼承 | `INHERITING FROM`、`REDEFINITION`、`super->`、abstract/final；艙等計價當例子 | 航班模型延續 | 規劃中 |
+| op04 | 靜態 vs 實例 | CLASS-DATA/CLASS-METHODS 使用時機、工具類 vs 有狀態物件 | ex08 已偷跑過 static method | 已出題（待驗收） |
+| op05 | 全域類別 | local class 搬成 `ZCL_` 全域類別（ADT/SE24）、可見性、跨程式重用 | 對照 ex15「FM 跨程式共用」定位 | 已出題（待驗收） |
+| op06 | 繼承 | `INHERITING FROM`、`REDEFINITION`、`super->`、abstract/final；艙等計價當例子 | 航班模型延續 | 已出題（待驗收） |
 | op07 | 介面 | `ZIF_` 介面定義與實作、介面參考、「寫給介面不寫給實作」 | 命名慣例表的 ZIF_ 落地 | 規劃中 |
 | op08 | 多型與轉型 | 向上/向下轉型、`CAST`、`IS INSTANCE OF`、多型迴圈 | 承 op06/07 | 規劃中 |
 | op09 | 例外類別 | TRY/CATCH/CLEANUP、`RAISE EXCEPTION`、自訂 `ZCX_` 繼承 CX_STATIC_CHECK vs CX_DYNAMIC_CHECK 的選擇（團隊規範）；對照 ex15 classic EXCEPTIONS | 兌現 ex09「TRY/CATCH 之後教」 | 規劃中 |
