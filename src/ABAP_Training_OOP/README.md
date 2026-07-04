@@ -19,9 +19,9 @@
 
 | # | 主題 | 內容重點 | 銜接基礎課 | 狀態 |
 |---|---|---|---|---|
-| op01 | 為什麼要 OOP + 第一個類別 | FORM/FM 的限制（全域變數、無封裝）；CLASS DEFINITION/IMPLEMENTATION、屬性、方法、`NEW` 建立物件 | ex08 的 FORM 痛點當引子 | 規劃中 |
-| op02 | 方法與參數 | IMPORTING/EXPORTING/CHANGING/RETURNING、函數式呼叫、方法鏈；隨堂引入現代語法（`DATA(...)`、string template） | 把 ex15 的 FM 改寫成 method，FORM/FM/Method 三方對照 | 規劃中 |
-| op03 | 建構子與封裝 | `constructor`、私有屬性 + 公開方法、`READ-ONLY`、`class_constructor` | — | 規劃中 |
+| op01 | 為什麼要 OOP + 第一個類別 | FORM/FM 的限制（全域變數、無封裝）；CLASS DEFINITION/IMPLEMENTATION、屬性、方法、`NEW` 建立物件 | ex08 的 FORM 痛點當引子 | 已出題（待驗收） |
+| op02 | 方法與參數 | IMPORTING/EXPORTING/CHANGING/RETURNING、函數式呼叫、方法鏈；隨堂引入現代語法（`DATA(...)`、string template） | 把 ex15 的 FM 改寫成 method，FORM/FM/Method 三方對照 | 已出題（待驗收） |
+| op03 | 建構子與封裝 | `constructor`、私有屬性 + 公開方法、`READ-ONLY`、`class_constructor` | — | 已出題（待驗收） |
 | op04 | 靜態 vs 實例 | CLASS-DATA/CLASS-METHODS 使用時機、工具類 vs 有狀態物件 | ex08 已偷跑過 static method | 規劃中 |
 | op05 | 全域類別 | local class 搬成 `ZCL_` 全域類別（ADT/SE24）、可見性、跨程式重用 | 對照 ex15「FM 跨程式共用」定位 | 規劃中 |
 | op06 | 繼承 | `INHERITING FROM`、`REDEFINITION`、`super->`、abstract/final；艙等計價當例子 | 航班模型延續 | 規劃中 |
