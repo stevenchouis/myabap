@@ -1,6 +1,6 @@
 # SAP ABAP OOP 課程
 
-基礎課（`src/ABAP_Training/`，ex01–ex15）的續篇。課綱已定稿（2026-07-03）；op01–op12 已全數出題（2026-07-04），驗收中。
+基礎課（`src/ABAP_Training/`，ex01–ex15）的續篇。課綱已定稿（2026-07-03）；op01–op12 已全數出題並驗收完成（2026-07-04），課程結案。
 
 ## 課程定位
 
@@ -19,18 +19,18 @@
 
 | # | 主題 | 內容重點 | 銜接基礎課 | 狀態 |
 |---|---|---|---|---|
-| op01 | 為什麼要 OOP + 第一個類別 | FORM/FM 的限制（全域變數、無封裝）；CLASS DEFINITION/IMPLEMENTATION、屬性、方法、`NEW` 建立物件 | ex08 的 FORM 痛點當引子 | 已出題（待驗收） |
-| op02 | 方法與參數 | IMPORTING/EXPORTING/CHANGING/RETURNING、函數式呼叫、方法鏈；隨堂引入現代語法（`DATA(...)`、string template） | 把 ex15 的 FM 改寫成 method，FORM/FM/Method 三方對照 | 已出題（待驗收） |
-| op03 | 建構子與封裝 | `constructor`、私有屬性 + 公開方法、`READ-ONLY`、`class_constructor` | — | 已出題（待驗收） |
-| op04 | 靜態 vs 實例 | CLASS-DATA/CLASS-METHODS 使用時機、工具類 vs 有狀態物件 | ex08 已偷跑過 static method | 已出題（待驗收） |
-| op05 | 全域類別 | local class 搬成 `ZCL_` 全域類別（ADT/SE24）、可見性、跨程式重用 | 對照 ex15「FM 跨程式共用」定位 | 已出題（待驗收） |
-| op06 | 繼承 | `INHERITING FROM`、`REDEFINITION`、`super->`、abstract/final；艙等計價當例子 | 航班模型延續 | 已出題（待驗收） |
-| op07 | 介面 | `ZIF_` 介面定義與實作、介面參考、「寫給介面不寫給實作」 | 命名慣例表的 ZIF_ 落地 | 已出題（待驗收） |
-| op08 | 多型與轉型 | 向上/向下轉型、`CAST`、`IS INSTANCE OF`、多型迴圈 | 承 op06/07 | 已出題（待驗收） |
-| op09 | 例外類別 | TRY/CATCH/CLEANUP、`RAISE EXCEPTION`、自訂 `ZCX_` 繼承 CX_STATIC_CHECK vs CX_DYNAMIC_CHECK 的選擇（團隊規範）；對照 ex15 classic EXCEPTIONS | 兌現 ex09「TRY/CATCH 之後教」 | 已出題（待驗收） |
-| op10 | ABAP Unit 單元測試 | local test class、`FOR TESTING RISK LEVEL HARMLESS DURATION SHORT`、given-when-then、`cl_abap_unit_assert` | 團隊規範「新 Class 必附測試」落地 | 已出題（待驗收） |
-| op11 | 標準 OO API 實戰：cl_salv_table | ex09 Functional ALV 改寫成 `cl_salv_table`、方法鏈實戰、ADT 導覽標準類別 | 兌現 ex09 的預告 | 已出題（待驗收） |
-| op12 | 期末綜合：報表 OO 化重構 | ex13 全面重構——`ZCL_OO12_FLIGHT_REVENUE`（取數+計算+`ZCX_` 例外）+ ABAP Unit 測試 + `cl_salv_table` 輸出，報表剩 <30 行 UI 層；重構前後行為一致 | ex13 是輸入，團隊規範是驗收 | 已出題（待驗收） |
+| op01 | 為什麼要 OOP + 第一個類別 | FORM/FM 的限制（全域變數、無封裝）；CLASS DEFINITION/IMPLEMENTATION、屬性、方法、`NEW` 建立物件 | ex08 的 FORM 痛點當引子 | 已驗收 |
+| op02 | 方法與參數 | IMPORTING/EXPORTING/CHANGING/RETURNING、函數式呼叫、方法鏈；隨堂引入現代語法（`DATA(...)`、string template） | 把 ex15 的 FM 改寫成 method，FORM/FM/Method 三方對照 | 已驗收 |
+| op03 | 建構子與封裝 | `constructor`、私有屬性 + 公開方法、`READ-ONLY`、`class_constructor` | — | 已驗收 |
+| op04 | 靜態 vs 實例 | CLASS-DATA/CLASS-METHODS 使用時機、工具類 vs 有狀態物件 | ex08 已偷跑過 static method | 已驗收 |
+| op05 | 全域類別 | local class 搬成 `ZCL_` 全域類別（ADT/SE24）、可見性、跨程式重用 | 對照 ex15「FM 跨程式共用」定位 | 已驗收 |
+| op06 | 繼承 | `INHERITING FROM`、`REDEFINITION`、`super->`、abstract/final；艙等計價當例子 | 航班模型延續 | 已驗收 |
+| op07 | 介面 | `ZIF_` 介面定義與實作、介面參考、「寫給介面不寫給實作」 | 命名慣例表的 ZIF_ 落地 | 已驗收 |
+| op08 | 多型與轉型 | 向上/向下轉型、`CAST`、`IS INSTANCE OF`、多型迴圈 | 承 op06/07 | 已驗收 |
+| op09 | 例外類別 | TRY/CATCH/CLEANUP、`RAISE EXCEPTION`、自訂 `ZCX_` 繼承 CX_STATIC_CHECK vs CX_DYNAMIC_CHECK 的選擇（團隊規範）；對照 ex15 classic EXCEPTIONS | 兌現 ex09「TRY/CATCH 之後教」 | 已驗收 |
+| op10 | ABAP Unit 單元測試 | local test class、`FOR TESTING RISK LEVEL HARMLESS DURATION SHORT`、given-when-then、`cl_abap_unit_assert` | 團隊規範「新 Class 必附測試」落地 | 已驗收 |
+| op11 | 標準 OO API 實戰：cl_salv_table | ex09 Functional ALV 改寫成 `cl_salv_table`、方法鏈實戰、ADT 導覽標準類別 | 兌現 ex09 的預告 | 已驗收 |
+| op12 | 期末綜合：報表 OO 化重構 | ex13 全面重構——`ZCL_OO12_FLIGHT_REVENUE`（取數+計算+`ZCX_` 例外）+ ABAP Unit 測試 + `cl_salv_table` 輸出，報表剩 <30 行 UI 層；重構前後行為一致 | ex13 是輸入，團隊規範是驗收 | 已驗收 |
 
 ## 不碰的範圍（下一階段）
 
