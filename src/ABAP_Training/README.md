@@ -31,12 +31,13 @@
 | 13 | 期末綜合實作：航班營收報表（含總頁數回填），結業對照 Z_INVENTORY_COST_REPORT | [ex13](ex13_capstone.md) | `ZR_TR13_CAPSTONE` | 完成 |
 | 14 | INCLUDE 拆檔（TOP/F01 慣例、context 啟用） | [ex14](ex14_include_split.md) | `ZR_TR14_CAPSTONE` + `_TOP`/`_F01` | 完成 |
 | 15 | Function Module（SE37 建立/單測、CALL FUNCTION 與例外） | [ex15](ex15_function_module.md) | `ZFG_TR15` / `Z_TR15_CALC_REVENUE` / `ZR_TR15_CALL_FM` | 完成 |
+| 16 | Field-Symbol（ASSIGN/LOOP ASSIGNING/ASSIGN COMPONENT） | [ex16](ex16_field_symbols.md) | `ZR_TR16_FIELD_SYMBOLS` | 完成 |
 
 > - 本階段不含 OOP（Local Class / Method / cl_salv_table 等），留待 SAP OOP 課程。
 > - 課程目標：完課後能獨立寫出並看懂 `Z_INVENTORY_COST_REPORT` 等級的傳統報表。
 
 ## 建議授課順序（題號 ≠ 順序）
 
-**ex01 → … → ex12 → ex14（INCLUDE 拆檔）→ ex15（Function Module）→ ex13（期末綜合實作，最後做）**
+**ex01 → … → ex05 → ex16（Field-Symbol）→ ex06 → … → ex12 → ex14（INCLUDE 拆檔）→ ex15（Function Module）→ ex13（期末綜合實作，最後做）**
 
-ex14/ex15 是後來補的主題，題號在 13 之後，但期末實作 ex13 會用到兩者的技能（拆檔結構、呼叫 FM），請放在最後。SAP 端答案程式已依原題號命名（`ZR_TR13_CAPSTONE` 等），故不重編題號。
+ex14/ex15/ex16 是後來補的主題，題號在 13 之後，但期末實作 ex13 會用到 ex14/ex15 的技能（拆檔結構、呼叫 FM），請放在最後；ex16 只依賴 internal table 技能，建議接在 ex05 之後教。SAP 端答案程式已依原題號命名（`ZR_TR13_CAPSTONE` 等），故不重編題號。
