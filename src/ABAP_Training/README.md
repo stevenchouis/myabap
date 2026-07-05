@@ -2,6 +2,10 @@
 
 本目錄存放基礎 ABAP 教育訓練的練習題目與答案程式。
 
+## 上課講義（lectures/）
+
+每題另有對應的**上課講義**（重要觀念＋詳細語法＋範例）放在 [lectures/](lectures/README.md)，編號與題號一致（lec01 ↔ ex01）。授課流程：先講課（lecNN）→ 實作練習（exNN）→ 對照答案程式。講義 PDF 重產指令：`node tools/md2pdf.js src/ABAP_Training/lectures`。
+
 ## 講義 PDF
 
 每份 `*.md` 都有對應的 `*.pdf` 講義。md 修改後在 repo 根目錄執行 `node tools/md2pdf.js` 重產（只重產有變更的；`--all` 全部重產），再 commit。
@@ -32,12 +36,20 @@
 | 14 | INCLUDE 拆檔（TOP/F01 慣例、context 啟用） | [ex14](ex14_include_split.md) | `ZR_TR14_CAPSTONE` + `_TOP`/`_F01` | 完成 |
 | 15 | Function Module（SE37 建立/單測、CALL FUNCTION 與例外） | [ex15](ex15_function_module.md) | `ZFG_TR15` / `Z_TR15_CALC_REVENUE` / `ZR_TR15_CALL_FM` | 完成 |
 | 16 | Field-Symbol（ASSIGN/LOOP ASSIGNING/ASSIGN COMPONENT） | [ex16](ex16_field_symbols.md) | `ZR_TR16_FIELD_SYMBOLS` | 完成 |
+| 17 | 運算與流程控制（IF/CASE/DO/WHILE/EXIT/CHECK） | [ex17](ex17_control_flow.md) | `ZR_TR17_CONTROL_FLOW` | 完成 |
+| 18 | 字串與日期處理（CONCATENATE/SPLIT/位移/月初月末） | [ex18](ex18_string_date.md) | `ZR_TR18_STRING_DATE` | 完成 |
+| 19 | Debugger 除錯（中斷點/單步/Watchpoint/ST22，附埋 bug 程式） | [ex19](ex19_debugging.md) | `ZR_TR19_DEBUGGING` | 完成 |
+| 20 | Control Break 群組小計（AT NEW/AT END OF/SUM） | [ex20](ex20_control_break.md) | `ZR_TR20_CONTROL_BREAK` | 完成 |
+| 21 | Z 資料表與 Open SQL 寫入（SE11/SM30/INSERT/UPDATE/MODIFY/DELETE） | [ex21](ex21_ztable.md) | `ZTR21_STUD` + `ZR_TR21_ZTABLE` | 完成 |
+| 22 | Message Class 與多語言文字元素（SE91/Text Symbol/Selection Texts） | [ex22](ex22_texts_messages.md) | `ZTR22` + `ZR_TR22_TEXTS` | 完成 |
 
 > - 本階段不含 OOP（Local Class / Method / cl_salv_table 等），留待 SAP OOP 課程。
 > - 課程目標：完課後能獨立寫出並看懂 `Z_INVENTORY_COST_REPORT` 等級的傳統報表。
+> - ex17～ex22 的答案物件已於 2026-07-05 寫入 SAP（$TMP）並通過語法檢查，含 ex21 的 DDIC 三層件（Domain/DE `ZTR21_SCORE`、表 `ZTR21_STUD`，DDL 快照見 `ztr21_stud.tabl.abap`）與 ex22 的訊息類別 `ZTR22`（001–003）。
+> - **待辦**：`ZR_TR22_TEXTS` 的 Text Symbols（001–003）與 Selection Texts 無法透過 ADT API 維護（只有 SAP GUI 介面），請在 SE38 → Goto → Text Elements 依程式頭註解手動補上；ex21 的 Table Maintenance Generator（SM30）也需在 GUI 產生。
 
 ## 建議授課順序（題號 ≠ 順序）
 
-**ex01 → … → ex05 → ex16（Field-Symbol）→ ex06 → … → ex12 → ex14（INCLUDE 拆檔）→ ex15（Function Module）→ ex13（期末綜合實作，最後做）**
+**ex01 → ex02 → ex17（流程控制）→ ex18（字串日期）→ ex03 → ex04 → ex05 → ex19（除錯）→ ex16（Field-Symbol）→ ex06 → … → ex10 → ex22（訊息與文字元素）→ ex11 → ex20（群組小計）→ ex12 → ex14（INCLUDE 拆檔）→ ex15（Function Module）→ ex21（Z 資料表）→ ex13（期末綜合實作，最後做）**
 
-ex14/ex15/ex16 是後來補的主題，題號在 13 之後，但期末實作 ex13 會用到 ex14/ex15 的技能（拆檔結構、呼叫 FM），請放在最後；ex16 只依賴 internal table 技能，建議接在 ex05 之後教。SAP 端答案程式已依原題號命名（`ZR_TR13_CAPSTONE` 等），故不重編題號。
+題號在 13 之後的主題都是後來補的，依主題插進對應位置授課，不重編題號（SAP 端答案程式依原題號命名）：ex17/ex18 是基本功，緊接變數宣告之後；ex19 除錯放在 internal table 之後（有足夠複雜度可供追蹤）；ex22 收攏 ex07 的 Selection Texts 伏筆與 ex10 首次登場的 MESSAGE；ex20 需要 JOIN 的資料、且是 ex12 列印排版的前置；ex21 需要 FM 觀念（SM30 的 function group）；期末實作 ex13 用到 ex14/ex15 技能，永遠最後。
