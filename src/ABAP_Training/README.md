@@ -49,7 +49,7 @@
 > - ex17～ex22 的答案物件已於 2026-07-05 寫入 SAP（$TMP）並通過語法檢查，含 ex21 的 DDIC 三層件（Domain/DE `ZTR21_SCORE`、表 `ZTR21_STUD`，DDL 快照見 `ztr21_stud.tabl.abap`）與 ex22 的訊息類別 `ZTR22`（001–003）。
 > - `ZR_TR22_TEXTS` 的 Text Symbols（001–003）／Selection Texts，以及 ex21 的 Table Maintenance Generator（SM30），已於 2026-07-05 在 SAP GUI 手動補齊（這兩項無法透過 ADT API 維護）。至此 ex17～ex22 全數完工。
 > - ex21 於 2026-07-06 擴充 Header/Detail 關聯教學：新增 Domain/DE `ZTR21_KLASSE`、`ZTR21_KLNAME`、班級主檔表 `ZTR21_CLASS`（DDL 快照 `ztr21_class.tabl.abap`），`ZTR21_STUD` 加外鍵欄位 `KLASSE`（Check Table 指向 `ZTR21_CLASS`），程式補教學片段（外鍵只擋畫面輸入、不擋 Open SQL；JOIN 兩表複習）。Search Help `ZTR21_CLASSH` 與 `ZTR21_STUD` 的 SM30 維護畫面已於 SAP GUI 手動補齊確認，至此 ex21 全數完工。（過程中踩到一個坑：`ZTR21_CLASS-KLNAME` 一開始用內建型別 `CHAR(40)` 沒掛 Data Element，導致 Search Help 無法 Activate，已補建 DE `ZTR21_KLNAME` 修正，詳見 `.claude/rules/sap-adt-mcp.md` 第 10 節。）
-> - 新增 ex23（2026-07-06）：期末整合練習「訂單 Header/Detail」，`ZTR23_ORDH`（訂單主檔）+ `ZTR23_ORDI`（訂單明細，`ORDNO` 同時是 Key 也是外鍵，比 ex21 更貼近 SAP 官方外鍵範例）+ 3 組 Domain/DE（`ZTR23_ORDNO`/`ZTR23_CUSTOMER`/`ZTR23_STATUS`，其中 `ZTR23_STATUS` 示範 Domain 固定值清單，跟 ex21 的區間值域是不同技巧）。程式 `ZR_TR23_ORDERS` 具體驗證 LUW all-or-nothing（Header+Detail 同一 LUW，中途失敗 ROLLBACK WORK 後連已成功的 Header 也一併消失）。**待辦**：Search Help `ZTR23_ORDHSH` 與 `ZTR23_ORDH` 的 SM30 維護畫面需在 SE11 手動建立（步驟見 ex23 第一部分第 9、10 點），無 ADT API 可用。
+> - 新增 ex23（2026-07-06）：期末整合練習「訂單 Header/Detail」，`ZTR23_ORDH`（訂單主檔）+ `ZTR23_ORDI`（訂單明細，`ORDNO` 同時是 Key 也是外鍵，比 ex21 更貼近 SAP 官方外鍵範例）+ 3 組 Domain/DE（`ZTR23_ORDNO`/`ZTR23_CUSTOMER`/`ZTR23_STATUS`，其中 `ZTR23_STATUS` 示範 Domain 固定值清單，跟 ex21 的區間值域是不同技巧）。程式 `ZR_TR23_ORDERS` 具體驗證 LUW all-or-nothing（Header+Detail 同一 LUW，中途失敗 ROLLBACK WORK 後連已成功的 Header 也一併消失）。Search Help `ZTR23_ORDHSH` 與 `ZTR23_ORDH` 的 SM30 維護畫面已於 SAP GUI 手動補齊確認，至此 ex23 全數完工，基礎課全部 23 題完課。
 
 ## 建議授課順序（題號 ≠ 順序）
 
