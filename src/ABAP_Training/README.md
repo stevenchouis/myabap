@@ -46,7 +46,7 @@
 > - 本階段不含 OOP（Local Class / Method / cl_salv_table 等），留待 SAP OOP 課程。
 > - 課程目標：完課後能獨立寫出並看懂 `Z_INVENTORY_COST_REPORT` 等級的傳統報表。
 > - ex17～ex22 的答案物件已於 2026-07-05 寫入 SAP（$TMP）並通過語法檢查，含 ex21 的 DDIC 三層件（Domain/DE `ZTR21_SCORE`、表 `ZTR21_STUD`，DDL 快照見 `ztr21_stud.tabl.abap`）與 ex22 的訊息類別 `ZTR22`（001–003）。
-> - **待辦**：`ZR_TR22_TEXTS` 的 Text Symbols（001–003）與 Selection Texts 無法透過 ADT API 維護（只有 SAP GUI 介面），請在 SE38 → Goto → Text Elements 依程式頭註解手動補上；ex21 的 Table Maintenance Generator（SM30）也需在 GUI 產生。
+> - `ZR_TR22_TEXTS` 的 Text Symbols（001–003）／Selection Texts，以及 ex21 的 Table Maintenance Generator（SM30），已於 2026-07-05 在 SAP GUI 手動補齊（這兩項無法透過 ADT API 維護）。至此 ex17～ex22 全數完工。
 
 ## 建議授課順序（題號 ≠ 順序）
 
