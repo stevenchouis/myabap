@@ -29,7 +29,7 @@
 
 ## 開發流程
 
-1. 新增物件前，先用 `searchObject` / `SearchObject` 確認是否已有相同用途的 Z 物件，避免重複建置。
+1. 新增物件前，先用 `sap_search_object` 確認是否已有相同用途的 Z 物件，避免重複建置。
 2. 每個功能變更對應**一個獨立的 Transport Request**，不要混用多個任務。
 3. 修改或新增程式碼後，一律先跑語法檢查（syntax check）沒問題才算完成。
 4. **不要自動釋放（Release）傳輸請求**，除非我明確說「釋放」或「release」。
@@ -54,4 +54,8 @@
 - [ ] 團隊程式碼風格細節（縮排慣例、關鍵字大小寫）
 - [ ] ATC 檢查變式（Check Variant）名稱
 - [ ] 常用套件清單與對應模組
-- [ ] 確認 `sap-adt` 實際暴露的工具名稱是否跟 `.claude/settings.json` 裡列的一致（第一次連線後用 `/mcp` 檢查，不一致要修正 allow/ask/deny 清單）
+- [x] 確認 `sap-adt` 實際暴露的工具名稱是否跟 `.claude/settings.json` 裡列的一致——2026-07-05 已校正（實際是底線式 `sap_xxx`，非駝峰式），詳見 `.claude/rules/sap-adt-mcp.md` 第 9 節；若之後 MCP server 版本更新，仍要重新核對。
+
+## Claude Code 設定總覽
+
+本專案用到的 CLAUDE.md / rules / skills / MCP 完整清單、各自的用途說明，以及**若要在新目錄複製同一套 sap-adt MCP 開發環境**該複製哪些檔案、改哪些地方，整理在 [`docs/claude-code-tooling-reference.md`](docs/claude-code-tooling-reference.md)。

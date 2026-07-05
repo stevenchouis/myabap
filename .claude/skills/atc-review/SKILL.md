@@ -13,3 +13,5 @@ description: 執行 ABAP Test Cockpit (ATC) 檢查並將結果整理成可讀報
    - **Info（可忽略）**
 4. 針對每個 Error/Warning，用一句話說明問題原因，並在可能的情況下附上修正建議，但**不要自動修改程式碼**，先跟使用者確認要不要修。
 5. 輸出格式：物件名稱 → 問題行號 → 問題說明 → 建議修法，方便使用者逐項檢視。
+
+> `sap-adt` MCP 工具的實際名稱與已知限制（含 ATC 相關工具）見 `.claude/rules/sap-adt-mcp.md`。
