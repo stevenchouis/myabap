@@ -1,7 +1,8 @@
 # sap-adt MCP 已知限制與 Workaround
 
-> 2026-07-03 實測（本機 ADT 代理 `http://127.0.0.1:8410`，sap-client=130）。
-> 代理埠號可能因環境而異；MCP server 修正後請重新驗證並更新本檔。
+> 2026-07-03 實測（本機 `adt-rfc-bridge`，`http://127.0.0.1:8410`，sap-client=130）。
+> `adt-rfc-bridge` 是本機的 Python 橋接程式：接收 MCP Server（Eclipse Plugin「SAP ADT MCP Server for Claude Code」）以 HTTP 傳來的 ADT API 請求，轉成 RFC 呼叫（用自己保存的 Host IP/User/Password/Client/Router String）連進 SAP Host 再把結果回傳——這是 `.mcp.json` 裡 `sap-adt` 位址（區網固定 IP，如 `192.168.68.56:3000`）的**下一層**，只有跑 MCP Server 的那台電腦看得到，架構全貌見 README.md「架構說明」。
+> bridge 埠號可能因環境而異；MCP server / bridge 版本更新後請重新驗證並更新本檔。
 
 ## 1. `sap_get_source` / `sap_object_structure` 讀不到 INCLUDE（HTTP 404）
 

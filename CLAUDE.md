@@ -45,7 +45,7 @@
 
 - `sap-adt`：透過 ADT (ABAP Development Tools) 協定讀寫 SAP 系統物件，HTTP transport，Project scope（設定在根目錄 `.mcp.json`，隨版控分享給團隊）。
 - `sap-docs`：SAP 相關文件查詢用，唯讀性質，同樣是 Project scope。
-- `sap-adt` 目前指向內網 IP（`192.168.68.56`），只有連得到這個網段的人才能用；不同網路環境的隊友需要各自調整，見 README.md。
+- `sap-adt` 目前指向內網 IP（`192.168.68.56`，區網固定 IP），只有連得到這個網段的人才能用；不同網路環境的隊友需要各自調整，見 README.md。這個位址是 Eclipse Plugin「SAP ADT MCP Server for Claude Code」的位址，它再透過本機的 `adt-rfc-bridge`（Python 橋接程式，監聽 `127.0.0.1:8410`）轉 RFC 連進 SAP Host——兩層架構細節見 README.md「架構說明」與 `.claude/rules/sap-adt-mcp.md`。
 - 有副作用的操作（建立物件、啟用、鎖定、釋放傳輸請求）一律先列出內容給我確認，不要靜默執行；刪除物件與釋放/刪除傳輸請求在 `.claude/settings.json` 已直接鎖死（deny）。
 
 ## 待補充（請依實際專案填寫）

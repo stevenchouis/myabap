@@ -22,6 +22,30 @@
 
 ## MCP 連線設定（Project scope）
 
+### 架構說明：兩層橋接
+
+`sap-adt` 這個 MCP Server 實際上是**兩層架構**疊起來的，理解這點才看得懂 `.mcp.json` 與 `.claude/rules/sap-adt-mcp.md` 裡出現的兩個不同位址是怎麼回事：
+
+```text
+Claude Code
+   │  MCP 協定（HTTP，url 見 .mcp.json）
+   ▼
+MCP Server：Eclipse Plugin「SAP ADT MCP Server for Claude Code」
+   │  在本機執行，對外暴露在 LAN 固定 IP（本專案是 192.168.68.56:3000，
+   │  已在家用/公司路由器把這台電腦的區網 IP 保留固定）
+   │  依 ADT API 規格組好參數，用 HTTP 呼叫下一層
+   ▼
+adt-rfc-bridge：本機 Python 橋接程式，監聽 http://127.0.0.1:8410
+   │  收到 HTTP 格式的 ADT API 請求後，轉換成 RFC 呼叫
+   │  用自己保存的 RFC 連線參數（Host IP / User / Password / Client / Router String）
+   ▼
+SAP Host（透過 SAProuter）
+```
+
+- `.mcp.json` 裡的 `url` 指向的是**第一層**（MCP Server／Eclipse Plugin）的位址：這台跑 Eclipse 的電腦在區網裡的固定 IP + port 3000。
+- `.claude/rules/sap-adt-mcp.md` 裡提到的 `http://127.0.0.1:8410` 是**第二層**（adt-rfc-bridge）的位址——這是 MCP Server 和 bridge 之間的內部溝通，**只有 MCP Server 那台電腦自己看得到**，其他隊友的 Claude Code 不會直接碰到這個位址，只需要能連到 `.mcp.json` 裡那個 LAN IP 即可。
+- 也因此，只有**跑 MCP Server（Eclipse Plugin）的那台電腦**需要裝 adt-rfc-bridge 並設定好 RFC 連線參數；其他隊友的電腦只要能連到區網、打得到 `192.168.68.56:3000` 就好，不需要在自己電腦上另外裝 bridge。
+
 `.mcp.json` 已經內建兩個 Server，team clone 這份專案下來、開 Claude Code 就會自動偵測到（第一次會跳出是否信任的提示，選同意即可，不用再手動 `claude mcp add`）：
 
 ```json
@@ -29,7 +53,7 @@
   "mcpServers": {
     "sap-adt": {
       "type": "http",
-      "url": "http://192.168.68.61:3000/mcp"
+      "url": "http://192.168.68.56:3000/mcp"
     },
     "sap-docs": {
       "type": "http",
@@ -42,20 +66,20 @@
 這是用以下指令產生的（如果要在新環境重建，或改別的 URL，直接照這個指令重跑，Claude Code 會自動幫你改 `.mcp.json`，不需要手動編輯 JSON）：
 
 ```bash
-claude mcp add --transport http --scope project sap-adt http://192.168.68.61:3000/mcp
+claude mcp add --transport http --scope project sap-adt http://192.168.68.56:3000/mcp
 claude mcp add --transport http --scope project sap-docs https://mcp-sap-docs.marianzeis.de/mcp
 ```
 
 **要注意的坑：**
 
-- `sap-adt` 指向的 `192.168.68.61` 是內網 IP。只有能連到這個網段的人（例如公司內網、VPN）才連得上；不同網路環境的隊友執行 Claude Code 時 `sap-adt` 會顯示連線失敗，屬正常現象，不是設定錯誤。若團隊分散在不同網路，考慮：
+- `sap-adt` 指向的 `192.168.68.56` 是內網 IP。只有能連到這個網段的人（例如公司內網、VPN）才連得上；不同網路環境的隊友執行 Claude Code 時 `sap-adt` 會顯示連線失敗，屬正常現象，不是設定錯誤。若團隊分散在不同網路，考慮：
   - 把 `sap-adt` 換成大家都能連到的固定網域（而不是內網 IP），或
   - 個別隊友改回 `local`/`user` scope，各自指向自己能連到的位址：`claude mcp add --transport http --scope local sap-adt <你的位址>`（local scope 會覆蓋 `.mcp.json` 裡同名的 project scope 設定，優先權更高）。
 - 這兩個 Server 目前沒有帶認證 Header。如果之後 `sap-adt` 加上驗證機制，記得用 `${VAR}` 展開，不要把 Token 明碼寫進 `.mcp.json`（因為這檔案會進版控）：
   ```json
   "sap-adt": {
     "type": "http",
-    "url": "http://192.168.68.61:3000/mcp",
+    "url": "http://192.168.68.56:3000/mcp",
     "headers": { "Authorization": "Bearer ${SAP_ADT_TOKEN}" }
   }
   ```
