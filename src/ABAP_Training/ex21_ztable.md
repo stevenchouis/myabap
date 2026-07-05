@@ -44,26 +44,29 @@
 
 1. **Domain** `ZTR21_KLASSE`：Data Type `CHAR`，Length `4`（不用設 Value Range，這題重點是外鍵不是值域檢核）→ 啟用
 2. **Data Element** `ZTR21_KLASSE`：參考上面的 Domain；Field Label 填「班級代碼」（Short/Medium/Long/Heading 都填）→ 啟用
-3. **新透明表** `ZTR21_CLASS`（Header／班級主檔）：
+3. **Domain** `ZTR21_KLNAME`：Data Type `CHAR`，Length `40` → 啟用
+4. **Data Element** `ZTR21_KLNAME`：參考上面的 Domain；Field Label 填「班級名稱」→ 啟用
+5. **新透明表** `ZTR21_CLASS`（Header／班級主檔）：
 
 | 欄位 | Key | 型別來源 | 說明 |
 |---|---|---|---|
 | MANDT | ✔ | Data Element `MANDT` | client |
 | KLASSE | ✔ | Data Element `ZTR21_KLASSE` | 班級代碼 |
-| KLNAME | | 內建型別 `CHAR` 40 | 班級名稱 |
+| KLNAME | | Data Element `ZTR21_KLNAME` | 班級名稱 |
 
    - Delivery Class `A`；Technical Settings 同 `ZTR21_STUD`（Data Class `APPL0`、Size Category `0`）→ 啟用
-4. **`ZTR21_STUD` 加一個欄位 `KLASSE`**（型別 Data Element `ZTR21_KLASSE`，放在 SCORE 之後、UPDUSER 之前）：
+   - **注意**：`KLNAME` 一定要引用 Data Element（不能直接用內建型別 `CHAR(40)`）——Search Help 的 Parameter 要對應到有 Data Element 的欄位才能正確解析語意，欄位只有內建型別會導致 Search Help **無法 Activate**（實測踩過這個坑，見第 6 點）
+6. **`ZTR21_STUD` 加一個欄位 `KLASSE`**（型別 Data Element `ZTR21_KLASSE`，放在 SCORE 之後、UPDUSER 之前）：
    - 在 Fields 頁籤該欄位的 **Foreign Key** 對話框：Check Table 填 `ZTR21_CLASS`，Cardinality 選 `Many : 1`（多個學生對應一個班級），Foreign Key Fields 讓系統自動帶出 `KLASSE = KLASSE`
    - 打開 **Screen Check** 開關（讓畫面輸入時真的會擋不存在的班級代碼）
    - 存檔啟用
-5. **Search Help** `ZTR21_CLASSH`（SE11 → Search Help → Elementary Search Help）：
+7. **Search Help** `ZTR21_CLASSH`（SE11 → Search Help → Elementary Search Help）：
    - Selection Method：`ZTR21_CLASS`
    - Search Help Parameters：`KLASSE`（勾 Import Parameter + Export Parameter + SelOnScr，設為 SH field／LPos 1）、`KLNAME`（只勾 Export Parameter，LPos 2，純顯示用）
-   - 存檔啟用，套件 `$TMP`
+   - 存檔啟用，套件 `$TMP`——若 Activate 失敗報錯跟欄位語意/Data Element 有關，回頭檢查 `ZTR21_CLASS` 的欄位是不是都掛了 Data Element（見第 5 點）
    - 回到 Data Element `ZTR21_KLASSE` → Change → **Further Characteristics** 頁籤 → Search Help 欄位填 `ZTR21_CLASSH` → 存檔啟用
    - 到 SM30 或任一輸入 KLASSE 的畫面按 F4，應該能選出班級清單
-6. 觀察差異：SM30 輸入一個 `ZTR21_CLASS` 沒有的班級代碼 → **外鍵**會擋下來報錯；按 F4 選班級 → **Search Help** 讓你用選的不用背代碼。兩者可以疊加，但意義不同。
+8. 觀察差異：SM30 輸入一個 `ZTR21_CLASS` 沒有的班級代碼 → **外鍵**會擋下來報錯；按 F4 選班級 → **Search Help** 讓你用選的不用背代碼。兩者可以疊加，但意義不同。
 
 ## 第三部分：程式寫入 ZR_TR21_&lt;縮寫&gt;
 

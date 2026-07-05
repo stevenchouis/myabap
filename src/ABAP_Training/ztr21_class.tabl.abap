@@ -6,6 +6,6 @@
 define table ztr21_class {
   key mandt  : mandt not null;
   key klasse : ztr21_klasse not null;
-  klname     : abap.char(40);
+  klname     : ztr21_klname;
 
 }

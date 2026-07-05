@@ -153,6 +153,8 @@ klasse : ztr21_klasse
 - **Parameters**：`KLASSE`（Import+Export+SH field）、`KLNAME`（純顯示，僅 Export）
 - 建好要**掛到 Data Element**（`ZTR21_KLASSE` → Search Help 欄位）才會全面生效
 
+> **Parameter 欄位必須有 Data Element**！`KLNAME` 若只用內建型別會 Activate 失敗
+
 ---
 
 ## 5. Open SQL 寫入四指令
