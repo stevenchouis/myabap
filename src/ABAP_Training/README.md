@@ -40,13 +40,14 @@
 | 18 | 字串與日期處理（CONCATENATE/SPLIT/位移/月初月末） | [ex18](ex18_string_date.md) | `ZR_TR18_STRING_DATE` | 完成 |
 | 19 | Debugger 除錯（中斷點/單步/Watchpoint/ST22，附埋 bug 程式） | [ex19](ex19_debugging.md) | `ZR_TR19_DEBUGGING` | 完成 |
 | 20 | Control Break 群組小計（AT NEW/AT END OF/SUM） | [ex20](ex20_control_break.md) | `ZR_TR20_CONTROL_BREAK` | 完成 |
-| 21 | Z 資料表與 Open SQL 寫入（SE11/SM30/INSERT/UPDATE/MODIFY/DELETE） | [ex21](ex21_ztable.md) | `ZTR21_STUD` + `ZR_TR21_ZTABLE` | 完成 |
+| 21 | Z 資料表與 Open SQL 寫入（SE11/SM30/INSERT/UPDATE/MODIFY/DELETE、外鍵/Check Table、Search Help） | [ex21](ex21_ztable.md) | `ZTR21_STUD` + `ZTR21_CLASS` + `ZR_TR21_ZTABLE` | 完成（Search Help 待 GUI 手動建，見下方待辦） |
 | 22 | Message Class 與多語言文字元素（SE91/Text Symbol/Selection Texts） | [ex22](ex22_texts_messages.md) | `ZTR22` + `ZR_TR22_TEXTS` | 完成 |
 
 > - 本階段不含 OOP（Local Class / Method / cl_salv_table 等），留待 SAP OOP 課程。
 > - 課程目標：完課後能獨立寫出並看懂 `Z_INVENTORY_COST_REPORT` 等級的傳統報表。
 > - ex17～ex22 的答案物件已於 2026-07-05 寫入 SAP（$TMP）並通過語法檢查，含 ex21 的 DDIC 三層件（Domain/DE `ZTR21_SCORE`、表 `ZTR21_STUD`，DDL 快照見 `ztr21_stud.tabl.abap`）與 ex22 的訊息類別 `ZTR22`（001–003）。
 > - `ZR_TR22_TEXTS` 的 Text Symbols（001–003）／Selection Texts，以及 ex21 的 Table Maintenance Generator（SM30），已於 2026-07-05 在 SAP GUI 手動補齊（這兩項無法透過 ADT API 維護）。至此 ex17～ex22 全數完工。
+> - ex21 於 2026-07-06 擴充 Header/Detail 關聯教學：新增 Domain/DE `ZTR21_KLASSE`、班級主檔表 `ZTR21_CLASS`（DDL 快照 `ztr21_class.tabl.abap`），`ZTR21_STUD` 加外鍵欄位 `KLASSE`（Check Table 指向 `ZTR21_CLASS`），程式補教學片段（外鍵只擋畫面輸入、不擋 Open SQL；JOIN 兩表複習）。**待辦**：Search Help `ZTR21_CLASSH` 無 ADT API 可用，需在 SE11 手動建立並掛到 DE `ZTR21_KLASSE`（步驟見 ex21 第二部分第 5 點）；`ZTR21_STUD` 結構改了，SM30 維護畫面也要重新確認欄位（KLASSE 有沒有正確帶出）。
 
 ## 建議授課順序（題號 ≠ 順序）
 

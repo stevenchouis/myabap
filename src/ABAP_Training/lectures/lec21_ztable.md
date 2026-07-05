@@ -1,12 +1,14 @@
 # 講義 21：建立 Z 資料表與 Open SQL 寫入（授課順序：接在講義 15 之後）
 
-> 對應練習：[ex21](../ex21_ztable.md)｜答案物件：資料表 `ZTR21_STUD`＋程式 `ZR_TR21_ZTABLE`
+> 對應練習：[ex21](../ex21_ztable.md)｜答案物件：資料表 `ZTR21_STUD` + `ZTR21_CLASS`＋程式 `ZR_TR21_ZTABLE`
 
 ## 本講重點
 
 - DDIC 三層件：Domain → Data Element → 表格欄位，各管什麼
 - SE11 建立透明表：鍵欄位、Delivery Class、Technical Settings
 - SM30 維護畫面（Table Maintenance Generator）
+- **Header／Detail 兩表關聯**：外鍵（Foreign Key）與檢查表（Check Table）
+- **Search Help**：F4 值清單怎麼來的，跟外鍵的差別
 - Open SQL 寫入：`INSERT` / `UPDATE` / `MODIFY` / `DELETE`
 - LUW 與 `COMMIT WORK` / `ROLLBACK WORK` 觀念
 
@@ -55,7 +57,52 @@
 
 實務上參數表、對照表幾乎都配 SM30；正式環境的維護權限與是否產 TR 由 Delivery Class 與權限控制。
 
-## 4. Open SQL 寫入
+## 4. Header／Detail 關聯：外鍵（Foreign Key）與檢查表（Check Table）
+
+實務上很少有表是孤立的：訂單表要串客戶主檔、明細表要串產品主檔——本質都是「**Header（主檔，1 那一邊）／Detail（明細，多那一邊）**」的關聯。本課用「班級（Header）－學生（Detail）」示範，跟講義 6 的 SCARR（航空公司）－SPFLI（航線）是同一種關係，只是這次自己動手建。
+
+### 4.1 觀念：Check Table 是什麼
+
+- **檢查表（Check Table）**：被參考的那張表（本例 `ZTR21_CLASS`），扮演「合法值清單」的角色
+- **外鍵表（Foreign Key Table）**：帶外鍵欄位的表（本例 `ZTR21_STUD` 的 `KLASSE` 欄位），欄位值必須存在於檢查表裡
+- 一對多：一個班級（Header）可以有多個學生（Detail），Cardinality 設 `Many : 1`（本例的「多」是學生、「1」是班級）
+
+SE11 用 Dictionary DDL（新版原始碼式編輯）寫的話，語法長這樣（跟講義 6 的 `SPFLI` 外鍵到 `SCARR` 是同一套）：
+
+```abap
+define table ztr21_stud {
+  ...
+  @AbapCatalog.foreignKey.label : 'Check Against Class'
+  @AbapCatalog.foreignKey.screenCheck : true
+  klasse : ztr21_klasse
+    with foreign key [0..*,1] ztr21_class
+      where mandt  = ztr21_stud.mandt
+        and klasse = ztr21_stud.klasse;
+  ...
+}
+```
+
+`[0..*,1]`：左邊 `0..*` 是外鍵表這一側（多筆學生都可以指到同一班級，也可以還沒指定）、右邊 `1` 是檢查表那一側（每個 KLASSE 值在 `ZTR21_CLASS` 剛好對應 1 筆）。
+
+### 4.2 外鍵只在「畫面輸入」擋人，不是資料庫 constraint
+
+這是本題**最容易搞錯**的地方：`@AbapCatalog.foreignKey.screenCheck : true` 只影響**Dynpro 畫面**（SM30、Module Pool 的輸入欄位）在使用者離開欄位時做檢查——**Open SQL 的 `INSERT`/`UPDATE`/`MODIFY` 完全不會被擋**，程式塞一個 `ZTR21_CLASS` 沒有的班級代碼一樣會成功（`sy-subrc = 0`）。想在程式層也擋，要自己 `SELECT SINGLE` 檢查檢查表存不存在該筆，這不是系統自動做的事。
+
+（跟其他資料庫的「Foreign Key Constraint」不一樣：那是資料庫引擎強制擋寫入；SAP DDIC 外鍵是應用層／畫面層的檢核機制，這個落差是很多人踩過的坑。）
+
+### 4.3 Search Help：F4 選單哪裡來的
+
+Search Help（搜尋輔助）解決的是另一個問題：**使用者不用背代碼，可以用 F4 選**。跟外鍵是兩件事——外鍵負責「擋不合法的值」，Search Help 負責「幫你選合法的值」，兩者可以疊加也可以只設一個：
+
+- 只設外鍵沒設 Search Help：畫面會擋錯誤輸入，但沒有 F4 選單，要自己背代碼
+- 只設 Search Help 沒設外鍵：F4 能選，但使用者若不透過 F4、手動打一個不存在的代碼，畫面不會擋
+
+建立方式（SE11 → Search Help → Elementary Search Help）：
+- **Selection Method**：資料來源表（本例 `ZTR21_CLASS`）
+- **Search Help Parameters**：每個要出現在選單裡的欄位；哪一個是「查完之後要帶回畫面」的欄位（本例 `KLASSE`）勾 Import+Export+SH field，純顯示用的欄位（`KLNAME`）只勾 Export
+- 建好後要**掛到 Data Element**（`ZTR21_KLASSE` 的 Further Characteristics 頁籤填 Search Help 名稱）才會在所有用到這個 DE 的欄位自動生效——這也是三層件「改一處全生效」精神的延伸
+
+## 5. Open SQL 寫入
 
 讀是 SELECT；寫有四個指令，全部**用 sy-subrc 回報結果**（鐵律不變），`sy-dbcnt` 是影響筆數：
 
@@ -83,7 +130,7 @@ DELETE FROM ztr21_stud WHERE id = 'S0001'.
 - MANDT 欄位一樣不用（不要）自己塞，系統自動帶當前 client。
 - 寫入欄位建議程式帶齊稽核欄（如異動者 `sy-uname`、異動日 `sy-datum`）——查問題時會感謝自己。
 
-## 5. LUW 與 COMMIT WORK
+## 6. LUW 與 COMMIT WORK
 
 資料庫的變更不是逐句永久生效，而是以 **LUW（Logical Unit of Work）**為單位，最後一次「確認」才真正落地：
 
@@ -100,7 +147,7 @@ COMMIT WORK.                    " 整包確認：全部永久生效
 - 報表程式跑完（或畫面切換）時系統會**隱含 commit**——所以練習程式沒寫 COMMIT WORK 資料多半也進去了，但**正式程式的寫入要明確 COMMIT／ROLLBACK**，把「哪裡算一個完整動作」寫清楚。
 - 多人同時改同一筆怎麼辦？正式做法要配 **Lock Object**（SE11 建 `EZ...`，產生 ENQUEUE/DEQUEUE FM）——本課先認識名詞，實作屬進階課題。
 
-## 6. 常見錯誤與陷阱
+## 7. 常見錯誤與陷阱
 
 | 症狀 | 原因 |
 |---|---|
@@ -110,7 +157,10 @@ COMMIT WORK.                    " 整包確認：全部永久生效
 | INSERT FROM TABLE 直接 dump | 批次裡有主鍵重複，沒加 ACCEPTING DUPLICATE KEYS |
 | SM30 說表不能維護 | 建表時 Data Browser/Table View Maint. 選了不允許，或沒產 Maintenance 畫面 |
 | 自己塞 MANDT | 不用，系統自動處理（跟 SELECT 一樣） |
+| 以為外鍵能擋住程式寫入的髒資料 | 外鍵（screenCheck）只管畫面輸入，Open SQL 不受影響（見 4.2） |
+| DE 掛了 Search Help 但 F4 還是沒選單 | Search Help 本身沒啟用，或掛的是舊版本；兩邊都要各自啟用一次 |
+| JOIN 兩表時把 MANDT 寫進 ON 條件 | 語法錯誤（GYA）：client 欄位由編譯器自動處理，不可在 ON 裡明寫 |
 
-## 7. 課堂練習
+## 8. 課堂練習
 
-完成 [ex21](../ex21_ztable.md)：建 Domain＋Data Element＋透明表 `ZTR21_STUD`、產 SM30 維護畫面，再寫程式跑完 INSERT / UPDATE / MODIFY / DELETE 全流程並驗證 sy-subrc。
+完成 [ex21](../ex21_ztable.md)：建 Domain＋Data Element＋透明表 `ZTR21_STUD`、產 SM30 維護畫面；再建 Header 表 `ZTR21_CLASS`、幫 `KLASSE` 欄位設外鍵與 Search Help；最後寫程式跑完 INSERT / UPDATE / MODIFY / DELETE 全流程＋外鍵行為驗證＋JOIN，並驗證 sy-subrc。

@@ -66,7 +66,7 @@ footer { color: #999; }
 <h1 id="%E8%AC%9B%E7%BE%A9-21">講義 21</h1>
 <h1 id="%E5%BB%BA%E7%AB%8B-z-%E8%B3%87%E6%96%99%E8%A1%A8%E8%88%87-open-sql-%E5%AF%AB%E5%85%A5">建立 Z 資料表與 Open SQL 寫入</h1>
 <p>ABAP 基礎教育訓練（授課順序：接在講義 15 之後）</p>
-<p>對應練習 ex21｜答案：表 <code>ZTR21_STUD</code>＋程式 <code>ZR_TR21_ZTABLE</code></p>
+<p>對應練習 ex21｜答案：表 <code>ZTR21_STUD</code> + <code>ZTR21_CLASS</code>＋程式 <code>ZR_TR21_ZTABLE</code></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -122,12 +122,14 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="13">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>DDIC 三層件：Domain → Data Element → 表格欄位</li>
 <li>SE11 建立透明表：鍵欄位、Delivery Class、Technical Settings</li>
 <li>SM30 維護畫面（Table Maintenance Generator）</li>
+<li><strong>Header／Detail 兩表關聯</strong>：外鍵（Foreign Key）與檢查表（Check Table）</li>
+<li><strong>Search Help</strong>：F4 值清單怎麼來的，跟外鍵的差別</li>
 <li>Open SQL 寫入：<code>INSERT</code> / <code>UPDATE</code> / <code>MODIFY</code> / <code>DELETE</code></li>
 <li>LUW 與 <code>COMMIT WORK</code> / <code>ROLLBACK WORK</code></li>
 </ul>
@@ -186,7 +188,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="13">
 <h2 id="1-ddic-%E4%B8%89%E5%B1%A4%E4%BB%B6">1. DDIC 三層件</h2>
 <table>
 <thead>
@@ -274,7 +276,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="13">
 <h2 id="2-se11-%E5%BB%BA%E7%AB%8B%E9%80%8F%E6%98%8E%E8%A1%A8">2. SE11 建立透明表</h2>
 <ol>
 <li>SE11 → Database table → <code>ZTR21_STUD</code> → Create</li>
@@ -346,7 +348,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="13">
 <h2 id="3-sm30-%E7%B6%AD%E8%AD%B7%E7%95%AB%E9%9D%A2">3. SM30 維護畫面</h2>
 <p>讓使用者不寫程式就能維護表內容：</p>
 <ol>
@@ -413,91 +415,85 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
-<h2 id="4-open-sql-%E5%AF%AB%E5%85%A5%E5%9B%9B%E6%8C%87%E4%BB%A4">4. Open SQL 寫入四指令</h2>
-<p>全部<strong>用 sy-subrc 回報結果</strong>；<code>sy-dbcnt</code> 是影響筆數：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gs_stud TYPE ztr21_stud.    &quot; 表名直接當結構型別
-
-* INSERT：新增；主鍵已存在 → sy-subrc = 4，不會蓋掉
-INSERT ztr21_stud FROM gs_stud.
-
-* UPDATE：改既有資料；找不到 → sy-subrc = 4
-UPDATE ztr21_stud SET score = 90 WHERE id = 'S0001'.
-
-* MODIFY：有就改、沒有就新增（upsert）——參數表最愛
-MODIFY ztr21_stud FROM gs_stud.
-
-* DELETE：刪除
-DELETE FROM ztr21_stud WHERE id = 'S0001'.
-</code></pre>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" data-marpit-pagination="7" style="--paginate:true;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="10">
-<h2 id="%E6%89%B9%E6%AC%A1%E5%AF%AB%E5%85%A5%E8%88%87%E5%85%A9%E5%80%8B%E7%BF%92%E6%85%A3">批次寫入與兩個習慣</h2>
-<p>多筆版本：<code>INSERT ztr21_stud FROM TABLE gt_stud.</code></p>
-<blockquote>
-<p><strong>INSERT FROM TABLE 遇任一筆主鍵重複就整批 dump</strong><br />
-除非加 <code>ACCEPTING DUPLICATE KEYS</code>（重複跳過、subrc = 4）</p>
-</blockquote>
-<p>兩個習慣：</p>
+;" data-marpit-pagination-total="13">
+<h2 id="4-header%EF%BC%8Fdetail-%E9%97%9C%E8%81%AF%E5%A4%96%E9%8D%B5%E8%88%87-check-table">4. Header／Detail 關聯：外鍵與 Check Table</h2>
+<p>訂單－客戶、明細－產品……本質都是 <strong>Header（1）／Detail（多）</strong> 關聯<br />
+本課示範：班級（Header）－學生（Detail），跟講義 6 的 SCARR－SPFLI 同一種關係</p>
 <ul>
-<li>MANDT 一樣<strong>不要</strong>自己塞——系統自動帶當前 client</li>
-<li>寫入帶齊<strong>稽核欄</strong>（<code>sy-uname</code> 異動者、<code>sy-datum</code> 異動日）<br />
-查問題時會感謝自己</li>
+<li><strong>Check Table</strong>：被參考的表（<code>ZTR21_CLASS</code>），扮演「合法值清單」</li>
+<li><strong>外鍵表</strong>：帶外鍵欄位的表（<code>ZTR21_STUD.KLASSE</code>），值必須存在於 Check Table</li>
 </ul>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">klasse : ztr21_klasse
+  with foreign key [0..*,1] ztr21_class
+    where mandt  = ztr21_stud.mandt
+      and klasse = ztr21_stud.klasse;
+</code></pre>
+<p><code>[0..*,1]</code>：多筆學生（外鍵表）對應 1 筆班級（檢查表）</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="7" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="13">
+<h2 id="%E5%A4%96%E9%8D%B5%E5%8F%AA%E6%93%8B%E7%95%AB%E9%9D%A2%E4%B8%8D%E6%93%8B%E7%A8%8B%E5%BC%8F">外鍵只擋畫面，不擋程式！</h2>
+<p><code>@AbapCatalog.foreignKey.screenCheck : true</code> <strong>只影響 Dynpro 畫面</strong>（SM30、Module Pool）</p>
+<blockquote>
+<p><strong>Open SQL 的 INSERT/UPDATE/MODIFY 完全不受外鍵約束</strong><br />
+程式塞一個 Check Table 沒有的班級代碼一樣 <code>sy-subrc = 0</code></p>
+</blockquote>
+<p>跟一般資料庫的 Foreign Key Constraint 不一樣：<br />
+那是資料庫引擎強制擋寫入；SAP DDIC 外鍵是<strong>應用層／畫面層</strong>機制</p>
+<p>要在程式擋，得自己 <code>SELECT SINGLE</code> 檢查 Check Table</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -553,22 +549,18 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
-<h2 id="5-luw-%E8%88%87-commit-work">5. LUW 與 COMMIT WORK</h2>
-<p>變更以 <strong>LUW</strong>（Logical Unit of Work）為單位，確認才落地：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">INSERT ztr21_stud FROM gs_stud.
-IF sy-subrc &lt;&gt; 0.
-  ROLLBACK WORK.       &quot; 整包撤銷：LUW 內所有寫入取消
-  MESSAGE '寫入失敗，已回復' TYPE 'E'.
-ENDIF.
-COMMIT WORK.           &quot; 整包確認：全部永久生效
-</code></pre>
+;" data-marpit-pagination-total="13">
+<h2 id="search-helpf4-%E9%81%B8%E5%96%AE%E5%93%AA%E8%A3%A1%E4%BE%86%E7%9A%84">Search Help：F4 選單哪裡來的</h2>
+<p>跟外鍵是兩件事：外鍵「擋不合法的值」、Search Help「幫你選合法的值」</p>
 <ul>
-<li>表頭＋明細必須「<strong>全成功或全失敗</strong>」——LUW 的意義</li>
-<li>程式跑完系統會隱含 commit（練習沒寫也多半進去了）<br />
-但<strong>正式程式的寫入要明確 COMMIT／ROLLBACK</strong></li>
-<li>多人同改一筆 → <strong>Lock Object</strong>（ENQUEUE/DEQUEUE）<br />
-先認識名詞，屬進階課題</li>
+<li>只設外鍵沒設 Search Help：會擋錯，但沒 F4，要背代碼</li>
+<li>只設 Search Help 沒設外鍵：F4 能選，但手動打錯的畫面不會擋</li>
+</ul>
+<p>建立（SE11 → Search Help → Elementary Search Help）：</p>
+<ul>
+<li><strong>Selection Method</strong>：資料來源表（<code>ZTR21_CLASS</code>）</li>
+<li><strong>Parameters</strong>：<code>KLASSE</code>（Import+Export+SH field）、<code>KLNAME</code>（純顯示，僅 Export）</li>
+<li>建好要<strong>掛到 Data Element</strong>（<code>ZTR21_KLASSE</code> → Search Help 欄位）才會全面生效</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
@@ -625,8 +617,220 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
-<h2 id="6-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">6. 常見錯誤與陷阱</h2>
+;" data-marpit-pagination-total="13">
+<h2 id="5-open-sql-%E5%AF%AB%E5%85%A5%E5%9B%9B%E6%8C%87%E4%BB%A4">5. Open SQL 寫入四指令</h2>
+<p>全部<strong>用 sy-subrc 回報結果</strong>；<code>sy-dbcnt</code> 是影響筆數：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gs_stud TYPE ztr21_stud.    &quot; 表名直接當結構型別
+
+* INSERT：新增；主鍵已存在 → sy-subrc = 4，不會蓋掉
+INSERT ztr21_stud FROM gs_stud.
+
+* UPDATE：改既有資料；找不到 → sy-subrc = 4
+UPDATE ztr21_stud SET score = 90 WHERE id = 'S0001'.
+
+* MODIFY：有就改、沒有就新增（upsert）——參數表最愛
+MODIFY ztr21_stud FROM gs_stud.
+
+* DELETE：刪除
+DELETE FROM ztr21_stud WHERE id = 'S0001'.
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="10" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="13">
+<h2 id="%E6%89%B9%E6%AC%A1%E5%AF%AB%E5%85%A5%E8%88%87%E5%85%A9%E5%80%8B%E7%BF%92%E6%85%A3">批次寫入與兩個習慣</h2>
+<p>多筆版本：<code>INSERT ztr21_stud FROM TABLE gt_stud.</code></p>
+<blockquote>
+<p><strong>INSERT FROM TABLE 遇任一筆主鍵重複就整批 dump</strong><br />
+除非加 <code>ACCEPTING DUPLICATE KEYS</code>（重複跳過、subrc = 4）</p>
+</blockquote>
+<p>兩個習慣：</p>
+<ul>
+<li>MANDT 一樣<strong>不要</strong>自己塞——系統自動帶當前 client</li>
+<li>寫入帶齊<strong>稽核欄</strong>（<code>sy-uname</code> 異動者、<code>sy-datum</code> 異動日）<br />
+查問題時會感謝自己</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="11" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="13">
+<h2 id="6-luw-%E8%88%87-commit-work">6. LUW 與 COMMIT WORK</h2>
+<p>變更以 <strong>LUW</strong>（Logical Unit of Work）為單位，確認才落地：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">INSERT ztr21_stud FROM gs_stud.
+IF sy-subrc &lt;&gt; 0.
+  ROLLBACK WORK.       &quot; 整包撤銷：LUW 內所有寫入取消
+  MESSAGE '寫入失敗，已回復' TYPE 'E'.
+ENDIF.
+COMMIT WORK.           &quot; 整包確認：全部永久生效
+</code></pre>
+<ul>
+<li>表頭＋明細必須「<strong>全成功或全失敗</strong>」——LUW 的意義</li>
+<li>程式跑完系統會隱含 commit（練習沒寫也多半進去了）<br />
+但<strong>正式程式的寫入要明確 COMMIT／ROLLBACK</strong></li>
+<li>多人同改一筆 → <strong>Lock Object</strong>（ENQUEUE/DEQUEUE）<br />
+先認識名詞，屬進階課題</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="12" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="13">
+<h2 id="7-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">7. 常見錯誤與陷阱</h2>
 <table>
 <thead>
 <tr>
@@ -659,10 +863,18 @@ footer { color: #999; }
 <td>自己塞 MANDT</td>
 <td>不用，系統自動處理</td>
 </tr>
+<tr>
+<td>以為外鍵能擋程式寫入的髒資料</td>
+<td>外鍵只管畫面輸入，Open SQL 不受影響</td>
+</tr>
+<tr>
+<td>JOIN 的 ON 條件寫了 MANDT</td>
+<td>語法錯誤：client 欄位由編譯器自動處理</td>
+</tr>
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -689,7 +901,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="10" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="13" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -716,13 +928,13 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="13">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex21</strong>：</p>
-<p>建 Domain＋Data Element＋透明表 <code>ZTR21_STUD</code><br />
-產 SM30 維護畫面</p>
+<p>建 Domain＋Data Element＋透明表 <code>ZTR21_STUD</code>＋班級主檔 <code>ZTR21_CLASS</code><br />
+<code>KLASSE</code> 欄位設外鍵＋Search Help，產 SM30 維護畫面</p>
 <p>寫程式跑完 INSERT / UPDATE / MODIFY / DELETE<br />
-全流程並驗證 sy-subrc</p>
+＋外鍵行為驗證＋JOIN，全流程並驗證 sy-subrc</p>
 </section>
 <script>!function(){"use strict";const t={h1:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"1"},style:"display: block; font-size: 2em; margin-block-start: 0.67em; margin-block-end: 0.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h2:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"2"},style:"display: block; font-size: 1.5em; margin-block-start: 0.83em; margin-block-end: 0.83em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h3:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"3"},style:"display: block; font-size: 1.17em; margin-block-start: 1em; margin-block-end: 1em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h4:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"4"},style:"display: block; margin-block-start: 1.33em; margin-block-end: 1.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h5:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"5"},style:"display: block; font-size: 0.83em; margin-block-start: 1.67em; margin-block-end: 1.67em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},h6:{proto:()=>HTMLHeadingElement,attrs:{role:"heading","aria-level":"6"},style:"display: block; font-size: 0.67em; margin-block-start: 2.33em; margin-block-end: 2.33em; margin-inline-start: 0px; margin-inline-end: 0px; font-weight: bold;"},span:{proto:()=>HTMLSpanElement},pre:{proto:()=>HTMLElement,style:"display: block; font-family: monospace; white-space: pre; margin: 1em 0; --marp-auto-scaling-white-space: pre;"}},e="data-marp-auto-scaling-wrapper",i="data-marp-auto-scaling-svg",n="data-marp-auto-scaling-container";class s extends HTMLElement{container;containerSize;containerObserver;svg;svgComputedStyle;svgPreserveAspectRatio="xMinYMid meet";wrapper;wrapperSize;wrapperObserver;constructor(){super();const t=t=>([e])=>{const{width:i,height:n}=e.contentRect;this[t]={width:i,height:n},this.updateSVGRect()};this.attachShadow({mode:"open"}),this.containerObserver=new ResizeObserver(t("containerSize")),this.wrapperObserver=new ResizeObserver((...e)=>{t("wrapperSize")(...e),this.flushSvgDisplay()})}static get observedAttributes(){return["data-downscale-only"]}connectedCallback(){this.shadowRoot.innerHTML=`\n<style>\n  svg[${i}] { display: block; width: 100%; height: auto; vertical-align: top; }\n  span[${n}] { display: table; white-space: var(--marp-auto-scaling-white-space, nowrap); width: max-content; }\n</style>\n<div ${e}>\n  <svg part="svg" ${i}>\n    <foreignObject><span ${n}><slot></slot></span></foreignObject>\n  </svg>\n</div>\n    `.split(/\n\s*/).join(""),this.wrapper=this.shadowRoot.querySelector(`div[${e}]`)??void 0;const t=this.svg;this.svg=this.wrapper?.querySelector(`svg[${i}]`)??void 0,this.svg!==t&&(this.svgComputedStyle=this.svg?window.getComputedStyle(this.svg):void 0),this.container=this.svg?.querySelector(`span[${n}]`)??void 0,this.observe()}disconnectedCallback(){this.svg=void 0,this.svgComputedStyle=void 0,this.wrapper=void 0,this.container=void 0,this.observe()}attributeChangedCallback(){this.observe()}flushSvgDisplay(){const{svg:t}=this;t&&(t.style.display="inline",requestAnimationFrame(()=>{t.style.display=""}))}observe(){this.containerObserver.disconnect(),this.wrapperObserver.disconnect(),this.wrapper&&this.wrapperObserver.observe(this.wrapper),this.container&&this.containerObserver.observe(this.container),this.svgComputedStyle&&this.observeSVGStyle(this.svgComputedStyle)}observeSVGStyle(t){const e=()=>{const i=(()=>{const e=t.getPropertyValue("--preserve-aspect-ratio");if(e)return e.trim();return`x${(({textAlign:t,direction:e})=>{if(t.endsWith("left"))return"Min";if(t.endsWith("right"))return"Max";if("start"===t||"end"===t){let i="rtl"===e;return"end"===t&&(i=!i),i?"Max":"Min"}return"Mid"})(t)}YMid meet`})();i!==this.svgPreserveAspectRatio&&(this.svgPreserveAspectRatio=i,this.updateSVGRect()),t===this.svgComputedStyle&&requestAnimationFrame(e)};e()}updateSVGRect(){let t=Math.ceil(this.containerSize?.width??0);const e=Math.ceil(this.containerSize?.height??0);void 0!==this.dataset.downscaleOnly&&(t=Math.max(t,this.wrapperSize?.width??0));const i=this.svg?.querySelector(":scope > foreignObject");if(i?.setAttribute("width",`${t}`),i?.setAttribute("height",`${e}`),this.svg&&(this.svg.setAttribute("viewBox",`0 0 ${t} ${e}`),this.svg.setAttribute("preserveAspectRatio",this.svgPreserveAspectRatio),this.svg.style.height=t<=0||e<=0?"0":""),this.container){const t=this.svgPreserveAspectRatio.toLowerCase();this.container.style.marginLeft=t.startsWith("xmid")||t.startsWith("xmax")?"auto":"0",this.container.style.marginRight=t.startsWith("xmi")?"auto":"0"}}}const r=(t,{attrs:e={},style:i})=>class extends t{constructor(...t){super(...t);for(const[t,i]of Object.entries(e))this.hasAttribute(t)||this.setAttribute(t,i);this._shadow()}static get observedAttributes(){return["data-auto-scaling"]}connectedCallback(){this._update()}attributeChangedCallback(){this._update()}_shadow(){if(!this.shadowRoot)try{this.attachShadow({mode:"open"})}catch(t){if(!(t instanceof Error&&"NotSupportedError"===t.name))throw t}return this.shadowRoot}_update(){const t=this._shadow();if(t){const e=i?`<style>:host { ${i} }</style>`:"";let n="<slot></slot>";const{autoScaling:s}=this.dataset;if(void 0!==s){n=`<marp-auto-scaling exportparts="svg:auto-scaling" ${"downscale-only"===s?"data-downscale-only":""}>${n}</marp-auto-scaling>`}t.innerHTML=e+n}}};let o;const a=()=>o??(o=!!document.createElement("div",{is:"marp-auto-scaling"}).outerHTML.startsWith("<div is"),o),l=Symbol();let c;const d="marpitSVGPolyfill:setZoomFactor,",h=Symbol(),g=Symbol();const p=()=>{const t="Apple Computer, Inc."===navigator.vendor,e=t?[v]:[],i={then:e=>(t?(async()=>{if(void 0===c){const t=document.createElement("canvas");t.width=10,t.height=10;const e=t.getContext("2d"),i=new Image(10,10),n=new Promise(t=>{i.addEventListener("load",()=>t())});i.crossOrigin="anonymous",i.src="data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%201%201%22%3E%3CforeignObject%20width%3D%221%22%20height%3D%221%22%20requiredExtensions%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Cdiv%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%20style%3D%22width%3A%201px%3B%20height%3A%201px%3B%20background%3A%20red%3B%20position%3A%20relative%22%3E%3C%2Fdiv%3E%3C%2FforeignObject%3E%3C%2Fsvg%3E",await n,e.drawImage(i,0,0),c=e.getImageData(5,5,1,1).data[3]<128}return c})().then(t=>{null==e||e(t?[v]:[])}):null==e||e([]),i)};return Object.assign(e,i)};let m,u;function v(t){const e="object"==typeof t&&t.target||document,i="object"==typeof t?t.zoom:t;window[g]||(Object.defineProperty(window,g,{configurable:!0,value:!0}),document.body.style.zoom=1.0001,document.body.offsetHeight,document.body.style.zoom=1,window.addEventListener("message",({data:t,origin:e})=>{if(e===window.origin)try{if(t&&"string"==typeof t&&t.startsWith(d)){const[,e]=t.split(","),i=Number.parseFloat(e);Number.isNaN(i)||(u=i)}}catch(t){console.error(t)}}));let n=!1;Array.from(e.querySelectorAll("svg[data-marpit-svg]"),t=>{var e,s,r,o;t.style.transform||(t.style.transform="translateZ(0)");const a=i||u||t.currentScale||1;m!==a&&(m=a,n=a);const l=t.getBoundingClientRect(),{length:c}=t.children;for(let i=0;i<c;i+=1){const n=t.children[i];if(n.getScreenCTM){const t=n.getScreenCTM();if(t){const i=null!==(s=null===(e=n.x)||void 0===e?void 0:e.baseVal.value)&&void 0!==s?s:0,c=null!==(o=null===(r=n.y)||void 0===r?void 0:r.baseVal.value)&&void 0!==o?o:0,d=n.children.length;for(let e=0;e<d;e+=1){const s=n.children[e];if("SECTION"===s.tagName){const{style:e}=s;e.transformOrigin||(e.transformOrigin=`${-i}px ${-c}px`),e.transform=`scale(${a}) matrix(${t.a}, ${t.b}, ${t.c}, ${t.d}, ${t.e-l.left}, ${t.f-l.top}) translateZ(0.0001px)`;break}}}}}}),!1!==n&&Array.from(e.querySelectorAll("iframe"),({contentWindow:t})=>{null==t||t.postMessage(`${d}${n}`,"null"===window.origin?"*":window.origin)})}function w({once:t=!1,target:e=document}={}){const i=function(t=document){if(t[h])return t[h];let e=!0;const i=()=>{e=!1,delete t[h]};Object.defineProperty(t,h,{configurable:!0,value:i});let n=[],s=!1;(async()=>{try{n=await p()}finally{s=!0}})();const r=()=>{for(const e of n)e({target:t});s&&0===n.length||e&&window.requestAnimationFrame(r)};return r(),i}(e);return t?(i(),()=>{}):i}m=1,u=void 0;const b=Symbol(),y=(e=document)=>{if("undefined"==typeof window)throw new Error("Marp Core's browser script is valid only in browser context.");if(((e=document)=>{const i=window[l];i||customElements.define("marp-auto-scaling",s);for(const n of Object.keys(t)){const s=`marp-${n}`,o=t[n].proto();a()&&o!==HTMLElement?i||customElements.define(s,r(o,{style:t[n].style}),{extends:n}):(i||customElements.define(s,r(HTMLElement,t[n])),e.querySelectorAll(`${n}[is="${s}"]`).forEach(t=>{t.outerHTML=t.outerHTML.replace(new RegExp(`^<${n}`,"i"),`<${s}`).replace(new RegExp(`</${n}>$`,"i"),`</${s}>`)}))}window[l]=!0})(e),e[b])return e[b];const i=w({target:e}),n=()=>{i(),delete e[b]},o=Object.assign(n,{cleanup:n,update:()=>y(e)});return Object.defineProperty(e,b,{configurable:!0,value:o}),o},f=document.currentScript;y(f?f.getRootNode():document)}();
 </script></foreignObject></svg></div><script>/*!! License: https://unpkg.com/@marp-team/marp-cli@4.4.1/lib/bespoke.js.LICENSE.txt */

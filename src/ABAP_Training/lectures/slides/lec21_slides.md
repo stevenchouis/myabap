@@ -41,7 +41,7 @@ style: |
 
 ABAP 基礎教育訓練（授課順序：接在講義 15 之後）
 
-對應練習 ex21｜答案：表 `ZTR21_STUD`＋程式 `ZR_TR21_ZTABLE`
+對應練習 ex21｜答案：表 `ZTR21_STUD` + `ZTR21_CLASS`＋程式 `ZR_TR21_ZTABLE`
 
 ---
 
@@ -50,6 +50,8 @@ ABAP 基礎教育訓練（授課順序：接在講義 15 之後）
 - DDIC 三層件：Domain → Data Element → 表格欄位
 - SE11 建立透明表：鍵欄位、Delivery Class、Technical Settings
 - SM30 維護畫面（Table Maintenance Generator）
+- **Header／Detail 兩表關聯**：外鍵（Foreign Key）與檢查表（Check Table）
+- **Search Help**：F4 值清單怎麼來的，跟外鍵的差別
 - Open SQL 寫入：`INSERT` / `UPDATE` / `MODIFY` / `DELETE`
 - LUW 與 `COMMIT WORK` / `ROLLBACK WORK`
 
@@ -104,7 +106,56 @@ ABAP 基礎教育訓練（授課順序：接在講義 15 之後）
 
 ---
 
-## 4. Open SQL 寫入四指令
+## 4. Header／Detail 關聯：外鍵與 Check Table
+
+訂單－客戶、明細－產品……本質都是 **Header（1）／Detail（多）** 關聯
+本課示範：班級（Header）－學生（Detail），跟講義 6 的 SCARR－SPFLI 同一種關係
+
+- **Check Table**：被參考的表（`ZTR21_CLASS`），扮演「合法值清單」
+- **外鍵表**：帶外鍵欄位的表（`ZTR21_STUD.KLASSE`），值必須存在於 Check Table
+
+```abap
+klasse : ztr21_klasse
+  with foreign key [0..*,1] ztr21_class
+    where mandt  = ztr21_stud.mandt
+      and klasse = ztr21_stud.klasse;
+```
+
+`[0..*,1]`：多筆學生（外鍵表）對應 1 筆班級（檢查表）
+
+---
+
+<!-- _class: compact -->
+
+## 外鍵只擋畫面，不擋程式！
+
+`@AbapCatalog.foreignKey.screenCheck : true` **只影響 Dynpro 畫面**（SM30、Module Pool）
+
+> **Open SQL 的 INSERT/UPDATE/MODIFY 完全不受外鍵約束**
+> 程式塞一個 Check Table 沒有的班級代碼一樣 `sy-subrc = 0`
+
+跟一般資料庫的 Foreign Key Constraint 不一樣：
+那是資料庫引擎強制擋寫入；SAP DDIC 外鍵是**應用層／畫面層**機制
+
+要在程式擋，得自己 `SELECT SINGLE` 檢查 Check Table
+
+---
+
+## Search Help：F4 選單哪裡來的
+
+跟外鍵是兩件事：外鍵「擋不合法的值」、Search Help「幫你選合法的值」
+
+- 只設外鍵沒設 Search Help：會擋錯，但沒 F4，要背代碼
+- 只設 Search Help 沒設外鍵：F4 能選，但手動打錯的畫面不會擋
+
+建立（SE11 → Search Help → Elementary Search Help）：
+- **Selection Method**：資料來源表（`ZTR21_CLASS`）
+- **Parameters**：`KLASSE`（Import+Export+SH field）、`KLNAME`（純顯示，僅 Export）
+- 建好要**掛到 Data Element**（`ZTR21_KLASSE` → Search Help 欄位）才會全面生效
+
+---
+
+## 5. Open SQL 寫入四指令
 
 全部**用 sy-subrc 回報結果**；`sy-dbcnt` 是影響筆數：
 
@@ -141,7 +192,7 @@ DELETE FROM ztr21_stud WHERE id = 'S0001'.
 
 ---
 
-## 5. LUW 與 COMMIT WORK
+## 6. LUW 與 COMMIT WORK
 
 變更以 **LUW**（Logical Unit of Work）為單位，確認才落地：
 
@@ -162,7 +213,7 @@ COMMIT WORK.           " 整包確認：全部永久生效
 
 ---
 
-## 6. 常見錯誤與陷阱
+## 7. 常見錯誤與陷阱
 
 | 症狀 | 原因 |
 |---|---|
@@ -172,6 +223,8 @@ COMMIT WORK.           " 整包確認：全部永久生效
 | INSERT FROM TABLE 直接 dump | 沒加 ACCEPTING DUPLICATE KEYS |
 | SM30 說表不能維護 | 建表時維護選項不允許、或沒產畫面 |
 | 自己塞 MANDT | 不用，系統自動處理 |
+| 以為外鍵能擋程式寫入的髒資料 | 外鍵只管畫面輸入，Open SQL 不受影響 |
+| JOIN 的 ON 條件寫了 MANDT | 語法錯誤：client 欄位由編譯器自動處理 |
 
 ---
 
@@ -181,8 +234,8 @@ COMMIT WORK.           " 整包確認：全部永久生效
 
 完成 **ex21**：
 
-建 Domain＋Data Element＋透明表 `ZTR21_STUD`
-產 SM30 維護畫面
+建 Domain＋Data Element＋透明表 `ZTR21_STUD`＋班級主檔 `ZTR21_CLASS`
+`KLASSE` 欄位設外鍵＋Search Help，產 SM30 維護畫面
 
 寫程式跑完 INSERT / UPDATE / MODIFY / DELETE
-全流程並驗證 sy-subrc
+＋外鍵行為驗證＋JOIN，全流程並驗證 sy-subrc
