@@ -1,6 +1,6 @@
 # SAP ABAP OOP 課程
 
-基礎課（`src/ABAP_Training/`，ex01–ex15）的續篇。課綱已定稿（2026-07-03）；op01–op12 已全數出題並驗收完成（2026-07-04），課程結案。
+基礎課（`src/ABAP_Training/`，ex01–ex23）的續篇。課綱已定稿（2026-07-03）；op01–op12 已全數出題並驗收完成（2026-07-04），主課程結案。2026-07-11 增開續篇 op13（OO 事件），同日驗收完成。
 
 ## 課程定位
 
@@ -31,10 +31,11 @@
 | op10 | ABAP Unit 單元測試 | local test class、`FOR TESTING RISK LEVEL HARMLESS DURATION SHORT`、given-when-then、`cl_abap_unit_assert` | 團隊規範「新 Class 必附測試」落地 | 已驗收 |
 | op11 | 標準 OO API 實戰：cl_salv_table | ex09 Functional ALV 改寫成 `cl_salv_table`、方法鏈實戰、ADT 導覽標準類別 | 兌現 ex09 的預告 | 已驗收 |
 | op12 | 期末綜合：報表 OO 化重構 | ex13 全面重構——`ZCL_OO12_FLIGHT_REVENUE`（取數+計算+`ZCX_` 例外）+ ABAP Unit 測試 + `cl_salv_table` 輸出，報表剩 <30 行 UI 層；重構前後行為一致 | ex13 是輸入，團隊規範是驗收 | 已驗收 |
+| op13 | OO 事件（EVENTS/SET HANDLER） | 事件宣告/RAISE EVENT/handler 方法、多訂閱者與 ACTIVATION 退訂、`sender`；實戰訂閱 `cl_salv_events_table` 的 `double_click`；Observer 模式前哨 | 承 op11 SALV；對照 ex10 report event | 已驗收 |
 
 ## 不碰的範圍（下一階段）
 
-OO 事件（EVENTS/SET HANDLER）、Design Pattern、CDS/RAP。
+Design Pattern、CDS/RAP。（OO 事件已於 op13 收編。）
 
 ## 出題工作流程（給接手的 session）
 
