@@ -20,7 +20,7 @@
 | 10 | [lec06](lec06_sap_table.md) | 讀 SAP Table：航班模型與 SELECT | [ex06](../ex06_sap_table.md) |
 | 11 | [lec07](lec07_selscreen.md) | 選擇畫面：PARAMETERS / SELECT-OPTIONS / IN | [ex07](../ex07_selscreen.md) |
 | 12 | [lec08](lec08_modularize.md) | 模組化：FORM / USING / CHANGING | [ex08](../ex08_modularize.md) |
-| 13 | [lec09](lec09_alv.md) | Functional ALV 與 MACRO | [ex09](../ex09_alv.md) |
+| 13 | [lec09](lec09_alv.md) | Functional ALV 與 MACRO；進階篇（第 8 節起）：REUSE_ALV_GRID_DISPLAY_LVC 可編輯 ALV、STYLEFNAME 反灰、EDT_CLL_CB/DATA_CHANGED | [ex09](../ex09_alv.md)、[ex24](../ex24_alv_lvc.md) |
 | 14 | [lec10](lec10_events.md) | Report Event：事件流程與互動清單 | [ex10](../ex10_events.md) |
 | 15 | [lec22](lec22_texts_messages.md) | Message Class 與多語言文字元素：SE91 / Text Symbol | [ex22](../ex22_texts_messages.md) |
 | 16 | [lec11](lec11_join.md) | 多表 JOIN 與 CORRESPONDING FIELDS | [ex11](../ex11_join.md) |

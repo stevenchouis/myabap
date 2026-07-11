@@ -43,6 +43,7 @@
 | 21 | Z 資料表與 Open SQL 寫入（SE11/SM30/INSERT/UPDATE/MODIFY/DELETE、外鍵/Check Table、Search Help） | [ex21](ex21_ztable.md) | `ZTR21_STUD` + `ZTR21_CLASS` + `ZR_TR21_ZTABLE` | 完成 |
 | 22 | Message Class 與多語言文字元素（SE91/Text Symbol/Selection Texts） | [ex22](ex22_texts_messages.md) | `ZTR22` + `ZR_TR22_TEXTS` | 完成 |
 | 23 | 期末整合練習：訂單 Header/Detail（外鍵/Search Help 綜合運用、LUW all-or-nothing 實地驗證） | [ex23](ex23_orders.md) | `ZTR23_ORDH` + `ZTR23_ORDI` + `ZR_TR23_ORDERS` | 完成 |
+| 24 | 可編輯 ALV（REUSE_ALV_GRID_DISPLAY_LVC：STYLEFNAME 反灰、EDT_CLL_CB+IT_EVENTS 觸發 DATA_CHANGED 即時檢核） | [ex24](ex24_alv_lvc.md) | `ZR_TR24_ALV_LVC`（＋GUI Status `STANDARD`） | 完成 |
 
 > - 本階段不含 OOP（Local Class / Method / cl_salv_table 等），留待 SAP OOP 課程。
 > - 課程目標：完課後能獨立寫出並看懂 `Z_INVENTORY_COST_REPORT` 等級的傳統報表。
@@ -50,9 +51,10 @@
 > - `ZR_TR22_TEXTS` 的 Text Symbols（001–003）／Selection Texts，以及 ex21 的 Table Maintenance Generator（SM30），已於 2026-07-05 在 SAP GUI 手動補齊（這兩項無法透過 ADT API 維護）。至此 ex17～ex22 全數完工。
 > - ex21 於 2026-07-06 擴充 Header/Detail 關聯教學：新增 Domain/DE `ZTR21_KLASSE`、`ZTR21_KLNAME`、班級主檔表 `ZTR21_CLASS`（DDL 快照 `ztr21_class.tabl.abap`），`ZTR21_STUD` 加外鍵欄位 `KLASSE`（Check Table 指向 `ZTR21_CLASS`），程式補教學片段（外鍵只擋畫面輸入、不擋 Open SQL；JOIN 兩表複習）。Search Help `ZTR21_CLASSH` 與 `ZTR21_STUD` 的 SM30 維護畫面已於 SAP GUI 手動補齊確認，至此 ex21 全數完工。（過程中踩到一個坑：`ZTR21_CLASS-KLNAME` 一開始用內建型別 `CHAR(40)` 沒掛 Data Element，導致 Search Help 無法 Activate，已補建 DE `ZTR21_KLNAME` 修正，詳見 `.claude/rules/sap-adt-mcp.md` 第 10 節。）
 > - 新增 ex23（2026-07-06）：期末整合練習「訂單 Header/Detail」，`ZTR23_ORDH`（訂單主檔）+ `ZTR23_ORDI`（訂單明細，`ORDNO` 同時是 Key 也是外鍵，比 ex21 更貼近 SAP 官方外鍵範例）+ 3 組 Domain/DE（`ZTR23_ORDNO`/`ZTR23_CUSTOMER`/`ZTR23_STATUS`，其中 `ZTR23_STATUS` 示範 Domain 固定值清單，跟 ex21 的區間值域是不同技巧）。程式 `ZR_TR23_ORDERS` 具體驗證 LUW all-or-nothing（Header+Detail 同一 LUW，中途失敗 ROLLBACK WORK 後連已成功的 Header 也一併消失）。Search Help `ZTR23_ORDHSH` 與 `ZTR23_ORDH` 的 SM30 維護畫面已於 SAP GUI 手動補齊確認，至此 ex23 全數完工，基礎課全部 23 題完課。
+> - 新增 ex24（2026-07-11）：Functional ALV 進階篇「可編輯 ALV」，`REUSE_ALV_GRID_DISPLAY_LVC` + `IS_LAYOUT_LVC-STYLEFNAME`（列級樣式反灰）+ `I_GRID_SETTINGS-EDT_CLL_CB` 搭配 `IT_EVENTS` 掛 `SLIS_EV_DATA_CHANGED` 對應 FORM（離開已編輯儲存格即時觸發檢核）。全程維持 Functional 寫法（事件表 + FORM 回呼），不涉及 class/SET HANDLER。GUI Status `STANDARD`（複製 `SAPLKKBL` 的 `STANDARD_FULLSCREEN` + Fcode `ZCONF`）已於 SAP GUI 手動補齊確認，程式驗收通過，至此 ex24 全數完工。
 
 ## 建議授課順序（題號 ≠ 順序）
 
-**ex01 → ex02 → ex17（流程控制）→ ex18（字串日期）→ ex03 → ex04 → ex05 → ex19（除錯）→ ex16（Field-Symbol）→ ex06 → … → ex10 → ex22（訊息與文字元素）→ ex11 → ex20（群組小計）→ ex12 → ex14（INCLUDE 拆檔）→ ex15（Function Module）→ ex21（Z 資料表）→ ex13（期末綜合實作一）→ ex23（期末整合練習二，全課程最後一題）**
+**ex01 → ex02 → ex17（流程控制）→ ex18（字串日期）→ ex03 → ex04 → ex05 → ex19（除錯）→ ex16（Field-Symbol）→ ex06 → ex07 → ex08 → ex09 → ex24（可編輯 ALV，進階選修）→ ex10 → ex22（訊息與文字元素）→ ex11 → ex20（群組小計）→ ex12 → ex14（INCLUDE 拆檔）→ ex15（Function Module）→ ex21（Z 資料表）→ ex13（期末綜合實作一）→ ex23（期末整合練習二，全課程最後一題）**
 
-題號在 13 之後的主題都是後來補的，依主題插進對應位置授課，不重編題號（SAP 端答案程式依原題號命名）：ex17/ex18 是基本功，緊接變數宣告之後；ex19 除錯放在 internal table 之後（有足夠複雜度可供追蹤）；ex22 收攏 ex07 的 Selection Texts 伏筆與 ex10 首次登場的 MESSAGE；ex20 需要 JOIN 的資料、且是 ex12 列印排版的前置；ex21 需要 FM 觀念（SM30 的 function group）；期末實作 ex13 用到 ex14/ex15 技能；ex23 需要 ex21 的外鍵/Search Help 觀念才有意義，是全課程真正的最後一題，用「訂單 Header/Detail」把外鍵、Search Help、LUW 三條線收在一起。
+題號在 13 之後的主題都是後來補的，依主題插進對應位置授課，不重編題號（SAP 端答案程式依原題號命名）：ex17/ex18 是基本功，緊接變數宣告之後；ex19 除錯放在 internal table 之後（有足夠複雜度可供追蹤）；ex24 是 ex09 的進階篇（lec09 第 8 節起），緊接 ex09、可視班級程度列為選修；ex22 收攏 ex07 的 Selection Texts 伏筆與 ex10 首次登場的 MESSAGE；ex20 需要 JOIN 的資料、且是 ex12 列印排版的前置；ex21 需要 FM 觀念（SM30 的 function group）；期末實作 ex13 用到 ex14/ex15 技能；ex23 需要 ex21 的外鍵/Search Help 觀念才有意義，是全課程真正的最後一題，用「訂單 Header/Detail」把外鍵、Search Help、LUW 三條線收在一起。
