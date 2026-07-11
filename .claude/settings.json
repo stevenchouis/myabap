@@ -10,14 +10,14 @@
       "mcp__sap-adt__sap_inactive_objects",
       "mcp__sap-adt__sap_abap_docu",
       "mcp__sap-adt__sap_sql_query",
-      "mcp__sap-docs__*"
+      "mcp__sap-docs__*",
+      "mcp__sap-adt__sap_activate",
+      "mcp__sap-adt__sap_lock",
+      "mcp__sap-adt__sap_unlock"
     ],
     "ask": [
       "mcp__sap-adt__sap_set_source",
       "mcp__sap-adt__sap_create_object",
-      "mcp__sap-adt__sap_activate",
-      "mcp__sap-adt__sap_lock",
-      "mcp__sap-adt__sap_unlock",
       "mcp__sap-adt__sap_atc_run"
     ],
     "deny": [
