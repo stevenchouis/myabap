@@ -28,11 +28,12 @@
 | 18 | [lec12](lec12_print_layout.md) | 列印排版與頁面規劃 | [ex12](../ex12_print_layout.md) |
 | 19 | [lec14](lec14_include_split.md) | INCLUDE 拆檔：TOP / F01 慣例 | [ex14](../ex14_include_split.md) |
 | 20 | [lec15](lec15_function_module.md) | Function Module：SE37 與 CALL FUNCTION | [ex15](../ex15_function_module.md) |
-| 21 | [lec21](lec21_ztable.md) | 建立 Z 資料表與 Open SQL 寫入：SE11 / SM30 | [ex21](../ex21_ztable.md) |
-| 22 | [lec13](lec13_capstone.md) | 期末總整理：完整報表架構與實作攻略 | [ex13](../ex13_capstone.md) |
-| 23 | [lec23](lec23_orders.md) | 期末整合練習二：訂單 Header/Detail、外鍵/Search Help/LUW 綜合運用 | [ex23](../ex23_orders.md) |
+| 21 | [lec25](lec25_ddic_overview.md) | Data Dictionary 總覽與 Global Type：重用標準型別、Check Table 指向標準表 | [ex25](../ex25_ddic_overview.md) |
+| 22 | [lec21](lec21_ztable.md) | 建立 Z 資料表與 Open SQL 寫入：SE11 / SM30 | [ex21](../ex21_ztable.md) |
+| 23 | [lec13](lec13_capstone.md) | 期末總整理：完整報表架構與實作攻略 | [ex13](../ex13_capstone.md) |
+| 24 | [lec23](lec23_orders.md) | 期末整合練習二：訂單 Header/Detail、外鍵/Search Help/LUW 綜合運用 | [ex23](../ex23_orders.md) |
 
-> 講義編號跟練習題號一致（lec16 對 ex16），所以授課順序不等於編號順序：流程控制/字串（lec17/18）緊接變數之後、除錯（lec19）在 internal table 之後、Field-Symbol（lec16）接在除錯之後、訊息與文字元素（lec22）緊接事件講次收攏 MESSAGE 與 Selection Texts、群組小計（lec20）在 JOIN 與列印排版之間、Z 資料表（lec21）在 FM 之後，期末總整理（lec13）在此之後，訂單 Header/Detail（lec23）需要 lec21 的外鍵/Search Help 觀念，是全課程真正的最後一講。
+> 講義編號跟練習題號一致（lec16 對 ex16），所以授課順序不等於編號順序：流程控制/字串（lec17/18）緊接變數之後、除錯（lec19）在 internal table 之後、Field-Symbol（lec16）接在除錯之後、訊息與文字元素（lec22）緊接事件講次收攏 MESSAGE 與 Selection Texts、群組小計（lec20）在 JOIN 與列印排版之間、Data Dictionary 總覽（lec25）在 FM 之後先建立 Global Type／Check Table／Search Help 的概念地圖，Z 資料表（lec21）接著做完整的自建深入動手，期末總整理（lec13）在此之後，訂單 Header/Detail（lec23）需要 lec21 的外鍵/Search Help 觀念，是全課程真正的最後一講。
 
 ## 使用方式
 
