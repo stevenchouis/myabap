@@ -1,5 +1,15 @@
 # REST 練習 2：一個 Service、多個資源——URI 路由
 
+## Lecture
+
+rs01 示範的是「整個 Service 只有一個 Resource」的最簡單情況（Application 直接回傳一個 Resource 實例）。但實際的 API 通常有很多種資源（航班、訂位、乘客……），每一種都需要自己的 URL 路徑跟自己的處理邏輯——這時候 Application 就不能只回傳單一 Resource，要有一個「路由器」依照 URL 路徑決定要交給哪一個 Resource。
+
+`CL_REST_ROUTER` 就是這個角色：`ATTACH` 方法登記「URL 樣板 → Handler Class」的對應關係，一個 Router 可以掛很多條樣板。框架收到 request 後，Router 會依樣板比對 URL 路徑，找到對應的 Resource Class 並把 request 轉交給它。
+
+**為什麼要拆成 Application（總機）跟 Resource（工人）兩層，而不是一個 Class 全包**：這是單一職責原則（Single Responsibility）的具體實踐——Application 只管「這個 request 該交給誰」，完全不碰業務邏輯；Resource 只管「收到 request 之後怎麼處理這一種資源」，完全不管路由。這樣的分工讓每個 Resource Class 可以獨立開發、獨立測試，也方便之後新增資源時只要多寫一個 Resource Class + 多一行 `ATTACH`，不用碰其他資源的程式碼。
+
+這題也是本課程第一次出現「一個 Application 掛兩個 Resource」的寫法，之後 rs03~rs09 的 Application Class 幾乎都是這個模式（差別只在掛幾條路徑、掛哪些 Resource）。
+
 ## 學習目標
 
 - 理解為什麼「一個 SICF Service 只能掛一個 Handler Class」，但實務上一個 Service 常常要處理很多種資源（`/hello`、`/carriers`、`/flights`……）

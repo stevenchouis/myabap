@@ -46,7 +46,7 @@
 - `sap-adt`：透過 ADT (ABAP Development Tools) 協定讀寫 SAP 系統物件，HTTP transport，Project scope（設定在根目錄 `.mcp.json`，隨版控分享給團隊）。
 - `sap-docs`：SAP 相關文件查詢用，唯讀性質，同樣是 Project scope。
 - `sap-adt` 目前指向內網 IP（`192.168.68.56`，區網固定 IP），只有連得到這個網段的人才能用；不同網路環境的隊友需要各自調整，見 README.md。這個位址是 Eclipse Plugin「SAP ADT MCP Server for Claude Code」的位址，它再透過本機的 `adt-rfc-bridge`（Python 橋接程式，監聽 `127.0.0.1:8410`）轉 RFC 連進 SAP Host——兩層架構細節見 README.md「架構說明」與 `.claude/rules/sap-adt-mcp.md`。
-- 建立物件（`sap_create_object`）與寫入原始碼（`sap_set_source`）一律先列出內容給我確認，不要靜默執行；啟用/鎖定/解鎖（`sap_activate`/`sap_lock`/`sap_unlock`）2026-07-12 起改為自動允許——這三個在正常開發流程裡幾乎每次寫完都要跑一次，且都是可逆操作（重新啟用、重新鎖定都行），要求逐次確認只會拖慢節奏而不會多攔到什麼風險；刪除物件與釋放/刪除傳輸請求在 `.claude/settings.json` 已直接鎖死（deny）。
+- 建立物件（`sap_create_object`）與寫入原始碼（`sap_set_source`）2026-07-13 起也改為自動允許（不再逐次跳出權限確認），但仍維持「動作前在對話中列出即將建立/寫入的內容」的習慣，只是審核方式從「權限彈窗」改成「聊天訊息」；啟用/鎖定/解鎖（`sap_activate`/`sap_lock`/`sap_unlock`）則是 2026-07-12 起改為自動允許。這五個在正常開發流程裡幾乎每次寫程式都要跑一次，且都是可逆操作（重新啟用、重新寫入、重新鎖定都行），要求逐次確認只會拖慢節奏而不會多攔到什麼風險；刪除物件與釋放/刪除傳輸請求在 `.claude/settings.json` 已直接鎖死（deny）。
 
 ## 待補充（請依實際專案填寫）
 

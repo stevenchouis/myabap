@@ -1,5 +1,28 @@
 # REST 練習 1：為什麼要 REST + 架構總覽
 
+## Lecture
+
+REST（Representational State Transfer）不是一個特定技術，而是一種設計 HTTP API 的**風格**（architectural style）：把系統裡的每個東西都當作「資源」（Resource），用一個 URL 代表它，然後用固定的一組 HTTP 動詞去操作它，而不是自己發明一堆自訂的操作名稱。
+
+**HTTP 動詞的標準語意**（這是整個 REST 課程的地基，之後每一題都會用到）：
+
+| 動詞 | 語意 | 冪等性（重複呼叫結果一樣嗎） | 安全性（會不會改動資料） |
+|---|---|---|---|
+| `GET` | 查詢一個資源 | 是 | 是（安全，不改資料） |
+| `POST` | 建立一個新資源 | 否（重複呼叫可能建立出多筆） | 否 |
+| `PUT` | 整筆覆蓋更新一個資源 | 是（重複送同一份資料，結果不變） | 否 |
+| `DELETE` | 刪除一個資源 | 是（刪過一次後再刪，結果一樣是「不存在」） | 否 |
+
+「冪等」（Idempotent）是 REST 設計的核心概念之一：呼叫端因為網路問題重送同一個請求時，冪等的動詞（GET/PUT/DELETE）不會因為重送而產生不良副作用，但 POST 的重送可能意外建立出重複資料（rs06 會實際示範這個問題）。
+
+**SAP Classic REST 框架把「HTTP 協定細節」跟「你的業務邏輯」切成三層**：
+
+1. **SICF**：SAP Web Dispatcher/ICM 層級的路由設定，決定「這個 URL 路徑要交給哪個 ABAP Handler Class」——這一層沒有 ADT API，只能在 SAP GUI 手動掛載（本課程唯一的例外）
+2. **Application Class**（繼承 `CL_REST_HTTP_HANDLER`）：整個 Service 的「總機」，唯一要做的事是覆寫 `GET_ROOT_HANDLER`，決定要把 request 轉給哪個/哪些 Resource（rs02 開始會看到用 `CL_REST_ROUTER` 依路徑分流）
+3. **Resource Class**（繼承 `CL_REST_RESOURCE`）：實際做事的地方，依 HTTP 動詞覆寫對應方法（`GET`/`POST`/`PUT`/`DELETE`），這裡才是寫業務邏輯的地方
+
+這三層的分工讓你完全不用自己處理「怎麼解析 HTTP 請求」「例外要轉成什麼狀態碼」這些底層問題——`CL_REST_HTTP_HANDLER`/`CL_REST_RESOURCE` 已經幫你做好了，這也是為什麼這門課從第一題就可以直接寫業務邏輯，不用自己刻一個 HTTP Server。
+
 ## 學習目標
 
 - 說得出 HTTP 動詞的語意（GET 查詢／POST 建立／PUT 整筆更新／DELETE 刪除）與「冪等性」是什麼意思
