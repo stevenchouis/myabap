@@ -19,6 +19,7 @@ rs04 的路徑參數解決的是「指定唯一一筆資源」，但很多時候
 
   - 篩選條件本身指向一個不存在的資源（例如 `carrid=ZZ`，`ZZ` 根本不是任何航空公司代碼）→ 這是**呼叫端的輸入錯誤**，回 `404`
   - 篩選條件都合法，只是剛好篩出 0 筆資料（例如 `fromdate=20991231`，`AA` 存在但沒有那麼晚的航班）→ 這是**正常的空結果**，回 `200` + 空陣列 `[]`，不是錯誤
+- **（延伸知識，非本題必考）**：`MO_REQUEST` 除了取 Query Parameter，也能用 `GET_HEADER_FIELD( )` 讀呼叫端送來的**自訂 HTTP Header**——這題不會實際用到，但既然這題主題是「怎麼從 Request 拿東西」，一併記录這個常被忽略的取值方式
 
 ## 為什麼這兩種「查無資料」要分開處理
 
@@ -38,6 +39,35 @@ rs04 的單筆查詢用完整主鍵定位「一筆」資源，查不到就是那
 - `carrid=AA&fromdate=20190101`（等值＋範圍）：篩出「這家航空公司從某天開始的所有航班」，結果會橫跨多個不同 `connid`、多個不同 `fldate`——這是**正確、預期的行為**，不是 bug，範圍篩選本來就會篩出「一個區間」而不是「一個值」（2026-07-12 第一次示範這個範例時曾被誤會成篩選壞掉，其實是對「範圍篩選會回傳一堆不同值」這件事還不熟悉）
 
 `fromdate` 除了示範範圍篩選，也重用了 rs04 教過的 `CONV dats( ... )` 轉型手法（`GET_URI_QUERY_PARAMETER` 拿回來是不帶短橫線的 8 碼數字字串，要轉成 `DATS` 才能跟 `FLDATE` 比較大小），跟 `carrid`/`connid` 直接拿 `STRING` 比較是不同的處理路徑，值得對照著看。
+
+## 延伸知識：在 Resource 裡讀取自訂 HTTP Header
+
+這題教的 `HAS_URI_QUERY_PARAMETER( )`/`GET_URI_QUERY_PARAMETER( )` 是從 **URL** 拿條件，但呼叫端也常常把資訊放在 **HTTP Header** 裡（例如追蹤用的關聯 ID、API 版本號，或是 rs06 之後會遇到的 `X-CSRF-Token`）。取 Header 一樣是透過繼承來的 `MO_REQUEST`，只是換一個方法：
+
+```abap
+METHOD if_rest_resource~get.
+  " Header 名稱不分大小寫，'X-Request-Id' 跟 'x-request-id' 效果相同
+  DATA(lv_request_id) = mo_request->get_header_field( iv_name = 'x-request-id' ).
+
+  IF lv_request_id IS INITIAL.
+    " GET_HEADER_FIELD 沒有像 Query Parameter 那樣另外提供 HAS_xxx 判斷式——
+    " Header 不存在時直接回傳空字串，要自己用 IS INITIAL 判斷「呼叫端到底有沒有帶」
+    lv_request_id = cl_system_uuid=>create_uuid_x16_static( ).
+  ENDIF.
+
+  " ...原本的查詢邏輯（篩選、查 SFLIGHT）...
+
+  " 把收到的（或沒帶就自動產生的）Request Id 原封不動回填在 Response Header，
+  " 讓前端可以拿同一個值去對照後端的 log，方便追查某一次呼叫
+  mo_response->set_header_field( iv_name = 'X-Request-Id' iv_value = lv_request_id ).
+ENDMETHOD.
+```
+
+幾個值得對照的地方：
+
+- **`MO_REQUEST` 是同一個物件**，取 URL 路徑參數（rs04 的 `GET_URI_ATTRIBUTE`）、Query Parameter（這題的 `GET_URI_QUERY_PARAMETER`）、HTTP Header（`GET_HEADER_FIELD`）都是呼叫它身上不同的方法，不是三個不同的物件
+- **Query Parameter 有 `HAS_URI_QUERY_PARAMETER( )` 專門判斷「有沒有提供」，Header 沒有對應的 `HAS_HEADER_FIELD( )`**——這是兩者刻意設計不同的地方：Header 取不到就是空字串，程式自己判斷 `IS INITIAL`，不能像 Query Parameter 那樣先問一次「有沒有」再決定要不要取值
+- 這個讀 Header 的技巧不只用在自訂追蹤欄位，rs06 會教的 CSRF Token 驗證流程、以及一般 API 常見的 `Authorization` 驗證 Header，本質上都是同一個 `GET_HEADER_FIELD( )` 呼叫，只是讀到的值後續處理邏輯不同
 
 ## 事前準備
 

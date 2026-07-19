@@ -16,10 +16,78 @@ rs01 示範的是「整個 Service 只有一個 Resource」的最簡單情況（
 - 會用 `CL_REST_ROUTER`：`ATTACH( iv_template = 'URI樣板' iv_handler_class = '類別名稱字串' )` 把 URI Pattern 對應到 Resource Class
 - 理解 router 是「收到 request 才動態 `CREATE OBJECT`」，`ATTACH` 只是註冊對照表，不會馬上建立 Resource 物件
 - 能分辨「Application Class 决定路由規則」和「Resource Class 負責實際邏輯」这两层职责不要混在一起
+- **（延伸知識，非本題必考）**：理解如果這個 API 要給瀏覽器前端（React/Vue 等 SPA）直接呼叫，Application Class 除了路由還要多負責一件事——**CORS**（Cross-Origin Resource Sharing）。這跟 rs06 會教的 CSRF 是完全不同層級的兩個機制，容易被搞混，這裡先建立正確的心智模型，rs06 再對照兩者差異
 
 ## 為什麼需要 Router
 
 rs01 的 `ZCL_RS01_APP` 直接 `ro_root_handler = NEW zcl_rs01_hello( )`——這只在「整個 service 只有一種資源」時夠用。實務上一個 REST API 通常要同時提供好幾種資源（例如訂單、客戶、航班……），每種資源各自有一個 Resource Class，但 SICF 一個 Service 只能指定**一個** Handler Class（Application Class）。解法：Application Class 不直接處理，而是回傳一個 `CL_REST_ROUTER` 實例，router 依照 URL 路徑決定要交給哪個 Resource Class。
+
+## CORS：如果要給瀏覽器前端呼叫，還要多做一件事（延伸知識）
+
+前面九題的測試工具都是 `SPROX_HTTP_REQUEST`（SAP GUI 內部程式）或 Postman/curl——這些工具**不會**觸發瀏覽器的同源政策（Same-Origin Policy），所以這門課到目前為止完全感覺不到 CORS 的存在。但如果呼叫端換成一支跑在瀏覽器裡的網頁（例如部署在 `https://frontend.example.com` 的 React App，要呼叫 `https://sap.company.com/sap/bc/zrest_training/...`），瀏覽器會主動擋下「跨來源」的回應，除非伺服器明確用 HTTP header 表態「我允許這個來源讀取回應」。
+
+**這是瀏覽器自己的安全機制，不是 SAP 或 ABAP 的行為**——伺服器其實還是正常處理了請求、也正常回了 200，只是瀏覽器收到回應後，發現裡面沒有 `Access-Control-Allow-Origin` 這個 header，就不讓呼叫的 JavaScript 讀取這個回應內容（在瀏覽器的 Network 頁籤看得到請求成功，但 Console 會報一個 CORS 錯誤）。
+
+**Preflight（預檢請求）**：如果前端呼叫用了 `Content-Type: application/json` 或帶了自訂 Header（例如 rs06 會教的 `X-CSRF-Token`），瀏覽器在送出真正的 GET/POST 之前，會**先自動送一個 `OPTIONS` 請求**探路，帶著 `Access-Control-Request-Method`/`Access-Control-Request-Headers` 問伺服器「我等一下要用這個方法、帶這些 header，你允許嗎？」。伺服器要回：
+
+```
+Access-Control-Allow-Origin: https://frontend.example.com
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type, X-CSRF-Token
+```
+
+瀏覽器確認允許後，才會真的送出正式請求；正式請求的回應也一樣要帶 `Access-Control-Allow-Origin`，瀏覽器才會放行讓 JS 讀到內容。
+
+**`CL_REST_HTTP_HANDLER` 沒有像 CSRF 那樣內建處理 CORS**，要自己刻，而且要放在 **Application Class**、覆寫 `IF_HTTP_EXTENSION~HANDLE_REQUEST`（這個方法比 `GET_ROOT_HANDLER` 更早被呼叫，是整個框架的最外層入口），理由：
+
+1. 這一層可以涵蓋這個 Service 底下所有 Resource、所有動詞的回應，寫在個別 Resource 裡每支都要補一次，容易漏
+2. **Preflight 的 `OPTIONS` 請求瀏覽器不會帶認證資訊**（沒有帳密、沒有已登入的 session），如果照一般流程跑到 Resource 才處理，`OPTIONS` 會先被 Basic Auth 擋下要求登入而失敗——**preflight 一失敗，瀏覽器根本不會送出後面的正式請求**，所以 `OPTIONS` 必須在最外層就攔截處理，完全跳過認證與路由
+
+**如何只允許白名單裡的網址（而不是開放任何來源）**：
+
+```abap
+CLASS zcl_rs02_app DEFINITION INHERITING FROM cl_rest_http_handler.
+  PROTECTED SECTION.
+    METHODS if_http_extension~handle_request REDEFINITION.
+ENDCLASS.
+
+CLASS zcl_rs02_app IMPLEMENTATION.
+
+  METHOD if_http_extension~handle_request.
+    " 白名單：只有這幾個網址可以跨來源呼叫本 API
+    DATA(lt_allowed_origins) = VALUE string_table(
+      ( `https://frontend.example.com` )
+      ( `http://localhost:3000` )   " 本機開發用
+    ).
+
+    DATA(lv_origin) = server->request->get_header_field( iv_name = 'origin' ).
+
+    IF lv_origin IS NOT INITIAL AND line_exists( lt_allowed_origins[ table_line = lv_origin ] ).
+      " 注意：回填的是「比對到的 lv_origin 本身」，不是寫死一個固定網址、也不是 '*'
+      server->response->set_header_field( iv_name = 'Access-Control-Allow-Origin'  iv_value = lv_origin ).
+      server->response->set_header_field( iv_name = 'Access-Control-Allow-Methods' iv_value = 'GET, POST, PUT, DELETE, OPTIONS' ).
+      server->response->set_header_field( iv_name = 'Access-Control-Allow-Headers' iv_value = 'Content-Type, X-CSRF-Token' ).
+      server->response->set_header_field( iv_name = 'Access-Control-Max-Age'       iv_value = '3600' ).
+    ENDIF.
+
+    IF server->request->get_method( ) = 'OPTIONS'.
+      " Preflight 到此結束：只回 CORS header，不呼叫 SUPER->，不進路由、不驗證 CSRF/帳密
+      server->response->set_status( code = 200 reason = 'OK' ).
+      RETURN.
+    ENDIF.
+
+    " 非 OPTIONS 的正式請求：交還框架繼續走 CSRF 檢查／路由／Resource 那一整套流程
+    super->if_http_extension~handle_request( server ).
+  ENDMETHOD.
+
+ENDCLASS.
+```
+
+幾個容易誤解的地方：
+
+- **`Access-Control-Allow-Origin` 回填的值必須是「比對白名單後、原封不動的 `lv_origin`」，不能圖方便寫死 `*`**：`*` 代表「任何來源都允許」，一來不安全（等於沒做白名單管控），二來瀏覽器規定 `*` 不能跟需要帶 Cookie/認證資訊的請求（`credentials: 'include'`）並用——只要前端 fetch 有帶 `credentials`，伺服器就一定要回填「精確比對到的來源」而不是 `*`，這也是上面範例先查白名單、再回填 `lv_origin` 本身的原因
+- **這段程式碼放的位置是 `IF_HTTP_EXTENSION~HANDLE_REQUEST`，不是 `IF_REST_APPLICATION~GET_ROOT_HANDLER`**——`GET_ROOT_HANDLER` 只負責回傳 router，不會被呼叫在「連 CSRF/路由都還沒開始跑」的最外層時間點；`HANDLE_REQUEST` 才是整個 `CL_REST_HTTP_HANDLER` 框架的入口，這也是 rs01 團隊實務備註提過「`GET_ROOT_HANDLER` 是唯一要覆寫的方法」在這個延伸情境下的例外
+- **這門課用的測試工具測不出 CORS 問題**：`SPROX_HTTP_REQUEST`、curl、Postman 都不是瀏覽器，不會執行同源政策檢查，就算沒加任何 CORS header 它們一樣能正常呼叫、正常拿到回應內容——CORS 只有真正的瀏覽器（或瀏覽器裡跑的 JS）才會擋。想驗證伺服器有沒有回對 header，可以用 `curl -i -H "Origin: https://frontend.example.com" http://<主機>:<port>/sap/bc/zrest_training/rs02/carriers` 看 Response Header 裡有沒有 `Access-Control-Allow-Origin`，但這只能驗證「伺服器行為對不對」，驗證不了「瀏覽器真的會放行」——真要驗證後者，得有一支部署在不同來源的網頁實際用 `fetch()` 呼叫
 
 ## 事前準備
 
