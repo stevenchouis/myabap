@@ -32,8 +32,9 @@
 | 22 | [lec21](lec21_ztable.md) | 建立 Z 資料表與 Open SQL 寫入：SE11 / SM30 | [ex21](../ex21_ztable.md) |
 | 23 | [lec13](lec13_capstone.md) | 期末總整理：完整報表架構與實作攻略 | [ex13](../ex13_capstone.md) |
 | 24 | [lec23](lec23_orders.md) | 期末整合練習二：訂單 Header/Detail、外鍵/Search Help/LUW 綜合運用 | [ex23](../ex23_orders.md) |
+| 25 | [lec26](lec26_modern_syntax.md) | 進階選修：新式語法總覽——字串模板／New Open SQL Inline Declaration／COND／SWITCH／VALUE／REDUCE／FILTER | [ex26](../ex26_modern_syntax.md) |
 
-> 講義編號跟練習題號一致（lec16 對 ex16），所以授課順序不等於編號順序：流程控制/字串（lec17/18）緊接變數之後、除錯（lec19）在 internal table 之後、Field-Symbol（lec16）接在除錯之後、訊息與文字元素（lec22）緊接事件講次收攏 MESSAGE 與 Selection Texts、群組小計（lec20）在 JOIN 與列印排版之間、Data Dictionary 總覽（lec25）在 FM 之後先建立 Global Type／Check Table／Search Help 的概念地圖，Z 資料表（lec21）接著做完整的自建深入動手，期末總整理（lec13）在此之後，訂單 Header/Detail（lec23）需要 lec21 的外鍵/Search Help 觀念，是全課程真正的最後一講。
+> 講義編號跟練習題號一致（lec16 對 ex16），所以授課順序不等於編號順序：流程控制/字串（lec17/18）緊接變數之後、除錯（lec19）在 internal table 之後、Field-Symbol（lec16）接在除錯之後、訊息與文字元素（lec22）緊接事件講次收攏 MESSAGE 與 Selection Texts、群組小計（lec20）在 JOIN 與列印排版之間、Data Dictionary 總覽（lec25）在 FM 之後先建立 Global Type／Check Table／Search Help 的概念地圖，Z 資料表（lec21）接著做完整的自建深入動手，期末總整理（lec13）在此之後，訂單 Header/Detail（lec23）需要 lec21 的外鍵/Search Help 觀念，是全課程真正的最後一講；新式語法總覽（lec26）是全課程收尾後的進階選修，回頭把前面刻意用傳統寫法教的內容（字串、JOIN、IF/CASE、累加）改寫成 7.40 之後常見的新式寫法，需要學員已經熟悉對應的傳統寫法才有意義。
 
 ## 使用方式
 
