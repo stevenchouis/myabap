@@ -1,6 +1,6 @@
 # SAP ABAP AMDP／SQLScript／Code-to-Data 課程
 
-REST 課程（`src/ABAP_Training_REST/`，rs01–rs11）之後的下一階段候選之一。課綱草案（2026-07-19），am01～am04 已出題（2026-07-19，am04 待使用者確認），其餘題目待逐題出題。
+REST 課程（`src/ABAP_Training_REST/`，rs01–rs11）之後的下一階段候選之一。課綱草案（2026-07-19），am01～am04 已出題並驗收（2026-07-19），其餘題目待逐題出題。
 
 ## 課程定位
 
@@ -24,7 +24,7 @@ REST 課程（`src/ABAP_Training_REST/`，rs01–rs11）之後的下一階段候
 | am01 | 為什麼要 Code-to-Data + AMDP 架構總覽 | Open SQL「搬資料回應用層算」vs AMDP「邏輯下推到資料庫算」的本質差異；AMDP = ABAP Method 包一段 SQLScript；`IF_AMDP_MARKER_HDB`、`BY DATABASE PROCEDURE FOR HDB LANGUAGE SQLSCRIPT` 語法骨架；**實測發現 AMDP 簽章限制**（所有參數須 `VALUE()`、`DEFAULT` 只能常數不能 `sy-mandt`）**與最重要的一課：AMDP 不會像 Open SQL 自動做 Client 過濾**，`SCARR` 在這套系統多 Client 灌了同一批資料，不加 `WHERE mandt = :iv_mandt` 會撈出重複資料 | 對照 REST rs01 的破題方式；呼應 RAP/CDS 討論裡「這套系統是 HANA」的前提 | 已驗收 |
 | am02 | 第一個 AMDP Method：Signature 規則與呼叫方式 | AMDP Method 參數限制（**修正**：elementary 純量型別跟 Table Type 都可以用，am01/am02 的 `iv_mandt`/`iv_carrid` 就是elementary 純量參數；真正不能用的是「非 Table 包裝的 Structure」；只有 IMPORTING/EXPORTING，沒有 RETURNING/CHANGING）；從一般 ABAP 呼叫 AMDP Method 跟呼叫一般 Method 語法上完全一樣（呼叫端無感）；**同時 `EXPORTING` 兩個 Internal Table 的範例**（`ZCL_AM02_FLIGHT_STATS`：同一次 SQLScript 運算，一次吐出 SFLIGHT 明細 + 依 connid 分組的彙總統計兩張表），對照一般 ABAP Method 只能 `RETURNING` 單一值/表格的限制；**呼叫端 `ZR_AM02_DEMO` 用 `cl_salv_table` 把這兩張回傳的 Internal Table 各自呈現成一個 ALV**（ALV 需要 GUI，已用 WRITE 版本自行驗證過資料邏輯正確，畫面效果經使用者於 SAP GUI 執行確認無誤） | 承 OOP op02 方法參數的對照；ALV 呈現承 OOP op11 `cl_salv_table` | 已驗收 |
 | am03 | SQLScript 基本語法：變數、流程控制 | `ZCL_AM03_PRICE_TIER`：`DECLARE` 純量變數＋`DECLARE CURSOR`、`FOR ... AS <cursor_name> DO ... END FOR` 迴圈、`IF/ELSEIF/ELSE` 分支，逐筆分類票價高低並累計三個等級筆數，對照另一段用宣告式 `CASE WHEN` 一次 `SELECT` 做同樣分類的寫法；**實測發現 `FOR <var> AS SELECT ...`（直接內嵌查詢）語法不合法，必須先 `DECLARE CURSOR` 再用游標名稱**，已在講義記錄 | — | 已驗收 |
-| am04 | SQLScript 集合處理：多表 JOIN／聚合／CTE | `ZCL_AM04_ROUTE_LOAD`：`WITH ... AS (...)` CTE 先依航線彙總 SFLIGHT，再 JOIN SCARR 補上公司名稱算出每條航線載客率；**實測發現兩個坑**：AMDP 簽章 `USING` 子句多個物件要空白分隔、不是逗號；SQLScript 的 JOIN ON 條件**必須**明寫 MANDT（跟 Open SQL JOIN ON 條件**不能**寫 MANDT 正好相反，兩者都指向「Client 處理自動化在哪一層」這個核心對照） | 對照 REST rs05 的 WHERE 條件組合手法；呼應 `.claude/rules/sap-adt-mcp.md` 第 10 節 Open SQL JOIN 限制 | 待使用者確認（已用 programrun API 自行驗證輸出正確） |
+| am04 | SQLScript 集合處理：多表 JOIN／聚合／CTE | `ZCL_AM04_ROUTE_LOAD`：`WITH ... AS (...)` CTE 先依航線彙總 SFLIGHT，再 JOIN SCARR 補上公司名稱算出每條航線載客率；**實測發現兩個坑**：AMDP 簽章 `USING` 子句多個物件要空白分隔、不是逗號；SQLScript 的 JOIN ON 條件**必須**明寫 MANDT（跟 Open SQL JOIN ON 條件**不能**寫 MANDT 正好相反，兩者都指向「Client 處理自動化在哪一層」這個核心對照） | 對照 REST rs05 的 WHERE 條件組合手法；呼應 `.claude/rules/sap-adt-mcp.md` 第 10 節 Open SQL JOIN 限制 | 已驗收 |
 | am05 | 錯誤處理與例外 | SQLScript `RAISE_APPLICATION_ERROR`、AMDP 端例外類別 `CX_AMDP_ERROR` 的攔截與轉換、AMDP 沒辦法呼叫回 ABAP（單向限制) | 承 OOP op09 例外類別設計 | 未出題 |
 | am06 | AMDP 除錯與資料預覽 | ADT 內建 AMDP Debugger 操作、Data Preview for AMDP、基本執行效能觀察（不深入 PlanViz） | — | 未出題 |
 | am07 | CDS Table Function：AMDP 的另一個身分 | `DEFINE TABLE FUNCTION ... AS SELECT FROM` 搭配 AMDP 實作、跟一般 CDS View 的差異（Table Function 可以塞任意 SQLScript 邏輯，View 只能宣告式查詢）、Association 限制 | 呼應 RAP/CDS 討論的技術背景 | 未出題 |
