@@ -1,6 +1,6 @@
 # SAP ABAP AMDP／SQLScript／Code-to-Data 課程
 
-REST 課程（`src/ABAP_Training_REST/`，rs01–rs11）之後的下一階段候選之一。課綱草案（2026-07-19），am01～am08 已出題並驗收（2026-07-19），其餘題目待逐題出題。
+REST 課程（`src/ABAP_Training_REST/`，rs01–rs11）之後的下一階段候選之一。課綱草案（2026-07-19），**am01～am09 全部出題完成（2026-07-19），am09 期末整合待使用者驗收**。
 
 ## 課程定位
 
@@ -14,7 +14,7 @@ REST 課程（`src/ABAP_Training_REST/`，rs01–rs11）之後的下一階段候
 
 - 每題三件套：題目 `amNN_主題.md` + PDF 講義（`node tools/md2pdf.js src/ABAP_Training_AMDP`）+ 答案快照
 - 每題 md 開頭（`## 學習目標` 之前）要有 `## Lecture` 完整背景知識講解，延續 REST 課程 rs07 起養成的慣例
-- 答案物件命名：AMDP 本質上還是 ABAP 類別＋方法（用 `BY DATABASE PROCEDURE` 宣告），沿用 `ZCL_AMnn_*`；牽涉到 CDS Table Function 的題目另外命名 DDL Source（暫定 `Z_AM_TF_nn`，實際命名視 CDS 物件慣例確認），套件 `$TMP`
+- 答案物件命名：AMDP 本質上還是 ABAP 類別＋方法（`BY DATABASE PROCEDURE` 或 `BY DATABASE FUNCTION`），沿用 `ZCL_AMnn_*`；CDS Table Function 的 DDL Source 命名為 `ZTF_AMnn_*`（am07 起實測確認），套件 `$TMP`
 - 資料模型：優先沿用 SCARR/SFLIGHT/SBOOK 航班模型（跟 OOP/REST 一致），除非某題需要更大量測試資料才能看出 Code-to-Data 的效能差異，才考慮換模型或造測試資料
 
 ## 課綱（草案，待確認與逐題出題）
@@ -29,7 +29,7 @@ REST 課程（`src/ABAP_Training_REST/`，rs01–rs11）之後的下一階段候
 | am06 | AMDP 除錯與資料預覽 | `ZR_AM06_DEMO`：重用 am04 已驗證的 AMDP 方法，改用**經典 ALV**（`REUSE_ALV_GRID_DISPLAY` Function Module，手動組 `IT_FIELDCAT`）呈現結果，對照 op11/am02 教過的 `cl_salv_table`（Functional ALV，靠型別反射自動產生欄位目錄）兩種世代的差異；Eclipse ADT 內建 AMDP Debugger 操作步驟（本題唯一需要使用者在 Eclipse 手動操作，Claude 端無法自動驗證）、Data Preview 快速查資料現況 | — | 已驗收 |
 | am07 | CDS Table Function：AMDP 的另一個身分 | `ZTF_AM07_ROUTE_STATS` + `ZCL_AM07_ROUTE_STATS`：把 am04 的航線載客率邏輯包成 CDS Table Function，`ZR_AM07_DEMO` 純 Open SQL `SELECT FROM` 查詢（完全不呼叫 AMDP Method）；**實測三個坑**：`returns` 結構須有 `abap.clnt` 型別欄位放第一位（底層 Client 相關表會被要求）、`FOR TABLE FUNCTION` 只能寫在 CLASS DEFINITION 不能寫在 IMPLEMENTATION、實作方法要用 `BY DATABASE FUNCTION` 不是 `BY DATABASE PROCEDURE`；**關鍵發現**：包成 Table Function 後透過 Open SQL 查詢會自動做 Client 過濾（26 筆跟 am04 一致），是 am01「AMDP 不自動處理 Client」教訓的重要例外 | 呼應 RAP/CDS 討論的技術背景 | 已驗收 |
 | am08 | Code-to-Data 實戰改寫 | `ZCL_AM08_REVENUE_CLASSIC`（改寫前：SELECT+LOOP 逐筆算營收，沿用 op12 航班營收模型）vs `ZCL_AM08_FLIGHT_REVENUE`（改寫後：AMDP 一次 SELECT 內建 CAST 計算），`ZR_AM08_DEMO` 用 `GET RUN TIME FIELD` 比對兩者筆數/總營收/耗時；**關鍵發現**：AMDP 第一次呼叫因執行計畫編譯耗時 208ms（比 ABAP 版 33ms 慢），後續呼叫降到 2~13ms（比 ABAP 版更快）——Code-to-Data 不是無條件更快，要考慮呼叫頻率與資料量 | 對照 OOP op12 報表重構的定位 | 已驗收 |
-| am09（期末整合） | 綜合實作：分析型報表用 AMDP + CDS Table Function 呈現 | 整合 am01~am08，一支完整報表用 AMDP 處理聚合統計、CDS Table Function 包裝、ABAP 端只做呈現層 | 對照 REST rs09 期末整合的收斂角色 | 未出題 |
+| am09（期末整合） | 綜合實作：分析型報表用 AMDP + CDS Table Function 呈現 | `ZTF_AM09_CARRIER_STATS`＋`ZCL_AM09_CARRIER_STATS`：兩層 CTE（先依航線彙總，再捲成依公司彙總），整合 am04（JOIN/聚合）+ am07（Table Function）+ am08（營收計算）；`ZR_AM09_CAPSTONE` 純 Open SQL + `cl_salv_table`，完全沒有業務邏輯；**驗證方式**：拿 am04/am08 已驗證過的細顆粒度數字手動加總，跟這題公司層級彙總結果交叉核對，LH 的 route_cnt/total_flights/seats_occ/seats_max/total_revenue 全部吻合 | 對照 REST rs09 期末整合的收斂角色 | 待使用者確認（已用 programrun API 驗證資料邏輯，與 am04/am08 交叉核對一致；ALV 畫面待 SAP GUI 確認） |
 
 ## 不碰的範圍（明確排除）
 
