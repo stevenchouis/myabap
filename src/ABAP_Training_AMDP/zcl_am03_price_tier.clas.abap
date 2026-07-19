@@ -27,6 +27,15 @@ CLASS zcl_am03_price_tier DEFINITION
         VALUE(ev_medium_cnt) TYPE i
         VALUE(ev_high_cnt)   TYPE i.
 
+    CLASS-METHODS classify_flight_prices_while
+      IMPORTING
+        VALUE(iv_mandt)      TYPE mandt
+        VALUE(iv_carrid)     TYPE s_carr_id
+      EXPORTING
+        VALUE(ev_low_cnt)    TYPE i
+        VALUE(ev_medium_cnt) TYPE i
+        VALUE(ev_high_cnt)   TYPE i.
+
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -68,6 +77,51 @@ CLASS zcl_am03_price_tier IMPLEMENTATION.
         lv_high_cnt := lv_high_cnt + 1;
       END IF;
     END FOR;
+
+    ev_low_cnt    := lv_low_cnt;
+    ev_medium_cnt := lv_medium_cnt;
+    ev_high_cnt   := lv_high_cnt;
+
+  ENDMETHOD.
+
+  METHOD classify_flight_prices_while BY DATABASE PROCEDURE
+    FOR HDB LANGUAGE SQLSCRIPT
+    OPTIONS READ-ONLY
+    USING sflight.
+
+    DECLARE lv_low_cnt    INTEGER := 0;
+    DECLARE lv_medium_cnt INTEGER := 0;
+    DECLARE lv_high_cnt   INTEGER := 0;
+    DECLARE lv_price      DECIMAL(15,2);
+    DECLARE lv_idx        INTEGER := 0;
+    DECLARE lv_total      INTEGER;
+
+    DECLARE CURSOR cur_prices FOR
+      SELECT price FROM sflight
+       WHERE mandt = :iv_mandt AND carrid = :iv_carrid;
+
+    SELECT COUNT(*) INTO lv_total FROM sflight
+     WHERE mandt = :iv_mandt AND carrid = :iv_carrid;
+
+    OPEN cur_prices;
+
+    -- lv_idx increments every loop; bounded by lv_total (a fixed count
+    -- computed up front), so this loop is guaranteed to terminate.
+    WHILE lv_idx < lv_total DO
+      FETCH cur_prices INTO lv_price;
+
+      IF lv_price < 300 THEN
+        lv_low_cnt := lv_low_cnt + 1;
+      ELSEIF lv_price < 700 THEN
+        lv_medium_cnt := lv_medium_cnt + 1;
+      ELSE
+        lv_high_cnt := lv_high_cnt + 1;
+      END IF;
+
+      lv_idx := lv_idx + 1;
+    END WHILE;
+
+    CLOSE cur_prices;
 
     ev_low_cnt    := lv_low_cnt;
     ev_medium_cnt := lv_medium_cnt;
