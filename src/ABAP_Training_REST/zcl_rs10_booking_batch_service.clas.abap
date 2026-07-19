@@ -13,6 +13,7 @@ CLASS zcl_rs10_booking_batch_service DEFINITION
              customid TYPE s_customer,
              class    TYPE s_class,
              passname TYPE s_passname,
+             counter  TYPE s_countnum,
            END OF ty_request,
 
            tt_request TYPE STANDARD TABLE OF ty_request WITH EMPTY KEY,
@@ -71,6 +72,9 @@ CLASS zcl_rs10_booking_batch_service IMPLEMENTATION.
       ls_booking_data-customerid = ls_request-customid.
       ls_booking_data-class      = ls_request-class.
       ls_booking_data-passname   = ls_request-passname.
+* BAPI 的業務規則：一筆訂位一定要透過「櫃台」或「旅行社」其中一種通路成立，
+* 兩者都不填會被 BAPI 拒絕（"No travel agency or counter passed"），這裡固定走櫃台通路
+      ls_booking_data-counter    = ls_request-counter.
 
       CALL FUNCTION 'BAPI_FLBOOKING_CREATEFROMDATA'
         EXPORTING

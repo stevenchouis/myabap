@@ -38,6 +38,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
             customid TYPE s_customer,
             class    TYPE s_class,
             passname TYPE s_passname,
+            counter  TYPE s_countnum,"訂位一定要透過櫃台或旅行社成立，這裡固定走櫃台通路
           END OF ty_request,
           tt_request TYPE STANDARD TABLE OF ty_request WITH EMPTY KEY,
 
@@ -94,6 +95,8 @@ ADT 端物件已由課程準備好（`$TMP`）：
        ls_booking_data-customerid = ls_request-customid.
        ls_booking_data-class      = ls_request-class.
        ls_booking_data-passname   = ls_request-passname.
+* 業務規則：訂位一定要透過「櫃台」或「旅行社」其中一種通路成立，兩者都不填 BAPI 會拒絕
+       ls_booking_data-counter    = ls_request-counter.
 
        CALL FUNCTION 'BAPI_FLBOOKING_CREATEFROMDATA'
          EXPORTING
@@ -146,10 +149,12 @@ ADT 端物件已由課程準備好（`$TMP`）：
 4. 用 `SPROX_HTTP_REQUEST` 測試（**URL 一律填完整網址**）：`POST http://<主機>:<port>/sap/bc/zrest_training/rs10/bookings/batch?sap-client=130`，Req. Body（混合一筆會成功、一筆會失敗的示範，客戶 id 先用 SE16 查一筆 `SCUSTOM` 真實存在的 `ID`）：
    ```json
    [
-     {"carrid":"LH","connid":400,"fldate":"20190104","customid":"00000001","class":"Y","passname":"Mickey Mouse"},
-     {"carrid":"ZZ","connid":400,"fldate":"20190104","customid":"00000001","class":"Y","passname":"Donald Duck"}
+     {"carrid":"LH","connid":400,"fldate":"20270101","customid":"00000001","class":"Y","passname":"Mickey Mouse","counter":"00000001"},
+     {"carrid":"ZZ","connid":400,"fldate":"20270101","customid":"00000001","class":"Y","passname":"Donald Duck","counter":"00000001"}
    ]
    ```
+   - **`fldate` 一定要用未來日期**：這個系統的 `SFLIGHT` 訓練資料整張表最新只到 `2019-10-19`，`BAPI_FLBOOKING_CREATEFROMDATA` 會檢查航班日期不能是過去，用歷史日期一定會被拒絕（`Flight date ... is in the past`）；`carrid`/`connid`/`fldate` 這組鍵值如果資料庫裡還沒有，要先用 rs06 的 `POST /flights` 建一筆（航線 `connid` 沿用既有的即可，只是換一個未來 `fldate`）
+   - **`counter`（櫃台代碼）是必填**：`BAPISBONEW` 結構的業務規則是「訂位一定要透過櫃台或旅行社其中一種通路成立」，兩者都不填會被 BAPI 拒絕（`No travel agency or counter passed`）；`00000001` 是這系統裡 `LH` 確認存在的櫃台代碼（`SCOUNTER` 查證），若要用其他航空公司要另外查一組有效的 `counter`
    - 確認回應是 `200`，Body 是一個陣列，第一筆 `success:true` 帶著新的 `bookid`，第二筆 `success:false`（`carrid=ZZ` 不是合法航空公司）帶著 BAPI 給的錯誤訊息
    - 用 SE16/rs09 的 GET 端點驗證第一筆真的寫進 `SBOOK` 了、第二筆沒有
    - 送一個空陣列 `[]`，確認回 `400` + `{"errorCode":"VALIDATION_FAILED",...}`
@@ -160,8 +165,8 @@ ADT 端物件已由課程準備好（`$TMP`）：
 
 ```json
 [
-  {"index":0,"success":true,"carrid":"LH","connid":400,"fldate":"2019-01-04","bookid":<bookid>,"message":"訂位建立成功"},
-  {"index":1,"success":false,"carrid":"ZZ","connid":400,"fldate":"2019-01-04","bookid":0,"message":"<BAPI 回傳的錯誤訊息文字>"}
+  {"index":0,"success":true,"carrid":"LH","connid":400,"fldate":"2027-01-01","bookid":<bookid>,"message":"訂位建立成功"},
+  {"index":1,"success":false,"carrid":"ZZ","connid":400,"fldate":"2027-01-01","bookid":0,"message":"<BAPI 回傳的錯誤訊息文字>"}
 ]
 ```
 
@@ -177,6 +182,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
 - **`BAPI_TRANSACTION_COMMIT` 只在最外層呼叫一次**是這題最重要的紀律：如果在 `LOOP` 裡面每筆都呼叫一次 `COMMIT`，會失去「先跑完整批、確認狀況、再決定要不要送出」的彈性（雖然這題目前的設計是不管前面結果如何都繼續跑完整批，但只在最後統一 COMMIT 的寫法，為將來想加上「超過 N 筆失敗就整批 ROLLBACK」這類規則留了修改空間）
 - `BAPIRET2` 的 `MESSAGE` 欄位是組好的完整訊息文字（不需要再查訊息類別/訊息號自己組字串），這是 BAPI 慣例的好處之一——呼叫端不用知道訊息背後的 T100 訊息類別結構，直接顯示 `MESSAGE` 欄位就是一句完整、人類看得懂的話
 - 這題沒有像 rs06/rs09 那樣自己寫 `SELECT SINGLE ... FROM sflight`/`scustom` 驗證外鍵——**因為 BAPI 自己會做這些檢查**，這正是呼叫 BAPI 比自己重寫驗證邏輯的好處，不用重複造輪子
+- **這題最早的版本沒有 `counter` 欄位，SICF 實測時才發現 `BAPISBONEW` 有「訂位必須透過櫃台或旅行社」的隱性業務規則**（BAPI 回 `No travel agency or counter passed`）——這正好示範了 BAPI 業務規則檢查「藏」在介面背後、光看 IMPORTING/TABLES 簽章不一定看得出所有必填的隱性條件，只有實際呼叫過（或查閱 SCOUNTER/STRAVELAG 這類關聯 customizing 表）才會發現；這也是為什麼 rs11 特別把 BAPI 的 `TESTRUN` 機制暴露成 API 參數——先小規模測試、看 `RETURN` 訊息，是面對這類複雜 BAPI 介面最務實的除錯方式，比光看程式碼推敲更可靠
 
 ## 思考題
 

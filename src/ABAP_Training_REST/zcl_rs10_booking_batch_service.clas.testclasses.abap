@@ -15,7 +15,7 @@ CLASS ltc_validate_requests IMPLEMENTATION.
   METHOD non_empty_passes.
 *   given：至少一筆
     DATA(lt_requests) = VALUE zcl_rs10_booking_batch_service=>tt_request(
-      ( carrid = 'LH' connid = '0400' fldate = '20190104' customid = '00000001' class = 'Y' passname = 'Mickey Mouse' ) ).
+      ( carrid = 'LH' connid = '0400' fldate = '20190104' customid = '00000001' class = 'Y' passname = 'Mickey Mouse' counter = '00000001' ) ).
 
 *   when/then：不應該拋出例外
     zcl_rs10_booking_batch_service=>validate_requests( lt_requests ).

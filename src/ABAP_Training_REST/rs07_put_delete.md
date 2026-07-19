@@ -234,7 +234,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
      ```
    - **PUT/GET 查無資源（`404`）**：`.../rs07/flights/LH/400/20991231`（這組鍵值資料庫裡不存在）
    - **`fldate` 格式錯誤（`400`）**：`.../rs07/flights/LH/400/abcd`（`fldate` 不是合法的 8 碼數字）
-   - **DELETE 成功（`204`）**：`.../rs07/flights/AA/17/20260101`（這是 rs06 練習時建立的那筆資料，如果還在就會刪成功；如果之前已經手動清理過，這步驟會回 `404`，正好用來驗證「查無資源」的路徑，兩種結果都是合理的教學示範），HTTP Method **DELETE**，不用填 Req. Body
+   - **DELETE 成功（`204`）**：`.../rs07/flights/AA/17/20180927`，HTTP Method **DELETE**，不用填 Req. Body。**`SPROX_HTTP_REQUEST` 這支標準程式沒有 DELETE 選項**（只有 POST/PUT/GET/HEAD 等），實測改用使用者自建的 ABAP 客戶端程式（`ZTEST_HTTP_DELETE`）發送，一樣是完整網址＋`sap-client=130`
    - **DELETE 後再驗證**：對同一個 URL 再 GET 一次，確認回 `404`；如果對同一筆再 DELETE 一次，也會是 `404`（示範 `DELETE` 的冪等語意：刪過的東西再刪一次，資源「不存在」這個最終狀態沒有改變，只是狀態碼從 `204` 變成 `404`）
 
 ## 預期輸出（範例）
@@ -269,7 +269,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
 {"errorCode":"INVALID_DATE","message":"fldate 格式不正確，必須是 8 碼數字（YYYYMMDD）"}
 ```
 
-`DELETE .../flights/AA/17/20260101`：HTTP 狀態碼 `204`，Response Body 空白。
+`DELETE .../flights/AA/17/20180927`：HTTP 狀態碼 `204`，Response Body 空白（2026-07-13 使用者用 `ZTEST_HTTP_DELETE` 實測確認，之後 `GET` 同一筆回 `404`）。
 
 ## 團隊實務備註
 
