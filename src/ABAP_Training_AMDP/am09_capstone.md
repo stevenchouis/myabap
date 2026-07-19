@@ -108,9 +108,23 @@ ADT 端物件已由課程準備好（`$TMP`）：
          r_salv_table = DATA(lo_alv)
        CHANGING
          t_table      = lt_stats ).
-     lo_alv->get_columns( )->set_optimize( abap_true ).
+
+     DATA(lo_columns) = lo_alv->get_columns( ).
+     lo_columns->set_optimize( abap_true ).
+
+     lo_columns->get_column( 'CARRID' )->set_medium_text( 'Carrier' ).
+     lo_columns->get_column( 'CARRNAME' )->set_medium_text( 'Airline' ).
+     lo_columns->get_column( 'ROUTE_CNT' )->set_medium_text( 'Routes' ).
+     lo_columns->get_column( 'TOTAL_FLIGHTS' )->set_medium_text( 'Flights' ).
+     lo_columns->get_column( 'TOTAL_SEATS_OCC' )->set_medium_text( 'Seats Occ.' ).
+     lo_columns->get_column( 'TOTAL_SEATS_MAX' )->set_medium_text( 'Seats Max' ).
+     lo_columns->get_column( 'LOAD_PCT' )->set_medium_text( 'Load %' ).
+     lo_columns->get_column( 'TOTAL_REVENUE' )->set_medium_text( 'Revenue' ).
+
      lo_alv->display( ).
    ```
+
+   **實測踩坑：一開始沒有手動設欄位標題，SAP GUI 實際執行後發現除了 `CARRID`／`CARRNAME` 兩欄有正常標題（`Carrier`／`Airline`）之外，其餘欄位（`ROUTE_CNT`／`TOTAL_FLIGHTS`／...）標題全部空白**：`cl_salv_table` 的欄位標題預設是靠 RTTI（執行期型別反射）去讀取每個欄位背後對應的 Data Element 說明文字自動生成——`carrid`/`carrname` 因為在 CDS 裡引用的是 `s_carr_id`/`s_carrname` 這兩個既有 Data Element（本身就帶著中/英文欄位說明），所以標題正常帶出來；但 `ZTF_AM09_CARRIER_STATS` 的 `route_cnt`/`total_flights`/... 這幾個彙總欄位，`returns` 結構裡直接用 `abap.int4`/`abap.dec(...)` 這種**內建型別**宣告（沒有另外建 Data Element），完全沒有欄位說明文字可以讓 RTTI 抓，所以標題是空的。修正方式：用 `get_columns( )->get_column( '<欄位名>' )->set_medium_text( '<標題>' )` 手動幫每一欄補標題——這跟 am06 手動組 `IT_FIELDCAT` 遇到的根本問題是同一件事（欄位沒有對應 Data Element、ALV 就沒有現成的標題可用），只是這裡用的是 `cl_salv_table` 的欄位物件 API，不是經典 ALV 的欄位目錄表格。
 
 ## 預期輸出（實測畫面，8 家有航班紀錄的航空公司）
 
