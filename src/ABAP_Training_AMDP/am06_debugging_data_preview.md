@@ -18,7 +18,7 @@
 
 ADT 端物件已由課程準備好（`$TMP`）：
 
-- `ZR_AM06_DEMO`——demo 程式，呼叫 am04 已經驗證過的 `ZCL_AM04_ROUTE_LOAD=>GET_ROUTE_LOAD_FACTOR`，用 `cl_salv_table` 顯示結果——**這題沒有新的 AMDP 類別**，刻意重用 am04 已驗證正確的方法，讓這題可以專心練習「怎麼在 Eclipse 里對一個既有的 AMDP 呼叫設中斷點」，不用同時應付新的 SQLScript 語法
+- `ZR_AM06_DEMO`——demo 程式，呼叫 am04 已經驗證過的 `ZCL_AM04_ROUTE_LOAD=>GET_ROUTE_LOAD_FACTOR`，用**經典 ALV Function Module** `REUSE_ALV_GRID_DISPLAY` 顯示結果——**這題沒有新的 AMDP 類別**，刻意重用 am04 已驗證正確的方法，讓這題可以專心練習「怎麼在 Eclipse 里對一個既有的 AMDP 呼叫設中斷點」，不用同時應付新的 SQLScript 語法
 
 ## 題目需求
 
@@ -35,16 +35,39 @@ ADT 端物件已由課程準備好（`$TMP`）：
        IMPORTING
          et_routes = DATA(lt_routes) ).
 
-     cl_salv_table=>factory(
-       IMPORTING
-         r_salv_table = DATA(lo_alv)
-       CHANGING
-         t_table      = lt_routes ).
-     lo_alv->get_columns( )->set_optimize( abap_true ).
-     lo_alv->display( ).
+     DATA: lt_fieldcat TYPE slis_t_fieldcat_alv,
+           ls_fieldcat TYPE slis_fieldcat_alv.
+
+     DEFINE add_fieldcat.
+       CLEAR ls_fieldcat.
+       ls_fieldcat-fieldname = &1.
+       ls_fieldcat-seltext_m = &2.
+       ls_fieldcat-outputlen = &3.
+       APPEND ls_fieldcat TO lt_fieldcat.
+     END-OF-DEFINITION.
+
+     add_fieldcat: 'CARRID'     'Carrier'      3,
+                   'CARRNAME'   'Carrier Name' 20,
+                   'CONNID'     'Connection'   4,
+                   'FLIGHT_CNT' 'Flights'      6,
+                   'SEATS_OCC'  'Seats Occ.'   8,
+                   'SEATS_MAX'  'Seats Max'    8,
+                   'LOAD_PCT'   'Load %'       6.
+
+     CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+       EXPORTING
+         i_callback_program = sy-repid
+         it_fieldcat        = lt_fieldcat
+       TABLES
+         t_outtab           = lt_routes.
    ```
 
-   這題的輸出改用 **Functional ALV**（`cl_salv_table`，承 OOP op11／am02），不是 `WRITE`——從這題開始，後續幾題只要有適合展示成表格的結果，都優先用這個方式呈現，`WRITE` 保留給純粹的除錯輸出或不需要表格排版的情境。
+   這題的輸出改用**經典 ALV**（`REUSE_ALV_GRID_DISPLAY` 這個標準 Function Module），跟 am02/am06 草稿階段原本用的 `cl_salv_table`（Functional ALV，承 OOP op11）是兩種不同世代的 ALV API：
+
+   - **`cl_salv_table`（Functional/OO ALV）**：`FACTORY( )` 靜態工廠方法建立物件，欄位資訊自動從 Internal Table 的執行期型別（RTTI）推導，不用手動組欄位目錄，是 SAP 目前推薦的寫法（op11 教過）
+   - **`REUSE_ALV_GRID_DISPLAY`（經典 ALV）**：年代更久、大量存在於既有系統的舊程式碼裡，因為這題的 `lt_routes` 是 AMDP 方法裡宣告的**本地 TYPES**（不是 DDIC 註冊過的結構），沒辦法用 `I_STRUCTURE_NAME` 參數自動產生欄位目錄，**要手動組一份 `IT_FIELDCAT`**（`SLIS_T_FIELDCAT_ALV` 表格，每個欄位手動指定 `FIELDNAME`/`SELTEXT_M`/`OUTPUTLEN`）——這是這題特別想讓你對照的地方：Functional ALV 靠型別反射自動化掉的事情，經典 ALV 要自己動手做
+
+   兩者都能正常顯示 AMDP 回傳的 Internal Table，選哪一種純粹是程式碼世代/團隊慣例的差異，不影響跟 AMDP 的整合方式。
 
 2. **在 Eclipse ADT 裡實際操作 AMDP Debugger（本題唯一需要你在 Eclipse 手動操作的步驟）**：
 
@@ -67,6 +90,8 @@ AMDP Debugger 的畫面效果需要你在 Eclipse 實際操作才能看到——
 ## 團隊實務備註
 
 - **這題是這門課第一次「本體程式碼」沒有新東西、純粹練習工具操作**——`ZR_AM06_DEMO` 呼叫的 AMDP 方法完全沿用 am04，這是刻意的：除錯工具的練習不應該同時綁著「還要弄懂新語法」，用一個已經確定正確的例子來練習「怎麼觀察它的執行過程」，學習效果比較純粹
+- **`REUSE_ALV_GRID_DISPLAY` 這種會產生全螢幕 ALV Grid 畫面的呼叫，一樣沒辦法透過 ADT 的無頭 `programrun` API 自動驗證**——跟 am02 遇到的 `cl_salv_table->display( )` 是同一種限制（都需要真實 GUI 前端），這題只驗證到「語法檢查/啟用成功、`lt_routes` 資料邏輯沿用 am04 已驗證正確」，實際 ALV 畫面效果一樣要你在 SAP GUI 執行 `ZR_AM06_DEMO`（F8）親眼確認
+- **手動組 `IT_FIELDCAT` 時 `OUTPUTLEN` 沒設或設太小，欄位內容可能被截斷顯示**——這題的 `CARRNAME`（航空公司全名，最長 20 字元）特別給了 `OUTPUTLEN = 20`，如果沿用其他欄位的短長度，畫面上長公司名稱可能顯示不全，這是手動組欄位目錄時容易漏掉的細節（`cl_salv_table` 因為有型別反射，通常不會有這個問題）
 - **AMDP Debugger 需要的權限，通常跟一般 ABAP 除錯權限（`S_DEVELOP` 之類）不完全一樣**，如果 Eclipse 沒有跳出 AMDP Debugger 的提示，第一個該檢查的不是程式碼有沒有問題，而是使用者權限——這是一個常見的「明明步驟做對了，但工具沒反應」的踩坑點，只是這次沒有在開發過程中實際踩到（因為 Claude 端沒有 Eclipse GUI 環境可以測試這一段），如果你在 SAP GUI/Eclipse 操作時遇到跳不出偵錯畫面，優先確認權限而不是懷疑自己操作錯誤
 - Data Preview 這個技巧不限於 AMDP 相關的表，前面所有課程（REST/OOP）用到的 `SFLIGHT`/`SCARR`/`SBOOK` 都可以用同樣方式快速預覽，開發時比自己寫一支 `SELECT` 程式再執行快很多
 
