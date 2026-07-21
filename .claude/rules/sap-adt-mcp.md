@@ -192,6 +192,22 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **`sap_activate` 工具回 `{"success":false,"messages":[]}` 不代表真的失敗**：本節踩到 `CASE = (UPPER)` 這個錯誤時，`sap_activate` 只回空陣列（延續第 9 節記載的「這個工具對 CLAS/INTF/PROG 一律回失敗、訊息通常是空的」的已知限制），實際錯誤內容是從**下一次 `sap_set_source`** 的 `activationError` 欄位才看到完整訊息（`HTTP 403` 或實際的編譯錯誤文字）。修正後重新 `sap_set_source` → `sap_lock`→`sap_unlock` 清鎖 → `sap_activate`，`sap_activate` 一樣回空陣列，這時要改用第 4 節的 `checkruns` API 或 `sap_inactive_objects`（回傳空清單代表沒有殘留未啟用版本）才能真正確認啟用成功，不能只看 `sap_activate` 的回應。
 - **`programrun` 無頭執行 API 要用 `POST`，不是 `GET`**：`GET /sap/bc/adt/programs/programrun/<程式>` 會回 400/`ExceptionMethodNotSupported`（`Resource controller does not support method GET`）；換成 `POST` 同一個 URL（不帶 body，帶 `x-csrf-token` 與已建立 session 的 cookie）才會實際執行程式並把 Classical List 輸出以純文字回傳。第 16 節記載的「`cl_salv_table`/`REUSE_ALV_GRID_DISPLAY` 沒辦法用 `programrun` 驗證」限制依然成立，這裡補上的是「純 `WRITE` 輸出的程式該怎麼正確呼叫這支 API」。
 
+## 18. `CALL FUNCTION` 不支援 inline `DATA(...)` 宣告、classic FM 的 `VALUE()` 參數在例外路徑會被清空、`datapreview/freestyle` 可以下真正的 WHERE 條件（2026-07-21 實測，Interface 課程 if05）
+
+- **`CALL FUNCTION ... IMPORTING xxx = DATA(lv_yyy)` 語法不合法**：`inline` 宣告（`DATA(...)`）只有 Method 呼叫（`CALL METHOD`／函數式呼叫）支援，`CALL FUNCTION` 的 `EXPORTING`/`IMPORTING`/`TABLES`/`CHANGING` 一律要用**事先宣告好的變數**，啟用時報 `The inline declaration "DATA(LV_YYY)" is not possible in this position.`＋`Field "LV_YYY" is unknown.`（兩則訊息同時出現）。這跟 Method 呼叫可以自由用 `DATA(...)` 是明確的語法差異，容易在把 Method 呼叫的寫作習慣帶進 `CALL FUNCTION` 時踩到。
+- **classic Function Module 用 `VALUE()` 宣告的 `EXPORTING` 參數，若該次呼叫因為 `EXCEPTIONS` 對應的例外被 `RAISE` 而提前結束，呼叫端變數還是會被覆寫成 FM 內部那個尚未賦值的空白值，不會維持呼叫前的原值**：這點違反直覺（很多人以為「例外路徑不會動到 EXPORTING 參數」），實測案例是標準 FM `FORMAT_MESSAGE`（`ID`/`NO`/`V1~V4` 找不到對應 `T100` 列時 `RAISE NOT_FOUND`，此時 `EXPORTING VALUE(MSG)` 仍會把呼叫端變數蓋成空白）——**正確寫法是呼叫後明確用 `sy-subrc` 判斷成敗，成功才把輸出參數的值採用，不要依賴「呼叫前先塞一個 fallback 值、指望例外路徑不覆寫它」這種寫法**（`ZCL_IF05_BDC_RUNNER=>format_messages` 一開始就是這樣寫錯，被 ABAP Unit 測試抓到才修正）。
+- **驗證「某個訊息類別/號碼在 T100 是否存在」不要用猜的**：意外發現 `00`/`999` 在這套系統真的有資料（`Table extension for compression successful`），代表訊息類別 `00` 幾乎整個 001~999 號碼區間都填滿了，不能假設「隨便挑一個大號碼」就一定不存在。
+- **`/sap/bc/adt/datapreview/freestyle` 這支端點可以直接下帶 `WHERE` 條件的 Open SQL `SELECT`**，比第 10 節記載的 `/sap/bc/adt/datapreview/ddic/<TABLE>` 好用（那支只能整表撈前 N 筆，不能篩選）：
+
+  ```bash
+  curl -b "$JAR" -H "x-csrf-token: ADT-RFC-BRIDGE" \
+    -H 'Accept: application/vnd.sap.adt.datapreview.table.v1+xml' \
+    -X POST 'http://127.0.0.1:8410/sap/bc/adt/datapreview/freestyle?rowNumber=20&sap-client=130' \
+    --data-binary "SELECT ARBGB, MSGNR, TEXT FROM T100 WHERE ARBGB = '00' AND SPRSL = 'E' AND MSGNR = '999'"
+  ```
+
+  回應的 `dataPreview:totalRows` 可以直接拿來確認「這個條件到底有沒有資料」（例如驗證 `ARBGB = 'ZZ'` 真的 0 筆），比自己另外寫一支查詢程式再用 `programrun` 執行更快，之後需要「查一筆資料存不存在」都優先用這支。
+
 ## 匯出 SAP 原始碼到 src/ 的慣例
 
 - 檔名採 abapGit 格式：`<物件名小寫>.<類型>.abap`（如 `zdqm0001.prog.abap`；INCLUDE 也是 `.prog.abap`）。
