@@ -240,6 +240,8 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **確認 `ZX` 開頭 Include 的正確生成方式**：`CMOD` 建 Enhancement Project、Assign Enhancement 之後，**雙擊 Project 底下想用的 Component（如 `EXIT_SAPLV01Z_001`）進去編輯一次，系統會自動生成該 Include 的骨架**（本例 `ZXVBZU01` 就是這樣生出來的，落在套件 `$TMP`，不需要傳輸請求；同一個 Enhancement 底下若有的 Component 早就被生成過如 `ZXVBZU02`，雙擊只是直接開啟既有內容）。生成後 Claude 就能正常用 `sap_get_source`/`sap_set_source` 讀寫，不用再嘗試第 6 節記載會被拒絕的 ADT Include 建立 API。
 - **⚠️ 更正（使用者澄清）：Classic Function Exit 的 Include 原始碼寫好＋用 ADT 啟用，不代表這個 Enhancement 真的生效**——`ZXVBZU02` 這次雖然透過 ADT 寫入並啟用成功（`sap_inactive_objects` 回空），但這只代表**原始碼存在系統裡**；Enhancement 要真的運作，必須在 `CMOD` 完整跑過一次：① 建 Enhancement Project ② Assign 對應的 Enhancement（本例 `SAPLV01Z`）③ Activate Project——這一步才是真正讓 Function Group 載入新程式碼的開關，沒做的話即使原始碼已經在系統裡，實際執行的還是舊版本（或完全沒執行到這段程式碼）。本檔先前的推論（第 20 節「CMOD 專案指派是 GUI-only，但程式碼內容可能是 Claude 能自動讀寫的」）**只在「能不能寫入原始碼」這件事上成立，不代表寫完就等於生效**——CMOD 的 Project／Assign／Activate 三步驟一律是 GUI-only、且是 Enhancement 真正啟用的必要條件，不能省略也沒有 ADT API 可以做。
 
+- **`NUMBER_GET_NEXT` 取號是非交易性（non-transactional）的，號碼一定會跳號，這是設計如此不是 bug**（2026-07-29 實測，Enhancement 課程 en02，真實 MIGO Goods Receipt 端對端驗證）：驗證程式 `ZR_EN02_BATCH_DEMO` 測試消耗了 `ZEN02BAT` 的 `1`/`2`/`3` 號，之後使用者在 MIGO 操作過程中（可能按過 `Check` 或重試）又消耗了幾號，最終真正過帳成功的批號序號是 `4`，但事後查 `NRIV` 的 `NRLEVEL` 已經是 `10`——中間 `5`~`9` 永遠消失、不會回收。原因：Number Range 的取號動作不受資料庫交易 COMMIT/ROLLBACK 約束（效能考量，避免並行過帳互相鎖等待），只要程式邏輯執行到取號那一行，號碼就真的被領走，即使該筆交易最後失敗/取消也不會歸還。**用 Number Range Object 產生的任何編號（批號、單號……）天生會有缺號，不能拿來當「總共發生過幾筆交易」的計數依據**；如果業務有「單號必須連號」的法規要求（如某些國家的統一發票），Number Range Object 這套機制從根本上不適用，要用完全不同的交易性＋鎖定機制設計。
+
 ## 匯出 SAP 原始碼到 src/ 的慣例
 
 - 檔名採 abapGit 格式：`<物件名小寫>.<類型>.abap`（如 `zdqm0001.prog.abap`；INCLUDE 也是 `.prog.abap`）。
