@@ -16,30 +16,41 @@
 
 三者的參數幾乎一模一樣（`NR_RANGE_NR`／`OBJECT`預設`'BATCH_CLT'`／`SUBOBJECT`／`TOYEAR`），這證實了 en01 提到的現象不是特例：**SAP 在同一個擴充點上，把新舊技術疊在一起，不會因為有了新技術就砍掉舊的**，舊系統用 Classic User-Exit 寫的客製化，升版後照樣有效。
 
-**兩支 Function Exit 分工**：
+**Internal vs External：先搞懂這是給號「政策」，不是技術二選一**
 
-- **`EXIT_SAPLV01Z_001`**（Include `ZXVBZU01`）：在**取號之前**執行，`CHANGING` 參數可以把 `OBJECT`（預設 `'BATCH_CLT'`）、`NR_RANGE_NR`（預設 `'01'`）換成自己的 Number Range Object——決定「跟哪個號碼簿要號碼」
-- **`EXIT_SAPLV01Z_002`**（Include `ZXVBZU02`）：在**取號之後**執行，`CHANGING NEW_CHARG` 拿到剛取到的號碼、可以重新加工——決定「拿到號碼之後怎麼組成最終字串」
+Classic User-Exit `SAPLV01Z`（本題用的）只在**內部給號（Internal）**這條路徑上被呼叫；還有一個平行的 Enhancement **`SAPLV1ZE`**（說明：「CFCs for external batch number assignment」）專門服務**外部給號（External）**路徑。這兩者是 Customizing 設定（Batch Level／批號指派方式，依物料主檔/工廠層級決定，對應到程式裡看到的 `T156-CHNEU` 欄位），**同一個系統裡不同物料可以分別設定，不是全系統只能選一種**：
 
-本題**只用 `EXIT_SAPLV01Z_002`**：不去重導向 `OBJECT`（`EXIT_SAPLV01Z_001` 用的 Include `ZXVBZU01` 在這套系統裡還沒被生成過，且 `ZX` 開頭的 Include 有保留規則，無法用一般 ADT Include 建立 API 生出來，見下方「查證與踩坑記錄」），改成**直接在 `_002` 裡自己呼叫 `NUMBER_GET_NEXT` 對一個全新的、跟標準 `BATCH_CLT` 完全獨立的 Number Range Object 取號**，取到號碼後加工成最終格式、蓋掉 `NEW_CHARG`——效果相同，但完全不用碰 `_001`。
+- **Internal（本題情境）**：系統自己用 Number Range Object 產生批號，使用者不用輸入。適用於批號純粹是內部技術追蹤用途、沒有必要對應外部編號的情境——想要統一格式、避免人工輸入錯誤（我們的「日期+流水號」正是典型 Internal 場景）。
+- **External**：批號由使用者手動輸入、或從外部系統帶進來，SAP 不自動產生。最常見的理由是**收貨時要保留供應商自己的 Lot Number**（尤其食品/藥廠等法規要求可追溯性的產業，SAP 批號要跟供應商包裝上的 Lot Number 一致，才能做到完整追溯）、或透過 IDoc/EDI 從外部系統帶入既有批號、或品管人員要目視核對標籤後手動輸入。
 
-**⚠️ 更正：寫程式碼進 Include 並啟用，還不等於這個 Enhancement 真的生效**——這點原本（第一版教材）誤判了。Classic User-Exit 要真的運作，一定要走 **`CMOD`** 完整跑完：① 建一個 Enhancement Project（Project 名稱自訂）② 在 Project 裡 Assign Enhancement **`SAPLV01Z`**（畫面上會列出這個 Enhancement 底下的所有 Component，含 `EXIT_SAPLV01Z_001`/`_002`）③ 雙擊 `EXIT_SAPLV01Z_002` 進去編輯（畫面會带你到 `ZXVBZU02` 這個 Include，內容應該已經是我們寫好的程式碼）④ **Activate Project**——這一步才是真正的開關，沒做這步，就算 Include 原始碼已經在系統裡、也用 ADT 啟用過，Function Group 實際載入執行的版本還是不會反映這段程式碼。這是 GUI-only 步驟，`CMOD` 沒有 ADT API（見 `.claude/rules/sap-adt-mcp.md` 第 20 節），由使用者在 SAP GUI 操作，Claude 只能把 Include 內容準備好、驗證語法沒問題。
+**`EXIT_SAPLV01Z_001`／`_002` 正規分工**（本題兩支都已實作）：
+
+- **`EXIT_SAPLV01Z_001`**（Include `ZXVBZU01`）：在**取號之前**執行，`CHANGING` 參數可以把 `OBJECT`（預設 `'BATCH_CLT'`）、`NR_RANGE_NR`（預設 `'01'`）換成自己的 Number Range Object——決定「跟哪個號碼簿要號碼」。用在你想**換掉來源**的時候（例如不同工廠要用不同的 Number Range Object）。本題把 `OBJECT` 重導向成自建的 **`ZEN02BAT`**。
+- **`EXIT_SAPLV01Z_002`**（Include `ZXVBZU02`）：在**取號之後**執行，`CHANGING NEW_CHARG` 拿到剛取到的號碼（此時已經是從 `ZEN02BAT` 取出的 10 碼補零數字）、可以重新加工——決定「拿到號碼之後怎麼組成最終字串」。本題把它改成 `YYMMDD`+後4碼流水號。
+
+兩支合起來的效果：**`_001` 決定「用哪個號碼簿」，`_002` 決定「號碼長什麼樣子」**——分工單純、各司其職，比一開始把兩件事都塞進 `_002` 自己重新呼叫 `NUMBER_GET_NEXT` 的權宜寫法更貼近 SAP 原始設計意圖。
+
+**啟用步驟（Classic User-Exit 要真的生效，一定要走 `CMOD`）**：寫程式碼進 Include 並用 ADT 啟用，只代表**原始碼存在系統裡**，Function Group 實際載入執行的版本不會反映，直到走完整套 `CMOD` 流程：① 建 Enhancement Project（本題使用者建的是 **`ZBATCHNO`**）② Assign Enhancement **`SAPLV01Z`**（畫面上會列出這個 Enhancement 底下的所有 Component，含 `EXIT_SAPLV01Z_001`/`_002`）③ **雙擊每一個要用的 Component 進去編輯一次**——這一步除了打開 Include 給你看/改，第一次雙擊還會**觸發系統自動生成該 Include 的骨架**（本題 `ZXVBZU01` 就是這樣被生出來的，套件落在 `$TMP`；`ZXVBZU02` 因為 2023 年就已經被人生成過，直接看到內容）④ **Activate Project**——這才是真正的開關。這整套是 GUI-only 步驟，`CMOD` 沒有 ADT API（見 `.claude/rules/sap-adt-mcp.md` 第 20 節），由使用者在 SAP GUI 操作，Claude 只能把 Include 內容準備好、驗證語法沒問題。
 
 **Number Range Object（NROB）概念**：一個「號碼簿」，本身有名稱（如 `BATCH_CLT`）、一或多個「Interval（區間）」（用二字元代碼區分，如 `'01'`），每個 Interval 記錄 From／To／目前用到哪裡（`NRLEVEL`）。ABAP 呼叫 `NUMBER_GET_NEXT`（`EXPORTING nr_range_nr`／`object`／`IMPORTING number`）就能拿到「這個 Interval 目前的下一號」，系統自動處理並發（同時兩個人呼叫不會拿到同一號）。**⚠️這個工具本身完全沒有 ADT API**（跟 SM59/DBCO/SPAD/Search Help 同一類 GUI-only），只能在 **`SNRO`** 交易碼手動建立與維護 Interval；`NUMBER_GET_NEXT` 回傳的 `number` 一律是**10 碼、左邊補零的數字字串**，不管 Interval 本身定義的號碼位數是多少（本題已用真實執行結果驗證：`0000000001`／`0000000002`／`0000000003`）。
 
 ## 學習目標
 
 - 能講出 Classic User-Exit（`EXIT_SAPLV01Z_001`/`_002`）、新式 BAdI（`BADI_BATCH_NUMBER_INT`）、Cloud BAdI 三代技術在同一個標準流程裡並存的現象，理解「新技術不會取代舊技術」
-- 能分辨 `_001`（取號前，決定用哪個 Number Range Object）與 `_002`（取號後，加工最終字串）兩個插入點的職責差異
+- 能講出 Internal／External 批號給號政策的差異與各自適用情境，知道這是 Customizing 層級的決策，不是程式技術上的二選一
+- 能分辨 `_001`（取號前，決定用哪個 Number Range Object）與 `_002`（取號後，加工最終字串）兩個插入點的職責差異，並能各自寫出正確的程式碼
 - 能講出 Number Range Object 的核心概念（Object／Interval／NRLEVEL），知道要用 `SNRO` 手動建立，`NUMBER_GET_NEXT` 回傳值一律 10 碼補零
 - 能講出批號欄位 `CHAR(10)` 的長度限制如何反過來限制了「日期+時間+流水號」格式的設計取捨
-- 知道 `ZX` 開頭的 Include 是保留給 Exit Function Group 的特殊命名空間，一般 ADT Include 建立 API 建不出來
+- 知道 `ZX` 開頭的 Include 是保留給 Exit Function Group 的特殊命名空間，一般 ADT Include 建立 API 建不出來，但 CMOD 裡雙擊該 Component 可以觸發系統自動生成
+- 能講出 Classic User-Exit 完整生效的四個步驟（建 Project → Assign Enhancement → 編輯 Component → Activate Project），理解「Include 原始碼存在」跟「Enhancement 生效」是兩件事
 
 ## 事前準備（已於本系統 client 130 實際完成，非假設）
 
 1. **Number Range Object `ZEN02BAT`**：使用者於 `SNRO` 手動建立，Number Length Domain 填 `CHARG`（查證自標準物件 `BATCH_CLT` 在設定表 `TNRO` 的 `DOMLEN` 欄位，同一個 Domain），Interval `01`：`0000000001`～`9999999999`，未勾 External。已用資料預覽 API 查 `TNRO`／`NRIV` 兩張表確認設定正確。
-2. **`EXIT_SAPLV01Z_002` 的 Include `ZXVBZU02`**：查證時發現這個 Include **已經是一個真實物件**（套件 `ZPP`，2023-08-08 由另一位同事 `MAVIS` 建立，但內容是空的）；進一步查 `MODSAP`／`MODACT` 兩張表確認 Enhancement `SAPLV01Z` **從未被任何 CMOD Project 正式指派**，SE10 也查無掛著這支程式的傳輸請求——判斷是當年被雙擊觸發自動產生、但沒人接著建 Project 或寫程式碼的殘留物件。**確認同事無異議後**，用傳輸請求 `S4HK901982`（套件 `ZPP`）寫入並啟用（Include 原始碼層級）。**⚠️這一步只完成了原始碼，Enhancement 尚未真的生效**——還需要使用者在 `CMOD` 建 Enhancement Project、Assign `SAPLV01Z`、Activate Project 才會真的啟用（見 Lecture 的更正說明），這部分由使用者在 GUI 處理，Claude 沒有 ADT API 可以做這一步。
-3. **驗證程式 `ZR_EN02_BATCH_DEMO`**（`$TMP`）：不動任何真實貨物移動，單獨呼叫三次 `NUMBER_GET_NEXT` 驗證 `ZEN02BAT`＋格式化邏輯，已用 `programrun` 無頭執行，真實輸出：
+2. **`EXIT_SAPLV01Z_002` 的 Include `ZXVBZU02`**：查證時發現這個 Include **已經是一個真實物件**（套件 `ZPP`，2023-08-08 由另一位同事 `MAVIS` 建立，但內容是空的）；進一步查 `MODSAP`／`MODACT` 兩張表確認 Enhancement `SAPLV01Z` **從未被任何 CMOD Project 正式指派**，SE10 也查無掛著這支程式的傳輸請求——判斷是當年被雙擊觸發自動產生、但沒人接著建 Project 或寫程式碼的殘留物件。**確認同事無異議後**，用傳輸請求 `S4HK901982`（套件 `ZPP`）寫入。
+3. **CMOD Project `ZBATCHNO`**：使用者建立，Assign Enhancement `SAPLV01Z`。**雙擊 `EXIT_SAPLV01Z_001` 觸發系統自動生成 Include `ZXVBZU01`**（落在套件 `$TMP`，不需要傳輸請求）；`EXIT_SAPLV01Z_002` 因為 `ZXVBZU02` 早就存在，直接看到內容。
+4. **`ZXVBZU01` 寫入重導向邏輯**：`OBJECT` 改成 `'ZEN02BAT'`；**`ZXVBZU02` 改寫成單純加工**：`new_charg = sy-datum+2(6) && new_charg+6(4).`（不再自己呼叫 `NUMBER_GET_NEXT`，因為 `_001` 已經把來源換成 `ZEN02BAT`，`_002` 拿到的 `NEW_CHARG` 已經是從 `ZEN02BAT` 取出的號碼）。兩支都已用 ADT 寫入並啟用（`sap_inactive_objects` 確認無殘留未啟用版本）。
+5. **驗證程式 `ZR_EN02_BATCH_DEMO`**（`$TMP`）：不動任何真實貨物移動，單獨呼叫三次 `NUMBER_GET_NEXT` 驗證 `ZEN02BAT`＋格式化邏輯本身（不經過 Enhancement 機制），已用 `programrun` 無頭執行，真實輸出：
 
    ```
    raw number: 0000000001   batch no: 2607280001
@@ -52,9 +63,10 @@
 ## 題目需求
 
 1. **完成三代擴充技術對照表**：技術世代／呼叫語法／對應物件名稱／是否需要 CMOD Project。
-2. **解釋為什麼本題選擇只實作 `EXIT_SAPLV01Z_002`，不實作 `_001`**：說明 `ZXVBZU01` 目前的狀態，以及 `ZX` 開頭 Include 的建立限制。
-3. **讀懂 `ZXVBZU02`（見答案快照 `zxvbzu02.prog.abap`）**，指出：`NEW_CHARG` 這個變數為什麼不用自己宣告（提示：它是 `EXIT_SAPLV01Z_002` 的 `CHANGING` 參數，Include 是直接嵌進 FUNCTION 內部，參數在整個 Include 範圍內都可以直接當變數用）。
-4. **情境判斷**：如果之後想要「依工廠分開計數」（不同工廠各自一組流水號，互不影響），Number Range Object 要怎麼調整？（提示：見 Lecture 提到的 Subobject 概念）
+2. **解釋 `_001`／`_002` 的分工，並指出為什麼「兩支都用」比「只用 `_002` 自己重新呼叫 `NUMBER_GET_NEXT`」更貼近 SAP 原始設計**（提示：對照 Lecture 的正規分工說明，想想如果之後要換 Number Range Object，只改 `_001` 一行 `OBJECT` 賦值，跟要重寫整段 `NUMBER_GET_NEXT` 呼叫，哪個維護成本更低）。
+3. **講出 Internal 與 External 批號給號的差異與各自適用情境**，並說明 `SAPLV01Z` 跟 `SAPLV1ZE` 兩個 Enhancement 的關係。
+4. **讀懂 `ZXVBZU01`／`ZXVBZU02`（見答案快照）**，指出：`ZXVBZU01` 裡的 `OBJECT`／`NR_RANGE_NR`／`SUBOBJECT` 為什麼不用自己宣告（提示：它們是 `EXIT_SAPLV01Z_001` 的 `CHANGING` 參數，Include 是直接嵌進 FUNCTION 內部，參數在整個 Include 範圍內都可以直接當變數用）。
+5. **情境判斷**：如果之後想要「依工廠分開計數」（不同工廠各自一組流水號，互不影響），Number Range Object 要怎麼調整？該改 `_001` 還是 `_002`？（提示：見 Lecture 提到的 Subobject 概念，想想「換來源」跟「換格式」是哪一支的職責）
 
 ## 參考答案
 
@@ -66,18 +78,20 @@
 | Classic BAdI（新式，Enhancement Spot 管理） | `GET BADI` / `CALL BADI` | `BADI_BATCH_NUMBER_INT`（Enhancement Spot `ES_BATCH_NUMBER_INT`） | 否，直接 SE18/SE19 建 Implementation |
 | S/4HANA Cloud BAdI | 透過 `g_badi_batch_number_cust`（`IF_LOBM_BATCH_NUMBER`） | Key User Extensibility BAdI | 否，走 ABAP Cloud 擴充性框架 |
 
-**為什麼只做 `_002`**：`_001` 的 Include `ZXVBZU01` 在這套系統從未被生成過，且已實測確認 `ZX` 開頭的 Include 名稱**保留給 Exit Function Group 專用**，直接用標準的 ADT Include 建立 API（POST `/sap/bc/adt/programs/includes`）會被拒絕（`Program names ZX... are reserved for includes of exit function groups`），必須先在 SE37/CMOD 用 GUI 觸發生成才能寫入——這超出本題範圍。改成完全在 `_002`（Include 已存在）裡自己呼叫 `NUMBER_GET_NEXT` 指定 `ZEN02BAT`，不依賴 `_001` 重導向 `OBJECT` 參數，效果一樣，且不需要碰觸尚不存在的 `_001`。
+**`_001`／`_002` 分工與維護成本對比**：`_001` 只做一件事——把 `OBJECT` 換成 `'ZEN02BAT'`，決定「跟哪個號碼簿要號碼」；`_002` 只做一件事——把拿到的號碼加上 `YYMMDD` 前綴，決定「號碼長什麼樣子」。這種切法之所以比「全部塞進 `_002` 自己重新呼叫 `NUMBER_GET_NEXT`」更好維護：**以後如果要換 Number Range Object（例如改成依工廠分開計數），只要改 `_001` 一行 `OBJECT`／`SUBOBJECT` 賦值，`_002` 的格式化邏輯完全不用動**；反過來，如果格式要改（例如流水號從4碼改5碼），只要改 `_002`，`_001` 完全不用動——兩支各自獨立變化，不會互相牽動。（最初卡在 `ZXVBZU01` 這個 Include 從未被生成過、且 `ZX` 開頭 Include 保留給 Exit Function Group 專用、無法用標準 ADT Include 建立 API 生出來，必須在 `CMOD` 裡雙擊 `EXIT_SAPLV01Z_001` 才會觸發生成——這步驟完成後才補上了 `_001`。）
 
-**情境判斷（依工廠分開計數）**：Number Range Object 要重新設計成帶 **Subobject**（在 `SNRO` 建立時填 `Subobject Data Element`，例如工廠代碼 `WERKS_D`），每個工廠各自維護一組 Interval；呼叫 `NUMBER_GET_NEXT` 時要多帶 `subobject` 參數（傳入實際工廠代碼），系統會依 `OBJECT`+`SUBOBJECT` 的組合各自計數,不會互相影響。
+**Internal vs External**：`SAPLV01Z`（Internal）與 `SAPLV1ZE`（External）是兩個**平行、互斥**的 Enhancement，同一個物料在某個時間點只會走其中一條路徑，由 Customizing（Batch Level／批號給號方式）決定。Internal 適合批號只是內部技術追蹤用途、想要統一格式的情境；External 適合要保留供應商 Lot Number、或需要人工核對輸入的情境。兩者不是「哪個比較新/比較好」的技術升級關係，是不同業務需求對應不同政策。
+
+**情境判斷（依工廠分開計數）**：Number Range Object 要重新設計成帶 **Subobject**（在 `SNRO` 建立時填 `Subobject Data Element`，例如工廠代碼 `WERKS_D`），每個工廠各自維護一組 Interval；這個改動**屬於「換來源」，要改 `_001`**——`NR_RANGE_NR`/`OBJECT`/`SUBOBJECT`（傳入實際工廠代碼）都是 `_001` 的 `CHANGING` 參數，系統會依 `OBJECT`+`SUBOBJECT` 的組合各自計數，不會互相影響；`_002` 的格式化邏輯完全不需要修改。
 
 ## 思考題
 
 1. 三代技術裡，`_001`／`_002` 這種 Classic User-Exit **沒有** BAdI 那種 `TRY...CATCH cx_badi_not_implemented` 的保護機制，這代表什麼實務風險？（提示：如果 Include 裡的程式碼寫錯、丟出未攔截的例外，會直接讓整個 `VB_NEXT_BATCH_NUMBER` 呼叫中斷，不像 BAdI 沒實作時會被優雅地跳過——Classic User-Exit 的程式碼品質要求其實更高，因為沒有安全網）
-2. `ZXVBZU02` 這個 Include 已經是套件 `ZPP` 的物件、但從未被任何 CMOD Project 指派過——如果之後 PP 團隊突然想要用 `EXIT_SAPLV01Z_002` 做他們自己的事，會發生什麼衝突？（提示：一個 Function Exit 的 Include 只有一份，兩個團隊的需求會被迫寫在同一支程式碼裡，這正是為什麼**動手前跟同事確認**這一步在真實企業環境中不能省略——不像新建 Z 物件那樣互不干擾）
+2. `ZXVBZU02` 這個 Include 原本是套件 `ZPP` 的孤兒物件（從未被任何 CMOD Project 指派過），現在已經被 `ZBATCHNO` 這個 Project 正式認領——如果之後 PP 團隊（`MAVIS` 原本可能想拿來做別的事）也想用 `EXIT_SAPLV01Z_002` 做他們自己的事，會發生什麼衝突？（提示：一個 Function Exit 的 Include 只有一份，兩個團隊的需求會被迫寫在同一支程式碼裡，這正是為什麼**動手前跟同事確認**這一步在真實企業環境中不能省略——不像新建 Z 物件那樣互不干擾；現在已經被 `ZBATCHNO` 正式指派，後續若有人也想用同一個 Enhancement，會在 `CMOD` 看到已經有 Project 佔用，能及早發現衝突）
 3. 為什麼 `NUMBER_GET_NEXT` 的 `number` 輸出參數固定是 10 碼補零，而不是依 Number Range Object 定義的區間位數決定長度？這對本題「取後 4 碼當流水號」的寫法有什麼啟示？（提示：不管 Interval 定義多少位數，程式都要自己決定「取哪一段」，`+6(4)` 這種寫法要跟 Interval 實際的最大值位數對齊，如果 Interval 改成 5 位數上限就要跟著改成取後 5 碼，否則流水號可能被截斷或補零位置算錯）
 
 ## 答案
 
-`ZEN02BAT`（Number Range Object，使用者於 `SNRO` 建立，Domain `CHARG`，Interval `01`：`0000000001`～`9999999999`）、`ZXVBZU02`（`EXIT_SAPLV01Z_002` 客戶 Include，套件 `ZPP`，傳輸請求 `S4HK901982`，快照 `zxvbzu02.prog.abap`）、`ZR_EN02_BATCH_DEMO`（驗證程式，`$TMP`，快照 `zr_en02_batch_demo.prog.abap`）均已建立並啟用（`sap_inactive_objects` 確認無殘留未啟用版本）。已用 `programrun` 無頭執行驗證程式（不經過 Enhancement 機制，直接呼叫 `NUMBER_GET_NEXT`），真實輸出批號 `2607280001`／`2607280002`／`2607280003`，證實 `ZEN02BAT`＋格式化邏輯本身正確。三代擴充技術對照表、Classic User-Exit 選用理由、情境判斷見本題內文。
+`ZEN02BAT`（Number Range Object，使用者於 `SNRO` 建立，Domain `CHARG`，Interval `01`：`0000000001`～`9999999999`）、`ZXVBZU01`（`EXIT_SAPLV01Z_001` 客戶 Include，套件 `$TMP`，透過 `CMOD` Project `ZBATCHNO` 雙擊自動生成，快照 `zxvbzu01.prog.abap`，內容為重導向 `OBJECT = 'ZEN02BAT'`）、`ZXVBZU02`（`EXIT_SAPLV01Z_002` 客戶 Include，套件 `ZPP`，傳輸請求 `S4HK901982`，快照 `zxvbzu02.prog.abap`，內容改為單純加工 `NEW_CHARG`）、`ZR_EN02_BATCH_DEMO`（驗證程式，`$TMP`，快照 `zr_en02_batch_demo.prog.abap`）均已建立並啟用（`sap_inactive_objects` 確認無殘留未啟用版本）。已用 `programrun` 無頭執行驗證程式（不經過 Enhancement 機制，直接呼叫 `NUMBER_GET_NEXT`），真實輸出批號 `2607280001`／`2607280002`／`2607280003`，證實 `ZEN02BAT`＋格式化邏輯本身正確。三代擴充技術對照表、Internal/External 差異、`_001`/`_002` 正規分工、情境判斷見本題內文。
 
-**⚠️ 待辦（GUI-only，由使用者處理）**：`EXIT_SAPLV01Z_002` 這個 Enhancement 本身**尚未真的啟用**——Include 原始碼已就緒，但還需要在 `CMOD` 完整跑一次「建 Enhancement Project → Assign `SAPLV01Z` → Activate Project」，才會讓 MIGO 等真實貨物移動的批號自動給號真的套用這段新邏輯。在使用者完成 CMOD 這一步之前，若照前一輪對話提到的方式用真實採購單做 Goods Receipt 測試，批號應該還是舊的預設格式，不代表程式邏輯有問題。
+**Classic User-Exit 啟用進度**：使用者已建立 CMOD Project `ZBATCHNO`、Assign Enhancement `SAPLV01Z`、雙擊 `EXIT_SAPLV01Z_001` 觸發生成 `ZXVBZU01`——四個必要步驟中前三步已完成，**「Activate Project」這最後一步待使用者在 CMOD 確認執行**，執行後才會讓 MIGO 等真實貨物移動的批號自動給號真的套用這段新邏輯，屆時可以用前一輪對話提到的方式（真實採購單 Goods Receipt、批號欄位留空、物料要是 Internal 批量管理）驗證。
