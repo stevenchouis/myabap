@@ -1,4 +1,4 @@
-REPORT zr_en05_flight_greeting_demo.
+REPORT zr_en05_flight_greeting_demo LINE-SIZE 250.
 
 DATA go_badi TYPE REF TO zes_en05_greeting.
 DATA lv_text TYPE string.
@@ -15,7 +15,9 @@ CALL BADI go_badi->get_greeting
     iv_carrid = 'LH'
   CHANGING
     cv_text   = lv_text.
-WRITE: / 'CARRID=LH  =>', lv_text.
+WRITE: / 'CARRID=LH  =>'.
+WRITE: / lv_text.
+WRITE: / ''.
 
 CLEAR lv_text.
 CALL BADI go_badi->get_greeting
@@ -23,4 +25,5 @@ CALL BADI go_badi->get_greeting
     iv_carrid = 'AA'
   CHANGING
     cv_text   = lv_text.
-WRITE: / 'CARRID=AA  =>', lv_text.
+WRITE: / 'CARRID=AA  =>'.
+WRITE: / lv_text.

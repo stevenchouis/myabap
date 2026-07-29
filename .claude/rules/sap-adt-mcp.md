@@ -286,6 +286,25 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
   - ADT GET 這個物件時，`enho:badiImplementation` 的 **`enho:isActive` 屬性不代表「Implementation is active」這個開關**（實測切換 SE19 的勾選框前後，`isActive` 值不變，一直是 `"true"`）；要看的是 **`enho:runtimeBehaviorShorttext`** 屬性，這個文字（`"The implementation will be called"` / `"The implementation will not be called"`）才會即時反映 SE19 畫面上「Runtime Behavior」欄位顯示的真實狀態。
 - **標準 PP 領域真正有 `ENHS/XS` 身分（非純 Classic）的 Enhancement Spot 範例**：quickSearch `WORKORDER*` 可以找到一批，例如 `WORKORDER_UPDATE`（套件 `COBADI`，Multi Use，Interface `IF_EX_WORKORDER_UPDATE`，說明「Business Add-In PM/PP/PS/PI Orders Operation: UPDATE」）——這個 Interface 底下的 `AT_SAVE` 方法（`IMPORTING IS_HEADER_DIALOG`／`EXCEPTIONS ERROR_WITH_MESSAGE`，簽章簡單、符合 Multi Use 限制）是工單存檔時的真實驗證掛勾點，適合當作「用標準既有 Enhancement Spot 建真實 Implementation」的教學案例；但這是系統裡**每天在跑的真實 BAdI**，一旦掛上自訂 Implementation 會對所有真實 PM/PP/PS/PI 工單存檔生效，務必比照 en04 的安全閘設計（只在明確不存在的測試資料組合才觸發邏輯）。
 
+## 25. `ENHO/XH`（BAdI Implementation）建立也是 GUI-only；Multi Use 無 Filter 時所有 Active Implementation 依序執行；**BAdI Implementation 絕對不能下 `COMMIT WORK`**（2026-07-29 實測，Enhancement 課程 en06，真實 `WORKORDER_UPDATE`/`AT_SAVE` 案例）
+
+- **`ENHO/XH`（BAdI Implementation）沒有 ADT 建立 API**：POST `/sap/bc/adt/enhancements/enhoxh` 一路依錯誤訊息補齊 `enho:contentCommon`、`enho:runtimeBehaviorShorttext` 等必要元素後，最終回 `ExceptionResourceCreationFailure: Resource controller does not support method POST`——這個端點本身就不支援 POST（不是資料格式問題），確認跟第 23／24 節的 `ENHOXHH`／`ENHS` 是同一類限制：**空殼建立一律走 SE19**，內容讀寫（含指定 Interface 每個方法的邏輯）建好之後可以正常走 ADT stateful session workaround。
+- **Multi Use BAdI 沒有 Filter 時，`CALL BADI` 會依序呼叫全部 Active Implementation，不是只挑一個**：實測建了兩個 Implementation 掛在同一個 Multi Use BAdI Definition 底下，都對同一個 `CHANGING` 參數做處理（第二個在第一個的結果後面追加文字），呼叫一次 `CALL BADI` 後兩個都真的執行了（依序疊加）。這是 en05 學到的「Multi Use 不能用 `RETURNING`/`EXPORTING`」規則存在的原因——資料流向設計成「多個 Implementation 可以依序疊加處理同一份資料」，不是「多選一」。
+- **⚠️⚠️ BAdI Implementation／被呼叫的子程式，絕對不能自己下 `COMMIT WORK`**：實測在 Implementation 方法裡寫完自訂邏輯後加了一行 `COMMIT WORK.`（想著「保險起見存進去」），結果使用者一觸發真實呼叫（本例是 `CO01` 訂單存檔）就整個系統 Dump：
+  ```
+  Category           ABAP programming error
+  Runtime Errors      MESSAGE_TYPE_X
+  ABAP Program        SAPLCOZV
+  * Unexpected COMMIT WORK!!!
+  * there should be no COMMIT WORK in order processing before
+  * fm CO_ZV_ORDER_POST was executed, since this might lead to
+  * inconsistencies!!!
+  ```
+  **原因**：Implementation 是在呼叫者（本例是訂單存檔框架）尚未完成的 LUW（邏輯工作單元）裡面執行的，`COMMIT WORK` 只能由「擁有這個 LUW 的最上層呼叫者」下達；子程式/Implementation/Function Module 自己下 `COMMIT WORK`，等於把目前已做的變更提前釘死，框架後續若因某個檢查失敗需要 ROLLBACK，已提前 COMMIT 的部分**沒辦法撤銷**，會讓資料庫停在不一致狀態。許多 SAP 標準框架（本例 `SAPLCOZV`）會主動偵測這個風險並讓程式直接 Dump，寧可讓開發者立刻發現，也不讓不一致資料悄悄進資料庫——**這條規則不是本例特有，適用所有「被別人呼叫」的程式碼**：Function Module、Method、BAdI Implementation、User-Exit 都不該自己下 `COMMIT WORK`，除非你確定自己就是這次呼叫鏈最上層、真正擁有這個 LUW 的呼叫者。拿掉 `COMMIT WORK` 後，Implementation 裡的 `INSERT`／`UPDATE` 會跟著呼叫者本身的交易一起被最上層框架 COMMIT，不需要（也不能）自己額外處理。
+- **驗證有風險的真實 BAdI Implementation，建議先做「不透過真實派送的單元測試」，再做真實交易測試**：本題先寫一支測試程式直接 `CREATE OBJECT`＋呼叫 Interface 方法（完全繞過 `GET BADI`/`CALL BADI` 派送機制），確認安全閘邏輯正確後，才請使用者用真實交易（`CO01`）測試——這個順序讓「先前那次 `COMMIT WORK` 誤植」造成的傷害範圍限縮在「單元測試執行結果不符預期」，而不是真的讓使用者的真實交易當機（雖然 ABAP Dump 會自動 ROLLBACK 不留壞資料，但仍是不必要的失敗體驗）。**修正 `COMMIT WORK` 之後，本題仍然是先重跑單元測試確認邏輯無誤，才請使用者重新做真實交易測試**——多一層驗證，少一次風險。
+- **查證 BAdI 方法參數的底層型別，可能發現能直接沿用之前課程已驗證過的安全閘設計**：`WORKORDER_UPDATE`／`AT_SAVE` 的 `IS_HEADER_DIALOG` 型別 `COBAI_S_HEADER_DIALOG`（`COBAI` Type Group 裡定義，讀 Type Group 原始碼 `/sap/bc/adt/ddic/typegroups/<name>/source/main` 可以看到 `LIKE CAUFVD`）——跟第 21～24 節（en04）用過的 `CAUFVD` 完全同一個結構，代表可以直接沿用已驗證過的安全閘測試值（`WERKS='1011'`／`AUART='PP71'`），不用重新查證一組新的測試資料。
+- **BAdI 掛勾點的呼叫時機會影響能拿到的資料完整度，不能只看文件猜**：本題真實驗證發現，`AT_SAVE` 觸發當下 `IS_HEADER_DIALOG-AUFNR` 顯示 `%00000000001` 這種內部暫時性編號格式（不是最終的 12 碼工單號），代表這個掛勾點的資料還沒完全定型。設計客製化邏輯前，若需要用到「最終確定的資料」（如正式工單號），最好先用類似本題的方式實際觸發一次、印出/記錄實際拿到的值，確認資料完整度是否符合需求，不要只憑方法名稱或參數型別猜測。
+
 ## 匯出 SAP 原始碼到 src/ 的慣例
 
 - 檔名採 abapGit 格式：`<物件名小寫>.<類型>.abap`（如 `zdqm0001.prog.abap`；INCLUDE 也是 `.prog.abap`）。
