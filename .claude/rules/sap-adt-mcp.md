@@ -305,6 +305,19 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **查證 BAdI 方法參數的底層型別，可能發現能直接沿用之前課程已驗證過的安全閘設計**：`WORKORDER_UPDATE`／`AT_SAVE` 的 `IS_HEADER_DIALOG` 型別 `COBAI_S_HEADER_DIALOG`（`COBAI` Type Group 裡定義，讀 Type Group 原始碼 `/sap/bc/adt/ddic/typegroups/<name>/source/main` 可以看到 `LIKE CAUFVD`）——跟第 21～24 節（en04）用過的 `CAUFVD` 完全同一個結構，代表可以直接沿用已驗證過的安全閘測試值（`WERKS='1011'`／`AUART='PP71'`），不用重新查證一組新的測試資料。
 - **BAdI 掛勾點的呼叫時機會影響能拿到的資料完整度，不能只看文件猜**：本題真實驗證發現，`AT_SAVE` 觸發當下 `IS_HEADER_DIALOG-AUFNR` 顯示 `%00000000001` 這種內部暫時性編號格式（不是最終的 12 碼工單號），代表這個掛勾點的資料還沒完全定型。設計客製化邏輯前，若需要用到「最終確定的資料」（如正式工單號），最好先用類似本題的方式實際觸發一次、印出/記錄實際拿到的值，確認資料完整度是否符合需求，不要只憑方法名稱或參數型別猜測。
 
+## 26. Explicit Enhancement Point/Section：一旦程式有 Explicit Enhancement，ADT `sap_lock` 永久失效；SE38 操作前必須先按「Enhance」切換按鈕，否則得到誤導性錯誤訊息（2026-07-29 實測，Enhancement 課程 en07）
+
+- **`ENHANCEMENT-POINT`/`ENHANCEMENT-SECTION ... SPOTS <spot>` 語句本身可以直接用 ADT 寫進程式原始碼**（跟一般 ABAP 陳述式一樣），但 `SPOTS` 參照的 Enhancement Spot 若還不存在，`checkruns` 會報 `Enhancement spot <name> is unknown`——這個 Spot 一樣沒有 ADT 建立 API（POST 一律失敗），必須走 SE38 GUI。
+- **⚠️ 最關鍵的操作前提：對含有 Explicit Enhancement 宣告的程式做任何 Enhancement 相關操作（Create Option／Create Implementation／Change Implementation）之前，必須先按 SE38 工具列的「Enhance」切換按鈕，把編輯器切到 Enhancement 編輯模式（畫面標題會變成「Change Enhancements for ...」）**——沒有這個前提，直接右鍵選單操作 Enhancement Operations，會得到一系列**文字通順但語意誤導**的錯誤訊息，讓人誤以為是物件設定/命名/綁定的問題，實際上只是編輯器模式沒切換：
+  - `ED291 Creating nested enhancements is not supported`（長文聲稱游標在 SECTION/END-SECTION 中間，但實際游標可能根本不在那個位置）
+  - `Enhancement spot <name> defines enhancement spot in another object`（聲稱 Spot 綁定到別的物件，實際上是編輯器狀態問題，換任何 Spot 名稱重試都一樣會報錯）
+  - `Operation is allowed only for lines ready for input`
+  這幾個錯誤訊息本身沒有指出「請先按 Enhance 按鈕」，只能靠實測比對「同樣操作，切換模式前後結果不同」才能確認根因。**遇到 Explicit Enhancement 相關操作報錯，第一件事永遠是先確認有沒有按過 Enhance 切換按鈕，不要急著去改 Spot 名稱或程式結構。**
+- **建立新 Enhancement Spot 時，直接在「Create Enhancement Option」對話框裡打一個全新名稱建立，比先用 SE18 獨立建立、再回來套用既有 Spot 更可靠**：實測用 SE18 獨立建立的 Spot（未指定要服務哪個程式），拿來套用到程式時一律報 `Enhancement spot X defines enhancement spot in another object`（長文顯示 "assigned to the object ''"，即從未正確綁定到任何物件）；改成在 Create Option 對話框的 Enhancement Spot 欄位直接輸入一個從未用過的新名稱、按 Enter 觸發「是否建立」提示確認建立，系統會**當場建立並正確綁定到目前這支程式**，一次成功。這代表這類需要「跟特定程式綁定」的 Enhancement Spot，建立時機要跟使用情境綁在一起，不能像 en05 的 BAdI Enhancement Spot 那樣獨立建立、之後才給任意物件使用。
+- **⚠️⚠️ 一旦程式碼裡有了正式建立的 Explicit Enhancement（Create Option 完成後），這支程式的 `sap_lock`（含後續所有 ADT 寫入）永久失效**：實測對已經有 `ENHANCEMENT-POINT` 宣告並成功建立 Option 的程式呼叫 `sap_lock`，一律回 `HTTP 405 ExceptionResourceIsEnhanced: The editor does not support enhanced objects (use SAP GUI instead)`——這是本課程目前遇過最徹底的 ADT 限制，比 en04/en05/en06 的「空殼建立需要 GUI、內容讀寫可以走 ADT」更嚴格：**這裡是連內容都無法用 ADT 讀寫，之後所有修改（不管是不是跟 Enhancement 相關的部分）都只能回 SAP GUI 進行**。GET（唯讀）不受影響，仍可正常讀取合併後的原始碼（但讀不到 Enhancement Implementation 本身塞入的程式碼內容）。
+- **Enhancement Implementation 的內容（`ENHANCEMENT n <名稱>. ... ENDENHANCEMENT.` 區塊）完全無法透過 ADT 讀寫**：`GET /sap/bc/adt/enhancements/enhsxs/<spot>` 回 `Enhancement technology HOOK_DEF is not supported yet`；嘗試組出對應 `ENHOXHH` 路徑讀取 Implementation 原始碼回 `uriMappingError: URI-Mapping cannot be performed due to invalid workbench object`。只能請使用者直接在 SE38 的 Enhancement 編輯區塊手動輸入程式碼，Claude 只能提供程式碼文字讓使用者貼上，無法代為寫入或事後讀取驗證內容（只能透過 `programrun` 執行結果間接驗證邏輯是否正確）。
+- **對照 en04（Implicit Enhancement／Source Code Plugin）**：兩者建立空殼都是 GUI-only，但 en04 的 `ENHOXHH` 建好之後內容可以完全用 ADT 讀寫、程式本身也不受影響仍可用 `sap_lock`；這題的 Explicit Enhancement 不只內容要 GUI，連**外層程式本身**都被 ADT 拒絕編輯。這代表「要不要在自己維護的 Z 程式上加 Explicit Enhancement Point」是一個需要跟團隊溝通清楚的技術取捨：加了之後，這支程式從此對 ADT/Claude 自動化流程關閉。
+
 ## 匯出 SAP 原始碼到 src/ 的慣例
 
 - 檔名採 abapGit 格式：`<物件名小寫>.<類型>.abap`（如 `zdqm0001.prog.abap`；INCLUDE 也是 `.prog.abap`）。
