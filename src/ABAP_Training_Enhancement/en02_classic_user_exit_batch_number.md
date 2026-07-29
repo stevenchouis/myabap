@@ -23,6 +23,8 @@
 
 本題**只用 `EXIT_SAPLV01Z_002`**：不去重導向 `OBJECT`（`EXIT_SAPLV01Z_001` 用的 Include `ZXVBZU01` 在這套系統裡還沒被生成過，且 `ZX` 開頭的 Include 有保留規則，無法用一般 ADT Include 建立 API 生出來，見下方「查證與踩坑記錄」），改成**直接在 `_002` 裡自己呼叫 `NUMBER_GET_NEXT` 對一個全新的、跟標準 `BATCH_CLT` 完全獨立的 Number Range Object 取號**，取到號碼後加工成最終格式、蓋掉 `NEW_CHARG`——效果相同，但完全不用碰 `_001`。
 
+**⚠️ 更正：寫程式碼進 Include 並啟用，還不等於這個 Enhancement 真的生效**——這點原本（第一版教材）誤判了。Classic User-Exit 要真的運作，一定要走 **`CMOD`** 完整跑完：① 建一個 Enhancement Project（Project 名稱自訂）② 在 Project 裡 Assign Enhancement **`SAPLV01Z`**（畫面上會列出這個 Enhancement 底下的所有 Component，含 `EXIT_SAPLV01Z_001`/`_002`）③ 雙擊 `EXIT_SAPLV01Z_002` 進去編輯（畫面會带你到 `ZXVBZU02` 這個 Include，內容應該已經是我們寫好的程式碼）④ **Activate Project**——這一步才是真正的開關，沒做這步，就算 Include 原始碼已經在系統裡、也用 ADT 啟用過，Function Group 實際載入執行的版本還是不會反映這段程式碼。這是 GUI-only 步驟，`CMOD` 沒有 ADT API（見 `.claude/rules/sap-adt-mcp.md` 第 20 節），由使用者在 SAP GUI 操作，Claude 只能把 Include 內容準備好、驗證語法沒問題。
+
 **Number Range Object（NROB）概念**：一個「號碼簿」，本身有名稱（如 `BATCH_CLT`）、一或多個「Interval（區間）」（用二字元代碼區分，如 `'01'`），每個 Interval 記錄 From／To／目前用到哪裡（`NRLEVEL`）。ABAP 呼叫 `NUMBER_GET_NEXT`（`EXPORTING nr_range_nr`／`object`／`IMPORTING number`）就能拿到「這個 Interval 目前的下一號」，系統自動處理並發（同時兩個人呼叫不會拿到同一號）。**⚠️這個工具本身完全沒有 ADT API**（跟 SM59/DBCO/SPAD/Search Help 同一類 GUI-only），只能在 **`SNRO`** 交易碼手動建立與維護 Interval；`NUMBER_GET_NEXT` 回傳的 `number` 一律是**10 碼、左邊補零的數字字串**，不管 Interval 本身定義的號碼位數是多少（本題已用真實執行結果驗證：`0000000001`／`0000000002`／`0000000003`）。
 
 ## 學習目標
@@ -36,7 +38,7 @@
 ## 事前準備（已於本系統 client 130 實際完成，非假設）
 
 1. **Number Range Object `ZEN02BAT`**：使用者於 `SNRO` 手動建立，Number Length Domain 填 `CHARG`（查證自標準物件 `BATCH_CLT` 在設定表 `TNRO` 的 `DOMLEN` 欄位，同一個 Domain），Interval `01`：`0000000001`～`9999999999`，未勾 External。已用資料預覽 API 查 `TNRO`／`NRIV` 兩張表確認設定正確。
-2. **`EXIT_SAPLV01Z_002` 的 Include `ZXVBZU02`**：查證時發現這個 Include **已經是一個真實物件**（套件 `ZPP`，2023-08-08 由另一位同事 `MAVIS` 建立，但內容是空的）；進一步查 `MODSAP`／`MODACT` 兩張表確認 Enhancement `SAPLV01Z` **從未被任何 CMOD Project 正式指派**，SE10 也查無掛著這支程式的傳輸請求——判斷是當年被雙擊觸發自動產生、但沒人接著建 Project 或寫程式碼的殘留物件。**確認同事無異議後**，用傳輸請求 `S4HK901982`（套件 `ZPP`）寫入並啟用。
+2. **`EXIT_SAPLV01Z_002` 的 Include `ZXVBZU02`**：查證時發現這個 Include **已經是一個真實物件**（套件 `ZPP`，2023-08-08 由另一位同事 `MAVIS` 建立，但內容是空的）；進一步查 `MODSAP`／`MODACT` 兩張表確認 Enhancement `SAPLV01Z` **從未被任何 CMOD Project 正式指派**，SE10 也查無掛著這支程式的傳輸請求——判斷是當年被雙擊觸發自動產生、但沒人接著建 Project 或寫程式碼的殘留物件。**確認同事無異議後**，用傳輸請求 `S4HK901982`（套件 `ZPP`）寫入並啟用（Include 原始碼層級）。**⚠️這一步只完成了原始碼，Enhancement 尚未真的生效**——還需要使用者在 `CMOD` 建 Enhancement Project、Assign `SAPLV01Z`、Activate Project 才會真的啟用（見 Lecture 的更正說明），這部分由使用者在 GUI 處理，Claude 沒有 ADT API 可以做這一步。
 3. **驗證程式 `ZR_EN02_BATCH_DEMO`**（`$TMP`）：不動任何真實貨物移動，單獨呼叫三次 `NUMBER_GET_NEXT` 驗證 `ZEN02BAT`＋格式化邏輯，已用 `programrun` 無頭執行，真實輸出：
 
    ```
@@ -60,7 +62,7 @@
 
 | 技術世代 | 呼叫語法 | 對應物件 | 需要 CMOD Project？ |
 |---|---|---|---|
-| Classic User-Exit | `CALL CUSTOMER-FUNCTION '001'/'002'` | `EXIT_SAPLV01Z_001`/`_002`（Enhancement `SAPLV01Z`） | 理論上是（要指派+Activate 才正式生效），但實測發現即使沒有 Project，Include 只要有內容並啟用，程式碼一樣會被執行（`CALL CUSTOMER-FUNCTION` 是編譯期靜態納入，不像 BAdI 有 `TRY...CATCH cx_badi_not_implemented` 的「有沒有實作」判斷） |
+| Classic User-Exit | `CALL CUSTOMER-FUNCTION '001'/'002'` | `EXIT_SAPLV01Z_001`/`_002`（Enhancement `SAPLV01Z`） | **是，缺一不可**——一定要用 `CMOD` 建 Enhancement Project、Assign `SAPLV01Z`、Activate Project，這個 Enhancement 才會真的生效；Include 原始碼寫好、用 ADT 啟用過，只代表原始碼存在系統裡，Function Group 實際載入執行的版本不會反映，直到 Project 被 Activate（第一版教材誤判成「不需要 Project」，已更正） |
 | Classic BAdI（新式，Enhancement Spot 管理） | `GET BADI` / `CALL BADI` | `BADI_BATCH_NUMBER_INT`（Enhancement Spot `ES_BATCH_NUMBER_INT`） | 否，直接 SE18/SE19 建 Implementation |
 | S/4HANA Cloud BAdI | 透過 `g_badi_batch_number_cust`（`IF_LOBM_BATCH_NUMBER`） | Key User Extensibility BAdI | 否，走 ABAP Cloud 擴充性框架 |
 
@@ -76,4 +78,6 @@
 
 ## 答案
 
-`ZEN02BAT`（Number Range Object，使用者於 `SNRO` 建立，Domain `CHARG`，Interval `01`：`0000000001`～`9999999999`）、`ZXVBZU02`（`EXIT_SAPLV01Z_002` 客戶 Include，套件 `ZPP`，傳輸請求 `S4HK901982`，快照 `zxvbzu02.prog.abap`）、`ZR_EN02_BATCH_DEMO`（驗證程式，`$TMP`，快照 `zr_en02_batch_demo.prog.abap`）均已建立並啟用（`sap_inactive_objects` 確認無殘留未啟用版本）。已用 `programrun` 無頭執行驗證程式，真實輸出批號 `2607280001`／`2607280002`／`2607280003`，格式符合 `YYMMDD`+4碼流水號＝10碼設計。三代擴充技術對照表、Classic User-Exit 選用理由、情境判斷見本題內文。
+`ZEN02BAT`（Number Range Object，使用者於 `SNRO` 建立，Domain `CHARG`，Interval `01`：`0000000001`～`9999999999`）、`ZXVBZU02`（`EXIT_SAPLV01Z_002` 客戶 Include，套件 `ZPP`，傳輸請求 `S4HK901982`，快照 `zxvbzu02.prog.abap`）、`ZR_EN02_BATCH_DEMO`（驗證程式，`$TMP`，快照 `zr_en02_batch_demo.prog.abap`）均已建立並啟用（`sap_inactive_objects` 確認無殘留未啟用版本）。已用 `programrun` 無頭執行驗證程式（不經過 Enhancement 機制，直接呼叫 `NUMBER_GET_NEXT`），真實輸出批號 `2607280001`／`2607280002`／`2607280003`，證實 `ZEN02BAT`＋格式化邏輯本身正確。三代擴充技術對照表、Classic User-Exit 選用理由、情境判斷見本題內文。
+
+**⚠️ 待辦（GUI-only，由使用者處理）**：`EXIT_SAPLV01Z_002` 這個 Enhancement 本身**尚未真的啟用**——Include 原始碼已就緒，但還需要在 `CMOD` 完整跑一次「建 Enhancement Project → Assign `SAPLV01Z` → Activate Project」，才會讓 MIGO 等真實貨物移動的批號自動給號真的套用這段新邏輯。在使用者完成 CMOD 這一步之前，若照前一輪對話提到的方式用真實採購單做 Goods Receipt 測試，批號應該還是舊的預設格式，不代表程式邏輯有問題。
