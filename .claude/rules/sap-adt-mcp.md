@@ -242,6 +242,25 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 
 - **`NUMBER_GET_NEXT` 取號是非交易性（non-transactional）的，號碼一定會跳號，這是設計如此不是 bug**（2026-07-29 實測，Enhancement 課程 en02，真實 MIGO Goods Receipt 端對端驗證）：驗證程式 `ZR_EN02_BATCH_DEMO` 測試消耗了 `ZEN02BAT` 的 `1`/`2`/`3` 號，之後使用者在 MIGO 操作過程中（可能按過 `Check` 或重試）又消耗了幾號，最終真正過帳成功的批號序號是 `4`，但事後查 `NRIV` 的 `NRLEVEL` 已經是 `10`——中間 `5`~`9` 永遠消失、不會回收。原因：Number Range 的取號動作不受資料庫交易 COMMIT/ROLLBACK 約束（效能考量，避免並行過帳互相鎖等待），只要程式邏輯執行到取號那一行，號碼就真的被領走，即使該筆交易最後失敗/取消也不會歸還。**用 Number Range Object 產生的任何編號（批號、單號……）天生會有缺號，不能拿來當「總共發生過幾筆交易」的計數依據**；如果業務有「單號必須連號」的法規要求（如某些國家的統一發票），Number Range Object 這套機制從根本上不適用，要用完全不同的交易性＋鎖定機制設計。
 
+## 22. 舊式 Classic BAdI（只有 `SXSD/XD`，沒有 `ENHS/XS`）要用 `cl_exithandler=>get_instance`，不能用 `GET BADI`；DDIC Customer Include（`CI_*`）擴充手法；套件建立後無法透過 API 事後更改（2026-07-29 實測，Enhancement 課程 en03 延伸的真實 PP 客製化：COOIS 加自訂欄位 `ZZEXTWG`）
+
+- **不是所有 Classic BAdI 都有 `ENHS/XS` 影子**：en01 的 `MB_MIGO_BADI`、en03 的 `BADI_MM_MATNR` 都同時有 `SXSD/XD`（舊）＋`ENHS/XS`（新，NW 7.0 統一框架時自動包上的外殼），這種**可以**用新式 `GET BADI`/`CALL BADI` 語法呼叫；但 `WORKORDER_INFOSYSTEM`（PP／COOIS 用）quickSearch **只查到 `SXSD/XD`，完全沒有 `ENHS/XS`**——這種「純舊式」BAdI 用新語法 `GET BADI lo_badi.` 直接在**編譯階段**報錯「"LO_BADI" is not a valid BAdI handle here」，必須改用舊式呼叫慣例：
+  ```abap
+  DATA go_exit TYPE REF TO if_ex_workorder_infosystem.
+  CALL METHOD cl_exithandler=>get_instance
+    EXPORTING exit_name = 'WORKORDER_INFOSYSTEM'
+    CHANGING  instance  = go_exit
+    EXCEPTIONS no_reference = 1 OTHERS = 2.
+  IF go_exit IS BOUND.
+    CALL METHOD go_exit->method_name ...
+  ENDIF.
+  ```
+  `cl_exithandler=>get_instance` 對 Multi Use BAdI **一律成功回傳一個 bound 的 instance**（它是分派器，內部管理 0～多個實作），即使 0 個生效中的實作也不會報錯，呼叫方法就是安靜地什麼都不做——跟新式 `GET BADI`/`CALL BADI` 對 Single Use 沒實作時會丟 `CX_BADI_NOT_IMPLEMENTED` 是不同的「沒實作」表現方式。**判斷該用哪種語法的方法**：quickSearch 該 BAdI 名稱，看有沒有 `ENHS/XS` 型別的結果，沒有就要用 `cl_exithandler=>get_instance`。
+- **一個 Multi Use BAdI 可能同時有好幾個 Implementation，只查一個就下結論會誤判「沒有生效中的實作」**：`BADI_MM_MATNR` 一開始只查到跟 Definition 同名的 1 個 Implementation（剛好 Inactive），誤以為「這個 BAdI 沒人實作」；改用 quickSearch 該 BAdI 名稱＋`objectType=ENHO/XH` 篩選才找到全部 6 個 Implementation（4 個 Active），推翻了原本的結論。**查一個 Multi Use BAdI 的實作狀態，一定要用 quickSearch 撈全部同名前綴的 Implementation，不能只看 GET Enhancement Spot 回應裡（如果有）附帶的單一範例**。
+- **DDIC 結構的「Customer Include」擴充手法**（新式 source-based 結構，如 `IOHEADER` 這種 `define structure { ... }` 語法）：很多 SAP 標準結構會預留 `include ci_<結構名>;` 這一行，但這個 `CI_*` 結構本身**尚未存在**（GET 會 404「Error while importing object from the database」）；只要用一般 DDIC Structure 建立流程（POST `/sap/bc/adt/ddic/structures`，Content-Type `application/vnd.sap.adt.structures.v2+xml`，root `blue:blueSource`）把這個 `CI_*` 結構建出來、填入自訂欄位、啟用，**不需要改動原本的標準結構本身**，因為 `include` 這一行早就存在，DDIC 會在讀取結構定義時自動解析進去。這是比 Append Structure 更輕量、SAP 官方預留的擴充機制。
+- **⚠️ 套件一旦在建立物件時指定，之後無法透過 ADT API 更改**：不慎把 `CI_IOHEADER` 建到 `$TMP`（應該要建在 `ZPP`）後，嘗試用「LOCK → PUT 帶新 `packageRef` → UNLOCK」想改套件，PUT 回應雖然是 200，但讀回來套件仍然是原本的 `$TMP`，改套件沒有生效；重新 POST 建立同名物件會直接報 `ExceptionResourceAlreadyExists`。目前沒有找到能改變既有物件套件的 ADT API，物件的套件本質上是建立當下就定死的屬性——**這代表建立正式套件物件前，務必先跟使用者確認清楚套件名稱，不要抱著「先建起來、之後再改套件」的心態**，改錯了只能留著（如果是 `$TMP` 這種不影響正式流程的情況）或請使用者到 GUI 手動處理（正式套件目前沒有 ADT 刪除/搬移工具）。
+- **DDIC Structure 建立時，`sap_set_source` 的第一次 PUT 若還沒清過殘留鎖，會直接回 `ExceptionResourceAlreadyExists: Can't save due to errors in source`（不是預期中的殘留鎖 403），內容也不會更新**：用 `sap_get_source`／直接 GET `source/main` 讀回來會發現還是建立時系統自動塞的預設樣板欄位（例如 `component_to_be_changed : abap.string(0);`）；照第 5 節標準流程（`sap_lock`→`sap_unlock`）清鎖後**重新呼叫一次 `sap_set_source`**（同樣的內容）就會成功——這代表 DDIC Structure 的殘留鎖有時要清鎖**之後才寫入**，跟一般 Include／Class「先寫入才發現要清鎖」的順序不同，遇到 DDIC 物件寫入報怪異錯誤時，可以先清鎖再重試一次寫入。
+
 ## 匯出 SAP 原始碼到 src/ 的慣例
 
 - 檔名採 abapGit 格式：`<物件名小寫>.<類型>.abap`（如 `zdqm0001.prog.abap`；INCLUDE 也是 `.prog.abap`）。
