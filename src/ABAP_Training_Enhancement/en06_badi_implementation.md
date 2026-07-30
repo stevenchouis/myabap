@@ -61,10 +61,11 @@ en01／en03 提過 Multi Use BAdI 可以用 **Filter** 依條件（如公司代�
 4. **SE19** 建立 Implementation，跟 en05 略有不同的操作順序（⚠️ 這是這題排錯發現、之前理解錯的地方）：
    - SE19 初始畫面「Create Implementation」區塊 → 選 **New BAdI** → **先填 Enhancement Spot 名稱**（`ZES_EN06_FILTER_DEMO`）→ 按 Create
    - 彈出「Create Enhancement Implementation」對話框 → 填 **Enhancement Implementation**（容器層級名稱）＋ Short Text → 確認
-   - 再彈出「Create BAdI Implementations for Existing BAdI Definitions」表格 → **這時候才填 BAdI Implementation 名稱（`ZIM_EN06_FILTER_LH`）＋ Implementation Class（`ZCL_EN06_FILTER_LH`）＋從下拉選單選 BAdI Definition**
+   - 再彈出「Create BAdI Implementations for Existing BAdI Definitions」表格 → **這時候才填 BAdI Implementation 名稱＋ Implementation Class（`ZCL_EN06_FILTER_LH`）＋從下拉選單選 BAdI Definition**
    - 進到 Implementation 的「Filter Values」頁籤 → Create Combination → 填 `Filter=CARRID`／`Comparator==`／`Value 1=LH`
    - 雙擊 Implementing Class，實作 `GET_GREETING` 方法內容，存檔 Activate
-   - 對 `AA` 重複整個流程（`ZIM_EN06_FILTER_AA`／`ZCL_EN06_FILTER_AA`／Filter 值 `AA`）
+   - 對 `AA` 重複整個流程（`ZCL_EN06_FILTER_AA`／Filter 值 `AA`）
+   - ⚠️ **2026-07-30 補課發現**：這個 BAdI Implementation 在 TADIR 裡實際登記的物件名稱是「Enhancement Implementation **容器層級**的名稱」（第二個對話框填的那個），不是第三個表格裡填的 BAdI Implementation 名稱——`AA` 案例當初容器跟 Implementation 剛好取同名（`ZIM_EN06_FILTER_AA`），`LH` 案例則是容器叫 `ZEI_EN06_FILTER_LH`，導致 ADT／TADIR 查得到的是 `ZEI_EN06_FILTER_LH`（透過 `GET /sap/bc/adt/enhancements/enhoxh/<容器名>` 才能讀到，裡面 `enho:badiImplementation` 才是實際 Filter 設定）。**兩個對話框的名稱其實是同一件事的兩層包裝，建議乾脆取同名，避免事後查證要記兩個名字。**
 5. 測試程式呼叫 `GET BADI go_badi FILTERS carrid = lv_carrid.`——**注意 `FILTERS` 子句用的是 Filter 名稱（`carrid`，對應 SE18 建的 `CARRID`），跟方法本身的 `iv_carrid` 參數是兩件事**，剛好同名容易誤會成同一個東西，實際上 Filter 值只是拿來讓框架決定「該呼叫哪個 Implementation」，不會自動塞進方法參數，方法呼叫時該傳的參數還是要自己傳。
 
 **實測結果**（`ZR_EN06_FILTER_DEMO`）：
@@ -98,7 +99,7 @@ UNCHANGED
 3. **兩層驗證**：
    - **單元測試**（`ZR_EN06_ATSAVE_UNIT_TEST`，`$TMP`）：不透過真實 BAdI 派送，直接 `CREATE OBJECT`＋呼叫方法，驗證安全閘組合（`1011`/`PP71`）寫入 1 筆記錄、非安全閘組合（`1011`/`PP01`）寫入 0 筆記錄，`programrun` 無頭執行驗證成功。
    - **真實存檔測試**：使用者用 `CO01`（Plant `1011`／Order Type `PP71`）建立真實工單並存檔，`ZEN06_ATSAVE_LOG` 正確寫入一筆新記錄（`AUFNR=%00000000001`），證實 Enhancement 對真實訂單存檔確實生效。過程中一度因 Implementation 誤含 `COMMIT WORK` 導致真實 Dump（`MESSAGE_TYPE_X`，`SAPLCOZV`），已修正並重新驗證成功。
-4. **案例三（Filter-dependent BAdI）**：`ZIF_EN06_FILTER_GREETING`（Interface，ADT 建立）＋`ZES_EN06_FILTER_DEMO`（Enhancement Spot／BAdI Definition，**使用者於 SE18 建立**，Multi Use，Filter `CARRID` type `C`）＋`ZIM_EN06_FILTER_LH`／`ZCL_EN06_FILTER_LH`（Filter 值 `LH`）與 `ZIM_EN06_FILTER_AA`／`ZCL_EN06_FILTER_AA`（Filter 值 `AA`，**皆使用者於 SE19 建立**，Claude 用 ADT 寫入 Class 內容）。驗證程式 `ZR_EN06_FILTER_DEMO` 已用 `programrun` 無頭執行驗證成功：`LH`／`AA` 各自觸發對應 Implementation，`UA`（無 Implementation）維持呼叫前的哨兵值不變。
+4. **案例三（Filter-dependent BAdI）**：`ZIF_EN06_FILTER_GREETING`（Interface，ADT 建立）＋`ZES_EN06_FILTER_DEMO`（Enhancement Spot／BAdI Definition，**使用者於 SE18 建立**，Multi Use，Filter `CARRID` type `C`）＋`ZEI_EN06_FILTER_LH`／`ZCL_EN06_FILTER_LH`（Filter 值 `LH`）與 `ZIM_EN06_FILTER_AA`／`ZCL_EN06_FILTER_AA`（Filter 值 `AA`，**皆使用者於 SE19 建立**，Claude 用 ADT 寫入 Class 內容）。驗證程式 `ZR_EN06_FILTER_DEMO` 已用 `programrun` 無頭執行驗證成功：`LH`／`AA` 各自觸發對應 Implementation，`UA`（無 Implementation）維持呼叫前的哨兵值不變。**（2026-07-30 補課：`LH` 的 Implementation 容器物件補建為 `ZEI_EN06_FILTER_LH`，見上方排錯記錄）**
 
 ## 題目需求
 
