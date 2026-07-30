@@ -338,6 +338,29 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **實測驗證（`ZES_EN06_FILTER_DEMO`＋`ZIM_EN06_FILTER_LH`／`ZIM_EN06_FILTER_AA`）**：`CARRID=LH`／`CARRID=AA` 分別正確觸發對應 Implementation；`CARRID=UA`（沒有任何 Implementation 掛這個 Filter 值）呼叫 `CALL BADI` 後，呼叫前設定的哨兵值（`cv_text = 'UNCHANGED'`）維持不變，證實「沒有符合 Filter 條件的 Implementation」時 `CALL BADI` 安靜地不執行任何邏輯，不報錯——是 en03 學到的「Multi Use 沒有生效中的 Implementation 也不會報錯」規則在 Filter 情境下的具體體現。
 - **驗證技巧：用「哨兵值」（sentinel value）排除歧義**——呼叫前先把 `CHANGING` 參數設成一個「正常邏輯絕對不會產生」的值（如字面字串 `'UNCHANGED'`），呼叫後如果這個值還在，才能明確證明「沒有任何 Implementation 的程式碼被執行到」，而不是「有執行、但恰巧算出同樣結果」——這個技巧在測試「0 個生效中 Implementation」這類「什麼都不做」的情境特別重要，光看輸出是不是空值/初始值容易有歧義。
 
+## 28. 權限物件（Authorization Object，SU21）完全沒有 ADT 路徑，比 Search Help／T-code 更徹底（2026-07-30 實測，Enhancement 課程 en08 出題前查證）
+
+- 抓 `/sap/bc/adt/discovery` 全文（166KB）搜尋所有 `<atom:title>`，找不到任何「Authorization Object」「Authorization」相關的 collection（唯一命中的是不相關的 "Security Reentranceticket"）。
+- 用 ADT quickSearch 查已知確實存在的標準權限物件 `K_ORDER`（已用 `datapreview/freestyle` 查 `TOBJ` 表證實存在，`OCLSS='CO'`，欄位 `FIEL1~FIEL5 = RESPAREA/AUFART/AUTHPHASE/CO_ACTION/KSTAR`），quickSearch **回空結果**（`<adtcore:objectReferences/>`）。
+- 嘗試用已知的物件型別代碼猜測 vit stub 路徑（`/sap/bc/adt/vit/wb/object_type/susoo/object_name/K_ORDER`）也只回空的 `<adtcore:mainObject/>`，代表**連猜測的物件型別代碼都是錯的／根本沒有對應路徑**。
+- **結論**：權限物件（`SU21` 維護）比本課程之前記載的 Search Help（第 10 節）、T-code（第 12 節）**更徹底 GUI-only**——那兩者至少 `repository/informationsystem/objecttypes` 目錄查得到物件型別、或 quickSearch 能命中已知物件；權限物件連這些都沒有，`sap-adt` MCP／ADT 協定完全不涵蓋這塊，自訂權限物件只能在 `SU21` GUI 手動建立，Claude 完全無法查詢或建立，只能請使用者建好後告知欄位/物件名稱，靠使用者回報或 `AUTHORITY-CHECK` 執行結果間接驗證。
+- **查證方法論延續本檔一貫做法**：不要因為「查不到就假設不存在」，要先用 `datapreview/freestyle` 查對應的字典表（`TOBJ` 查權限物件本身、`TOBJT` 查文字說明）確認物件真的存在，再拿確定存在的物件去測 ADT 路徑，這樣「ADT 查不到」才是真正的 ADT 限制，而不是查詢方式錯誤或物件真的不存在導致的偽陰性。
+
+## 29. Message Class 訊息內容寫入：正確 schema 找到了，但 PUT 回 200 OK 卻沒有真的存進去（2026-07-30 實測，Enhancement 課程 en08 出題）
+
+- **正確的訊息巢狀 schema（跟第 8 節原本記載的猜測不同，已更正）**：`mc:message` 元素要**直接當 `mc:messageClass` 的子元素**，不能包一層 `mc:messages` 容器；屬性是 **`mc:msgno`**／**`mc:msgtext`**（不是 `mc:number`／`mc:shortText`，也不是獨立的 `msg:` namespace）：
+  ```xml
+  <mc:messageClass xmlns:mc="http://www.sap.com/adt/MessageClass" xmlns:adtcore="http://www.sap.com/adt/core"
+    adtcore:name="ZEN08" adtcore:type="MSAG/N" adtcore:description="...">
+    <adtcore:packageRef adtcore:name="$TMP"/>
+    <mc:message mc:msgno="001" mc:msgtext="Plant &amp;1 has no authorization for cost analysis"/>
+  </mc:messageClass>
+  ```
+  這個 schema 是靠 GET 個別訊息子資源 `/sap/bc/adt/messageclass/<class>/messages/<no>`（對不存在的訊息也會回一個空白樣板）反查出正確屬性名稱（`msg:msgno`/`msg:msgtext`，但這是**個別訊息子資源**的 namespace，class 層級 PUT 內嵌訊息時要換回 `mc:` 前綴＋同樣的 `msgno`/`msgtext` 屬性名）。
+- **個別訊息子資源（`/messages/<no>`）自己的 LOCK 疑似有 bug**：對這個子資源呼叫 LOCK，不管重試幾次都回傳**完全相同的 LOCK_HANDLE**（不是每次重新產生的隨機值），且緊接著用這個 handle 呼叫 PUT 一律報 `ExceptionResourceInvalidLockHandle`（"is not locked"）——這暗示這個子資源的 LOCK 沒有真的在後端註冊。改回對 **Message Class 本身**（`/sap/bc/adt/messageclass/<class>`）做 LOCK，用該 lock handle PUT 整個 class（訊息當直接子元素，見上一條），才拿得到正常、可用的 lock handle 並讓 PUT 回 200。
+- **⚠️⚠️ 即使 PUT 回 200 OK，訊息內容依然沒有真的存進去**：PUT 完之後不管是 GET class 本身（`changedAt` 時間戳完全沒變，跟建立當下一模一樣）還是 GET 個別訊息子資源（`msgno`/`msgtext` 都還是空字串），都證實**這次 PUT 沒有任何實際效果**；額外嘗試對 Message Class 呼叫 activation API（`POST /sap/bc/adt/activation?method=activate`）也一樣回 200 但完全沒有改變讀回的結果。這是本課程第二次遇到「PUT／POST 回 200/201，但實際資料沒有落地」的情況（第一次是第 14 節 Table Type 用錯 Content-Type 時），但這次已經確認 schema 正確、Content-Type 正確（`application/vnd.sap.adt.messageclass.v1+xml`），仍然存不進去，目前判斷是這個 RFC bridge／MCP server 版本對 Message Class 訊息內容寫入這塊**有實際的功能缺陷**，不是操作方式錯誤。
+- **結論／Workaround**：Message Class 本身（空殼，`adtcore:name`/`adtcore:description`/套件）可以用 ADT 建立且會真的生效（第一次 POST 建立、GET 讀回確認 `version="active"`）；但**訊息文字（T100 的實際內容）目前這個環境無法透過 ADT 寫入，必須請使用者到 `SE91` 手動維護**——跟 Text Symbols／Search Help／T-code／權限物件同一類「GUI-only 收尾」的限制，但這次連「schema 對、Content-Type 對」都救不回來，是目前記錄過最頑固的一個案例。程式碼裡照樣可以直接寫 `MESSAGE e001(zen08) WITH ...`，只要訊息類別／編號存在（哪怕文字是空的），語法檢查跟啟用都不會擋，只是執行時顯示的文字要等使用者在 SE91 補上才會正確顯示。
+
 ## 匯出 SAP 原始碼到 src/ 的慣例
 
 - 檔名採 abapGit 格式：`<物件名小寫>.<類型>.abap`（如 `zdqm0001.prog.abap`；INCLUDE 也是 `.prog.abap`）。
