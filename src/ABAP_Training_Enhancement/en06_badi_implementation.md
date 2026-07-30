@@ -103,6 +103,25 @@ UNCHANGED
 **⚠️ 排錯記錄（2026-07-30 補課）：不同真實工單的稽核記錄卻共用同一個 `AUFNR=%00000000001`，是設計缺口不是隨機巧合**——使用者在兩個不同日期（7/29、7/30）分別用 CO01 建立了兩張不同的真實工單，`ZEN06_ATSAVE_LOG` 卻都記成同一個 `%00000000001`，導致這張稽核表實際上無法用 `AUFNR` 分辨到底是哪一張工單。
 
 - **根本原因**：`AT_SAVE` 觸發當下，新建工單的 `AUFNR` 還是一個**暫時號碼**（內部佔位格式，每次新建工單都重新從這個暫時號碼起算），要等真正的號碼從 Number Range 確定之後，SAP 才會另外呼叫一個專用的掛勾點通知「暫時號碼 → 真實號碼」的對應——查 `IF_EX_WORKORDER_UPDATE` 完整方法清單，果然找到 `NUMBER_SWITCH(I_AUFNR_OLD, I_AUFNR_NEW, I_AUFPL_OLD, I_AUFPL_NEW, I_AUTYP)` 這個方法，證實這是 SAP 標準設計好的機制，不是本題獨有的巧合或 bug。
+
+**⚠️ 重要釐清：`NUMBER_SWITCH` 是「通知回填」用的掛勾點，不是「客製產生工單號碼」用的掛勾點**——這是很容易誤會的地方（連方法名稱聽起來都很像「可以介入決定號碼」），實際查標準系統裡真正呼叫這套「暫時號碼→真實號碼」機制的標準 FM `CO_NB_ORDER_NUMBER_SWITCH`（Function Group `CONB`，套件 `CO`）證實：
+
+```abap
+FUNCTION CO_NB_ORDER_NUMBER_SWITCH
+  IMPORTING
+    VALUE(AUFNR_OLD) LIKE CAUFVD-AUFNR
+    VALUE(AUFNR_NEW) LIKE CAUFVD-AUFNR.
+* 1. switch current order number
+  NBAU_ORD-AUFNR = AUFNR_NEW.
+  MODIFY NBAU_ORD TRANSPORTING AUFNR WHERE AUFNR EQ AUFNR_OLD.
+* 2. switch parent order numbers ...
+* 3. switch leading order numbers ...
+ENDFUNCTION.
+```
+
+這支標準 FM 做的事情跟我們在 `NUMBER_SWITCH` 裡寫的邏輯一模一樣：**拿舊的暫時號碼去找內部緩衝區裡對應的記錄，把它們的號碼欄位整批改成新的真實號碼**——SAP 自己內部管理工單相關資料的緩衝表（`NBAU_ORD` 這類）也是用同一套「先用暫時號碼登記、真實號碼確定後再全面回填」的模式，我們的 BAdI Implementation 只是被通知「順便一起做同樣的事」而已。
+
+**為什麼這個掛勾點沒辦法用來客製工單號碼**：`NUMBER_SWITCH` 呼叫時，`I_AUFNR_NEW` 是 **IMPORTING 參數**（唯讀）——真正的號碼在這一步之前就已經從 Number Range 確定下來了，`NUMBER_SWITCH` 拿到的是「已經決定好的結果」，不是「請你決定一個號碼」。想客製工單真正產生的號碼邏輯，要往更早的階段找掛勾點——真正決定號碼的地方是系統呼叫 `NUMBER_GET_NEXT` 跟 Number Range Object 要號碼的那一刻，這正是 en02（`EXIT_SAPLV01Z_001`/`002`，客製化批號自動給號）跟 en04（`ZEN04_ORDER_NO_PLUGIN`，Implicit Enhancement 插在 `CO_ZF_NUMBER_GET` 最前面直接覆寫 `caufvd-aufnr`）已經示範過的正確做法：**要在「跟 Number Range 要號碼」這個動作發生之前或當下攔截，不是在號碼確定之後的廣播通知裡攔截**。一句話總結：`NUMBER_SWITCH` 是「事後被告知結果」，`CO_ZF_NUMBER_GET` 這類掛勾點才是「事前可以介入決定」。
 - **修法**：在 `NUMBER_SWITCH` 裡把 `AT_SAVE` 當下寫入的暫時號碼記錄，回填成真正的工單號碼：
   ```abap
   method IF_EX_WORKORDER_UPDATE~NUMBER_SWITCH.
