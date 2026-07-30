@@ -323,6 +323,21 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **Enhancement Implementation 的內容（`ENHANCEMENT n <名稱>. ... ENDENHANCEMENT.` 區塊）完全無法透過 ADT 讀寫**：`GET /sap/bc/adt/enhancements/enhsxs/<spot>` 回 `Enhancement technology HOOK_DEF is not supported yet`；嘗試組出對應 `ENHOXHH` 路徑讀取 Implementation 原始碼回 `uriMappingError: URI-Mapping cannot be performed due to invalid workbench object`。只能請使用者直接在 SE38 的 Enhancement 編輯區塊手動輸入程式碼，Claude 只能提供程式碼文字讓使用者貼上，無法代為寫入或事後讀取驗證內容（只能透過 `programrun` 執行結果間接驗證邏輯是否正確）。
 - **對照 en04（Implicit Enhancement／Source Code Plugin）**：兩者建立空殼都是 GUI-only，但 en04 的 `ENHOXHH` 建好之後內容可以完全用 ADT 讀寫、程式本身也不受影響仍可用 `sap_lock`；這題的 Explicit Enhancement 不只內容要 GUI，連**外層程式本身**都被 ADT 拒絕編輯。這代表「要不要在自己維護的 Z 程式上加 Explicit Enhancement Point」是一個需要跟團隊溝通清楚的技術取捨：加了之後，這支程式從此對 ADT/Claude 自動化流程關閉。
 
+## 27. Filter-dependent BAdI：Filter 是 SE18 右鍵「Create Filter」獨立建立，Filter Type 只能選五種基本型別分類，SE19 建立順序是先填 Spot 名稱（2026-07-30 實測，Enhancement 課程 en06 補課）
+
+- **BAdI Definition 畫面的「Limited filter use」核取方塊不是啟用 Filter 的開關**，它在 Usability 區塊，跟「Multiple Use」並列，但實測勾選後**不會**跳出任何 Filter Type 輸入欄位——這個核取方塊的真正用途是「限制 Filter 值只能是預先列出的固定清單」，前提是已經有 Filter 存在，不是用來建立 Filter 本身。
+- **真正建立 Filter 的入口：在 SE18 左側樹狀節點的 BAdI Definition 上右鍵 → Create Filter**，彈出「Create Filter for BAdI」對話框，欄位：
+  - **BAdI Filter**：自訂名稱（如 `CARRID`）
+  - **Filter Type**：⚠️ **這是單一字元欄位**，F4 只會列出 5 個內建分類：`I`（Integer）／`C`（Character-like）／`S`（String）／`N`（Numeric）／`P`（Packed）——**不是**填一個完整的 Data Element 名稱（一開始直覺填 `S_CARR_ID` 這種 Data Element 名稱是錯的，欄位長度只有 1 碼放不下，也不會被接受）；要對照實際需要過濾的資料型別選最接近的分類（3 碼字元代碼如航空公司代碼、公司代碼、廠別代碼都選 `C`）
+  - **Description**、**Constant filter value in call**（勾選代表這個 Filter 值是寫死常數，不勾才能在執行期動態傳不同值）
+  - **Filter Value Check for BAdI Implementations**：`No Check`／`Automatically by dictionary`（要對照 Data Element 的檢查表驗證合法性）／`By separate program`
+  - 建立後 Filter 會成為 BAdI Definition 樹狀節點下的獨立子節點（跟 Interface、Implementations 平行），GET 該 Enhancement Spot 的 ADT XML 可以看到 `<enhs:filters><enhs:filter enhs:filterName="CARRID" enhs:filterType="C" enhs:onlyConstantFilterValues="false"/></enhs:filters>`，證實 Filter 是掛在 `enhs:badiDefinition` 底下的獨立結構，不是 Usability 的屬性。
+- **SE19 建立 Filter-dependent Implementation 的操作順序，容易憑直覺搞反**：正確順序是**先在 SE19 初始畫面的「Create Implementation」區塊填 Enhancement Spot 名稱**（不是先想 Implementation 要叫什麼），按 Create 後才依序：① 彈出「Create Enhancement Implementation」對話框，填**容器層級**的 Enhancement Implementation 名稱＋Short Text；② 再彈出「Create BAdI Implementations for Existing BAdI Definitions」表格，這時候才填實際的 **BAdI Implementation 名稱**、**Implementation Class 名稱**，並從下拉選單選 **BAdI Definition**（因為理論上一個 Spot 可以掛多個 BAdI Definition）。這代表**外層有兩層命名**：Enhancement Implementation（容器，ENHO 物件本身的名稱）與 BAdI Implementation（容器裡的實際實作項目名稱），兩者可以不同名，教學上容易只注意到後者、忽略前者也要命名。
+- **建好 Implementation 後，指定 Filter 值走「Enh. Implementation Elements」樹底下的「Filter Values」節點**：Create Combination → 在表格填 `Filter`（選剛才 SE18 建的 Filter 名稱，如 `CARRID`）／`Comparator`（`=`）／`Value 1`（實際比對值，如 `LH`）。多個 Implementation 各自建各自的 Filter Combination，值不同即可分流。
+- **`GET BADI ref FILTERS <filter名> = <值>.` 語法確認可用**，`<filter名>` 對應 SE18 建的 Filter 名稱（不分大小寫），可以跟方法本身的參數同名（如都叫 `carrid`）但**是兩件獨立的事**——Filter 值只影響「該呼叫哪個 Implementation」，不會自動變成方法呼叫時的參數值，方法的 `EXPORTING`/`CHANGING` 參數還是要自己在 `CALL BADI` 那行明確傳遞。
+- **實測驗證（`ZES_EN06_FILTER_DEMO`＋`ZIM_EN06_FILTER_LH`／`ZIM_EN06_FILTER_AA`）**：`CARRID=LH`／`CARRID=AA` 分別正確觸發對應 Implementation；`CARRID=UA`（沒有任何 Implementation 掛這個 Filter 值）呼叫 `CALL BADI` 後，呼叫前設定的哨兵值（`cv_text = 'UNCHANGED'`）維持不變，證實「沒有符合 Filter 條件的 Implementation」時 `CALL BADI` 安靜地不執行任何邏輯，不報錯——是 en03 學到的「Multi Use 沒有生效中的 Implementation 也不會報錯」規則在 Filter 情境下的具體體現。
+- **驗證技巧：用「哨兵值」（sentinel value）排除歧義**——呼叫前先把 `CHANGING` 參數設成一個「正常邏輯絕對不會產生」的值（如字面字串 `'UNCHANGED'`），呼叫後如果這個值還在，才能明確證明「沒有任何 Implementation 的程式碼被執行到」，而不是「有執行、但恰巧算出同樣結果」——這個技巧在測試「0 個生效中 Implementation」這類「什麼都不做」的情境特別重要，光看輸出是不是空值/初始值容易有歧義。
+
 ## 匯出 SAP 原始碼到 src/ 的慣例
 
 - 檔名採 abapGit 格式：`<物件名小寫>.<類型>.abap`（如 `zdqm0001.prog.abap`；INCLUDE 也是 `.prog.abap`）。
