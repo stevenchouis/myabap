@@ -4,7 +4,7 @@
 @AbapCatalog.deliveryClass : #A
 @AbapCatalog.dataMaintenance : #LIMITED
 define table zen08_complog {
-  key client : abap.clnt not null;
+  key mandt  : mandt not null;
   key aufnr  : aufnr not null;
   key artnr  : artnr not null;
   key updat  : updat not null;

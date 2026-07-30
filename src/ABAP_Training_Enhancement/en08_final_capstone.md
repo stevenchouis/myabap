@@ -15,9 +15,9 @@ en08 就是照這個消費者視角，設計三個各自獨立的真實客戶需
 
 | # | 技術 | 案例 | 狀態 |
 |---|---|---|---|
-| 1 | Classic User-Exit | PPCO0001：工單存檔時把 Component Change 存入 Log Table | 待建置 |
+| 1 | Classic User-Exit | PPCO0001：工單存檔時把 Component Change 存入 Log Table | **✅ 已完整驗證** |
 | 2 | Implicit Enhancement | CO02/CO03 Cost Analysis 權限漏洞：標準功能不卡使用者權限，補上廠別層級授權檢查 | **✅ 已完整驗證** |
-| 3 | Explicit Enhancement（消費者視角） | MB52 加 MRP Controller 選取欄位，掛在 SAP 標準程式**已經存在**的 Explicit Enhancement Point 上 | 待建置 |
+| 3 | Explicit Enhancement（消費者視角） | MB52 加 MRP Controller 選取欄位，掛在 SAP 標準程式**已經存在**的 Explicit Enhancement Point 上 | **✅ 已完整驗證** |
 
 案例 3 特別值得注意：跟 en07 剛好相反——en07 是「生產者視角」，自己在 Z 程式裡宣告插入點；這裡是**消費者視角**，SAP 標準程式（`RM07MLBS`，MB52 底層報表）裡**已經存在**別人（另一個開發者）留下的 `ENHANCEMENT-POINT`，這次要做的是在**同一個插入點上再掛一個新的 Implementation**，不用自己宣告任何東西。
 
@@ -95,7 +95,7 @@ ENDIF.
 
 ---
 
-## 案例一：PPCO0001（工單存檔時 Component Change 存 Log Table）——建置中
+## 案例一：PPCO0001（工單存檔時 Component Change 存 Log Table）——✅ 已完整驗證
 
 **需求**：工單存檔時，把使用者對工單元件（Component）的異動內容（改前/改後值）記錄進自訂 Log 表，方便事後稽核。
 
@@ -109,7 +109,7 @@ ENDIF.
 **設計與建置**（承 CLAUDE.md 風格規範「要用 Data Element，不要直接給 Type」）：
 
 - **`ZEN08_COMPLOG`（Log 表，ADT 建立）**：17 個欄位全部用 Data Element，沿用標準 DE（`AUFNR`/`ARTNR`/`UPDAT`/`UPTIM`/`RSNUM`/`RSPOS`/`RSART`/`CDCHNGIND`/`FIELDNAME`/`CDFLDVALO`/`CDFLDVALN`/`UNAME`/`TCODE`/`TEXT30`/`TEXT80`），唯一沒有語意相符標準 DE 的序號欄位（`SEQ`）自建 `ZEN08_SEQ`（Domain+DE，NUMC 3 碼）
-- **`EZEN08_COMPLOG`（Lock Object，**使用者於 SE11 建立**）**：Primary Table `ZEN08_COMPLOG`，Lock Mode **`E`（Exclusive/Write Lock）**，Lock Parameter 勾選 `CLIENT`/`AUFNR`/`ARTNR`（對應參考文件 `ENQUEUE_EZPPT005` 用的 `mode_zppt005 = 'E'`，鎖工單+成品兩個欄位）——建好後系統自動產生 `ENQUEUE_EZEN08_COMPLOG`/`DEQUEUE_EZEN08_COMPLOG` 兩個 FM
+- **`EZEN08_COMPLOG`（Lock Object，**使用者於 SE11 建立**）**：Primary Table `ZEN08_COMPLOG`，Lock Mode **`E`（Exclusive/Write Lock）**，Lock Parameter 勾選 `MANDT`/`AUFNR`/`ARTNR`（對應參考文件 `ENQUEUE_EZPPT005` 用的 `mode_zppt005 = 'E'`，鎖工單+成品兩個欄位）——建好後系統自動產生 `ENQUEUE_EZEN08_COMPLOG`/`DEQUEUE_EZEN08_COMPLOG` 兩個 FM
 - **`ZCL_EN08_COMPLOG`（Z Class，ADT 建立）**：把參考文件的比對/寫入邏輯搬進 `LOG_CHANGE` 靜態方法，呼應 en07 思考題 3 提過的「把邏輯集中寫在 Z Class，Enhancement 裡只放一行呼叫」設計
 - **CMOD**（**使用者執行**，比照 en02 四步驟）：Project 建立 → Assign Enhancement `PPCO0001` → 雙擊 `EXIT_SAPLCOBT_001` 生成 Include `ZXCO1U01` → 內容只放一行 `CALL METHOD zcl_en08_complog=>log_change( it_head = header_table it_comp = component_table ).` → Activate Project
 
@@ -127,7 +127,24 @@ ENDIF.
 1. **`PROTECTED SECTION.` 這個區塊即使空白也必須明確存在**——中間拿掉整段 `PROTECTED SECTION.`（讓 `PUBLIC SECTION` 後面直接接 `PRIVATE SECTION`），會讓這個 source-based 存檔的解析器整個崩潰，回這個誤導性的「無法拆分 SECTION」錯誤，實際上只是少了一個空區塊。
 2. **`CLASS-METHODS` 的 `IMPORTING`／`RETURNING` 參數，型別不能用 `TYPE STANDARD TABLE OF <結構>` 這種 inline 寫法**——這種寫法只能用在區域變數的 `DATA`/`TYPES` 宣告，用在 Method 的正式參數宣告上會讓同一個解析器崩潰、報出同樣誤導性的錯誤。正確做法：Method 簽章維持泛型 `TYPE STANDARD TABLE`（不指定 `OF`），方法內部改用**具名 `TYPES` 定義表格型別，再讓 `FIELD-SYMBOLS` 參照那個型別名稱**（`FIELD-SYMBOLS` 同樣不支援 inline 的 `OF <結構>` 寫法），最後用一般 `ASSIGN it_head TO <lt_head>.`（不需要 `CASTING`）取得靜態型別化的存取，才能同時滿足 Method 簽章的限制、又讓 `SELECT ... FOR ALL ENTRIES` 這類需要編譯期靜態型別的語句正常運作。
 
-**尚待完成**：Z Class 邏輯已可正常編譯與啟用（見上）；CMOD 四步驟待使用者執行。
+**⚠️ 排錯記錄：Client 欄位一開始沒有跟標準命名慣例，導致真實 CO02 測試直接 Dump**——`ZEN08_COMPLOG` 表格建立時，Client 欄位第一版取名 `CLIENT`（型別 `abap.clnt`），語法上完全合法、也能正常啟用；但 SE11 建 Lock Object 時，系統會依欄位名稱自動產生 Enqueue/Dequeue FM 的參數名稱，於是 `ENQUEUE_EZEN08_COMPLOG`/`DEQUEUE_EZEN08_COMPLOG` 的參數也叫 `CLIENT`，不是慣例的 `MANDT`。真實在 CO02 觸發時，`ZCL_EN08_COMPLOG` 呼叫這兩個 FM 時寫的是慣例寫法 `EXPORTING mandt = sy-mandt`，結果 Dump：`CALL_FUNCTION_PARM_UNKNOWN`／`CX_SY_DYN_CALL_PARAM_NOT_FOUND`，「Function parameter 'MANDT' is unknown」。**標準表格的 Client 欄位一律要叫 `MANDT`（型別引用標準 Data Element `MANDT`），這是貫穿整個 SAP 系統的強制慣例，不是「隨便取名、程式配合欄位名稱就好」**（第一次修正時我一度改成讓程式配合欄位名稱 `client = sy-mandt`，方向反了，應該是欄位名稱要配合慣例）。修法：把表格欄位改回 `key mandt : mandt not null;`，但這會連動觸發 `"ZEN08_COMPLOG-CLIENT is used in aggregate EZEN08_COMPLOG. Delete not allowed"`（Lock Object 還在參照舊欄位）——要先到 SE11 把 Lock Object 的 Primary Table 移除再重新加回（讓欄位清單重新抓到 `MANDT`），勾選回 `MANDT`/`AUFNR`/`ARTNR` 並存檔，才能讓表格的欄位改名生效；表格與 Class 都改回 `mandt` 之後重新啟用即修復。
+
+**✅ 端對端真實驗證結果**（SE16 查 `ZEN08_COMPLOG`）：
+
+| 欄位 | 實際值 |
+|---|---|
+| Client | 130 |
+| Order | 110000000006 |
+| Product | SFG101 |
+| Changed on / At | 2026/07/30 21:41:08 |
+| Reservation / Item no. | 2577 / 5 |
+| Change Ind. | U（Update） |
+| Field Name | ERFMG（Requirement Qty） |
+| Old value → New value | 100 → 120 |
+| User Name | MONICA |
+| Transaction Code | CO02 |
+
+真實在 CO02 把工單 `110000000006` 的元件 `SFG101` 需求量從 100 改成 120 並存檔後，Log 表正確寫入一筆異動記錄，欄位標籤（Field Name 說明文字、User Name 全名）也都正確帶出——證實 MANDT 命名修正後，`ENQUEUE_EZEN08_COMPLOG`/`DEQUEUE_EZEN08_COMPLOG` 鎖定、`ZCL_EN08_COMPLOG=>LOG_CHANGE` 比對寫入、CMOD Enhancement 派送三段完全打通，案例一至此**完整驗證通過**。
 
 ## 案例三：MB52 加 MRP Controller 選取欄位（Explicit Enhancement，消費者視角）——✅ 已完整驗證
 
@@ -207,7 +224,7 @@ CALL FUNCTION 'SELECTION_TEXTS_MODIFY'
 2. **`ZEN08`**（Message Class，ADT 建立空殼成功；訊息 `001` 文字**使用者於 SE91 補上**）：「沒有權限顯示廠別 &1 的成本分析」。
 3. **`ZIM_CO_COST_AUTH`**（Implicit Enhancement Implementation，**使用者於 SE37 建立**，掛在 `K_KKB_CO_OBJECT_REPORT_CALL` 函式最開頭）：內容見上方案例二程式碼，已使用者親自用 `CO02`/`CO03` 真實工單（Plant 1011）雙重情境（有權限／無權限）端對端驗證成功。
 4. **`ZMB52_EE`**（Explicit Enhancement Implementation，**使用者於 SE38 建立**，掛在 `RM07MLBS` 的三個既有插入點上：`rm07mlbs_3`／`rm07mlbs_07`／`ehp604_rm07mlbs_08`）：內容見上方案例三①②③程式碼，已使用者親自在 `MB52` 端對端驗證成功（選取欄位、畫面文字、篩選邏輯皆生效）。系統裡另有一個使用者先前測試留下的殘留物件 `ZRM07MLBS3`（同樣宣告指向 `MARC-DISPO`，變數名 `s_dispo`，已確認 Active），待使用者清理。
-5. 案例一（PPCO0001）**尚未建置**，僅完成需求分析與技術背景查證（含使用者提供的真實參考文件內容）。
+5. **`ZEN08_COMPLOG`/`EZEN08_COMPLOG`/`ZCL_EN08_COMPLOG`**（Log 表＋Lock Object＋Z Class，ADT 建立＋**使用者於 SE11 建 Lock Object**）＋**CMOD Project（使用者建立，Assign `PPCO0001`，Include `ZXCO1U01`，已 Activate）**：案例一完整鏈路，已使用者親自用 `CO02` 真實工單（`110000000006`，元件 `SFG101`）端對端驗證成功（見上方案例一驗證結果）。
 
 ## 題目需求
 
