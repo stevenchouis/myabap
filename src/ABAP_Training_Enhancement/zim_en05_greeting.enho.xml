@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enho:objectData adtcore:responsible="MONICA" adtcore:masterLanguage="EN" adtcore:masterSystem="S4H" adtcore:name="ZIM_EN05_GREETING" adtcore:type="ENHO/XH" adtcore:changedAt="2026-07-29T17:58:34Z" adtcore:version="active" adtcore:createdAt="2026-07-29T17:43:37Z" adtcore:changedBy="MONICA" adtcore:createdBy="MONICA" adtcore:description="ZIM_EN05_GREETING" adtcore:language="EN" xmlns:enho="http://www.sap.com/adt/enhancements/enho" xmlns:adtcore="http://www.sap.com/adt/core">
+<atom:link href="/sap/bc/adt/vit/wb/object_type/enhoxh/object_name/ZIM_EN05_GREETING" rel="self" type="application/vnd.sap.sapgui" title="Representation in SAP GUI" xmlns:atom="http://www.w3.org/2005/Atom"/>
+<adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP" adtcore:description="Temporary Objects (never transported!)"/>
+<enho:contentCommon enho:toolType="BADI_IMPL" enho:adjustmentStatus="adjusted" enho:upgradeFlag="false"/>
+<enho:contentSpecific>
+<enho:badiTechnology>
+<enho:badiImplementations>
+<enho:badiImplementation enho:name="ZIM_EN05_GREETING" enho:shortText="Implementation: ZES_EN05_GREETING" enho:isExample="false" enho:isDefault="false" enho:isActive="true" enho:isCustomizingSupported="true" enho:runtimeBehaviorShorttext="The implementation will be called">
+<enho:enhancementSpot adtcore:uri="/sap/bc/adt/enhancements/enhsxs/zes_en05_greeting" adtcore:type="ENHS/XS" adtcore:name="ZES_EN05_GREETING"/>
+<enho:badiDefinition adtcore:uri="/sap/bc/adt/vit/wb/object_type/enhsxb/object_name/ZES_EN05_GREETING%20%20%20%20%20%20%20%20%20%20%20%20%20ZES_EN05_GREETING" adtcore:type="ENHS/XB" adtcore:name="ZES_EN05_GREETING"/>
+<enho:implementingClass adtcore:uri="/sap/bc/adt/oo/classes/zcl_en05_greeting" adtcore:type="CLAS/OC" adtcore:name="ZCL_EN05_GREETING"/>
+</enho:badiImplementation>
+</enho:badiImplementations>
+</enho:badiTechnology>
+</enho:contentSpecific>
+</enho:objectData>

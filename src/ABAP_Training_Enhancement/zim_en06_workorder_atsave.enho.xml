@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enho:objectData adtcore:responsible="MONICA" adtcore:masterLanguage="EN" adtcore:masterSystem="S4H" adtcore:name="ZIM_EN06_WORKORDER_ATSAVE" adtcore:type="ENHO/XH" adtcore:changedAt="2026-07-29T18:37:12Z" adtcore:version="active" adtcore:createdAt="2026-07-29T18:36:38Z" adtcore:changedBy="MONICA" adtcore:createdBy="MONICA" adtcore:description="ZIM_EN06_WORKORDER_ATSAVE" adtcore:language="EN" xmlns:enho="http://www.sap.com/adt/enhancements/enho" xmlns:adtcore="http://www.sap.com/adt/core">
+<atom:link href="/sap/bc/adt/vit/wb/object_type/enhoxh/object_name/ZIM_EN06_WORKORDER_ATSAVE" rel="self" type="application/vnd.sap.sapgui" title="Representation in SAP GUI" xmlns:atom="http://www.w3.org/2005/Atom"/>
+<adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP" adtcore:description="Temporary Objects (never transported!)"/>
+<enho:contentCommon enho:toolType="BADI_IMPL" enho:adjustmentStatus="adjusted" enho:upgradeFlag="false"/>
+<enho:contentSpecific>
+<enho:badiTechnology>
+<enho:badiImplementations>
+<enho:badiImplementation enho:name="ZIM_EN06_WORKORDER_ATSAVE" enho:shortText="Implementation: Business Add-In PM-/PP-/PS-/PI-Aufträge Vorgang: UPDATE" enho:isExample="false" enho:isDefault="false" enho:isActive="true" enho:isCustomizingSupported="true" enho:runtimeBehaviorShorttext="The implementation will be called">
+<enho:enhancementSpot adtcore:uri="/sap/bc/adt/enhancements/enhsxs/workorder_update" adtcore:type="ENHS/XS" adtcore:name="WORKORDER_UPDATE"/>
+<enho:badiDefinition adtcore:uri="/sap/bc/adt/vit/wb/object_type/enhsxb/object_name/WORKORDER_UPDATE%20%20%20%20%20%20%20%20%20%20%20%20%20%20WORKORDER_UPDATE" adtcore:type="ENHS/XB" adtcore:name="WORKORDER_UPDATE"/>
+<enho:implementingClass adtcore:uri="/sap/bc/adt/oo/classes/zcl_en06_workorder_atsave" adtcore:type="CLAS/OC" adtcore:name="ZCL_EN06_WORKORDER_ATSAVE"/>
+</enho:badiImplementation>
+</enho:badiImplementations>
+</enho:badiTechnology>
+</enho:contentSpecific>
+</enho:objectData>

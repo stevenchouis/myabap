@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enhs:objectData adtcore:responsible="MONICA" adtcore:masterLanguage="EN" adtcore:masterSystem="S4H" adtcore:name="ZES_EN05_GREETING" adtcore:type="ENHS/XS" adtcore:changedAt="2026-07-29T00:00:00Z" adtcore:version="active" adtcore:createdAt="2026-07-29T00:00:00Z" adtcore:changedBy="MONICA" adtcore:createdBy="MONICA" adtcore:description="ZES_EN05_GREETING" adtcore:language="EN" xmlns:enhs="http://www.sap.com/adt/enhancements/enhs" xmlns:adtcore="http://www.sap.com/adt/core">
+<atom:link href="./zes_en05_greeting/objectstructure" rel="http://www.sap.com/adt/relations/objectstructure" title="Object Structure" xmlns:atom="http://www.w3.org/2005/Atom"/>
+<atom:link href="/sap/bc/adt/vit/wb/object_type/enhsxs/object_name/ZES_EN05_GREETING" rel="self" type="application/vnd.sap.sapgui" title="Representation in SAP GUI" xmlns:atom="http://www.w3.org/2005/Atom"/>
+<adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP" adtcore:description="Temporary Objects (never transported!)"/>
+<enhs:contentCommon enhs:toolType="BADI_DEF" enhs:internal="false"/>
+<enhs:contentSpecific>
+<enhs:badiTechnology>
+<enhs:badiDefinitions>
+<enhs:badiDefinition enhs:name="ZES_EN05_GREETING" enhs:shorttext="ZES_EN05_GREETING" enhs:singleUse="false" enhs:useFallbackClass="true" enhs:filterLimitation="false" enhs:documentationId="">
+<enhs:interface adtcore:uri="/sap/bc/adt/oo/interfaces/zif_en05_flight_greeting" adtcore:type="INTF/OI" adtcore:name="ZIF_EN05_FLIGHT_GREETING"/>
+<enhs:defaultClass adtcore:uri="/sap/bc/adt/oo/classes/zcl_en05_flight_greeting_fb" adtcore:type="CLAS/OC" adtcore:name="ZCL_EN05_FLIGHT_GREETING_FB"/>
+<enhs:sampleClasses>
+<enhs:sampleClass adtcore:uri="/sap/bc/adt/oo/classes/zcl_en05_flight_greeting_fb" adtcore:type="CLAS/OC" adtcore:name="ZCL_EN05_FLIGHT_GREETING_FB"/>
+</enhs:sampleClasses>
+</enhs:badiDefinition>
+</enhs:badiDefinitions>
+</enhs:badiTechnology>
+</enhs:contentSpecific>
+</enhs:objectData>

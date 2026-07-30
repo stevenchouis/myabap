@@ -398,3 +398,34 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **CMOD Project 底下生成的 Function Exit Include（如 en02 的 `ZXVBZU01`/`ZXVBZU02`、en08 案例一的 `ZXCO1U01`）也適用這條慣例**：本質是普通 `PROG/I`，一樣用 `<include名小寫>.prog.abap` 匯出，不需要額外記錄 CMOD Project 本身（CMOD Project／Assign／Activate 是 GUI-only 設定，沒有可匯出的原始碼）。
 - **Lock Object（ENQU）不適用 `.abap` 慣例**：它是結構化 DDIC 物件、沒有純文字原始碼，改存 `.enqu.xml`（GET 該物件 ADT 回應的 pretty-print 版本），見上方第 33 節。
 - `src/` 是**單向快照**：SAP 端修改後需重新匯出；本地修改要用 `sap_set_source` 寫回系統才算數。
+
+## 34. 「以可重建角度全面 Review」的方法論，與非 `.abap` 快照的完整命名規則（2026-07-30 實測，Enhancement 課程 en01~en08 收尾稽核）
+
+**背景**：課程做到 en08 收尾時，使用者要求「以可以參考重建的角度」全面 Review 整個 Enhancement 課程，檢查是否有 ABAP Object 沒有備份回 `src/`。這帶出一個先前沒有系統化處理過的問題：**課程中有好幾類物件既不是純文字原始碼（不適用 `.abap`），也完全不是 GUI-only（有 ADT 讀取路徑），過去只顧著匯出 Class/Program/Table，漏掉了這一整類「結構化但可讀」的物件**。稽核方法：不要憑印象或記憶檔案的敘述判斷「已經備份」，要逐一對每個課程中出現過的 Z 物件名稱實際打 ADT GET／TADIR quickSearch 驗證，因為記憶檔案可能記錄的是「設計/講義寫的」而非「系統裡實際存在的」。
+
+**本次稽核結果與補齊的物件**：
+
+| 物件類型 | ADT 端點 | 內容型態 | 檔名慣例 | 本次補齊物件 |
+|---|---|---|---|---|
+| BAdI Definition／Enhancement Spot（`ENHS/XS`，`toolType=BADI_DEF`） | `GET /sap/bc/adt/enhancements/enhsxs/<name>` | 結構化 XML（Interface／Fallback Class／Filter 定義） | `.enhs.xml` | `zes_en05_greeting.enhs.xml`／`zes_en06_filter_demo.enhs.xml` |
+| BAdI Implementation 容器（`ENHO/XH`，`toolType=BADI_IMPL`） | `GET /sap/bc/adt/enhancements/enhoxh/<name>` | 結構化 XML（指向哪個 Class／哪個 Spot／Filter 組合值） | `.enho.xml`（**注意跟 Source Code Plugin 內容的 `.enho.abap` 副檔名不同**，這裡是純 metadata 沒有文字原始碼） | `zim_en05_greeting.enho.xml`／`zim_en06_greeting2.enho.xml`／`zim_en06_workorder_atsave.enho.xml`／`zim_en06_filter_aa.enho.xml` |
+| Source Code Plugin／Explicit Enhancement 內容（`ENHO/XHH`，`toolType` 非上述兩者） | `GET /sap/bc/adt/enhancements/enhoxhh/<name>/source/main` | **純文字**（可以直接讀寫，跟第 23 節記載一致） | `.enho.abap` | `zim_co_cost_auth.enho.abap`（en08 案例二 Implicit Enhancement 內容）／`zmb52_ee.enho.abap`（en08 案例三，含 3 個 `ENHANCEMENT n` 區塊）／`zei_en07_section_append.enho.abap`（en07 用來證明「只有整段取代沒有追加」的反證測試物件，保留當作反面教材） |
+| Domain | `GET /sap/bc/adt/ddic/domains/<name>` | 結構化 XML | `.doma.xml` | `zen08_seq.doma.xml` |
+| Data Element | `GET /sap/bc/adt/ddic/dataelements/<name>` | 結構化 XML | `.dtel.xml` | `zen08_seq.dtel.xml` |
+| Message Class | `GET /sap/bc/adt/messageclass/<name>` | 結構化 XML（**含訊息文字**，見下方重要更正） | `.msag.xml` | `zen08.msag.xml` |
+
+**⚠️ 重要更正：第 29 節記載的「Message Class 訊息文字 ADT 寫入失敗」只代表 PUT 失敗，不代表 GET 讀不到**——本次重新 GET `zen08` 這個 Message Class，訊息 `001` 的 `mc:msgtext` 屬性正確顯示使用者事後在 SE91 補上的完整中文文字（「沒有權限顯示廠別 &1 的成本分析」），代表**使用者用 SE91 手動維護過的內容，之後可以正常用 ADT GET 讀回**，只是「用 ADT 寫入」這條路走不通，讀取沒有問題。之前只顧著記錄寫入失敗，沒有回頭驗證「GUI 補完之後能不能讀」，是這次稽核才補上的驗證缺口。
+
+**⚠️ Explicit Enhancement 的 Spot 定義本身（`toolType` 實際是 `HOOK_DEF`，涵蓋 Explicit Point 跟 Section 兩種）目前這版環境完全無法 GET**（一律 `HTTP 500 Enhancement technology HOOK_DEF is not supported yet`），這是第 26 節已經記載過的限制，這次針對 en07 的 point（`ZES_EN07_V3`）與 section（`ZES_EN07_SECTION_V1`）兩種都重新驗證過，確認限制對兩者一致套用——**這個 Spot 本身沒有任何快照方式，只能靠講義文字描述＋使用者的 SAP GUI 畫面截圖佐證存在**；但掛在它上面的 Implementation 內容（`ENHO/XHH`，上表第三列）不受影響，可以正常快照。
+
+**確認完全無法備份、原因是物件本身沒有 ADT 內容（非本次稽核缺失）**：
+- **`ZWORKORDER_INFO`**（en03，Classic BAdI Implementation，物件型別是 `SXCI/XI`）：quickSearch 只回一個 `vit/wb/object_type/sxcixi/...` 唯讀 metadata stub 連結，沒有任何 `source`／`content` 子資源——這是 Classic（`SXSD/XD`）BAdI 的 Implementation 對應物件，跟 SMOD/CMOD 同一類「純 GUI」限制，符合第 20 節記載的模式（`CMOD/XP` 也只有 metadata stub）。實際邏輯已經完整在 `ZCL_IM_WORKORDER_INFO`（已備份）裡，這個 SXCI/XI 容器本身只是「哪個方法對應哪個 Class」的指標，遺漏它不影響能不能重建邏輯，只是要記得**重建時這一步（SE19／哪個方法委派給哪個 Class）沒有文字紀錄，得靠講義敘述手動重做**。
+- **Explicit Enhancement Spot（`HOOK_DEF`）本身**：見上一段。
+
+**⚠️ 意外發現、需要使用者確認的疑點（不是「查不到」而是「TADIR 裡真的不存在」）**：直接查 `SELECT OBJ_NAME FROM TADIR WHERE OBJECT='ENHO' AND OBJ_NAME LIKE 'ZIM_EN06%'`，系統裡**只有 `ZIM_EN06_GREETING2`／`ZIM_EN06_WORKORDER_ATSAVE`／`ZIM_EN06_FILTER_AA` 三個，沒有講義／記憶檔案都提到的 `ZIM_EN06_FILTER_LH`**——對應的 Class `ZCL_EN06_FILTER_LH` 確實存在且已備份，但包裝它的 BAdI Implementation 容器從未真正建立成一個持久物件。這代表當初「`LH`／`AA` 各自觸發對應 Implementation」的驗證結論，`LH` 這一半可能只是設計/預期沒有被真正驗證到，或是使用者用了不同名稱建立、事後又被刪除——**需要跟使用者確認這是遺漏還是有其他解釋，不要自行假設並補建**。
+
+**發現但刻意不處理的殘留/廢棄物件（不在這次備份範圍內，屬於課程過程中的死路徑）**：
+- en07 除錯過程留下三個未使用的 Enhancement Spot（`ZES_EN07_EXPLICIT_DEMO`／`ZES_EN07_POINT_DEMO`），實際生效的是 `ZES_EN07_V3`（`ZR_EN07_EXPLICIT_DEMO` 的 `ENHANCEMENT-POINT ... SPOTS` 子句證實）——這些是第 26 節「使用者初版結論被推翻」那次除錯過程中的失敗嘗試，`$TMP` 套件、不影響任何人，跟本課程一貫的「訓練殘留物無妨」原則一致，不特別清理也不特別備份。
+- en08 案例三的 `ZRM07MLBS3`（掛在真實共用 `MB52` 交易上，非本課程物件）——延續先前已記載的結論，這是使用者自己的殘留測試物件，待使用者清理，不屬於「本課程 Z 物件備份」範圍。
+
+**附帶發現、與備份範圍無關但值得記錄的一致性問題**：`zen04_pltauart.tabl.abap`／`zen04_rule.tabl.abap`／`zen04_seq.tabl.abap`／`zen06_atsave_log.tabl.abap` 這四張表的 Client 欄位都是 `key mandt : abap.clnt not null;`——**欄位命名正確（`mandt`），但型別是原生 Builtin Type `abap.clnt`，沒有引用標準 Data Element `MANDT`**，跟本檔第 22 節「案例一 CLIENT 命名」這次修正後的 `ZEN08_COMPLOG`（`key mandt : mandt not null;`，引用 DE）風格不一致。這不影響功能（`abap.clnt`／DE `MANDT` 的底層型別相同），純粹是 DDIC 慣例上「能引用 Data Element 就不要用 Builtin Type」原則沒有貫徹到早期建的表——是否要回頭統一修正，由使用者決定（這幾張表都已端對端驗證過，修改型別需要重新啟用＋確認不影響既有資料）。

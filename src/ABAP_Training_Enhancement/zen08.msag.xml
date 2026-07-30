@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mc:messageClass adtcore:responsible="MONICA" adtcore:masterLanguage="EN" adtcore:masterSystem="S4H" adtcore:name="ZEN08" adtcore:type="MSAG/N" adtcore:changedAt="2026-07-30T15:12:48Z" adtcore:version="active" adtcore:createdAt="2026-07-30T00:00:00Z" adtcore:changedBy="MONICA" adtcore:createdBy="MONICA" adtcore:description="EN08 course message class" adtcore:language="EN" xmlns:mc="http://www.sap.com/adt/MessageClass" xmlns:adtcore="http://www.sap.com/adt/core">
+<adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP"/>
+<mc:messages mc:msgno="001" mc:msgtext="沒有權限顯示廠別 &amp;1 的成本分析" mc:selfexplainatory="true" mc:documented="false" mc:lastchangedby="MONICA" mc:lastmodified="2026-07-30" adtcore:name="">
+<atom:link href="/sap/bc/adt/vit/docu/object_type/NA/object_name/ZEN08001" rel="http://www.sap.com/adt/relations/longtext" xmlns:atom="http://www.w3.org/2005/Atom"/>
+<atom:link href="/sap/bc/adt/messageclass/zen08/messages/001" rel="http://www.sap.com/adt/relations/messageclasses/messages" xmlns:atom="http://www.w3.org/2005/Atom"/>
+</mc:messages>
+</mc:messageClass>
