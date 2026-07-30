@@ -5,7 +5,7 @@
 @AbapCatalog.dataMaintenance : #LIMITED
 define table zen04_pltauart {
   key mandt : mandt not null;
-  key werks : abap.char(4) not null;
-  key auart : abap.char(4) not null;
+  key werks : werks_d not null;
+  key auart : aufart not null;
 
 }

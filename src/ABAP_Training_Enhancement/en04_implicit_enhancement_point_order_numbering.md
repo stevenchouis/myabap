@@ -71,7 +71,7 @@ ASSIGN (lcfnam1) TO <fs>.
 
 ## 事前準備（已於本系統 client 130 實際完成，非假設）
 
-1. **三張自訂表**（`$TMP`）：`ZEN04_PLTAUART`（`WERKS`+`AUART` 為 Key，無資料欄位）、`ZEN04_RULE`（`WERKS`+`AUART`+`FEVOR`+`ZGRTYPE` 為 Key，`LEADCODE`+`STNUM` 為資料欄位）、`ZEN04_SEQ`（`WERKS`+`AUART`+`FEVOR`+`ZGRTYPE`+`LEADCODE`+`ZYEAR`+`ZMONTH` 為 Key，`NUMNO`+`AUFNR` 為資料欄位），均已建立並啟用。
+1. **三張自訂表**（`$TMP`）：`ZEN04_PLTAUART`（`WERKS`+`AUART` 為 Key，無資料欄位）、`ZEN04_RULE`（`WERKS`+`AUART`+`FEVOR`+`ZGRTYPE` 為 Key，`LEADCODE`+`STNUM` 為資料欄位）、`ZEN04_SEQ`（`WERKS`+`AUART`+`FEVOR`+`ZGRTYPE`+`LEADCODE`+`ZYEAR`+`ZMONTH` 為 Key，`NUMNO`+`AUFNR` 為資料欄位），均已建立並啟用。**（2026-07-30 補課：全部欄位改為引用 Data Element，不再直接用 Builtin Type——`WERKS`→標準 DE `WERKS_D`、`AUART`→標準 DE `AUFART`、`FEVOR`→標準 DE `FEVOR`、`AUFNR`→標準 DE `AUFNR`；`ZGRTYPE`/`LEADCODE`/`STNUM`/`ZYEAR`/`ZMONTH`/`NUMNO` 六個課程自訂欄位沒有語意相符的標準 DE，各自新建一組 Domain+DE（`ZEN04_ZGRTYPE`/`ZEN04_LEADCOD`/`ZEN04_STNUM`/`ZEN04_ZYEAR`/`ZEN04_ZMONTH`/`ZEN04_NUMNO`），沿用 en08 案例一「能引用 Data Element 就不要用 Builtin Type」的 DDIC 慣例。既有資料在型別轉換後確認保留，未受影響。）**
 2. **`ZCL_EN04_ORDER_NUMBERING`**（`$TMP`）：核心編號邏輯類別，`get_custom_order_number` 方法依三張表算出號碼，支援 `FEVOR`/`ZGRTYPE` 萬用字元「精確優先、萬用其次」比對，已建立並啟用。
 3. **`ZEN04_ORDER_NO_PLUGIN`**：使用者於 **SE37** 對 `CO_ZF_NUMBER_GET` 建立 Implicit Enhancement（Source Code Plugin），插入點位置 `\FU:CO_ZF_NUMBER_GET\SE:BEGIN\EI`（Function Module 最前面），Claude 用 ADT 寫入呼叫 `ZCL_EN04_ORDER_NUMBERING` 的程式碼並啟用。
 4. **端對端驗證（兩組情境，均已實測成功）**：

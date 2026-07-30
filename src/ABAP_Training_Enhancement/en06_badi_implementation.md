@@ -99,6 +99,25 @@ UNCHANGED
 3. **兩層驗證**：
    - **單元測試**（`ZR_EN06_ATSAVE_UNIT_TEST`，`$TMP`）：不透過真實 BAdI 派送，直接 `CREATE OBJECT`＋呼叫方法，驗證安全閘組合（`1011`/`PP71`）寫入 1 筆記錄、非安全閘組合（`1011`/`PP01`）寫入 0 筆記錄，`programrun` 無頭執行驗證成功。
    - **真實存檔測試**：使用者用 `CO01`（Plant `1011`／Order Type `PP71`）建立真實工單並存檔，`ZEN06_ATSAVE_LOG` 正確寫入一筆新記錄（`AUFNR=%00000000001`），證實 Enhancement 對真實訂單存檔確實生效。過程中一度因 Implementation 誤含 `COMMIT WORK` 導致真實 Dump（`MESSAGE_TYPE_X`，`SAPLCOZV`），已修正並重新驗證成功。
+
+**⚠️ 排錯記錄（2026-07-30 補課）：不同真實工單的稽核記錄卻共用同一個 `AUFNR=%00000000001`，是設計缺口不是隨機巧合**——使用者在兩個不同日期（7/29、7/30）分別用 CO01 建立了兩張不同的真實工單，`ZEN06_ATSAVE_LOG` 卻都記成同一個 `%00000000001`，導致這張稽核表實際上無法用 `AUFNR` 分辨到底是哪一張工單。
+
+- **根本原因**：`AT_SAVE` 觸發當下，新建工單的 `AUFNR` 還是一個**暫時號碼**（內部佔位格式，每次新建工單都重新從這個暫時號碼起算），要等真正的號碼從 Number Range 確定之後，SAP 才會另外呼叫一個專用的掛勾點通知「暫時號碼 → 真實號碼」的對應——查 `IF_EX_WORKORDER_UPDATE` 完整方法清單，果然找到 `NUMBER_SWITCH(I_AUFNR_OLD, I_AUFNR_NEW, I_AUFPL_OLD, I_AUFPL_NEW, I_AUTYP)` 這個方法，證實這是 SAP 標準設計好的機制，不是本題獨有的巧合或 bug。
+- **修法**：在 `NUMBER_SWITCH` 裡把 `AT_SAVE` 當下寫入的暫時號碼記錄，回填成真正的工單號碼：
+  ```abap
+  method IF_EX_WORKORDER_UPDATE~NUMBER_SWITCH.
+    IF i_aufnr_old IS NOT INITIAL AND i_aufnr_new IS NOT INITIAL AND i_aufnr_old <> i_aufnr_new.
+      UPDATE zen06_atsave_log
+        SET aufnr = i_aufnr_new
+        WHERE aufnr = i_aufnr_old
+          AND werks = '1011'
+          AND auart = 'PP71'.
+    ENDIF.
+  endmethod.
+  ```
+  用 `werks`/`auart` 縮小範圍，避免動到不相關的既有記錄（Client 由編譯器自動處理，Open SQL 不可在 `WHERE` 明寫 `MANDT`，見 `.claude/rules/sap-adt-mcp.md` 第 10 節）。
+- **驗證方式刻意避開真實 CO01**：直接在 `ZR_EN06_ATSAVE_UNIT_TEST` 加一段測試，模擬「`AT_SAVE` 寫入暫時號碼 `%TESTTEMP01` → `NUMBER_SWITCH` 回填成 `UT_FINAL001`」，確認暫時號碼那筆記錄消失、回填後的真實號碼那筆記錄出現，全程不消耗真實 Number Range、不建立真實工單。
+- **⚠️⚠️ 過程中的操作疏失（誠實記錄）**：驗證新版單元測試程式之前，忘記先把改好的程式碼 `sap_set_source` 推回 SAP，就直接呼叫 `programrun` 執行——結果執行到的是**舊版本**程式（開頭有 `DELETE FROM zen06_atsave_log WHERE werks = '1011' AND auart = 'PP71'.` 這種依 `werks`/`auart` 全面刪除的清理邏輯），把 `ZEN06_ATSAVE_LOG` 裡原本兩筆真實 CO01 測試留下的稽核記錄（7/29、7/30 各一筆）也一併清空了，且已 `COMMIT WORK`、無法復原。**教訓：任何會執行 `DELETE`／`COMMIT WORK` 的測試程式，修改後必須先確認新版本已經真的推送並啟用到系統上，才能執行——不能假設本地檔案改了就代表系統上也是新版本**；也再次印證「測試程式的清理邏輯應該只鎖定測試專用的特定值（如本例改成的 `aufnr = 'UNITTEST001'` 等），不要用 `werks`/`auart` 這種會波及真實資料的條件做全面 `DELETE`」。事後已把測試程式的兩處 `DELETE` 都改成只鎖定測試用 `AUFNR` 值。
 4. **案例三（Filter-dependent BAdI）**：`ZIF_EN06_FILTER_GREETING`（Interface，ADT 建立）＋`ZES_EN06_FILTER_DEMO`（Enhancement Spot／BAdI Definition，**使用者於 SE18 建立**，Multi Use，Filter `CARRID` type `C`）＋`ZEI_EN06_FILTER_LH`／`ZCL_EN06_FILTER_LH`（Filter 值 `LH`）與 `ZIM_EN06_FILTER_AA`／`ZCL_EN06_FILTER_AA`（Filter 值 `AA`，**皆使用者於 SE19 建立**，Claude 用 ADT 寫入 Class 內容）。驗證程式 `ZR_EN06_FILTER_DEMO` 已用 `programrun` 無頭執行驗證成功：`LH`／`AA` 各自觸發對應 Implementation，`UA`（無 Implementation）維持呼叫前的哨兵值不變。**（2026-07-30 補課：`LH` 的 Implementation 容器物件補建為 `ZEI_EN06_FILTER_LH`，見上方排錯記錄）**
 
 ## 題目需求

@@ -5,11 +5,11 @@
 @AbapCatalog.dataMaintenance : #LIMITED
 define table zen04_rule {
   key mandt   : mandt not null;
-  key werks   : abap.char(4) not null;
-  key auart   : abap.char(4) not null;
-  key fevor   : abap.char(3) not null;
-  key zgrtype : abap.char(10) not null;
-  leadcode    : abap.char(2) not null;
-  stnum       : abap.numc(4) not null;
+  key werks   : werks_d not null;
+  key auart   : aufart not null;
+  key fevor   : fevor not null;
+  key zgrtype : zen04_zgrtype not null;
+  leadcode    : zen04_leadcod not null;
+  stnum       : zen04_stnum not null;
 
 }

@@ -5,14 +5,14 @@
 @AbapCatalog.dataMaintenance : #LIMITED
 define table zen04_seq {
   key mandt    : mandt not null;
-  key werks    : abap.char(4) not null;
-  key auart    : abap.char(4) not null;
-  key fevor    : abap.char(3) not null;
-  key zgrtype  : abap.char(10) not null;
-  key leadcode : abap.char(2) not null;
-  key zyear    : abap.char(2) not null;
-  key zmonth   : abap.char(1) not null;
-  numno        : abap.numc(4) not null;
-  aufnr        : abap.char(12) not null;
+  key werks    : werks_d not null;
+  key auart    : aufart not null;
+  key fevor    : fevor not null;
+  key zgrtype  : zen04_zgrtype not null;
+  key leadcode : zen04_leadcod not null;
+  key zyear    : zen04_zyear not null;
+  key zmonth   : zen04_zmonth not null;
+  numno        : zen04_numno not null;
+  aufnr        : aufnr not null;
 
 }

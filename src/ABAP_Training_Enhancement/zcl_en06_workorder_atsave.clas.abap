@@ -59,6 +59,20 @@ CLASS ZCL_EN06_WORKORDER_ATSAVE IMPLEMENTATION.
   endmethod.
 
   method IF_EX_WORKORDER_UPDATE~NUMBER_SWITCH.
+    " EN06 補課：新建工單存檔當下（AT_SAVE），工單號碼還是暫時號碼（如 %00000000001），
+    " 每次新建工單都會重新從這個暫時號碼起算，所以稽核表裡會看到不同真實工單
+    " 卻共用同一個 AUFNR 的怪現象。SAP 標準機制是等真正的號碼確定後另外呼叫
+    " NUMBER_SWITCH 告知「暫時號碼 -> 真實號碼」的對應，這裡把 AT_SAVE 當下
+    " 寫入的暫時號碼記錄，回填成真正的工單號碼。
+    " 用 werks+auart 縮小範圍，避免動到不相關的既有記錄；Client 由編譯器自動處理，
+    " Open SQL 不可在 WHERE 明寫 MANDT。
+    IF i_aufnr_old IS NOT INITIAL AND i_aufnr_new IS NOT INITIAL AND i_aufnr_old <> i_aufnr_new.
+      UPDATE zen06_atsave_log
+        SET aufnr = i_aufnr_new
+        WHERE aufnr = i_aufnr_old
+          AND werks = '1011'
+          AND auart = 'PP71'.
+    ENDIF.
   endmethod.
 
   method IF_EX_WORKORDER_UPDATE~REORG_STATUS_ACTIVATE.
