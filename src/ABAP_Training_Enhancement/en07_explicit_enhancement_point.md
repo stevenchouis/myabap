@@ -24,6 +24,8 @@ END-ENHANCEMENT-SECTION.
 
 `SPOTS` 後面接的 Enhancement Spot，跟 en05/en06 用過的是**同一種物件**（`ENHS/XS`），只是這裡不掛 BAdI Definition，掛的是「Enhancement Spot Element Definition」（技術上叫 Hook Definition，`HOOK_DEF`）。`STATIC` 是給資料宣告用的（例如額外的 `DATA` 宣告），不加則是給可執行程式碼用的。
 
+**⚠️ 「Include Bound」不是決定「追加 vs 整段取代」的開關（2026-07-30 更正）**：Create Option 對話框裡確實有一個「Include Bound」核取方塊（在 Enhanceable Object 區塊），但**當 Enhanceable Object Type 是 Program 時，這個欄位整個是灰階、無法勾選**——這代表它在「一般 Z 程式裡宣告 Explicit Enhancement」這個情境下根本用不到，不是「留給你決定行為」的選項。`ENHANCEMENT-SECTION` 的 Implementation 到底是「保留原邏輯疊加」還是「整段取代」，實際行為要靠**直接建一個 Implementation、觀察執行結果**來確認，不能靠這個灰階欄位判斷。
+
 **⚠️ 這題全程都是 GUI-only，而且比 en04/en05/en06 更徹底——連 ADT 讀寫都不支援**：
 
 - **建立 Enhancement Spot 本身**：跟 en05 一樣沒有 ADT 建立 API，但這裡不能像 en05 那樣繞去 SE18——**只有 BAdI Definition 類型的 Spot 能用 SE18 建立，Source Code Plug-In 類型必須從 SE38 GUI 建立**（2026-07-30 實測確認）。這不是「SE18 剛好沒開放這個選項」的表面現象，而是**兩種類型本質不同**：BAdI Definition 是獨立物件，不依附任何程式的特定位置，SE18 這種脫離程式上下文的獨立管理畫面可以完整建立它；但 Source Code Plug-In 型的 Spot（`ENHANCEMENT-POINT`/`ENHANCEMENT-SECTION` 用的那種）**本質上需要把「這個 Spot 錨定在哪支程式的哪個位置」這個資訊記錄下來**，這個錨點只有在**該程式的編輯器（SE38）裡、對著實際原始碼位置操作**才能被正確捕捉——SE18 沒有程式上下文，天生就沒有這個資訊來源，所以唯一能建立這種 Spot 的方式是下面講的「從 SE38 Create Option 對話框裡順便建立」。
@@ -74,12 +76,7 @@ Enhanced: extra greeting inserted via ENHANCEMENT-POINT for carrier LH
 
 第二行是插入點本身新增的輸出；第三行是**插入點之後、原本就存在的 `WRITE: / lv_text.`**——因為插入的程式碼改了共用變數 `lv_text`，連帶影響了它後面既有的邏輯，證實 Explicit Enhancement Point 插入的程式碼是跟原有程式碼在**同一個變數作用域**裡執行的，不是隔離的沙箱。
 
-**`ENHANCEMENT-SECTION`**：跟 `ENHANCEMENT-POINT` 語法幾乎一樣，差別是 `ENHANCEMENT-SECTION ... END-ENHANCEMENT-SECTION` 包住一段**既有邏輯**，Enhancement Implementation 可以選擇：
-
-- **保留原邏輯、額外追加程式碼**（`INCLUDE BOUND`，行為類似 `ENHANCEMENT-POINT`）
-- **整段取代**：Implementation 提供的程式碼完全取代 `ENHANCEMENT-SECTION` 包住的原邏輯，原邏輯不會執行
-
-這是 `ENHANCEMENT-SECTION` 相對 `ENHANCEMENT-POINT` 獨有的能力——`ENHANCEMENT-POINT` 沒有「原邏輯」可以取代，只能純插入。
+**`ENHANCEMENT-SECTION`**：跟 `ENHANCEMENT-POINT` 語法幾乎一樣，差別是 `ENHANCEMENT-SECTION ... END-ENHANCEMENT-SECTION` 包住一段**既有邏輯**。官方概念上 Enhancement Implementation 可以「保留原邏輯、額外追加」或「整段取代原邏輯」——這是 `ENHANCEMENT-SECTION` 相對 `ENHANCEMENT-POINT` 獨有的能力（`ENHANCEMENT-POINT` 沒有「原邏輯」可以取代，只能純插入）。**這兩種行為在這套系統裡實際是由什麼開關控制，本題尚未確認**：Create Option 對話框裡的「Include Bound」欄位在 Enhanceable Object 是 Program 型別時整個灰階、無法勾選（見上方「Lecture」段落的更正說明），不是可用的控制項；真正決定「追加 vs 取代」的機制，要靠下面「待驗證」段落的實測結果才能確認，不要照抄官方文件的籠統描述當作這套系統的實際行為。
 
 **實測結果（`ZR_EN07_SECTION_DEMO`，2026-07-30）**：依照上面的「建立流程完整版」，選取一段預設邏輯（計算並顯示一筆預設金額）當作 Section 範圍，Create Option 建立 `ENHANCEMENT-SECTION es_mytest SPOTS zes_en07_section_v1`，Spot 自動建立並正確 Binding（SE18 確認 Enhancement Method = Source Code Plug-In，編輯器左側裝訂線出現螺旋圖示）：
 
@@ -111,7 +108,7 @@ WRITE: / lv_text.
 
 **倒數第二段的 `*ENHANCEMENT-SECTION es_en07_greeting ...` 是排錯過程留下的殘留片段，已被整段註解掉、不會執行**：這是排錯初期第一次嘗試建立 Section 時取的 Option 名稱（`es_en07_greeting`，呼應 `ENHANCEMENT-POINT` 案例的 `lv_text = |Standard: greeting for ...|` 寫法），後來改用 `ES_MYTEST`＋預設金額邏輯重新成功建立，這段舊嘗試就留在原始碼裡當註解、沒有刪除。這也解釋了最後一行 `WRITE: / lv_text.` 為什麼會印出空字串——`lv_text` 從頭到尾沒有被賦值過（賦值那行在註解裡），這是真實系統目前的原樣，不是示範邏輯的一部分。
 
-Point／Section 兩者的 Spot 建立與綁定流程完全驗證成功。**Create Implementation（實際寫「追加」或「整段取代」兩種 Implementation 內容）留待下一輪操作**，屆時可以拿這個 Section 分別示範：①追加一段折扣邏輯（原本的 100 元判斷保留，額外疊加）；②整段取代，改用完全不同的金額計算規則，藉此觀察 `INCLUDE BOUND` 開關對執行結果的實際影響。
+Point／Section 兩者的 Spot 建立與綁定流程完全驗證成功。**Create Implementation（實際寫程式碼、觀察「追加」還是「取代」）留待下一輪操作**：直接建一個 Implementation（Create Implementation 對話框本身只問名稱／套件，沒有額外開關），貼上一段容易辨識的測試程式碼、Activate、執行，看輸出裡「預設金額: 100」這行有沒有出現，就能直接判斷這個 Section 目前的實際行為，不用依賴猜測的 UI 開關。
 
 ## 學習目標
 
