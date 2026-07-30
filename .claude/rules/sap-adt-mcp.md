@@ -370,6 +370,21 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **掛在真實共用標準物件上的殘留 Implementation，跟掛在 `$TMP` 訓練物件上的殘留，清理急迫性完全不同**：本次意外發現使用者先前自己測試時留下的 `ZRM07MLBS3`（同樣宣告 `SELECT-OPTIONS: s_dispo for marc-dispo.`，指向同一個底層欄位，且確認是 Active），導致 `MB52` 選取畫面同時出現兩個重複的「MRP Controller」欄位——**這個殘留物件此刻正在影響所有正在使用 `MB52` 這個真實共用標準交易的人**，跟本檔一貫記載的「`$TMP` 訓練物件留著也無妨」是完全不同的風險等級，發現後應提醒使用者盡快清理，不能套用訓練物件的寬鬆標準。
 - **`SELECT-OPTIONS` 宣告的變數用在 `WHERE ... IN` 條件時，使用者完全不輸入＝該欄位不生效**：這是 ABAP 語言本身的內建行為（空的 range table 用在 `IN` 條件會匹配所有值），不需要像 en04/en06 那樣額外手寫 `IF` 判斷特定條件才決定要不要套用篩選——只要新增的篩選條件本身是用 `SELECT-OPTIONS` 型別的變數（而非普通 `PARAMETERS`），「使用者沒填就不影響既有查詢行為」這個安全閘天生就內建在語言機制裡。
 
+## 31. Source-based Class 存檔 `ExceptionResourceScanDuringSaveFailure`：錯誤訊息完全文不對題，兩個真正根因（2026-07-30 實測，Enhancement 課程 en08 案例一）
+
+- **現象**：`sap_set_source`／PUT `/sap/bc/adt/oo/classes/<name>/source/main` 對某些內容一律回 `HTTP 400 ExceptionResourceScanDuringSaveFailure`，訊息宣稱「The class can't be separated into its different source parts (public-, protected-, (package-,) private section or method implementation)」——**這個訊息幾乎完全沒有診斷價值**，因為真正的根因跟 SECTION 能不能拆分毫無關係，靠系統性地從「全空方法」開始逐步加回內容才排除出來。
+- **根因① `PROTECTED SECTION.` 這個區塊即使空白也必須明確存在**：把 `PUBLIC SECTION` 後面直接接 `PRIVATE SECTION`（完全省略 `PROTECTED SECTION.` 這一行）會讓這個 source-based 存檔的解析器整個崩潰，回上述誤導性錯誤。修法：即使用不到 protected 成員，`PROTECTED SECTION.` 這行也要保留（空的即可，緊接著寫 `PRIVATE SECTION.` 沒問題，不用留空行）。
+- **根因② `CLASS-METHODS`／`METHODS` 的 `IMPORTING`／`EXPORTING`／`RETURNING`／`CHANGING` 參數宣告，型別不能用 `TYPE STANDARD TABLE OF <結構>` 這種 inline 寫法**——這種「`OF <結構>`」inline 語法**只能用在區域變數的 `DATA`/`TYPES` 陳述式**，用在 Method 正式參數宣告的 `TYPE` 子句上，會讓同一個 source-based 解析器崩潰、報出跟根因①一模一樣的誤導性錯誤（兩種完全不同的根因，卻共用同一句籠統錯誤訊息，這是本檔記錄過最難排錯的案例之一）。同樣的限制也適用於 **`FIELD-SYMBOLS` 宣告**（但錯誤訊息不同——`FIELD-SYMBOLS: <fs> TYPE STANDARD TABLE OF <結構>` 編譯期直接報 `"," expected after "TABLE"`，語法錯誤訊息至少還算精確）。
+  - **正確 workaround**：Method 簽章維持泛型 `TYPE STANDARD TABLE`（不寫 `OF`）；方法內部若需要靜態型別化存取（例如要用 `SELECT ... FOR ALL ENTRIES IN <itab>` 這類需要編譯期知道 row type 的語句），先用具名 `TYPES tt_xxx TYPE STANDARD TABLE OF <結構>.` 定義一個型別，再讓 `FIELD-SYMBOLS: <fs> TYPE tt_xxx.` 參照這個具名型別（不能 inline），最後用一般 `ASSIGN <參數> TO <fs>.`（**不需要** `CASTING`，因為 `<fs>` 本身已經是靜態具體型別，直接指派即可讓執行期檢查是否相容）取得可用的靜態型別化存取。
+  - **`ASSIGN ... CASTING TYPE STANDARD TABLE OF <結構>` 這招對 `SELECT ... FOR ALL ENTRIES` 沒用**：`CASTING` 只能讓 `ASSIGN COMPONENT` 這類**執行期動態**存取生效，Open SQL 的 `FOR ALL ENTRIES`／直接用 `<itab>-欄位` 這種**編譯期靜態**存取，`CASTING` 給的執行期型別資訊幫不上忙，一律要用「具名 TYPES＋FIELD-SYMBOLS 參照具名型別」這條路才行。
+- **排錯方法論**：遇到這類「錯誤訊息籠統到像是騙人」的存檔失敗，不要照著錯誤訊息字面意思去改（例如去反覆檢查 SECTION 順序），改成**從已知可行的最小骨架開始，逐段加回內容，每加一段就存一次**，用二分法快速定位真正出錯的那一行/那個語法結構——這題最終是靠比對「哪一次改動」讓 200 OK 變成 400，才鎖定兩個根因分別是「拿掉 PROTECTED SECTION」和「Method 參數型別加了 OF」。
+
+## 32. 新建的 Domain/DE 若未啟用就拿去給表格引用，表格存檔會報跟真正原因無關的錯誤（2026-07-30 實測，Enhancement 課程 en08 案例一）
+
+- **現象**：POST 建立自訂 Domain（`ZEN08_SEQ`）＋Data Element（`ZEN08_SEQ`）都回 201 成功，但**沒有另外呼叫 activation**（POST 回應的 `adtcore:version` 其實是 `new`，不是 `inactive`，這個狀態比「未啟用」更早一個階段）；接著建立引用這個 DE 的表格（`ZEN08_COMPLOG`），`sap_set_source` 寫入內容後存檔一律回 `ExceptionResourceAlreadyExists: Can't save due to errors in source`——這句錯誤訊息**完全沒有指出「因為 DE 還沒啟用」**，容易誤判成鎖的問題或欄位命名問題（花了好幾輪排查殘留鎖、欄位型別才鎖定真因）。
+- **排查方法**：對懷疑的新建 DE／Domain 直接 GET 讀回，檢查 `adtcore:version` 屬性——`"new"` 代表從未啟用過，`"inactive"` 代表存過但沒啟用，`"active"` 才是可以被其他物件正常引用的狀態。`sap_inactive_objects` 這個 MCP 工具**不會列出**這類剛建立、還處於 `new` 狀態的 DDIC 物件（目前只在使用者/物件被明確鎖定編輯時才會出現在清單裡），所以「`sap_inactive_objects` 回 0 筆」不能當作「所有相依物件都已啟用」的證據。
+- **修法**：新建的 Domain／Data Element 建立後，**在拿去給任何表格/結構引用之前，先手動呼叫一次 activation API**（`POST /sap/bc/adt/activation?method=activate`，body 帶 `adtcore:objectReference` 指向該 Domain／DE 的 URI，可以把 Domain 跟 DE 放在同一個請求批次啟用），確認 GET 讀回 `adtcore:version="active"` 後，再建立/修改引用它們的表格。這是本檔第 8 節「Domain/DE/表可以放進同一個 activation 請求批次啟用」原則的具體應用——重點是**引用方（表格）動手之前，被引用方（Domain/DE）必須先確認是 `active` 狀態**，不能假設「POST 201 成功」就等於「已經可以被引用」。
+
 ## 匯出 SAP 原始碼到 src/ 的慣例
 
 - 檔名採 abapGit 格式：`<物件名小寫>.<類型>.abap`（如 `zdqm0001.prog.abap`；INCLUDE 也是 `.prog.abap`）。

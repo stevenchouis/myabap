@@ -95,17 +95,39 @@ ENDIF.
 
 ---
 
-## 案例一：PPCO0001（工單存檔時 Component Change 存 Log Table）——待建置
+## 案例一：PPCO0001（工單存檔時 Component Change 存 Log Table）——建置中
 
 **需求**：工單存檔時，把使用者對工單元件（Component）的異動內容（改前/改後值）記錄進自訂 Log 表，方便事後稽核。
 
 **已查證的技術背景**：
 
-- Enhancement 名稱 `PPCO0001`，Function Exit 是 `EXIT_SAPLCOBT_001`（Function Group `SAPLCOBT`）
+- Enhancement 名稱 `PPCO0001`，Function Exit 是 `EXIT_SAPLCOBT_001`（Function Group `XCO1`，Include `ZXCO1U01`）——簽章 `COMPONENT_TABLE LIKE RESBB`／`HEADER_TABLE LIKE CAUFVDB`，剛好對得上參考文件的比對邏輯需要的參數
 - 查 `MODACT` 表：本系統 0 筆，**從未被任何 CMOD Project 指派過**，是乾淨的教學素材
-- 使用者提供完整的真實參考文件（`工單存檔時將Component Change存入Log Table.docx`），內含實際運作過的實作邏輯：核心是 `FORM log_co02_change_content`（放在 Include `ZXCO1F01`），逐欄位比對元件變更前後的值、寫入自訂 Log 表（範例用 `ZPPT005`），過程含 `ENQUEUE`/`DEQUEUE` 鎖定與使用者/時間戳記錄
+- 使用者提供完整的真實參考文件（`工單存檔時將Component Change存入Log Table.docx`），內含實際運作過的實作邏輯：核心是 `FORM log_co02_change_content`，逐欄位比對元件變更前後的值（12 個比對欄位：`POSNR/MATNR/ERFMG/ERFME/WERKS/LGORT/CHARG/SCHGT/RGEKZ/SOBKZ/KZEAR/XLOEK`）、寫入自訂 Log 表，過程含 `ENQUEUE`/`DEQUEUE` 鎖定與使用者/時間戳記錄
+- 文件裡的第二份欄位清單（`CDCHNGIND`/`ZCO02LOG_SEQ`/`FIELDNAME`/`CDFLDVALO`/`CDFLDVALN`/`UNAME`）比對後發現是**各欄位對應的 Data Element**——`CDCHNGIND`/`FIELDNAME`/`CDFLDVALO`/`CDFLDVALN`/`UNAME` 剛好是 SAP 標準異動文件（`CDHDR`/`CDPOS`）在用的標準 DE，直接沿用比自建更合理
 
-**下一步**：比照 en02 的 CMOD 四步驟（Project 建立 → Assign `SAPLCOBT` → 雙擊生成 Include → Activate），設計本課程自己的 Log 表與 Include 內容（沿用參考文件的邏輯架構，物件命名改用課程慣例）。
+**設計與建置**（承 CLAUDE.md 風格規範「要用 Data Element，不要直接給 Type」）：
+
+- **`ZEN08_COMPLOG`（Log 表，ADT 建立）**：17 個欄位全部用 Data Element，沿用標準 DE（`AUFNR`/`ARTNR`/`UPDAT`/`UPTIM`/`RSNUM`/`RSPOS`/`RSART`/`CDCHNGIND`/`FIELDNAME`/`CDFLDVALO`/`CDFLDVALN`/`UNAME`/`TCODE`/`TEXT30`/`TEXT80`），唯一沒有語意相符標準 DE 的序號欄位（`SEQ`）自建 `ZEN08_SEQ`（Domain+DE，NUMC 3 碼）
+- **`EZEN08_COMPLOG`（Lock Object，**使用者於 SE11 建立**）**：Primary Table `ZEN08_COMPLOG`，Lock Mode **`E`（Exclusive/Write Lock）**，Lock Parameter 勾選 `CLIENT`/`AUFNR`/`ARTNR`（對應參考文件 `ENQUEUE_EZPPT005` 用的 `mode_zppt005 = 'E'`，鎖工單+成品兩個欄位）——建好後系統自動產生 `ENQUEUE_EZEN08_COMPLOG`/`DEQUEUE_EZEN08_COMPLOG` 兩個 FM
+- **`ZCL_EN08_COMPLOG`（Z Class，ADT 建立）**：把參考文件的比對/寫入邏輯搬進 `LOG_CHANGE` 靜態方法，呼應 en07 思考題 3 提過的「把邏輯集中寫在 Z Class，Enhancement 裡只放一行呼叫」設計
+- **CMOD**（**使用者執行**，比照 en02 四步驟）：Project 建立 → Assign Enhancement `PPCO0001` → 雙擊 `EXIT_SAPLCOBT_001` 生成 Include `ZXCO1U01` → 內容只放一行 `CALL METHOD zcl_en08_complog=>log_change( it_head = header_table it_comp = component_table ).` → Activate Project
+
+**Lock Object 的 Lock Mode 選項差異**（SE11 建立時必填，四個選項）：
+
+| Lock Mode | 說明 | 適用情境 |
+|---|---|---|
+| **E（Exclusive/Write Lock）** | 同一時間只能有**一個人**鎖定；同一個使用者可以重複呼叫 `ENQUEUE` 疊加鎖定次數，但要呼叫相同次數的 `DEQUEUE` 才會真正解鎖 | **本題選這個**——確保同一張工單的元件異動記錄，同時間只有一人在寫入，避免兩個人同時改同一張工單、記錄互相覆蓋或遺失 |
+| S（Shared/Read Lock） | 多人可以**同時**持有 S 鎖（唯讀情境），但只要有人持有 S 鎖，其他人就拿不到 E 鎖 | 適合「允許多人同時讀取、但寫入要互斥」的情境 |
+| X（Exclusive，不可累加） | 效果類似 E，但**同一個使用者**重複呼叫 `ENQUEUE` 會直接失敗（不像 E 允許同一人疊加鎖定次數） | 適合「絕對只能鎖一次，連自己都不能重入」的嚴格情境 |
+| O（Optimistic） | 不是真的鎖資料，只記錄狀態供之後比對是否被別人改過（樂觀鎖定） | 適合長時間編輯、不想整段時間占著鎖的情境 |
+
+**⚠️ 排錯記錄：source-based Class 存檔失敗，錯誤訊息完全文不對題**——建立 `ZCL_EN08_COMPLOG` 時反覆遇到 `ExceptionResourceScanDuringSaveFailure`（訊息宣稱「類別無法拆分成 SECTION」），但實際上跟 SECTION 完全無關，逐步排除後找到兩個真正的根因：
+
+1. **`PROTECTED SECTION.` 這個區塊即使空白也必須明確存在**——中間拿掉整段 `PROTECTED SECTION.`（讓 `PUBLIC SECTION` 後面直接接 `PRIVATE SECTION`），會讓這個 source-based 存檔的解析器整個崩潰，回這個誤導性的「無法拆分 SECTION」錯誤，實際上只是少了一個空區塊。
+2. **`CLASS-METHODS` 的 `IMPORTING`／`RETURNING` 參數，型別不能用 `TYPE STANDARD TABLE OF <結構>` 這種 inline 寫法**——這種寫法只能用在區域變數的 `DATA`/`TYPES` 宣告，用在 Method 的正式參數宣告上會讓同一個解析器崩潰、報出同樣誤導性的錯誤。正確做法：Method 簽章維持泛型 `TYPE STANDARD TABLE`（不指定 `OF`），方法內部改用**具名 `TYPES` 定義表格型別，再讓 `FIELD-SYMBOLS` 參照那個型別名稱**（`FIELD-SYMBOLS` 同樣不支援 inline 的 `OF <結構>` 寫法），最後用一般 `ASSIGN it_head TO <lt_head>.`（不需要 `CASTING`）取得靜態型別化的存取，才能同時滿足 Method 簽章的限制、又讓 `SELECT ... FOR ALL ENTRIES` 這類需要編譯期靜態型別的語句正常運作。
+
+**尚待完成**：Z Class 邏輯已可正常編譯與啟用（見上）；CMOD 四步驟待使用者執行。
 
 ## 案例三：MB52 加 MRP Controller 選取欄位（Explicit Enhancement，消費者視角）——✅ 已完整驗證
 
