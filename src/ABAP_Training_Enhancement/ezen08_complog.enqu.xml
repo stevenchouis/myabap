@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enqu:lockobject adtcore:responsible="MONICA" adtcore:masterLanguage="EN" adtcore:masterSystem="S4H" adtcore:name="EZEN08_COMPLOG" adtcore:type="ENQU/DL" adtcore:changedAt="2026-07-30T21:38:17Z" adtcore:version="active" adtcore:createdAt="2026-07-30T00:00:00Z" adtcore:changedBy="MONICA" adtcore:createdBy="MONICA" adtcore:description="EN08 Component Log Lock Object" adtcore:language="EN" xmlns:enqu="http://www.sap.com/adt/ddic/enqu" xmlns:adtcore="http://www.sap.com/adt/core">
+<atom:link href="/sap/bc/adt/vit/wb/object_type/enqudl/object_name/EZEN08_COMPLOG" rel="self" type="application/vnd.sap.sapgui" title="Representation in SAP Gui" xmlns:atom="http://www.w3.org/2005/Atom"/>
+<atom:link href="/sap/bc/adt/ddic/logs/db/ACTENQUEZEN08_COMPLOG" rel="http://www.sap.com/adt/relations/ddic/activationlog" type="application/vnd.sap.adt.logs+xml" title="Activation Log" xmlns:atom="http://www.w3.org/2005/Atom"/>
+<adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP" adtcore:description="Temporary Objects (never transported!)"/>
+<enqu:content>
+<enqu:allowRFC>false</enqu:allowRFC>
+<enqu:primaryTable>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:lockMode>E</enqu:lockMode>
+</enqu:primaryTable>
+<enqu:secondaryTables/>
+<enqu:lockParameters>
+<enqu:lockParameter>
+<enqu:parameterWanted>true</enqu:parameterWanted>
+<enqu:parameterName>MANDT</enqu:parameterName>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:fieldName>MANDT</enqu:fieldName>
+</enqu:lockParameter>
+<enqu:lockParameter>
+<enqu:parameterWanted>true</enqu:parameterWanted>
+<enqu:parameterName>AUFNR</enqu:parameterName>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:fieldName>AUFNR</enqu:fieldName>
+</enqu:lockParameter>
+<enqu:lockParameter>
+<enqu:parameterWanted>true</enqu:parameterWanted>
+<enqu:parameterName>ARTNR</enqu:parameterName>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:fieldName>ARTNR</enqu:fieldName>
+</enqu:lockParameter>
+<enqu:lockParameter>
+<enqu:parameterWanted>false</enqu:parameterWanted>
+<enqu:parameterName>UPDAT</enqu:parameterName>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:fieldName>UPDAT</enqu:fieldName>
+</enqu:lockParameter>
+<enqu:lockParameter>
+<enqu:parameterWanted>false</enqu:parameterWanted>
+<enqu:parameterName>UPTIM</enqu:parameterName>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:fieldName>UPTIM</enqu:fieldName>
+</enqu:lockParameter>
+<enqu:lockParameter>
+<enqu:parameterWanted>false</enqu:parameterWanted>
+<enqu:parameterName>RSNUM</enqu:parameterName>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:fieldName>RSNUM</enqu:fieldName>
+</enqu:lockParameter>
+<enqu:lockParameter>
+<enqu:parameterWanted>false</enqu:parameterWanted>
+<enqu:parameterName>RSPOS</enqu:parameterName>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:fieldName>RSPOS</enqu:fieldName>
+</enqu:lockParameter>
+<enqu:lockParameter>
+<enqu:parameterWanted>false</enqu:parameterWanted>
+<enqu:parameterName>RSART</enqu:parameterName>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:fieldName>RSART</enqu:fieldName>
+</enqu:lockParameter>
+<enqu:lockParameter>
+<enqu:parameterWanted>false</enqu:parameterWanted>
+<enqu:parameterName>SEQ</enqu:parameterName>
+<enqu:tableName>ZEN08_COMPLOG</enqu:tableName>
+<enqu:fieldName>SEQ</enqu:fieldName>
+</enqu:lockParameter>
+</enqu:lockParameters>
+<enqu:lockModules>
+<enqu:lockModule adtcore:uri="/sap/bc/adt/functions/groups/%2f1bcdwben%2ften0000/fmodules/enqueue_ezen08_complog" adtcore:type="FUGR/FF" adtcore:name="ENQUEUE_EZEN08_COMPLOG"/>
+<enqu:lockModule adtcore:uri="/sap/bc/adt/functions/groups/%2f1bcdwben%2ften0000/fmodules/dequeue_ezen08_complog" adtcore:type="FUGR/FF" adtcore:name="DEQUEUE_EZEN08_COMPLOG"/>
+</enqu:lockModules>
+</enqu:content>
+</enqu:lockobject>

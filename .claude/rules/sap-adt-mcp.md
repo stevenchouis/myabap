@@ -385,8 +385,16 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **排查方法**：對懷疑的新建 DE／Domain 直接 GET 讀回，檢查 `adtcore:version` 屬性——`"new"` 代表從未啟用過，`"inactive"` 代表存過但沒啟用，`"active"` 才是可以被其他物件正常引用的狀態。`sap_inactive_objects` 這個 MCP 工具**不會列出**這類剛建立、還處於 `new` 狀態的 DDIC 物件（目前只在使用者/物件被明確鎖定編輯時才會出現在清單裡），所以「`sap_inactive_objects` 回 0 筆」不能當作「所有相依物件都已啟用」的證據。
 - **修法**：新建的 Domain／Data Element 建立後，**在拿去給任何表格/結構引用之前，先手動呼叫一次 activation API**（`POST /sap/bc/adt/activation?method=activate`，body 帶 `adtcore:objectReference` 指向該 Domain／DE 的 URI，可以把 Domain 跟 DE 放在同一個請求批次啟用），確認 GET 讀回 `adtcore:version="active"` 後，再建立/修改引用它們的表格。這是本檔第 8 節「Domain/DE/表可以放進同一個 activation 請求批次啟用」原則的具體應用——重點是**引用方（表格）動手之前，被引用方（Domain/DE）必須先確認是 `active` 狀態**，不能假設「POST 201 成功」就等於「已經可以被引用」。
 
+## 33. Lock Object（ENQU）ADT 有唯讀 GET，但不是 source-based；CMOD Function Exit Include 就是普通 PROG/I（2026-07-30 實測，Enhancement 課程 en08 案例一收尾）
+
+- **Lock Object 有 ADT collection**（discovery 找得到 `/sap/bc/adt/ddic/lockobjects/sources`），GET `/sap/bc/adt/ddic/lockobjects/sources/<name>` 可以正常讀到完整結構化 XML（`enqu:lockobject`，含 Primary Table／Lock Mode／Lock Parameters／自動產生的 Enqueue-Dequeue FM 清單／`adtcore:version`），可以用來確認 Lock Object 是否 `active`、Lock Parameters 是否正確——這點跟第 10 節「Search Help 完全沒有 ADT 路徑」不同。
+- **但 Lock Object 不是 source-based**：GET `/sap/bc/adt/ddic/lockobjects/sources/<name>/source/main` 回 `No suitable resource found`，代表沒有像 Table DDL 那樣的純文字原始碼可讀寫，只有這份結構化 XML（也沒有 `sap_get_source`/`sap_set_source` 的 objectType 選項）。**匯出到 `src/` 時不適用 `.abap` 慣例**，改存一份 pretty-print 過的 `.enqu.xml`（比照 abapGit 對非 source-based DDIC 物件用 XML 序列化的慣例），純粹當作唯讀快照留存 Lock Mode／Lock Parameters 設定內容，不是可寫回系統的原始碼。
+- **CMOD Project 底下、雙擊 Component 生成的 Function Exit Include（如 `ZXCO1U01`），本質就是一般 `PROG/I` Include**，第 1 節記載的「INCLUDE 讀寫走 `programs/includes` 路徑」workaround 直接適用，讀寫上沒有任何特殊之處——延續第 21 節已經記載過的結論（`ZX` 開頭 Include 只是建立方式特殊，需要 CMOD 雙擊觸發生成，生成後就是普通 Include），這裡再次確認：**這類 Include 一樣要匯出進 `src/`**，用 `<include名小寫>.prog.abap` 命名，跟主程式的 INCLUDE 匯出慣例一致。
+
 ## 匯出 SAP 原始碼到 src/ 的慣例
 
 - 檔名採 abapGit 格式：`<物件名小寫>.<類型>.abap`（如 `zdqm0001.prog.abap`；INCLUDE 也是 `.prog.abap`）。
 - 主程式要連同其 INCLUDE 一起匯出；多支程式共用的 INCLUDE 只存一份。
+- **CMOD Project 底下生成的 Function Exit Include（如 en02 的 `ZXVBZU01`/`ZXVBZU02`、en08 案例一的 `ZXCO1U01`）也適用這條慣例**：本質是普通 `PROG/I`，一樣用 `<include名小寫>.prog.abap` 匯出，不需要額外記錄 CMOD Project 本身（CMOD Project／Assign／Activate 是 GUI-only 設定，沒有可匯出的原始碼）。
+- **Lock Object（ENQU）不適用 `.abap` 慣例**：它是結構化 DDIC 物件、沒有純文字原始碼，改存 `.enqu.xml`（GET 該物件 ADT 回應的 pretty-print 版本），見上方第 33 節。
 - `src/` 是**單向快照**：SAP 端修改後需重新匯出；本地修改要用 `sap_set_source` 寫回系統才算數。
