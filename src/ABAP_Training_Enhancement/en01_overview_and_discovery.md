@@ -13,6 +13,26 @@ CLAUDE.md 開發流程明訂一條鐵律：**「不可修改 SAP 標準物件（
 3. **新式 BAdI／Enhancement Spot（NetWeaver 7.0 起）**：BAdI 機制整合進統一的 Enhancement Framework 後的新一代——BAdI Definition 改掛在一個 **Enhancement Spot**（`ENHS`）底下管理，Implementation 變成一種 **Enhancement Implementation**（`ENHO`）。**這次查證發現一個有意思的現象**：連 NetWeaver 4.6 時代就存在的老牌 Classic BAdI `MB_MIGO_BADI`（MIGO 交易碼的外掛點，套件 `MB`），在這套系統裡同時查得到**兩種身分**——舊式的 `SXSD/XD`（BAdI Definition，只能在 SE18 GUI 操作，ADT 只有唯讀 metadata stub）**和**新式的 `ENHS/XS`（Enhancement Spot，完整 ADT 可讀寫）。這證實了官方文件的說法：NetWeaver 7.0 升版時，系統會把舊 Classic BAdI 自動「包」一層新式 Enhancement Spot 外殼，讓舊 BAdI 也能被新框架的工具管理，兩種身分同時存在、指向同一組 Definition／Interface。
 4. **Enhancement Point／Section（Explicit）與 Implicit Enhancement Point**：這是新框架**額外**提供、User-Exit／BAdI 都沒有的能力——**Explicit**：開發者在自己的程式裡用 `ENHANCEMENT-POINT`／`ENHANCEMENT-SECTION` 語法刻意留一個插入點（跟 User-Exit 概念類似，但是新框架語法，且原生支援多個 Enhancement Implementation 並存）；**Implicit**：新框架的殺手級功能——**任何** `FORM`／`METHOD`／`FUNCTION`／`MODULE` 的**開頭與結尾**、以及程式最開頭/結尾，系統都自動提供一個隱式插入點，**完全不需要原開發者事先宣告**。這代表就連沒有預留任何 Explicit 插入點的老舊標準程式，只要是新框架涵蓋的版本，一樣可以用 Implicit Enhancement Point（Source Code Plugin，`ENHOXHH`）插入程式碼——這是「合法擴充任何標準物件」這件事在技術上真正落地的地方。
 
+**新框架的統一架構：Enhancement Spot／Enhancement Option／Enhancement Implementation 三層關係**（本課程 en05～en07 反覆碰到、但一直沒有集中講清楚的核心詞彙，這裡統整）：
+
+上面第 3、4 點提到的「新式 BAdI」跟「Explicit/Implicit Enhancement Point」，表面上是兩種不同東西（一個管理 BAdI、一個管理程式碼插入點），但底層其實是**同一套架構**，只是「掛上去的東西類型不同」。三層關係由外到內是：
+
+```text
+Enhancement Spot（ENHS，容器／管理單位，一個具名的「這裡開放客製化」宣告）
+ └─ Enhancement Option（實際的具名錨點，一個 Spot 底下可以有一個或多個，各自有「類型」）
+     ├─ 類型 = BAdI Definition        → en05／en06 教的（一個 Interface，等待被 Implementation 實作）
+     ├─ 類型 = Enhancement Point      → en07 教的（純插入，無法取代原邏輯）
+     ├─ 類型 = Enhancement Section    → en07 教的（可以整段取代原邏輯，本系統實測沒有追加選項）
+     └─ （還有其他類型，如 Class Enhancement／Web Dynpro Enhancement 等，本課程未涵蓋）
+         └─ Enhancement Implementation（ENHO，實際掛上去生效的客製化程式碼／Class，可以有 0～多個）
+```
+
+**「Enhancement Option」這個詞從哪裡冒出來的**：就是 en07 SE38 操作裡按過無數次的**「Create Enhancement Option」**對話框——那個對話框做的事情，正是「建立一個新的具名錨點（Option），並要求你指定它要綁定到哪一個 Enhancement Spot」。en05/en06 建 BAdI Definition 時，SE18 底層做的也是同一件事，只是 GUI 把「建 Spot」與「建 Option（BAdI Definition 類型）」包成同一步，感覺不到這個分層；SE18 只能建 BAdI 類型的 Option，是因為 SE18 這支交易碼的設計目的就是專門管理 BAdI 類型的 Option，不是它「做不到」建 Spot 這件事本身。這也解釋了 SE18 Display 一個 Spot 時，Attributes 頁籤那個「**Enhancement Method**」欄位到底在顯示什麼——它就是這個 Spot 底下那個 Option 的**類型**（`Source Code Plug-In` 或 `BAdI Definition`），en07 用來確認 Binding 是否成功的關鍵欄位，其實就是在讀這一層架構。
+
+**Implicit／Explicit 用這套語言重講一次會更精確**：兩者的差異不在「有沒有 Enhancement Option」，而在「Option 是誰、什麼時候建立的」——**Implicit**：SAP 框架在**每一支程式編譯時自動生成**大量系統管理的 Enhancement Option（type=Source Code Plugin），掛在系統自動維護的 Enhancement Spot 底下，原開發者不用做任何事，這些 Option 預設隱藏，要切換「Show Implicit Enhancement Options」才看得到；**Explicit**：原開發者要**主動**呼叫 Create Option 建立 Option＋順便建立/綁定 Spot，這一步不做，這個位置就沒有任何 Option 存在——這正是 en07 為什麼要花那麼多篇幅講「怎麼正確建立並綁定」，因為 Implicit 情境完全不需要這道手續。
+
+**⚠️ 一個常見的簡化說法「Explicit Enhancement Option 就是 Enhancement Spot」不完全精確，但在本課程的範例裡剛好成立**：en07 示範的兩個案例（`ZR_EN07_EXPLICIT_DEMO`＋`ZES_EN07_V3`、`ZR_EN07_SECTION_DEMO`＋`ZES_EN07_SECTION_V1`）都是「一個 Spot 只裝一個 Option」的 1:1 關係，容易讓人誤以為兩者是同一件事、可以互相取代著講。但嚴格說，**Spot 是容器、Option 是容器裡的具名錨點**，一個 Spot 理論上可以裝多個 Option（Implicit 情境下，一支程式背後的系統 Spot 其實掛了非常多個隱式 Option，每個 FORM/METHOD 邊界就是一個）——只是本課程從零手動建立的 Explicit 案例，因為都是「一個位置對應一次 Create Option」，剛好呈現出 1:1 的簡單樣貌。
+
 **怎麼找一個交易/程式有哪些可用的增強點**（實務上常用、依情境選用）：
 
 | 方法 | 適用分類 | 說明 |
@@ -29,6 +49,7 @@ CLAUDE.md 開發流程明訂一條鐵律：**「不可修改 SAP 標準物件（
 - 能分辨四大增強分類（User-Exit／Classic BAdI／新式 BAdI(Enhancement Spot)／Explicit vs Implicit Enhancement Point）在**誰刻意留插入點**、**能不能多重實作**、**用什麼工具維護**這三個面向的差異
 - 知道 Classic BAdI 與新式 Enhancement Spot 之間「舊 BAdI 被包一層新外殼」的共存現象，理解這不是兩套互斥的技術，是同一套機制的新舊介面
 - 能講出至少三種尋找「某交易/程式有哪些可用增強點」的方法，並知道各自適用哪個分類
+- 能講出 **Enhancement Spot／Enhancement Option／Enhancement Implementation** 三層架構的關係，並指出「新式 BAdI」與「Explicit/Implicit Enhancement Point」其實是同一套架構下、Option 類型不同的兩種呈現——不是兩套互不相干的技術
 
 ## 事前準備
 
