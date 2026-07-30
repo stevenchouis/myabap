@@ -76,7 +76,7 @@ Enhanced: extra greeting inserted via ENHANCEMENT-POINT for carrier LH
 
 第二行是插入點本身新增的輸出；第三行是**插入點之後、原本就存在的 `WRITE: / lv_text.`**——因為插入的程式碼改了共用變數 `lv_text`，連帶影響了它後面既有的邏輯，證實 Explicit Enhancement Point 插入的程式碼是跟原有程式碼在**同一個變數作用域**裡執行的，不是隔離的沙箱。
 
-**`ENHANCEMENT-SECTION`**：跟 `ENHANCEMENT-POINT` 語法幾乎一樣，差別是 `ENHANCEMENT-SECTION ... END-ENHANCEMENT-SECTION` 包住一段**既有邏輯**。官方概念上 Enhancement Implementation 可以「保留原邏輯、額外追加」或「整段取代原邏輯」——這是 `ENHANCEMENT-SECTION` 相對 `ENHANCEMENT-POINT` 獨有的能力（`ENHANCEMENT-POINT` 沒有「原邏輯」可以取代，只能純插入）。**這兩種行為在這套系統裡實際是由什麼開關控制，本題尚未確認**：Create Option 對話框裡的「Include Bound」欄位在 Enhanceable Object 是 Program 型別時整個灰階、無法勾選（見上方「Lecture」段落的更正說明），不是可用的控制項；真正決定「追加 vs 取代」的機制，要靠下面「待驗證」段落的實測結果才能確認，不要照抄官方文件的籠統描述當作這套系統的實際行為。
+**`ENHANCEMENT-SECTION`**：跟 `ENHANCEMENT-POINT` 語法幾乎一樣，差別是 `ENHANCEMENT-SECTION ... END-ENHANCEMENT-SECTION` 包住一段**既有邏輯**。官方文件籠統描述 Enhancement Implementation 可以「保留原邏輯、額外追加」或「整段取代原邏輯」，但**這套系統實測結果是：只要建立了 Implementation，就是整段取代，沒有追加這條路**（詳見下方實測結果）——原因是 Create Option 對話框裡的「Include Bound」欄位在 Enhanceable Object 是 Program 型別時整個灰階、無法勾選（見上方「Lecture」段落的更正說明），這個系統沒有開放讓你選「追加」的入口。
 
 **實測結果（`ZR_EN07_SECTION_DEMO`，2026-07-30）**：依照上面的「建立流程完整版」，選取一段預設邏輯（計算並顯示一筆預設金額）當作 Section 範圍，Create Option 建立 `ENHANCEMENT-SECTION es_mytest SPOTS zes_en07_section_v1`，Spot 自動建立並正確 Binding（SE18 確認 Enhancement Method = Source Code Plug-In，編輯器左側裝訂線出現螺旋圖示）：
 
@@ -108,12 +108,33 @@ WRITE: / lv_text.
 
 **倒數第二段的 `*ENHANCEMENT-SECTION es_en07_greeting ...` 是排錯過程留下的殘留片段，已被整段註解掉、不會執行**：這是排錯初期第一次嘗試建立 Section 時取的 Option 名稱（`es_en07_greeting`，呼應 `ENHANCEMENT-POINT` 案例的 `lv_text = |Standard: greeting for ...|` 寫法），後來改用 `ES_MYTEST`＋預設金額邏輯重新成功建立，這段舊嘗試就留在原始碼裡當註解、沒有刪除。這也解釋了最後一行 `WRITE: / lv_text.` 為什麼會印出空字串——`lv_text` 從頭到尾沒有被賦值過（賦值那行在註解裡），這是真實系統目前的原樣，不是示範邏輯的一部分。
 
-Point／Section 兩者的 Spot 建立與綁定流程完全驗證成功。**Create Implementation（實際寫程式碼、觀察「追加」還是「取代」）留待下一輪操作**：直接建一個 Implementation（Create Implementation 對話框本身只問名稱／套件，沒有額外開關），貼上一段容易辨識的測試程式碼、Activate、執行，看輸出裡「預設金額: 100」這行有沒有出現，就能直接判斷這個 Section 目前的實際行為，不用依賴猜測的 UI 開關。
+**Create Implementation 實測（`ZEI_EN07_SECTION_APPEND`，2026-07-30）**：先踩到一個很有意義的語法錯誤——Implementation 程式碼直接沿用原邏輯裡宣告的 `lv_amount` 會報 `Field "LV_AMOUNT" is unknown`，代表 **Implementation 的作用域跟原邏輯區塊是分開的，原邏輯裡的區域宣告對 Implementation 不可見**。改用 Implementation 自己獨立宣告的變數後正常啟用：
+
+```abap
+ENHANCEMENT 1 ZEI_EN07_SECTION_APPEND.
+  WRITE: / '=== Implementation 有執行到這裡 ==='.
+  DATA: lv_new_amount TYPE i.
+  lv_new_amount = 999.
+  WRITE: / 'Implementation 設定的金額:', lv_new_amount.
+ENDENHANCEMENT.
+```
+
+執行輸出：
+
+```
+EN07 Explicit Enhancement Section demo
+==================================================================
+=== Implementation 有執行到這裡 ===
+Implementation 設定的金額:        999
+```
+
+**「預設金額: 100」完全沒有出現**——證實這套系統裡 `ENHANCEMENT-SECTION` 一旦建立 Implementation，就是**整段取代**：原邏輯（含 `DATA: lv_amount` 那行宣告、`lv_amount = 100`、`WRITE '預設金額:'`）完全不執行，Implementation 提供的程式碼是唯一生效的邏輯。結合前面 Include Bound 灰階不可用的觀察，可以下一個明確結論：**在這套系統對一般 Z 程式（Program 型別）建立 Explicit `ENHANCEMENT-SECTION` 時，沒有「保留原邏輯、額外追加」這個選項可用，只有整段取代**——官方文件描述的「追加」能力，理論上需要 Include Bound 開放的情境（例如某些 BAdI/框架物件），不適用於這裡的純 Program 場景。
 
 ## 學習目標
 
 - 能講出 Explicit 與 Implicit Enhancement Point 的差異：前者需要原開發者主動宣告、肉眼可見；後者框架保證到處都有、需要切換顯示才看得到
-- 能講出 `ENHANCEMENT-POINT`（純插入）與 `ENHANCEMENT-SECTION`（可整段取代）的能力差異
+- 能講出 `ENHANCEMENT-POINT`（純插入）與 `ENHANCEMENT-SECTION`（可整段取代）的能力差異，並知道**在這套系統的 Program 型別情境下，`ENHANCEMENT-SECTION` 實測只有「整段取代」，沒有「追加」的選項可用**（Include Bound 灰階不可勾選）
+- 能解釋為什麼 Implementation 程式碼引用原邏輯裡宣告的區域變數會報 `Field ... is unknown`：Implementation 的作用域跟被取代的原邏輯是分開的，原邏輯裡的 `DATA` 宣告對 Implementation 不可見，Implementation 要自己獨立宣告變數
 - 知道 Explicit Enhancement 的建立與內容編輯**完全是 GUI-only**，而且一旦程式碼裡有了 Explicit Enhancement，這支程式就再也不能用 ADT `sap_lock` 編輯（`ExceptionResourceIsEnhanced`）——這是本課程遇過最徹底的 ADT 限制
 - 知道 **SE18 建立 Enhancement Spot 只能選 BAdI Definition 類型，沒有 Source Code Plug-In 選項**——Explicit Point/Section 用的 Spot 必須從 SE38 的 Create Option 對話框「順便」建立，不能靠 SE18 事先準備
 - 知道 Create Option（建立 Point/Section 宣告＋Spot）這一步**不需要**切到 Enhance 模式，一般 Change 模式的右鍵選單就找得到；Enhance 模式是用在編輯「已存在的 Enhancement 內容」（Create/Change Implementation）這個不同的步驟
@@ -127,8 +148,9 @@ Point／Section 兩者的 Spot 建立與綁定流程完全驗證成功。**Creat
 2. **`ZR_EN07_EXPLICIT_DEMO`**（`$TMP`，基礎程式由 ADT 建立，Explicit Enhancement 宣告與內容由**使用者於 SE38 建立**）：內含 `ENHANCEMENT-POINT ep_en07_after_init SPOTS zes_en07_v3.`。
 3. **`ZEI_EN07_INSERT_DEMO`**（**使用者於 SE38 建立**）：掛在上述插入點的 Enhancement Implementation，內容為修改 `lv_text` 並額外 `WRITE` 一行。已用 `programrun` 無頭執行驗證成功，輸出三行文字，證實插入的程式碼確實執行、且影響了插入點之後的既有邏輯。
 4. **`ZES_EN07_EXPLICIT_DEMO`／`ZES_EN07_POINT_DEMO`**：本題排錯過程中建立的中間產物——2026-07-30 確認根因是**用 SE18 建立的 Spot 型別是 BAdI Definition，天生就不適用於 Explicit Point/Section**，留在系統裡當反面教材，未被實際使用。
-5. **`ZR_EN07_SECTION_DEMO`**（`$TMP`，**使用者於 SE38 Create Option 對話框直接建立**）：`ENHANCEMENT-SECTION es_mytest SPOTS zes_en07_section_v1.` 包住一段預設金額計算邏輯，已端對端驗證 Spot 正確 Binding（SE18 Technical Details＋編輯器螺旋圖示雙重確認）；Create Implementation（追加／整段取代兩種內容）尚未建立，留待下一輪。
+5. **`ZR_EN07_SECTION_DEMO`**（`$TMP`，**使用者於 SE38 Create Option 對話框直接建立**）：`ENHANCEMENT-SECTION es_mytest SPOTS zes_en07_section_v1.` 包住一段預設金額計算邏輯，已端對端驗證 Spot 正確 Binding（SE18 Technical Details＋編輯器螺旋圖示雙重確認）。
 6. **`ZES_EN07_SECTION_V1`**（**隨上述 Create Option 動作自動建立並綁定**，Enhancement Method 確認為 Source Code Plug-In）：`ZR_EN07_SECTION_DEMO` 的 Explicit Enhancement Section 專用 Spot。
+7. **`ZEI_EN07_SECTION_APPEND`**（**使用者於 SE38 建立**，掛在 `ZES_EN07_SECTION_V1` 上）：已用 `programrun` 無頭執行驗證成功，確認 `ENHANCEMENT-SECTION` 在這套系統的 Program 型別情境下是**整段取代**，原邏輯（含區域變數宣告）完全不執行、對 Implementation 也不可見。
 
 ## 題目需求
 
@@ -136,6 +158,7 @@ Point／Section 兩者的 Spot 建立與綁定流程完全驗證成功。**Creat
 2. **解釋為什麼這支程式一旦有了 Explicit Enhancement，就不能再用 ADT `sap_lock` 編輯**：這對「開發流程要不要優先用 ADT／MCP 自動化」這件事，帶來什麼實務上的提醒？
 3. **對比 `ENHANCEMENT-POINT` 跟 en04 的 `Implicit Enhancement`（Source Code Plugin）**：兩者都能「插入程式碼、不能改介面」，但一個要原開發者主動宣告、一個到處都有——如果你是原始程式的開發者，什麼情況下你會想主動加一個 `ENHANCEMENT-POINT`，而不是依賴到處都有的 Implicit 插入點？
 4. **解釋 `ENHANCEMENT-SECTION` 的「整段取代」能力，跟 en05/en06 學到的哪個機制概念上最接近**（提示：想想 Multi Use BAdI 的多個 Implementation 依序疊加 `CHANGING` 參數 vs 這裡的「取代」，是相同的資料流向模式嗎？）。
+5. **實測發現 Implementation 程式碼不能引用原邏輯裡宣告的區域變數（`Field "LV_AMOUNT" is unknown`），且執行結果證實「預設金額: 100」完全不會輸出**——這兩個證據合起來，能不能直接推論出「這套系統的 `ENHANCEMENT-SECTION` 只有整段取代、沒有追加」這個結論？只看其中一個證據（例如只看語法錯誤，不做實際執行測試）夠不夠下這個結論？
 
 ## 參考答案
 
@@ -146,6 +169,8 @@ Point／Section 兩者的 Spot 建立與綁定流程完全驗證成功。**Creat
 **主動加 `ENHANCEMENT-POINT` vs 依賴 Implicit 的判斷**：如果你明確知道「這個位置未來很可能需要讓客製化邏輯掛進來」（例如一段驗證邏輯、一段格式化邏輯），主動宣告 `ENHANCEMENT-POINT` 並取一個有語意的名稱（如 `ep_en07_after_init`），能讓未來要客製化的人**一眼就看到這是官方預留的插入點**，不用像 en04 那樣還要切換「Show Implicit Enhancement Options」才找得到，也不用擔心插入位置選得不好影響到不該影響的程式碼段落；Implicit 插入點雖然到處都有、彈性最大，但正因為到處都有，反而沒有「這裡才是建議插入點」的語意指引，客製化的人要自己判斷插入在哪裡最安全，風險相對更高（en04 就實際踩過這個風險：一開始用「不論任何條件、寫死測試值」的診斷版本測試，就真的建立了一張錯誤的正式工單）。
 
 **`ENHANCEMENT-SECTION` 取代能力跟 Multi Use BAdI 的資料流向對比**：兩者**不是同一種模式**。Multi Use BAdI（en06）是「多個 Implementation 都執行、依序疊加同一個 `CHANGING` 參數」，原邏輯（Fallback 除外）不會被跳過；`ENHANCEMENT-SECTION` 的取代模式則是「Implementation 提供的程式碼完全取代原邏輯，原邏輯根本不會執行」，更接近 Single Use BAdI 的精神（保證只有一個邏輯真正生效，不會疊加）——`ENHANCEMENT-SECTION` 本身雖然也可以有多個 Implementation，但語意上是「挑一個取代」而不是「疊加處理」，跟 Multi Use BAdI「刻意讓多個邏輯依序處理同一份資料」的設計目的並不相同。
+
+**兩個證據合起來才夠下結論，只看語法錯誤不夠**：`Field "LV_AMOUNT" is unknown` 這個語法錯誤只能證明「Implementation 的編譯期作用域看不到原邏輯的區域宣告」，理論上這**也可能只是「取代」跟「追加」共通的一個技術限制**（例如即使是追加模式，Implementation 程式碼也可能被編譯成獨立單元、本來就不共用原邏輯的區域變數），不能單靠這個語法錯誤就排除「追加」的可能性——追加也可能是「兩段各自獨立編譯，但執行時依序都跑」。真正一錘定音的是**執行輸出**：`WRITE '預設金額:', lv_amount.` 這一整行完全沒有出現在輸出裡，代表原邏輯**在執行期根本沒有被觸發**，不是「跑了但看不到變數」而是「整段沒跑」——這才是能排除「追加」、坐實「整段取代」的關鍵證據。這個對照本身是很好的方法論提醒：**編譯期的錯誤訊息只能告訴你「靜態結構上發生了什麼」，要驗證「執行期實際發生了什麼」，一定要真的跑一次看輸出**，兩者不能互相取代。
 
 ## 思考題
 
