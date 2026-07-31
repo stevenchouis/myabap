@@ -1,37 +1,13 @@
 REPORT zr_tr28_param_list.
 
-TABLES: ztr28_wparm, sscrfields.
+* ⚠️ 本程式已於 ex28 最終版設計中棄用（2026-07-31）。
+* 原本的功能（「沒有保護」的對照按鈕，直接呼叫 Parameter Transaction ZTR28_SM30
+* 跳進 SM30）已經併入 ZR_TR28_PRICE_CALC 的選取畫面按鈕，不需要另外維護一支
+* 專門展示「不安全做法」的清單程式，教學上重複。
+*
+* 保留這個物件（沒有清空刪除）是因為 ADT 沒有刪除 ABAP 物件的 API，
+* 只能把原始碼改成這份說明留存；物件本身留在 $TMP 當殘留物無妨。
+* 正式的維護入口見 ZR_TR28_PARAM_MAINT（T-code ZTR28_MAINT），
+* 主要報表見 ZR_TR28_PRICE_CALC。
 
-SELECT-OPTIONS s_werks FOR ztr28_wparm-werks.
-
-SELECTION-SCREEN FUNCTION KEY 1.
-
-DATA: gt_wparm TYPE STANDARD TABLE OF ztr28_wparm.
-
-INITIALIZATION.
-  sscrfields-functxt_01 = '維護主檔(SM30)'.
-
-AT SELECTION-SCREEN.
-  CASE sscrfields-ucomm.
-    WHEN 'FC01'.
-      " 示範「土法煉鋼」的做法：直接呼叫 SM30，完全不經過 ZR_TR28_PARAM_MAINT 那個
-      " Wrapper——沒有 AUTHORITY-CHECK、沒有 Lock Object、也沒有依工廠篩選，
-      " 跟 ZR_TR28_PARAM_MAINT（AUTHORITY-CHECK -> ENQUEUE -> VIEW_MAINTENANCE_CALL
-      " 帶 WERKS 篩選 -> DEQUEUE）刻意做對照，說明為什麼需要包一層 Wrapper。
-      SET PARAMETER ID 'VIM' FIELD 'ZTR28_WPARM'.
-      CALL TRANSACTION 'SM30' AND SKIP FIRST SCREEN.
-  ENDCASE.
-
-START-OF-SELECTION.
-  SELECT * FROM ztr28_wparm
-    WHERE werks IN @s_werks
-    ORDER BY werks, param
-    INTO TABLE @gt_wparm.
-
-  LOOP AT gt_wparm INTO DATA(gs_wparm).
-    WRITE: / gs_wparm-werks, gs_wparm-param, gs_wparm-parval, gs_wparm-partxt.
-  ENDLOOP.
-
-  IF sy-subrc <> 0.
-    WRITE: / '（沒有資料，或選取條件沒有命中）'.
-  ENDIF.
+WRITE: / '本程式已棄用，請改用 ZR_TR28_PRICE_CALC（選取畫面按鈕可直接跳去維護主檔）'.

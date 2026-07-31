@@ -440,3 +440,39 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
   3. **這個資料遺失沒有復原手段**（$TMP 訓練表、沒有備份、DB 層級的 `DELETE`+`COMMIT` 無法復原），只能誠實記錄、更新講義說明「這兩筆記錄已遺失」，並改用單元測試（不消耗真實 Number Range、不建立真實工單）補上等效的驗證證據。
 - **`WORKORDER_UPDATE`／`AT_SAVE` 的 `AUFNR` 在新建工單情境下是暫時號碼（如 `%00000000001`），每次新建工單都從這個暫時號碼重新起算，不同真實工單會共用同一個暫時號碼**——這不是隨機巧合或 bug，是 SAP 標準機制：`IF_EX_WORKORDER_UPDATE` 介面本身就有一個專用方法 `NUMBER_SWITCH(I_AUFNR_OLD, I_AUFNR_NEW, I_AUFPL_OLD, I_AUFPL_NEW, I_AUTYP)`，在真正的號碼從 Number Range 確定後另外呼叫，通知「暫時號碼 → 真實號碼」的對應。**任何在 `AT_SAVE`（或類似「存檔當下」的掛勾點）記錄新建物件編號的稽核/Log 設計，都要檢查該 BAdI Interface 是否也提供類似的「號碼確定後」回呼方法，否則記錄下來的編號可能只是暫時佔位值，同一個值會被不同的真實物件重複使用，讓稽核記錄失去可追溯性**——這個模式（先給暫時號碼、確定後再廣播真實號碼）在 SAP 許多「建立時前端就要顯示編號、但編號要等交易確定才能寫死」的物件類型（生產工單、部分銷售單據等）都存在，不是 `WORKORDER_UPDATE` 獨有。
 - **`I_AUFPL_OLD`/`I_AUFPL_NEW`（途程 Routing Plan 編號）在 `NUMBER_SWITCH` 簽章裡是必填參數（沒有 `OPTIONAL`），即使呼叫端邏輯用不到也必須傳值**（傳 `'0000000000'` 這種安全佔位值即可，不影響邏輯），漏傳會在啟用時報 `No value was passed to the mandatory parameter`。
+
+## 36. `sap_set_source` 內建的自動啟用步驟回報「User XXX is currently editing」403，可能是工具本身的 bug，不是真實鎖——SM12 查無 Lock Entry 時直接改用手動 curl activation（2026-07-31 實測，基礎課 ex28 收尾）
+
+- **現象**：`ZR_TR28_PARAM_MAINT` 補推送 `dba_sellist` 篩選修正版，連續兩次呼叫 `sap_set_source` 都寫入成功（`status: success`）但自動啟用失敗，回報 `HTTP 403 ExceptionResourceNoAccess: User MONICA is currently editing ZR_TR28_PARAM_MAINT`；中間有照第 5 節標準流程做過 `sap_lock`→`sap_unlock` 清鎖，`sap_unlock` 也回報成功，但下一次 `sap_set_source` 的自動啟用一樣報同一個錯誤，訊息一字不差。
+- **關鍵排除證據**：使用者直接在 **SM12 查詢 MONICA 這個使用者的 Lock Entry，結果是空的**——代表 SAP 端根本沒有真正的 ENQUEUE 鎖存在，錯誤訊息裡「User MONICA is currently editing」的診斷文字（本來設計是給「有其他人在 SE38 編輯畫面鎖著」這種情境）在這裡是**誤導性的**，真正原因出在 **`sap_set_source` 工具內部呼叫 activation API 這一步本身有問題**（推測是 CSRF token 沒有正確帶入、或工具內部維護的 session 狀態沒有跟這次呼叫同步），不是 SAP 系統真的鎖住了這支程式。
+- **Workaround（繞過工具內建的自動啟用邏輯，改手動兩步 curl）**：
+  ```bash
+  # 1. 取得 CSRF token 與 session cookie（token 固定回 ADT-RFC-BRIDGE）
+  curl -c jar.txt -b jar.txt -H 'x-csrf-token: fetch' 'http://127.0.0.1:8410/sap/bc/adt/discovery?sap-client=130' -o /dev/null -D -
+
+  # 2. 直接呼叫 activation API，物件 URI 用 programs/programs（PROG）或對應型別的路徑
+  curl -b jar.txt -H 'x-csrf-token: ADT-RFC-BRIDGE' -H 'Content-Type: application/vnd.sap.adt.activation+xml' \
+    -X POST 'http://127.0.0.1:8410/sap/bc/adt/activation?method=activate&preauditRequested=true&sap-client=130&sap-language=EN' \
+    --data '<?xml version="1.0" encoding="UTF-8"?><adtcore:objectReferences xmlns:adtcore="http://www.sap.com/adt/core"><adtcore:objectReference adtcore:uri="/sap/bc/adt/programs/programs/<程式名小寫>"/></adtcore:objectReferences>'
+  ```
+  這次一次就成功（`HTTP 200`，`Content-Length: 0`，無錯誤內容）；事後用 `sap_inactive_objects`（回 0 筆）＋`sap_get_source(version=active)`（內容比對本地檔案逐字相符）雙重確認啟用真的生效，不是誤判。
+- **教訓／排錯順序**：`sap_set_source` 回報 activation 403「User XXX is currently editing」時，**不要立刻假設是真實 GUI 編輯畫面造成的殘留鎖、也不要無止盡重試 `sap_set_source`**——這類重試只會不斷重現同一個工具內部 bug，不會自己好（本次案例重試了三次以上、跨越前後兩次對話都失敗）。正確順序：① 先請使用者用 SM12 查證該使用者名稱是否真的有 Lock Entry；② 如果 SM12 是空的，直接跳過 `sap_set_source` 的自動啟用，改用上面這段手動 curl workaround；③ 如果 SM12 確實查到 Lock Entry，才照第 5 節「請使用者關閉 SE38 編輯畫面／SM12 手動刪鎖」的方式處理。
+- 這個案例也再次印證第 4 節記載的 `sap_syntax_check` 500 問題與其 workaround（`checkruns` API）：補推送後驗證語法時同樣要繞過工具、改走 curl。
+
+## 37. `REUSE_ALV_GRID_DISPLAY`（Functional ALV）在 `programrun` 無頭環境會自動退化成文字清單，`cl_salv_table`（OO ALV）則會卡住斷線——兩者行為不同，前者可以無頭驗證（2026-07-31 實測，基礎課 ex28 改版）
+
+- **背景**：本檔第 16 節已經記載過「`cl_salv_table`／`REUSE_ALV_GRID_DISPLAY` 這類會開全螢幕畫面的呼叫，沒辦法透過 ADT 的無頭 `programrun` API 驗證」——這個結論其實只精確驗證過 `cl_salv_table`（OO ALV），這次改版 `ZR_TR28_PARAM_LIST` 用 `REUSE_ALV_GRID_DISPLAY`（Functional ALV）意外發現**兩者行為並不相同**。
+- **實測**：`ZR_TR28_PARAM_LIST` 用 `REUSE_ALV_GRID_DISPLAY` 顯示 `ZTR28_CDISC` 兩筆資料，透過 `POST /sap/bc/adt/programs/programrun/<程式>` 無頭執行，**沒有卡住、沒有 `RFC_CLOSED`**，直接回傳文字化的清單輸出（欄位標題＋逐列資料，用 ASCII 分隔線排版），可以直接讀出來驗證欄位對不對、資料筆數對不對。
+- **推測原因**：`REUSE_ALV_GRID_DISPLAY` 底層在偵測不到真正的 GUI Container／Screen 環境時，會 fallback 成傳統 Classical List（用 `WRITE`／`FORMAT` 系列語句組版），這是 Functional ALV 框架本身就有的相容性設計；`cl_salv_table` 是純物件導向、綁定 Container 的現代 ALV，沒有這種 fallback，偵測不到畫面環境就直接卡住等待。
+- **教學上的實務影響**：如果某一門課（如本課程 `ABAP_Training` 基礎課）選用 `REUSE_ALV_GRID_DISPLAY` 而非 `cl_salv_table`，除了跟課程既有進度一致（ex09 已教過 Functional ALV，OO ALV 留給 OOP 課程）之外，還多一個實用好處：**寫完程式可以直接用 `programrun` 驗證 ALV 輸出的資料正確性，不用等使用者到 SAP GUI 才能確認邏輯對不對**，只有真正的畫面呈現效果（顏色、排序點擊、匯出等互動功能）才需要使用者在 GUI 手動確認。
+- **不要因此推翻第 16 節的結論**：`cl_salv_table` 卡住斷線的限制依然成立，這兩節要對照著看——第 16 節講的是 OO ALV，這裡新增的是 Functional ALV 的例外情況，選型時如果預期需要無頭驗證，Functional ALV（`REUSE_ALV_GRID_DISPLAY`）會比 OO ALV（`cl_salv_table`）更適合。
+
+## 38. ⚠️ 重要更正／補充：一旦某個特定 PROG 物件的 `programrun` 卡住過一次（`RFC_CLOSED`），這個物件之後會持續卡住，不管怎麼改程式碼都一樣——是物件層級被卡住，不是程式碼問題（2026-07-31 實測，基礎課 ex28，`ZR_TR28_PRICE_CALC`）
+
+- **現象**：第 37 節驗證 `ZR_TR28_PARAM_LIST` 的 `REUSE_ALV_GRID_DISPLAY` 可以無頭驗證之後，緊接著幫 `ZR_TR28_PRICE_CALC` 也加上同樣的 ALV 輸出＋`SELECTION-SCREEN FUNCTION KEY` 按鈕，第一次 `programrun` 就卡住回 `RFC_CLOSED`。之後為了排錯，**連續五次**調整程式碼（加大 `LINE-SIZE`、砍欄位數／砍到只剩 3 欄、砍資料列數到 `UP TO 1 ROWS`、拿掉 `SELECTION-SCREEN FUNCTION KEY`/`sscrfields`、幫 fieldcat 補上 `REF_TABNAME`/`REF_FIELDNAME`）、每次都重新 `sap_set_source`＋手動 curl activation 確認啟用成功，**全部一樣卡住 `RFC_CLOSED`**，連改回最初能正常執行的權限檢查程式 `ZR_TR28_PARAM_MAINT`（原本這次對話稍早才成功跑過）都跟著開始卡住。
+- **關鍵排除實驗**：另外建一個全新物件 `ZR_TR28_ALVTEST`（跟卡住版本一模一樣的程式結構：同樣的本地 `TYPES` 結構、同樣的 fieldcat macro、同樣的 `REUSE_ALV_GRID_DISPLAY` 呼叫，只是資料改成寫死一筆），`programrun` **立刻正常執行**、回傳文字化 ALV 清單——證實問題**跟程式碼寫法完全無關**（不是 ALV 欄位寬度、不是列數、不是本地 TYPES 缺 DDIC 型別、不是按鈕/`sscrfields`），而是 `ZR_TR28_PRICE_CALC`（以及巧合下同一時段的 `ZR_TR28_PARAM_MAINT`）這兩個**特定物件**在 SAP 端被卡住了。
+- **推測機制**：`programrun` 很可能不是每次都開全新、無狀態的執行環境（如同第 17 節原本假設的），而是**針對同一個「使用者+程式」組合重用某種 Dialog/Session 狀態**；一旦某次呼叫因為程式內部走到需要畫面互動的邏輯（例如 `ZR_TR28_PARAM_MAINT` 這次很可能是因為使用者已經在背景完成 PFCG 授權，導致 `AUTHORITY-CHECK` 通過、程式真的走到 `VIEW_MAINTENANCE_CALL` 這個第 5 節已知會卡住的呼叫）而卡死不返回，**這個卡死的 Session 會被同一支程式之後所有的 `programrun` 呼叫重新接上**，導致後續呼叫看起來像是「這支程式怎麼改都卡住」，實際上是重複打到同一個殭屍 Session。全新物件（沒有卡死歷史）自然不受影響。
+- **教訓／排錯方法論**：
+  1. **`programrun` 連續卡住 `RFC_CLOSED` 時，不要無止盡調整程式碼猜測原因**——先用一個全新建立的最小化測試物件（結構抄一份，資料寫死）重現同樣的呼叫方式，如果新物件正常，就能直接排除「程式碼邏輯有問題」，把懷疑方向轉成「這個特定物件的 Session 卡住了」。
+  2. **懷疑物件被卡住時，檢查是不是曾經呼叫過已知會卡住 headless 環境的邏輯**（`VIEW_MAINTENANCE_CALL`、`cl_salv_table`、或任何會開全螢幕互動畫面的呼叫，見第 5／16 節）——特別是像 `ZR_TR28_PARAM_MAINT` 這種「權限檢查+維護畫面」的 Wrapper 程式，隨著使用者在背景逐步完成 PFCG 授權，同一支程式在不同時間點呼叫可能從「權限不足、快速返回」變成「權限通過、卡在維護畫面」——**程式本身沒有改，但外部狀態（授權是否到位）變了，導致 `programrun` 的行為從能測變成不能測**，這不是 bug，是預期之內的行為轉變。
+  3. **目前沒有已知的 ADT 端 workaround 可以清除這個卡住的 Session**（不是 ENQUEUE 鎖，`sap_lock`/`sap_unlock` 對這個無效；也不是 activation 殘留，`sap_inactive_objects` 一路都是 0 筆）。這種情況下：程式碼本身如果已經過 `checkruns` 語法檢查確認無誤、且邏輯已經用其他方式驗證過（例如用一個全新測試物件驗證同樣的呼叫結構能正常執行），就可以合理判斷**程式碼是對的，只是這個物件的 headless 驗證管道暫時不可用**，请使用者改到 SAP GUI（SE38 F8／T-code）直接測試即可，不需要繼續在 ADT 這邊除錯。

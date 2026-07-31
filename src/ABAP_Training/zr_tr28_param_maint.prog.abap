@@ -1,7 +1,7 @@
 REPORT zr_tr28_param_maint.
 
-PARAMETERS: p_werks TYPE ztr28_wparm-werks DEFAULT '1011' OBLIGATORY,
-            p_disp  AS CHECKBOX DEFAULT ' '.  " 勾選：只要顯示，不維護
+PARAMETERS: p_carrid TYPE ztr28_cdisc-carrid DEFAULT 'LH' OBLIGATORY,
+            p_disp   AS CHECKBOX DEFAULT ' '.  " 勾選：只要顯示，不維護
 
 DATA: lv_actvt TYPE activ_auth.
 
@@ -11,33 +11,33 @@ ELSE.
   lv_actvt = '02'.
 ENDIF.
 
-* ---- 1. 權限檢查：這個工廠的維護/顯示權限 ----
-AUTHORITY-CHECK OBJECT 'ZTR28_WERK'
-  ID 'ACTVT' FIELD lv_actvt
-  ID 'WERKS' FIELD p_werks.
+* ---- 1. 權限檢查：這家航空公司折扣的維護/顯示權限 ----
+AUTHORITY-CHECK OBJECT 'ZTR28_CARR'
+  ID 'ACTVT'  FIELD lv_actvt
+  ID 'CARRID' FIELD p_carrid.
 
 DATA(lv_mode_text) = COND string( WHEN lv_actvt = '02' THEN '維護' ELSE '顯示' ).
 
 IF sy-subrc <> 0.
-  WRITE: / '權限不足：無法對工廠', p_werks, '執行', lv_mode_text, '（sy-subrc =', sy-subrc, '）'.
+  WRITE: / '權限不足：無法對航空公司', p_carrid, '執行', lv_mode_text, '（sy-subrc =', sy-subrc, '）'.
   RETURN.
 ENDIF.
 
-WRITE: / '權限檢查通過：工廠', p_werks, lv_mode_text, '模式'.
+WRITE: / '權限檢查通過：航空公司', p_carrid, lv_mode_text, '模式'.
 
 * ---- 2. 維護模式才需要上鎖（顯示不用搶鎖，允許多人同時看）----
 IF lv_actvt = '02'.
-  CALL FUNCTION 'ENQUEUE_EZTR28_WERKS'
+  CALL FUNCTION 'ENQUEUE_EZTR28_CARR'
     EXPORTING
       mandt          = sy-mandt
-      werks          = p_werks
+      carrid         = p_carrid
     EXCEPTIONS
       foreign_lock   = 1
       system_failure = 2
       OTHERS         = 3.
 
   IF sy-subrc <> 0.
-    WRITE: / '工廠', p_werks, '目前正被其他人維護中，請稍後再試（sy-subrc =', sy-subrc, '）'.
+    WRITE: / '航空公司', p_carrid, '目前正被其他人維護中，請稍後再試（sy-subrc =', sy-subrc, '）'.
     RETURN.
   ENDIF.
 
@@ -45,23 +45,23 @@ IF lv_actvt = '02'.
 ENDIF.
 
 * ---- 3. 呼叫標準 Table Maintenance（SM30 底層機制），不是直接 CALL TRANSACTION 'SM30' ----
-* 用 dba_sellist 帶入「WERKS = p_werks」的篩選條件，讓維護畫面只顯示這個工廠的資料，
-* 不會讓通過權限檢查的使用者順便看到/改到其他工廠的列——這是跟 ZR_TR28_PARAM_LIST
-* 那顆「直接 CALL TRANSACTION 'SM30'」按鈕最大的差異：那顆按鈕沒有任何篩選。
+* 用 dba_sellist 帶入「CARRID = p_carrid」的篩選條件，讓維護畫面只顯示這家航空公司的折扣，
+* 不會讓通過權限檢查的使用者順便看到/改到其他航空公司的列——這是跟 ZR_TR28_PARAM_LIST
+* 那顆「透過 ZTR28_SM30 直接呼叫 SM30」按鈕最大的差異：那顆按鈕沒有任何篩選。
 DATA: lt_sellist TYPE STANDARD TABLE OF vimsellist,
       ls_sellist TYPE vimsellist.
 
 CLEAR ls_sellist.
-ls_sellist-viewfield = 'WERKS'.
+ls_sellist-viewfield = 'CARRID'.
 ls_sellist-operator  = 'EQ'.
-ls_sellist-value     = p_werks.
+ls_sellist-value     = p_carrid.
 ls_sellist-tabix     = 1.
 APPEND ls_sellist TO lt_sellist.
 
 CALL FUNCTION 'VIEW_MAINTENANCE_CALL'
   EXPORTING
     action    = COND #( WHEN lv_actvt = '03' THEN 'S' ELSE 'U' )
-    view_name = 'ZTR28_WPARM'
+    view_name = 'ZTR28_CDISC'
   TABLES
     dba_sellist = lt_sellist
   EXCEPTIONS
@@ -78,9 +78,9 @@ ENDIF.
 
 * ---- 4. 維護模式才需要解鎖 ----
 IF lv_actvt = '02'.
-  CALL FUNCTION 'DEQUEUE_EZTR28_WERKS'
+  CALL FUNCTION 'DEQUEUE_EZTR28_CARR'
     EXPORTING
-      mandt = sy-mandt
-      werks = p_werks.
-  WRITE: / '已解鎖工廠', p_werks.
+      mandt  = sy-mandt
+      carrid = p_carrid.
+  WRITE: / '已解鎖航空公司', p_carrid.
 ENDIF.
