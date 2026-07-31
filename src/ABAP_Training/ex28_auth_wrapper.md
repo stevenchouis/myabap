@@ -92,7 +92,7 @@
 
 ```
 ZR_TR28_PARAM_LIST（空表）→ 印出「（沒有資料，或選取條件沒有命中）」，SET PF-STATUS 未定義的狀態名稱不會造成 dump
-ZR_TR28_PARAM_MAINT（p_werks=1011）→ 權限不足：無法對工廠 1011 執行 維護（sy-subrc = 12，代表系統裡還沒有這個權限物件）
+ZR_TR28_PARAM_MAINT（p_werks=1011）→ 權限不足：無法對工廠 1011 執行 維護（sy-subrc = 12，官方定義是「User Master Record 裡完全沒有這個物件的任何授權」，不是「物件不存在」——PFCG 沒做之前一律會是 12）
 ```
 
 **六項 GUI-only 作業（含 PFCG 指派 `ZTR28_WERK` 角色 `ACTVT=02`、`WERKS=1011`）都做好之後**：
@@ -115,4 +115,4 @@ ZR_TR28_PARAM_MAINT（p_werks=1011）→ 權限不足：無法對工廠 1011 執
 
 見 `zr_tr28_param_maint.prog.abap`、`zr_tr28_param_list.prog.abap`（SAP 端 `ZR_TR28_PARAM_MAINT`／`ZR_TR28_PARAM_LIST`）。DDIC 表 `ZTR28_WPARM` 快照見 `ztr28_wparm.tabl.abap`。權限物件 `ZTR28_WERK`、Lock Object `EZTR28_WERKS`、T-code `ZTR28_MAINT`、GUI Status `ZTR28LIST` 均為 GUI-only（SU21／SE11／SE93／SE41 皆無 ADT 建立 API），無程式碼快照，需照上方步驟手動建立。
 
-**已用 `programrun` 驗證的部分**：兩支程式皆已建立、啟用、無語法錯誤；`ZR_TR28_PARAM_MAINT` 在權限物件尚未建立時正確回報「權限不足（sy-subrc=12）」，證實 Wrapper 的檢查順序與邏輯正確。**六項 GUI-only 作業建好後的端對端驗證（含 `VIEW_MAINTENANCE_CALL` 畫面互動、雙 Session `FOREIGN_LOCK`、App bar 按鈕）需要使用者在 SAP GUI 手動確認**，這部分不受 ADT `programrun` 支援（跟講義提過的「會開全螢幕畫面的呼叫沒辦法無頭驗證」限制相同）。
+**已用 `programrun` 驗證的部分**：兩支程式皆已建立、啟用、無語法錯誤；`ZR_TR28_PARAM_MAINT` 在權限物件尚未建立、以及物件已建立但 PFCG 尚未指派兩種情境下，都正確回報「權限不足（sy-subrc=12）」，證實 Wrapper 的檢查順序與邏輯正確——**sy-subrc=12 的官方定義是「User Master Record 裡完全沒有這個物件的任何授權」，不是「物件不存在」，這兩種情境剛好都符合這個定義（一種是物件真的不存在、一種是物件存在但沒人被授權），所以看到同樣的 12 是正常的，不是 bug**。等 PFCG 指派完成、且值填對之後，應該轉為 `sy-subrc=0`；如果角色的 `WERKS` 值填錯（例如填了 `1011` 以外的值卻拿 `1011` 來測），會轉成 `sy-subrc=4`（找得到授權但值不對）而不是 `12`——這兩種失敗情境在 SU53 交易碼裡也會顯示不同的診斷內容，是排查權限問題時的重要線索。**六項 GUI-only 作業建好後的端對端驗證（含 `VIEW_MAINTENANCE_CALL` 畫面互動、雙 Session `FOREIGN_LOCK`、App bar 按鈕）需要使用者在 SAP GUI 手動確認**，這部分不受 ADT `programrun` 支援（跟講義提過的「會開全螢幕畫面的呼叫沒辦法無頭驗證」限制相同）。

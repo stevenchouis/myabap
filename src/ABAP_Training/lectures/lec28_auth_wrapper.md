@@ -56,7 +56,9 @@ AUTHORITY-CHECK OBJECT 'ZTR28_WERK'
   ID 'WERKS' FIELD p_werks.
 
 IF sy-subrc <> 0.
-  " 沒有權限——sy-subrc 常見值：4=沒有這個值的權限、12=系統裡根本沒有這個權限物件
+  " 沒有權限——sy-subrc 常見值（官方定義）：4=使用者有這個物件的授權，但值對不上（或欄位規格錯誤）；
+  " 12=使用者的 User Master Record 裡完全沒有這個物件的任何授權（不是「物件不存在」，是「這個人一筆都沒有」，
+  " 通常代表 PFCG 角色還沒指派給這個人，或角色沒 Generate/沒 User Comparison）
 ENDIF.
 ```
 
