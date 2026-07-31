@@ -68,3 +68,5 @@
 ## 答案
 
 見 `zr_tr27_lock_object.prog.abap`（SAP 端程式 `ZR_TR27_LOCK_OBJECT`）。Lock Object `EZTR21_STUD` 無程式碼快照（結構化 DDIC 物件，非 source-based，且**建立本身是 GUI-only，ADT 沒有建立 API**，需在 SE11 手動建立——這點在 Enhancement 課程 en08 案例一也遇到過同樣的限制）。
+
+**✅ 已端對端驗證（2026-07-31）**：使用者於 SE11 建好 `EZTR21_STUD` 後，`programrun` 無頭執行 `ZR_TR27_LOCK_OBJECT`（`p_id` 預設 `S9001`），確認：`ENQUEUE_EZTR21_STUD` 鎖定成功（`sy-subrc = 0`）、正確讀出學生資料、**E 模式下同一使用者重複呼叫 `ENQUEUE` 確實不會擋自己**（鎖定次數疊加）、兩次 `DEQUEUE_EZTR21_STUD` 皆正常執行——跟預期輸出完全吻合。`FOREIGN_LOCK`（被別人擋下）這段因為需要兩個真實 Session 才能重現，維持課堂實測方式驗證，見上方「課堂實測」小節。

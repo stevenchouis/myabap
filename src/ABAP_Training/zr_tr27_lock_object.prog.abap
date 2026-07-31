@@ -1,6 +1,6 @@
 REPORT zr_tr27_lock_object.
 
-PARAMETERS p_id TYPE ztr21_stud-id OBLIGATORY.
+PARAMETERS p_id TYPE ztr21_stud-id DEFAULT 'S9001' OBLIGATORY.
 
 DATA: ls_stud TYPE ztr21_stud.
 
