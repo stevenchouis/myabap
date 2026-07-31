@@ -17,7 +17,7 @@
 
 ## 第一部分：SE11 建立 Lock Object
 
-1. SE11 → 左邊選 **Lock Object** → 輸入 `EZTR21_STUD`（**慣例 `E` 開頭**）→ Create
+1. SE11 → 左邊選 **Lock Object** → 輸入 `EZTR21_STUD`（**Lock Object 名稱系統強制規定要 `E` 開頭**，打別的字首存檔會跳警告「Start the lock object names with the prefix 'E'」）→ Create
 2. **Tables** 頁籤：Primary Table 填 `ZTR21_STUD`
 3. **Lock Parameters** 頁籤：勾選 `MANDT`、`ID`（鎖住「這一個學號」，不是整張表）
 4. **Lock Mode** 選 `E`（Exclusive/Write Lock）

@@ -35,7 +35,7 @@ SAP 系統有一個獨立的**鎖定管理員（Enqueue Server）**，維護一�
 
 ## 3. SE11 建立自訂 Lock Object
 
-1. SE11 → 左邊選 **Lock Object** → 輸入名稱（**慣例用 `E` 開頭**，如 `EZTR21_STUD`，代表 Enqueue）→ Create
+1. SE11 → 左邊選 **Lock Object** → 輸入名稱（**系統強制規定要 `E` 開頭**，如 `EZTR21_STUD`，代表 Enqueue——不是單純的命名慣例，打別的字首存檔會直接跳出警告「Start the lock object names with the prefix 'E'」）→ Create
 2. **Tables** 頁籤：Primary Table 填要保護的表（`ZTR21_STUD`）
 3. **Lock Parameters** 頁籤：勾選要當鎖定鍵的欄位——通常勾整個主鍵（`MANDT`＋`ID`），代表「鎖住這一筆特定學生記錄」，不是鎖整張表
 4. **Lock Mode**（下一節詳細講）：練習選 `E`（Exclusive/Write Lock，最常用）

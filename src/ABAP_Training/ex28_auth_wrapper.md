@@ -38,11 +38,23 @@
 2. 物件名稱 `ZTR28_WERKS`，Short Text 自訂
 3. Authorization Fields：`ACTVT`（標準欄位）、`WERKS`（本題業務欄位，型別參考 Data Element `WERKS_D`）
 4. 存檔、Activate
-5. **這一步只是定義「有哪些欄位可以管控」，真正要讓某個使用者擁有權限，還要在 PFCG 把這個物件加進角色、給值（如 `ACTVT=02`、`WERKS=1011`），指派給使用者**——這部分是權限管理員的工作，不是本題重點，但缺這一步的話，任何人 `AUTHORITY-CHECK` 都會失敗（`sy-subrc <> 0`），程式邏輯本身不受影響
+5. **這一步只是定義「有哪些欄位可以管控」，真正要讓某個使用者擁有權限，還要走完下面的 PFCG 流程**——缺這一步的話，任何人 `AUTHORITY-CHECK` 都會失敗（`sy-subrc <> 0`），程式邏輯本身不受影響
+
+## 第二點五部分：PFCG 角色維護（需使用者手動建立，權限真正生效的關鍵，詳細操作見講義第 2.1 節）
+
+1. **PFCG** → Role 欄位輸入 `ZTR28_MAINT_ROLE` → **Single Role** → Create
+2. Description 頁籤填說明 → 存檔
+3. Menu 頁籤 → Transaction → 輸入 `ZTR28_MAINT` → Enter
+4. Authorizations 頁籤 → 鉛筆圖示 Change Authorization Data → **Manually** 按鈕輸入 `ZTR28_WERKS` → Enter
+5. 展開 `ZTR28_WERKS` 節點：`ACTVT` 填 `02`、`WERKS` 填 `1011`；確認 `S_TCODE` 底下的 `TCD` 有 `ZTR28_MAINT`
+6. 齒輪圖示 **Generate** 產生 Profile
+7. User 頁籤輸入自己的使用者代號 → **User Comparison** → Complete Comparison
+8. 存檔
+9. 登出重新登入（或開新 Session）驗證：SU53 可查上一次權限失敗的細節
 
 ## 第三部分：SE11 建立 Lock Object（需使用者手動建立）
 
-1. SE11 → Lock Object → `EZTR28_WERKS` → Create
+1. SE11 → Lock Object → `EZTR28_WERKS`（**系統強制要求 `E` 開頭，不是命名慣例**；⚠️ 注意別跟第二部分的權限物件 `ZTR28_WERKS` 搞混，只差一個 `E`）→ Create
 2. Primary Table：`ZTR28_WPARM`
 3. Lock Parameters：**只勾 `MANDT`、`WERKS`（不勾 `PARAM`）**——鎖定範圍是「整個工廠」，不是「單一參數列」，見講義第 3 節的設計理由
 4. Lock Mode：`E`
@@ -81,7 +93,7 @@ ZR_TR28_PARAM_LIST（空表）→ 印出「（沒有資料，或選取條件沒�
 ZR_TR28_PARAM_MAINT（p_werks=1011）→ 權限不足：無法對工廠 1011 執行 維護（sy-subrc = 12，代表系統裡還沒有這個權限物件）
 ```
 
-**五個 GUI-only 物件都建好、且透過 PFCG 給自己指派了 `ZTR28_WERKS`（`ACTVT=02`、`WERKS=1011`）角色之後**：
+**六項 GUI-only 作業（含 PFCG 指派 `ZTR28_WERKS` 角色 `ACTVT=02`、`WERKS=1011`）都做好之後**：
 
 1. 直接執行 `ZR_TR28_PARAM_MAINT`（`p_werks=1011`，不勾顯示）：應該看到「權限檢查通過」→「鎖定成功」→ 跳出 SM30 風格的維護畫面 → 離開畫面後印出「已解鎖工廠」
 2. 開兩個 Session，都對 `1011` 執行維護：第二個應該在 `ENQUEUE` 那一步被擋下（`FOREIGN_LOCK`）
@@ -101,4 +113,4 @@ ZR_TR28_PARAM_MAINT（p_werks=1011）→ 權限不足：無法對工廠 1011 執
 
 見 `zr_tr28_param_maint.prog.abap`、`zr_tr28_param_list.prog.abap`（SAP 端 `ZR_TR28_PARAM_MAINT`／`ZR_TR28_PARAM_LIST`）。DDIC 表 `ZTR28_WPARM` 快照見 `ztr28_wparm.tabl.abap`。權限物件 `ZTR28_WERKS`、Lock Object `EZTR28_WERKS`、T-code `ZTR28_MAINT`、GUI Status `ZTR28LIST` 均為 GUI-only（SU21／SE11／SE93／SE41 皆無 ADT 建立 API），無程式碼快照，需照上方步驟手動建立。
 
-**已用 `programrun` 驗證的部分**：兩支程式皆已建立、啟用、無語法錯誤；`ZR_TR28_PARAM_MAINT` 在權限物件尚未建立時正確回報「權限不足（sy-subrc=12）」，證實 Wrapper 的檢查順序與邏輯正確。**五個 GUI-only 物件建好後的端對端驗證（含 `VIEW_MAINTENANCE_CALL` 畫面互動、雙 Session `FOREIGN_LOCK`、App bar 按鈕）需要使用者在 SAP GUI 手動確認**，這部分不受 ADT `programrun` 支援（跟講義提過的「會開全螢幕畫面的呼叫沒辦法無頭驗證」限制相同）。
+**已用 `programrun` 驗證的部分**：兩支程式皆已建立、啟用、無語法錯誤；`ZR_TR28_PARAM_MAINT` 在權限物件尚未建立時正確回報「權限不足（sy-subrc=12）」，證實 Wrapper 的檢查順序與邏輯正確。**六項 GUI-only 作業建好後的端對端驗證（含 `VIEW_MAINTENANCE_CALL` 畫面互動、雙 Session `FOREIGN_LOCK`、App bar 按鈕）需要使用者在 SAP GUI 手動確認**，這部分不受 ADT `programrun` 支援（跟講義提過的「會開全螢幕畫面的呼叫沒辦法無頭驗證」限制相同）。
