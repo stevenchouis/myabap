@@ -45,10 +45,25 @@ IF lv_actvt = '02'.
 ENDIF.
 
 * ---- 3. 呼叫標準 Table Maintenance（SM30 底層機制），不是直接 CALL TRANSACTION 'SM30' ----
+* 用 dba_sellist 帶入「WERKS = p_werks」的篩選條件，讓維護畫面只顯示這個工廠的資料，
+* 不會讓通過權限檢查的使用者順便看到/改到其他工廠的列——這是跟 ZR_TR28_PARAM_LIST
+* 那顆「直接 CALL TRANSACTION 'SM30'」按鈕最大的差異：那顆按鈕沒有任何篩選。
+DATA: lt_sellist TYPE STANDARD TABLE OF vimsellist,
+      ls_sellist TYPE vimsellist.
+
+CLEAR ls_sellist.
+ls_sellist-viewfield = 'WERKS'.
+ls_sellist-operator  = 'EQ'.
+ls_sellist-value     = p_werks.
+ls_sellist-tabix     = 1.
+APPEND ls_sellist TO lt_sellist.
+
 CALL FUNCTION 'VIEW_MAINTENANCE_CALL'
   EXPORTING
     action    = COND #( WHEN lv_actvt = '03' THEN 'S' ELSE 'U' )
     view_name = 'ZTR28_WPARM'
+  TABLES
+    dba_sellist = lt_sellist
   EXCEPTIONS
     client_reference          = 1
     foreign_lock               = 2

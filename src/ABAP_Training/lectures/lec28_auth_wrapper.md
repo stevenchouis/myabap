@@ -124,6 +124,35 @@ CALL FUNCTION 'VIEW_MAINTENANCE_CALL'
 
 `action = 'S'`（只顯示）搭配 `ACTVT = '03'` 的權限檢查，可以做出一個「只能看、不能改」的模式，這正是本題 Wrapper 程式 `p_disp` 核取方塊要做的事。
 
+### 5.1 用 `dba_sellist` 篩選：只顯示使用者被授權的那個工廠
+
+只做完 `AUTHORITY-CHECK` 還不夠——它只回答「這個人能不能對工廠 `1011` 做維護」，不會自動限制他進了 `VIEW_MAINTENANCE_CALL` 畫面之後只看得到 `1011` 的資料。如果不額外處理，一個只被授權 `WERKS=1011` 的使用者，一樣可以在維護畫面裡看到、甚至改到其他工廠的列——這是很容易漏掉的一步。
+
+`VIEW_MAINTENANCE_CALL` 有一個 `TABLES dba_sellist` 參數（型別 `VIMSELLIST`），可以帶入篩選條件，效果類似幫這次維護動作先套一個 `WHERE` 子句：
+
+```abap
+DATA: lt_sellist TYPE STANDARD TABLE OF vimsellist,
+      ls_sellist TYPE vimsellist.
+
+CLEAR ls_sellist.
+ls_sellist-viewfield = 'WERKS'.   " 要篩選的欄位名稱（大寫）
+ls_sellist-operator  = 'EQ'.      " 比較運算子：EQ/NE/GT/GE/LT/LE/LK（Like）
+ls_sellist-value     = p_werks.   " 要比對的值
+ls_sellist-tabix     = 1.         " 條件的序號（多筆條件用 and_or 欄位串接 AND/OR）
+APPEND ls_sellist TO lt_sellist.
+
+CALL FUNCTION 'VIEW_MAINTENANCE_CALL'
+  EXPORTING
+    action    = 'U'
+    view_name = 'ZTR28_WPARM'
+  TABLES
+    dba_sellist = lt_sellist
+  EXCEPTIONS
+    ...
+```
+
+帶了這個篩選之後，維護畫面一開啟就只會列出 `WERKS = p_werks` 這個工廠的資料列，使用者不會不小心看到或改到別的工廠——**這一步刻意跟下一節 `ZR_TR28_PARAM_LIST` 那顆「直接呼叫 SM30」的按鈕做對照**：那顆按鈕完全沒有篩選，會看到整張表所有工廠的資料，兩者的差異正好示範了「隨便呼叫 SM30」跟「透過 Wrapper 正規呼叫」在資料曝露範圍上的落差。
+
 > ⚠️ **`VIEW_MAINTENANCE_CALL` 會真的開出一個完整畫面，等使用者操作完才會返回**——這代表它沒辦法用 ADT 的無頭 `programrun` API 驗證（headless 呼叫會卡在等畫面回應，最終連線逾時斷線 `RFC_CLOSED`），只能請使用者在真實 SAP GUI 測試，跟前面題目遇過的 ALV／Smartform 是同一類限制。**還有一個連帶影響**：如果 Wrapper 程式在呼叫這支 FM「之前」已經成功 `ENQUEUE_EZTR28_WERKS`，`programrun` 卡在這裡逾時斷線時，程式不會執行到後面的 `DEQUEUE_EZTR28_WERKS`（因為程式根本沒跑完），理論上鎖會殘留——**SM12 跟 Lock Object 的關係、以及這種殘留鎖該怎麼排查與清除，見講義 27 第 7 節**，那一節已經用這個真實情境當例子寫進去了。
 
 ## 6. T-code 要指給 Wrapper，不是指給裸的 SM30
@@ -136,30 +165,48 @@ CALL FUNCTION 'VIEW_MAINTENANCE_CALL'
 
 **這是整個模式能不能生效的關鍵一步**：如果貪方便，直接開一個 T-code 指給 SM30、或是把 `S_TABU_DIS`/`S_TABU_NAM` 開放給所有人，使用者就能繞過我們寫的 Wrapper 直接進 SM30 維護，前面做的權限檢查與 Lock Object 就完全形同虛設。實務上要搭配：**一般使用者的角色不給 SM30／裸 View 維護的權限，只給這支 Wrapper 的 T-code**，才能確保大家只能走這條有檢查的路。
 
-## 7. Report 主程式的 App bar 按鈕：`SET PF-STATUS` + `AT USER-COMMAND`
+## 7. 選取畫面上的按鈕：`SELECTION-SCREEN FUNCTION KEY`
 
-Classical List Report（`WRITE` 清單）可以在畫面上方工具列（App bar）加自訂按鈕，透過 **SE41 Menu Painter** 設計，跟 ALV 用 `IT_EVENTS`/GUI Status 觸發互動（講義 9 進階篇）是不同的機制：
+`ZR_TR28_PARAM_LIST` 是「主檔的瀏覽入口」——它的**選取畫面**（輸入 `s_werks` 篩選條件的那個畫面）上直接加一顆按鈕，讓使用者不用先跑出清單、也不用另外去記 T-code，就能捷徑跳去維護主檔。這跟 ALV 工具列按鈕（講義 9 進階篇，`IT_EVENTS`）、或前面版本一度用過的清單畫面 `SET PF-STATUS`/`AT USER-COMMAND`（那是掛在**執行完畢後的輸出清單**上）都不一樣——這裡要按的是**選取畫面本身**的按鈕，語法是 `SELECTION-SCREEN FUNCTION KEY`：
 
-1. 交易碼輸入 **SE41** → **Program** 欄位填 `ZR_TR28_PARAM_LIST`、**Status** 欄位填 `ZTR28LIST` → **Create**
-2. Short Text 填說明（如「TR28 參數清單」）→ Enter
-3. 進入 Status Painter 畫面，左側樹狀選單找到 **Application Toolbar**，雙擊展開
-4. 在任一空白按鈕格子輸入 **Function Code** `MAINT`、**Icon Text** 或 **Function Text** 填「維護」（顯示在按鈕上的文字/圖示自訂）
-5. 存檔（Local Object）、工具列 **Activate**（Menu Painter 物件本身沒有語法檢查，存檔啟用即可）
-
-程式裡對應：
+1. **宣告 `TABLES: sscrfields.`**——這是系統結構，專門用來承接選取畫面上的功能鍵被按下時的資訊（哪一個按鈕、代碼是什麼）
+2. **宣告功能鍵**：`SELECTION-SCREEN FUNCTION KEY 1.`（**位置很重要**，這一行要放在選取畫面相關宣告區塊，即 `PARAMETERS`/`SELECT-OPTIONS` 附近，不能放在事件區塊裡）——最多可以宣告到 `FUNCTION KEY 4`（四顆自訂按鈕），系統固定把它們的 Function Code 命名為 `'FC01'`／`'FC02'`／`'FC03'`／`'FC04'`，**這四個代碼是系統保留的，不能自己改**
+3. **在 `INITIALIZATION` 事件裡設定按鈕文字**：`sscrfields-functxt_01 = '維護主檔(SM30)'.`（`functxt_01` 對應 `FUNCTION KEY 1`；有幾個按鈕就對應填 `functxt_01`～`functxt_04`）
+4. **在 `AT SELECTION-SCREEN` 事件裡判斷按鈕被按下、處理動作**：
 
 ```abap
-TOP-OF-PAGE.
-  SET PF-STATUS 'ZTR28LIST'.    " 掛上剛剛在 SE41 設計的畫面狀態
+TABLES: ztr28_wparm, sscrfields.
 
-AT USER-COMMAND.
-  CASE sy-ucomm.                 " 使用者按下的按鈕 Function Code
-    WHEN 'MAINT'.
-      CALL TRANSACTION 'ZTR28_MAINT'.   " 呼叫 T-code，不是直接呼叫程式
+SELECT-OPTIONS s_werks FOR ztr28_wparm-werks.
+
+SELECTION-SCREEN FUNCTION KEY 1.
+
+INITIALIZATION.
+  sscrfields-functxt_01 = '維護主檔(SM30)'.
+
+AT SELECTION-SCREEN.
+  CASE sscrfields-ucomm.
+    WHEN 'FC01'.
+      SET PARAMETER ID 'VIM' FIELD 'ZTR28_WPARM'.
+      CALL TRANSACTION 'SM30' AND SKIP FIRST SCREEN.
   ENDCASE.
 ```
 
-**用 `CALL TRANSACTION` 呼叫 T-code，而不是 `SUBMIT` 呼叫程式本身**：差別在於 `CALL TRANSACTION` 會連 T-code 層級的 `S_TCODE` 權限也一併檢查，`SUBMIT` 則會跳過這一層，直接執行程式——既然我們花心思設計了「只給 Wrapper 的 T-code 授權」這道防線，呼叫方式也要選擇會觸發這道防線的 `CALL TRANSACTION`，才能讓整套設計前後一致。
+`SET PARAMETER ID 'VIM'` 是把要維護的 View 名稱先塞進 SPA/GPA 記憶體（`'VIM'` 是 SM30 View 名稱欄位對應的標準 Parameter ID），接著 `CALL TRANSACTION 'SM30' AND SKIP FIRST SCREEN` 才能直接跳過 SM30 自己的初始輸入畫面，一步到位進到 `ZTR28_WPARM` 的維護畫面。
+
+### ⚠️ 這顆按鈕故意示範「沒有保護」的做法，跟 `ZR_TR28_PARAM_MAINT` 對照
+
+這裡刻意**不**透過 `ZR_TR28_PARAM_MAINT` 那個 Wrapper，而是直接 `CALL TRANSACTION 'SM30'`——這是為了跟 Wrapper 的正規做法做對比教學，兩者差在：
+
+| | `ZR_TR28_PARAM_LIST` 的按鈕 | `ZR_TR28_PARAM_MAINT`（T-code `ZTR28_MAINT`） |
+|---|---|---|
+| 呼叫方式 | 直接 `CALL TRANSACTION 'SM30'` | 走完整的 Wrapper 流程 |
+| 業務權限檢查（`ZTR28_WERK`） | ❌ 沒有 | ✅ 有 |
+| Lock Object（`EZTR28_WERKS`） | ❌ 沒有 | ✅ 有 |
+| 資料篩選（只看單一工廠） | ❌ 沒有，看得到整張表所有工廠 | ✅ 有（見上一節 `dba_sellist`） |
+| 適合場景 | 純示範對照用；實務上若真的要開放，只能給完全信任、本來就有 SM30/`S_TABU_DIS` 權限的維運人員 | 一般使用者的正式入口 |
+
+**這正是本題最重要的教學重點**：同樣是「從另一支程式跳進主檔維護」，寫法上的差別（有沒有包一層 Wrapper）決定了資安上是天壤之別。實務上兩個入口不會同時開放給一般使用者——會像講義第 6 節說的，只把 T-code `ZTR28_MAINT` 的權限給一般使用者，`ZR_TR28_PARAM_LIST` 這顆按鈕的存在本身就是要提醒學員「這樣寫是不對的」，不是真的建議這樣上線。
 
 ## 8. 整體流程總結
 

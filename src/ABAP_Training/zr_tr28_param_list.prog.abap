@@ -1,9 +1,26 @@
 REPORT zr_tr28_param_list.
 
-TABLES ztr28_wparm.
+TABLES: ztr28_wparm, sscrfields.
+
 SELECT-OPTIONS s_werks FOR ztr28_wparm-werks.
 
+SELECTION-SCREEN FUNCTION KEY 1.
+
 DATA: gt_wparm TYPE STANDARD TABLE OF ztr28_wparm.
+
+INITIALIZATION.
+  sscrfields-functxt_01 = '維護主檔(SM30)'.
+
+AT SELECTION-SCREEN.
+  CASE sscrfields-ucomm.
+    WHEN 'FC01'.
+      " 示範「土法煉鋼」的做法：直接呼叫 SM30，完全不經過 ZR_TR28_PARAM_MAINT 那個
+      " Wrapper——沒有 AUTHORITY-CHECK、沒有 Lock Object、也沒有依工廠篩選，
+      " 跟 ZR_TR28_PARAM_MAINT（AUTHORITY-CHECK -> ENQUEUE -> VIEW_MAINTENANCE_CALL
+      " 帶 WERKS 篩選 -> DEQUEUE）刻意做對照，說明為什麼需要包一層 Wrapper。
+      SET PARAMETER ID 'VIM' FIELD 'ZTR28_WPARM'.
+      CALL TRANSACTION 'SM30' AND SKIP FIRST SCREEN.
+  ENDCASE.
 
 START-OF-SELECTION.
   SELECT * FROM ztr28_wparm
@@ -18,16 +35,3 @@ START-OF-SELECTION.
   IF sy-subrc <> 0.
     WRITE: / '（沒有資料，或選取條件沒有命中）'.
   ENDIF.
-
-TOP-OF-PAGE.
-  SET PF-STATUS 'ZTR28LIST'.
-  WRITE: / '工廠參數清單 —— 按上方工具列「維護」按鈕可進入維護畫面（會先做權限與鎖定檢查）'.
-  ULINE.
-
-AT USER-COMMAND.
-  CASE sy-ucomm.
-    WHEN 'MAINT'.
-      " 呼叫 T-code（不是直接呼叫 ZR_TR28_PARAM_MAINT 程式本身），
-      " 讓 S_TCODE 這層權限檢查也生效——T-code 名稱要跟 SE93 建立的完全一致
-      CALL TRANSACTION 'ZTR28_MAINT'.
-  ENDCASE.

@@ -7,9 +7,9 @@
 - 理解 SM30 原生權限檢查（`S_TABU_DIS`/`S_TABU_NAM`）只到表格層級，業務維度要自己包 Wrapper
 - 會在 SU21 建立自訂**權限物件**（`ACTVT`＋業務欄位），並知道 `AUTHORITY-CHECK` 怎麼呼叫
 - 理解 Lock Object 的鎖定範圍**不必等於表格主鍵**，要對應「使用者實際爭搶的資源邊界」
-- 會用 `VIEW_MAINTENANCE_CALL` 從程式呼叫標準 Table Maintenance
+- 會用 `VIEW_MAINTENANCE_CALL` 從程式呼叫標準 Table Maintenance，並用 `dba_sellist` 依欄位篩選只顯示授權範圍內的資料
 - 理解「T-code 要指給 Wrapper 程式，不能指給裸的 SM30」這個設計為什麼重要
-- 會用 `SET PF-STATUS` + `AT USER-COMMAND` + `CALL TRANSACTION` 在 Report 的 App bar 加自訂按鈕呼叫另一支 Transaction
+- 會用 `SELECTION-SCREEN FUNCTION KEY` 在選取畫面加自訂按鈕，並理解「直接 `CALL TRANSACTION 'SM30'`」跟「透過 Wrapper 正規呼叫」在保護程度上的差別
 
 ## 事前準備
 
@@ -75,33 +75,29 @@
 3. Program 填 `ZR_TR28_PARAM_MAINT`（**Wrapper 程式，不是 SM30、不是 View 名稱**），Screen `1000`
 4. 存檔
 
-## 第六部分：SE41 建立 GUI Status（需使用者手動建立）
+## 第六部分：程式（已由 Claude 建立並啟用，見下方原始碼）
 
-1. SE41 → Program `ZR_TR28_PARAM_LIST`、Status `ZTR28LIST` → Create
-2. Application Toolbar 加一個按鈕：Function Code `MAINT`，文字/圖示自訂（如「維護」）
-3. 存檔、Activate
+> ⚠️ 這一版設計把「選取畫面按鈕」改成 `SELECTION-SCREEN FUNCTION KEY`（純 ABAP 語法），**不再需要 SE41 建 GUI Status**——原本規劃的第六部分（SE41）已經拿掉，本題的 GUI-only 手動步驟只剩**五項**（SU21／PFCG／SE11 Lock Object／SM30／SE93）。
 
-## 第七部分：程式（已由 Claude 建立並啟用，見下方原始碼）
-
-- **`ZR_TR28_PARAM_MAINT`**（Wrapper）：選取畫面 `p_werks`（工廠，預設 `1011`）＋ `p_disp`（勾選＝只顯示）。依序：`AUTHORITY-CHECK` → （維護模式才）`ENQUEUE_EZTR28_WERKS` → `VIEW_MAINTENANCE_CALL` → （維護模式才）`DEQUEUE_EZTR28_WERKS`
-- **`ZR_TR28_PARAM_LIST`**（清單＋入口按鈕）：`SELECT-OPTIONS s_werks` 篩選顯示 `ZTR28_WPARM` 內容，`TOP-OF-PAGE` 掛 `SET PF-STATUS 'ZTR28LIST'`，`AT USER-COMMAND` 處理 `sy-ucomm = 'MAINT'` 時 `CALL TRANSACTION 'ZTR28_MAINT'`
+- **`ZR_TR28_PARAM_MAINT`**（Wrapper，走完整保護流程）：選取畫面 `p_werks`（工廠，預設 `1011`）＋ `p_disp`（勾選＝只顯示）。依序：`AUTHORITY-CHECK` → （維護模式才）`ENQUEUE_EZTR28_WERKS` → `VIEW_MAINTENANCE_CALL`（帶 `dba_sellist` 篩選 `WERKS = p_werks`，只顯示這個工廠）→ （維護模式才）`DEQUEUE_EZTR28_WERKS`
+- **`ZR_TR28_PARAM_LIST`**（清單＋刻意「沒有保護」的對照按鈕）：`SELECT-OPTIONS s_werks` 篩選顯示 `ZTR28_WPARM` 內容；選取畫面用 `SELECTION-SCREEN FUNCTION KEY 1` 加一顆「維護主檔(SM30)」按鈕，`AT SELECTION-SCREEN` 判斷 `sscrfields-ucomm = 'FC01'` 時，直接 `SET PARAMETER ID 'VIM' FIELD 'ZTR28_WPARM'.` + `CALL TRANSACTION 'SM30' AND SKIP FIRST SCREEN.`——**完全不經過 Wrapper**，沒有權限檢查、沒有 Lock、也沒有工廠篩選，刻意跟 `ZR_TR28_PARAM_MAINT` 做對照（詳見講義第 7 節的對照表）
 
 ## 測試流程
 
 **未建齊 GUI-only 物件時**（`programrun` 無頭驗證，已由 Claude 執行過）：
 
 ```
-ZR_TR28_PARAM_LIST（空表）→ 印出「（沒有資料，或選取條件沒有命中）」，SET PF-STATUS 未定義的狀態名稱不會造成 dump
+ZR_TR28_PARAM_LIST（空表）→ 印出「（沒有資料，或選取條件沒有命中）」
 ZR_TR28_PARAM_MAINT（p_werks=1011）→ 權限不足：無法對工廠 1011 執行 維護（sy-subrc = 12，官方定義是「User Master Record 裡完全沒有這個物件的任何授權」，不是「物件不存在」——PFCG 沒做之前一律會是 12）
 ```
 
-**六項 GUI-only 作業（含 PFCG 指派 `ZTR28_WERK` 角色 `ACTVT=02`、`WERKS=1011`）都做好之後**：
+**五項 GUI-only 作業（含 PFCG 指派 `ZTR28_WERK` 角色 `ACTVT=02`、`WERKS=1011`）都做好之後**：
 
-1. 直接執行 `ZR_TR28_PARAM_MAINT`（`p_werks=1011`，不勾顯示）：應該看到「權限檢查通過」→「鎖定成功」→ 跳出 SM30 風格的維護畫面 → 離開畫面後印出「已解鎖工廠」
+1. 直接執行 `ZR_TR28_PARAM_MAINT`（`p_werks=1011`，不勾顯示）：應該看到「權限檢查通過」→「鎖定成功」→ 跳出 SM30 風格的維護畫面，**且只看得到 `WERKS=1011` 這一個工廠的資料列**（`dba_sellist` 篩選生效）→ 離開畫面後印出「已解鎖工廠」
 2. 開兩個 Session，都對 `1011` 執行維護：第二個應該在 `ENQUEUE` 那一步被擋下（`FOREIGN_LOCK`）
 3. `p_disp` 打勾（顯示模式）：應該能看、但維護畫面裡的變更功能被關閉，且完全不會呼叫 `ENQUEUE`（顯示不用搶鎖）
 4. 執行 T-code `ZTR28_MAINT`（不透過 `ZR_TR28_PARAM_LIST`）：應該直接進到跟上面一樣的選取畫面
-5. 執行 `ZR_TR28_PARAM_LIST`，選取工廠後按上方工具列的「維護」按鈕：應該觸發 `CALL TRANSACTION 'ZTR28_MAINT'`，行為跟直接打 T-code 一致
+5. 執行 `ZR_TR28_PARAM_LIST`，選取畫面上按「維護主檔(SM30)」按鈕：應該直接跳進 `ZTR28_WPARM` 的 SM30 維護畫面，**這次看得到所有工廠的資料**（沒有篩選），也不會有任何權限檢查訊息——跟第 1 步的行為對比，具體感受「有沒有包 Wrapper」的差別
 
 ## 思考題
 
@@ -113,6 +109,8 @@ ZR_TR28_PARAM_MAINT（p_werks=1011）→ 權限不足：無法對工廠 1011 執
 
 ## 答案
 
-見 `zr_tr28_param_maint.prog.abap`、`zr_tr28_param_list.prog.abap`（SAP 端 `ZR_TR28_PARAM_MAINT`／`ZR_TR28_PARAM_LIST`）。DDIC 表 `ZTR28_WPARM` 快照見 `ztr28_wparm.tabl.abap`。權限物件 `ZTR28_WERK`、Lock Object `EZTR28_WERKS`、T-code `ZTR28_MAINT`、GUI Status `ZTR28LIST` 均為 GUI-only（SU21／SE11／SE93／SE41 皆無 ADT 建立 API），無程式碼快照，需照上方步驟手動建立。
+見 `zr_tr28_param_maint.prog.abap`、`zr_tr28_param_list.prog.abap`（SAP 端 `ZR_TR28_PARAM_MAINT`／`ZR_TR28_PARAM_LIST`）。DDIC 表 `ZTR28_WPARM` 快照見 `ztr28_wparm.tabl.abap`。權限物件 `ZTR28_WERK`、PFCG 角色 `ZTR28_MAINT_ROLE`、Lock Object `EZTR28_WERKS`、T-code `ZTR28_MAINT` 均為 GUI-only（SU21／PFCG／SE11／SE93 皆無 ADT 建立 API），無程式碼快照，需照上方步驟手動建立。
 
-**已用 `programrun` 驗證的部分**：兩支程式皆已建立、啟用、無語法錯誤；`ZR_TR28_PARAM_MAINT` 在權限物件尚未建立、以及物件已建立但 PFCG 尚未指派兩種情境下，都正確回報「權限不足（sy-subrc=12）」，證實 Wrapper 的檢查順序與邏輯正確——**sy-subrc=12 的官方定義是「User Master Record 裡完全沒有這個物件的任何授權」，不是「物件不存在」，這兩種情境剛好都符合這個定義（一種是物件真的不存在、一種是物件存在但沒人被授權），所以看到同樣的 12 是正常的，不是 bug**。等 PFCG 指派完成、且值填對之後，應該轉為 `sy-subrc=0`；如果角色的 `WERKS` 值填錯（例如填了 `1011` 以外的值卻拿 `1011` 來測），會轉成 `sy-subrc=4`（找得到授權但值不對）而不是 `12`——這兩種失敗情境在 SU53 交易碼裡也會顯示不同的診斷內容，是排查權限問題時的重要線索。**六項 GUI-only 作業建好後的端對端驗證（含 `VIEW_MAINTENANCE_CALL` 畫面互動、雙 Session `FOREIGN_LOCK`、App bar 按鈕）需要使用者在 SAP GUI 手動確認**，這部分不受 ADT `programrun` 支援（跟講義提過的「會開全螢幕畫面的呼叫沒辦法無頭驗證」限制相同）。
+**已用 `programrun` 驗證的部分**：兩支程式皆已建立、啟用、無語法錯誤；`ZR_TR28_PARAM_MAINT` 在權限物件尚未建立、以及物件已建立但 PFCG 尚未指派兩種情境下，都正確回報「權限不足（sy-subrc=12）」，證實 Wrapper 的檢查順序與邏輯正確——**sy-subrc=12 的官方定義是「User Master Record 裡完全沒有這個物件的任何授權」，不是「物件不存在」，這兩種情境剛好都符合這個定義（一種是物件真的不存在、一種是物件存在但沒人被授權），所以看到同樣的 12 是正常的，不是 bug**。等 PFCG 指派完成、且值填對之後，應該轉為 `sy-subrc=0`；如果角色的 `WERKS` 值填錯（例如填了 `1011` 以外的值卻拿 `1011` 來測），會轉成 `sy-subrc=4`（找得到授權但值不對）而不是 `12`——這兩種失敗情境在 SU53 交易碼裡也會顯示不同的診斷內容，是排查權限問題時的重要線索。**五項 GUI-only 作業建好後的端對端驗證（含 `VIEW_MAINTENANCE_CALL` 畫面互動、雙 Session `FOREIGN_LOCK`、選取畫面按鈕）需要使用者在 SAP GUI 手動確認**，這部分不受 ADT `programrun` 支援（跟講義提過的「會開全螢幕畫面的呼叫沒辦法無頭驗證」限制相同）。
+
+**2026-07-31 補課：新增 `VIEW_MAINTENANCE_CALL` 的 `dba_sellist` 工廠篩選＋改用 `SELECTION-SCREEN FUNCTION KEY`**——原本 `ZR_TR28_PARAM_MAINT` 呼叫 `VIEW_MAINTENANCE_CALL` 沒有篩選條件，通過權限檢查後一樣看得到全部工廠的資料，是設計上的漏洞，已補上 `dba_sellist` 只篩出 `p_werks` 那個工廠；`ZR_TR28_PARAM_LIST` 原本用 `SET PF-STATUS`＋`AT USER-COMMAND`（畫在輸出清單上、且需要額外的 SE41 GUI Status），改成選取畫面本身的 `SELECTION-SCREEN FUNCTION KEY`，並刻意讓這顆按鈕**不**經過 Wrapper、直接 `CALL TRANSACTION 'SM30'`，跟 `ZR_TR28_PARAM_MAINT` 的正規做法做教學對照（見講義第 7 節對照表）。`ZR_TR28_PARAM_LIST` 已重新推送並確認啟用；`ZR_TR28_PARAM_MAINT` 的 `dba_sellist` 修正已寫好但**因為物件被鎖定（疑似使用者當時在 SE38 開著編輯）尚未成功推送到 SAP**，下次要先確認物件沒被鎖住，再重新推送＋驗證。
