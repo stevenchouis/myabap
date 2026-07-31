@@ -124,6 +124,8 @@ CALL FUNCTION 'VIEW_MAINTENANCE_CALL'
 
 `action = 'S'`（只顯示）搭配 `ACTVT = '03'` 的權限檢查，可以做出一個「只能看、不能改」的模式，這正是本題 Wrapper 程式 `p_disp` 核取方塊要做的事。
 
+> ⚠️ **`VIEW_MAINTENANCE_CALL` 會真的開出一個完整畫面，等使用者操作完才會返回**——這代表它沒辦法用 ADT 的無頭 `programrun` API 驗證（headless 呼叫會卡在等畫面回應，最終連線逾時斷線 `RFC_CLOSED`），只能請使用者在真實 SAP GUI 測試，跟前面題目遇過的 ALV／Smartform 是同一類限制。**還有一個連帶影響**：如果 Wrapper 程式在呼叫這支 FM「之前」已經成功 `ENQUEUE_EZTR28_WERKS`，`programrun` 卡在這裡逾時斷線時，程式不會執行到後面的 `DEQUEUE_EZTR28_WERKS`（因為程式根本沒跑完），理論上鎖會殘留——**SM12 跟 Lock Object 的關係、以及這種殘留鎖該怎麼排查與清除，見講義 27 第 7 節**，那一節已經用這個真實情境當例子寫進去了。
+
 ## 6. T-code 要指給 Wrapper，不是指給裸的 SM30
 
 1. 交易碼輸入 **SE93** → **Transaction Code** 欄位輸入 `ZTR28_MAINT` → **Create**
