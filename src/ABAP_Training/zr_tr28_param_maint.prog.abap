@@ -12,7 +12,7 @@ ELSE.
 ENDIF.
 
 * ---- 1. 權限檢查：這個工廠的維護/顯示權限 ----
-AUTHORITY-CHECK OBJECT 'ZTR28_WERKS'
+AUTHORITY-CHECK OBJECT 'ZTR28_WERK'
   ID 'ACTVT' FIELD lv_actvt
   ID 'WERKS' FIELD p_werks.
 

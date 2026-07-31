@@ -1,6 +1,6 @@
 # 講義 28：客製 Table Maintenance 的權限防護與並行控制（授課順序：接在講義 27 之後）
 
-> 對應練習：[ex28](../ex28_auth_wrapper.md)｜答案物件：表 `ZTR28_WPARM`＋權限物件 `ZTR28_WERKS`＋Lock Object `EZTR28_WERKS`＋T-code `ZTR28_MAINT`＋程式 `ZR_TR28_PARAM_MAINT`／`ZR_TR28_PARAM_LIST`
+> 對應練習：[ex28](../ex28_auth_wrapper.md)｜答案物件：表 `ZTR28_WPARM`＋權限物件 `ZTR28_WERK`＋Lock Object `EZTR28_WERKS`＋T-code `ZTR28_MAINT`＋程式 `ZR_TR28_PARAM_MAINT`／`ZR_TR28_PARAM_LIST`
 
 ## 本講重點
 
@@ -36,20 +36,22 @@
 ## 3. 自訂權限物件：SU21
 
 1. 交易碼輸入 **SU21** → Enter
-2. 左側樹狀選單找一個 Object Class（本例用 `BC`，Basis 相關；實務上依表格所屬模組選對應 Class，例如 PP 模組相關的表可以選 `PP`）→ 對該 Class 按滑鼠右鍵 → **Create**（或工具列的「Create」按鈕）
-3. **Object** 欄位輸入 `ZTR28_WERKS`（Z 開頭，10 碼以內），**Text** 填說明（如「TR28 工廠維護權限」）→ Enter
+2. 左側樹狀選單找一個 Object Class（⚠️ **`BC` 這個代碼本身不存在，是分類的字首不是完整代碼**，實測 F4 選單裡查得到的是 `BC_A`（Basis: Administration）、`BC_C`（Basis - Development Environment）、`BC_Z`（Basis - Central Functions）等更細的子分類——本例選 **`BC_A`**；實務上依表格所屬模組選對應 Class，例如 PP 模組相關的表可以選 `PP`）→ 對該 Class 按滑鼠右鍵 → **Create**（或工具列的「Create」按鈕）
+3. **Object** 欄位輸入 `ZTR28_WERK`（**權限物件名稱上限只有 10 碼**，`ZTR28_WERKS` 11 碼會超過，要縮寫成 `ZTR28_WERK`——這點跟 Lock Object／表格／Data Element 動輒 16～30 碼的限制不同，10 碼是權限物件特有的較嚴格限制），**Text** 填說明（如「TR28 工廠維護權限」）→ Enter
 4. **Authorization Fields** 頁籤，逐一加兩個欄位（每個欄位按 `Insert Row` 或直接在空白列輸入）：
    - `ACTVT`（標準欄位，Activity，代表「做什麼」：`01`=Create、`02`=Change、`03`=Display……SAP 標準的活動代碼清單）
    - `WERKS`（本例的業務欄位，代表「對誰」：哪個工廠——欄位型別會自動帶出 Data Element `WERKS_D` 的意義，因為 `WERKS` 是 SAP 標準保留的欄位名稱）
 5. 存檔（跳出的 Transport 對話框選 **Local Object**，練習用途不用建正式傳輸單）
-6. 工具列 **Activate**（或 Ctrl+F3）
+6. 工具列 **Activate**（或 Ctrl+F3）——存檔時如果看到「Permissible activities not maintained for field ACTVT」這種**黃色警告**（不是紅色錯誤）可以先忽略，那是提醒「還沒設定這個物件允許哪些 `ACTVT` 值」，不影響本題後續使用；如果是紅色的「Object class ... does not exist」就要回頭檢查 Class 代碼有沒有打對
 
 > **`ACTVT` 幾乎是所有自訂權限物件的標配**：光看「使用者對某張表有沒有權限」不夠，還要分「只能看」還是「可以改」。標準活動代碼 `01`/`02`/`03`/`06`（刪除）／`08` (顯示變更文件)…可以查 `SU21` 或 `SE11` 顯示 Data Element `ACTVT` 的固定值清單。
+
+> ⚠️ **本例的權限物件 `ZTR28_WERK`（無 `S`）跟 Lock Object `EZTR28_WERKS`（有 `S`，且 `E` 開頭）拼法不同，不要看錯**——一開始設計時兩者刻意同名（只差 `E` 開頭）容易搞混，後來因為權限物件的 10 碼上限被迫把其中一個縮寫，兩者現在拼法不同了，但因為外觀還是很相似，操作時務必看清楚字尾有沒有 `S`。
 
 程式裡用 `AUTHORITY-CHECK` 呼叫這個物件：
 
 ```abap
-AUTHORITY-CHECK OBJECT 'ZTR28_WERKS'
+AUTHORITY-CHECK OBJECT 'ZTR28_WERK'
   ID 'ACTVT' FIELD lv_actvt
   ID 'WERKS' FIELD p_werks.
 
@@ -71,9 +73,9 @@ ENDIF.
    - 工具列 **Transaction** 按鈕（或右鍵 → Insert Transaction）
    - 輸入 T-code `ZTR28_MAINT` → Enter，選單樹會出現這一項
 5. **Authorizations** 頁籤 → 按鉛筆圖示 **Change Authorization Data**：
-   - 系統會**自動帶入** T-code 本身需要的標準權限物件（如 `S_TCODE`，因為 Menu 頁籤加了 `ZTR28_MAINT`），但**不會自動帶入我們自訂的 `ZTR28_WERKS`**——自訂物件沒有跟 T-code 自動關聯，要手動加
-   - 工具列 **Manually**（手動）按鈕 → 輸入 `ZTR28_WERKS` → Enter，這個物件的節點會出現在權限樹狀清單裡
-   - 展開 `ZTR28_WERKS` 節點，把 `ACTVT` 欄位的值改成 `02`（Change；如果也想順便給顯示權限可以再加一行 `03`）
+   - 系統會**自動帶入** T-code 本身需要的標準權限物件（如 `S_TCODE`，因為 Menu 頁籤加了 `ZTR28_MAINT`），但**不會自動帶入我們自訂的 `ZTR28_WERK`**——自訂物件沒有跟 T-code 自動關聯，要手動加
+   - 工具列 **Manually**（手動）按鈕 → 輸入 `ZTR28_WERK` → Enter，這個物件的節點會出現在權限樹狀清單裡
+   - 展開 `ZTR28_WERK` 節點，把 `ACTVT` 欄位的值改成 `02`（Change；如果也想順便給顯示權限可以再加一行 `03`）
    - `WERKS` 欄位填 `1011`（想授權的工廠代碼；教學上建議先只給 `1011`，具體體會「只能改自己工廠」的效果——真的要開放全部工廠可以填 `*`）
    - 檢查 `S_TCODE` 節點底下的 `TCD` 欄位確實已經有 `ZTR28_MAINT`
 6. 工具列齒輪圖示 **Generate**（產生 Profile）→ 跳出的 Profile 名稱視窗直接 Enter 接受系統預設值
@@ -91,7 +93,7 @@ ENDIF.
 
 SE11 建立步驟（跟講義 27 相同流程，範圍不同）：
 
-1. 交易碼輸入 **SE11** → 左側選 **Lock Object** → 輸入 `EZTR28_WERKS`（**系統強制規定要 `E` 開頭**，不是單純的命名慣例——打別的字首存檔會直接跳出警告「Start the lock object names with the prefix 'E'」。⚠️ 這裡容易跟第 2 節建的權限物件 `ZTR28_WERKS` 搞混，兩者只差一個 `E` 開頭，輸入時務必看清楚）→ **Create**
+1. 交易碼輸入 **SE11** → 左側選 **Lock Object** → 輸入 `EZTR28_WERKS`（**系統強制規定要 `E` 開頭**，不是單純的命名慣例——打別的字首存檔會直接跳出警告「Start the lock object names with the prefix 'E'」。⚠️ 這裡容易跟第 3 節建的權限物件 `ZTR28_WERK` 搞混，兩者外觀相似但拼法不同（`ZTR28_WERK` 無 `S`／`EZTR28_WERKS` 有 `S`），輸入時務必看清楚）→ **Create**
 2. **Tables** 頁籤：Primary Table 填 `ZTR28_WPARM` → Enter（系統會自動帶出這張表的完整欄位清單）
 3. **Lock Parameters** 頁籤：勾選 `MANDT`、`WERKS` 兩個欄位的 **Lock parameter** 核取方塊——**`PARAM` 欄位保持不勾**
 4. **Lock Mode** 欄位選 `E`（Exclusive/Write Lock）
@@ -167,7 +169,7 @@ CALL TRANSACTION 'ZTR28_MAINT'   ← S_TCODE 權限檢查（誰能執行這個 T
 ZR_TR28_PARAM_MAINT 選取畫面：輸入工廠、勾選顯示/維護
         │
         ▼
-AUTHORITY-CHECK 'ZTR28_WERKS'    ← 業務維度權限檢查（這個人對這個工廠能不能維護/顯示）
+AUTHORITY-CHECK 'ZTR28_WERK'    ← 業務維度權限檢查（這個人對這個工廠能不能維護/顯示）
         │ 通過
         ▼
 ENQUEUE_EZTR28_WERKS              ← 並行控制（這個工廠有沒有人在維護）

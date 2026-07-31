@@ -34,19 +34,21 @@
 
 ## 第二部分：SU21 建立自訂權限物件（需使用者手動建立，ADT 沒有建立 API）
 
-1. **SU21** → Object Class 選 `BC` → Create Authorization Object
-2. 物件名稱 `ZTR28_WERKS`，Short Text 自訂
+1. **SU21** → Object Class 選 **`BC_A`**（Basis: Administration；⚠️ `BC` 本身不是合法的 Class 代碼，只是分類字首，實際要選 `BC_A`/`BC_C`/`BC_Z` 這種細分類，存檔時如果選了不存在的 Class 會報紅字錯誤「Object class ... does not exist」）→ Create Authorization Object
+2. 物件名稱 `ZTR28_WERK`（**權限物件名稱上限 10 碼**，`ZTR28_WERKS` 有 11 碼會超過，要縮寫掉一個字母），Short Text 自訂
 3. Authorization Fields：`ACTVT`（標準欄位）、`WERKS`（本題業務欄位，型別參考 Data Element `WERKS_D`）
-4. 存檔、Activate
+4. 存檔、Activate（存檔時如果看到黃色警告「Permissible activities not maintained for field ACTVT」可以忽略，不影響後續使用）
 5. **這一步只是定義「有哪些欄位可以管控」，真正要讓某個使用者擁有權限，還要走完下面的 PFCG 流程**——缺這一步的話，任何人 `AUTHORITY-CHECK` 都會失敗（`sy-subrc <> 0`），程式邏輯本身不受影響
 
-## 第二點五部分：PFCG 角色維護（需使用者手動建立，權限真正生效的關鍵，詳細操作見講義第 2.1 節）
+> ⚠️ **`ZTR28_WERK`（權限物件，無 `S`）跟 `EZTR28_WERKS`（Lock Object，有 `S`、`E` 開頭）拼法相近但不同，操作時注意看清楚。**
+
+## 第二點五部分：PFCG 角色維護（需使用者手動建立，權限真正生效的關鍵，詳細操作見講義第 3.1 節）
 
 1. **PFCG** → Role 欄位輸入 `ZTR28_MAINT_ROLE` → **Single Role** → Create
 2. Description 頁籤填說明 → 存檔
 3. Menu 頁籤 → Transaction → 輸入 `ZTR28_MAINT` → Enter
-4. Authorizations 頁籤 → 鉛筆圖示 Change Authorization Data → **Manually** 按鈕輸入 `ZTR28_WERKS` → Enter
-5. 展開 `ZTR28_WERKS` 節點：`ACTVT` 填 `02`、`WERKS` 填 `1011`；確認 `S_TCODE` 底下的 `TCD` 有 `ZTR28_MAINT`
+4. Authorizations 頁籤 → 鉛筆圖示 Change Authorization Data → **Manually** 按鈕輸入 `ZTR28_WERK` → Enter
+5. 展開 `ZTR28_WERK` 節點：`ACTVT` 填 `02`、`WERKS` 填 `1011`；確認 `S_TCODE` 底下的 `TCD` 有 `ZTR28_MAINT`
 6. 齒輪圖示 **Generate** 產生 Profile
 7. User 頁籤輸入自己的使用者代號 → **User Comparison** → Complete Comparison
 8. 存檔
@@ -54,7 +56,7 @@
 
 ## 第三部分：SE11 建立 Lock Object（需使用者手動建立）
 
-1. SE11 → Lock Object → `EZTR28_WERKS`（**系統強制要求 `E` 開頭，不是命名慣例**；⚠️ 注意別跟第二部分的權限物件 `ZTR28_WERKS` 搞混，只差一個 `E`）→ Create
+1. SE11 → Lock Object → `EZTR28_WERKS`（**系統強制要求 `E` 開頭，不是命名慣例**；⚠️ 注意別跟第二部分的權限物件 `ZTR28_WERK` 搞混，兩者拼法相近但不同）→ Create
 2. Primary Table：`ZTR28_WPARM`
 3. Lock Parameters：**只勾 `MANDT`、`WERKS`（不勾 `PARAM`）**——鎖定範圍是「整個工廠」，不是「單一參數列」，見講義第 3 節的設計理由
 4. Lock Mode：`E`
@@ -93,7 +95,7 @@ ZR_TR28_PARAM_LIST（空表）→ 印出「（沒有資料，或選取條件沒�
 ZR_TR28_PARAM_MAINT（p_werks=1011）→ 權限不足：無法對工廠 1011 執行 維護（sy-subrc = 12，代表系統裡還沒有這個權限物件）
 ```
 
-**六項 GUI-only 作業（含 PFCG 指派 `ZTR28_WERKS` 角色 `ACTVT=02`、`WERKS=1011`）都做好之後**：
+**六項 GUI-only 作業（含 PFCG 指派 `ZTR28_WERK` 角色 `ACTVT=02`、`WERKS=1011`）都做好之後**：
 
 1. 直接執行 `ZR_TR28_PARAM_MAINT`（`p_werks=1011`，不勾顯示）：應該看到「權限檢查通過」→「鎖定成功」→ 跳出 SM30 風格的維護畫面 → 離開畫面後印出「已解鎖工廠」
 2. 開兩個 Session，都對 `1011` 執行維護：第二個應該在 `ENQUEUE` 那一步被擋下（`FOREIGN_LOCK`）
@@ -107,10 +109,10 @@ ZR_TR28_PARAM_MAINT（p_werks=1011）→ 權限不足：無法對工廠 1011 執
 2. 為什麼 Wrapper 程式的 `AUTHORITY-CHECK` 跟 `VIEW_MAINTENANCE_CALL` 內部自己的權限檢查不衝突、也不是多餘的？兩者各自把關什麼？
 3. 如果 Lock Object 的 Lock Parameters 改成勾整個主鍵（`MANDT`+`WERKS`+`PARAM`），會有什麼實際後果？兩個人分別維護同工廠、不同參數代碼的資料時，行為會有什麼不同？
 4. `p_disp`（顯示模式）完全不呼叫 `ENQUEUE`／`DEQUEUE`，這樣設計合理嗎？如果兩個人都用顯示模式同時打開同一個工廠，會有問題嗎？
-5. 如果某個使用者的角色同時擁有 `S_TABU_DIS`（對 `&NC&` Authorization Group 有維護權限）跟這支 T-code，但**沒有**被指派 `ZTR28_WERKS` 這個自訂權限物件，這個使用者能不能繞過 Wrapper、直接用 SM30 改到 `ZTR28_WPARM` 的資料？這代表整個防護設計還缺了哪一塊角色/權限管理上的配套？
+5. 如果某個使用者的角色同時擁有 `S_TABU_DIS`（對 `&NC&` Authorization Group 有維護權限）跟這支 T-code，但**沒有**被指派 `ZTR28_WERK` 這個自訂權限物件，這個使用者能不能繞過 Wrapper、直接用 SM30 改到 `ZTR28_WPARM` 的資料？這代表整個防護設計還缺了哪一塊角色/權限管理上的配套？
 
 ## 答案
 
-見 `zr_tr28_param_maint.prog.abap`、`zr_tr28_param_list.prog.abap`（SAP 端 `ZR_TR28_PARAM_MAINT`／`ZR_TR28_PARAM_LIST`）。DDIC 表 `ZTR28_WPARM` 快照見 `ztr28_wparm.tabl.abap`。權限物件 `ZTR28_WERKS`、Lock Object `EZTR28_WERKS`、T-code `ZTR28_MAINT`、GUI Status `ZTR28LIST` 均為 GUI-only（SU21／SE11／SE93／SE41 皆無 ADT 建立 API），無程式碼快照，需照上方步驟手動建立。
+見 `zr_tr28_param_maint.prog.abap`、`zr_tr28_param_list.prog.abap`（SAP 端 `ZR_TR28_PARAM_MAINT`／`ZR_TR28_PARAM_LIST`）。DDIC 表 `ZTR28_WPARM` 快照見 `ztr28_wparm.tabl.abap`。權限物件 `ZTR28_WERK`、Lock Object `EZTR28_WERKS`、T-code `ZTR28_MAINT`、GUI Status `ZTR28LIST` 均為 GUI-only（SU21／SE11／SE93／SE41 皆無 ADT 建立 API），無程式碼快照，需照上方步驟手動建立。
 
 **已用 `programrun` 驗證的部分**：兩支程式皆已建立、啟用、無語法錯誤；`ZR_TR28_PARAM_MAINT` 在權限物件尚未建立時正確回報「權限不足（sy-subrc=12）」，證實 Wrapper 的檢查順序與邏輯正確。**六項 GUI-only 作業建好後的端對端驗證（含 `VIEW_MAINTENANCE_CALL` 畫面互動、雙 Session `FOREIGN_LOCK`、App bar 按鈕）需要使用者在 SAP GUI 手動確認**，這部分不受 ADT `programrun` 支援（跟講義提過的「會開全螢幕畫面的呼叫沒辦法無頭驗證」限制相同）。
