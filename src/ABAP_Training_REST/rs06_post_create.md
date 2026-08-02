@@ -130,7 +130,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
 1. SICF 交易碼，在 `zrest_training` node 上右鍵 → **New Sub-Element**，Service Name 填 `rs06`
 2. Handler List 掛 `ZCL_RS06_APP`
 3. Activate Service
-4. 用 `SPROX_HTTP_REQUEST` 測試（**這題一定要用 `SPROX_HTTP_REQUEST` 或其他能自訂 Request Body 的工具，瀏覽器網址列沒辦法送 POST body**）。**URL 一樣要填完整網址（含 `http://` 與主機:port）**：`http://<主機>:<port>/sap/bc/zrest_training/rs06/flights?sap-client=130`，HTTP Method 選 **POST**，Req. Body 分頁貼 JSON：
+4. 用 `SPROX_HTTP_REQUEST` 測試（**這題一定要用 `SPROX_HTTP_REQUEST` 或其他能自訂 Request Body 的工具，瀏覽器網址列沒辦法送 POST body**）。**URL 一樣要填完整網址（含 `http://` 與主機:port）**：`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs06/flights?sap-client=130`，HTTP Method 選 **POST**，Req. Body 分頁貼 JSON：
    - 成功建立（`201`）：
      ```json
      {"carrid":"AA","connid":17,"fldate":"20260101","price":422.94,"currency":"USD"}
@@ -173,7 +173,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
 ## 思考題
 
 1. 如果把 `carrid` 存在性檢查拿掉，只留必填欄位檢查，POST 一筆 `carrid` 亂打的資料（例如 `"XX"`）會發生什麼事？`SFLIGHT` 有沒有 DDIC 層級的外鍵約束會擋下這筆資料？（提示：回顧 `.claude/rules/sap-adt-mcp.md` 第 10 節提過的「DDIC 外鍵只在 Dynpro/SM30 畫面輸入層級生效，Open SQL 完全不受影響」）
-2. 這題的 `Location` header 值是用字串組出來的相對路徑（`/flights/AA/17/20260101`），沒有帶 `http://<主機>:<port>` 前綴——如果呼叫端真的想直接把 `Location` 的值當網址呼叫下一個請求，這樣夠用嗎？正式的 REST API 通常會怎麼處理 `Location` header 的網址完整性？
+2. 這題的 `Location` header 值是用字串組出來的相對路徑（`/flights/AA/17/20260101`），沒有帶 `https://erpdemo01.itts.com.tw:44300` 前綴——如果呼叫端真的想直接把 `Location` 的值當網址呼叫下一個請求，這樣夠用嗎？正式的 REST API 通常會怎麼處理 `Location` header 的網址完整性？
 3. 如果呼叫端在同一秒鐘內對同一組 `carrid`/`connid`/`fldate` 送出兩個 POST 請求（例如網路重送），有沒有可能兩個請求都通過「主鍵不存在」的檢查、但只有一個 `INSERT` 會成功？這種「檢查」跟「寫入」之間的時間差（race condition）在資料庫層面要怎麼處理？（提示：`INSERT` 語句本身在資料庫層級是有主鍵約束保護的，這題的程式邏輯是否也依賴了這個保護，還是只靠應用層的邏輯判斷？）
 
 ## 答案

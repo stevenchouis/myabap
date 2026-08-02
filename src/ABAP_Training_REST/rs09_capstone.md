@@ -170,7 +170,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
 1. SICF 交易碼，在 `zrest_training` node 上右鍵 → **New Sub-Element**，Service Name 填 `rs09`
 2. Handler List 掛 `ZCL_RS09_APP`
 3. Activate Service
-4. 用 `SPROX_HTTP_REQUEST` 測試，**URL 一律填完整網址**（`http://<主機>:<port>/sap/bc/zrest_training/rs09/...?sap-client=130`）：
+4. 用 `SPROX_HTTP_REQUEST` 測試，**URL 一律填完整網址**（`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs09/...?sap-client=130`）：
    - **建立訂位（`201`）**：`POST .../bookings`，Req. Body（挑一個已知存在的航班，例如 rs07/rs08 測過的 `LH/400/20190104`，客戶 id 先用 SE16 查一筆 `SCUSTOM` 真實存在的 `ID`）：
      ```json
      {"carrid":"LH","connid":400,"fldate":"20190104","customid":"00000001","class":"Y","passname":"Mickey Mouse","forcuram":250.00,"forcurkey":"EUR"}

@@ -148,11 +148,11 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **診斷方法**：懷疑某個 DDIC 物件「寫入後沒真的存進去」時，用該物件的標準/既有物件當範本（本例用標準 Table Type `SFLIGHT_TAB2`，`GET /sap/bc/adt/ddic/tabletypes/sflight_tab2`）逐欄位比對，同時務必用 `?version=active` 讀回自己剛寫入啟用的版本確認欄位值，不要只看 PUT 的回應（PUT 回應可能是 `inactive` 版本、內容正確，但 activation 那一步仍可能因為別的原因跟預期不同）。
 - **`ttyp:rowType` 用 `dictionaryType` 時，除了 `typeKind`/`typeName` 之外還要帶 `ttyp:builtInType`（`dataType=STRU`、`length=000000`、`decimals=000000`）與空的 `ttyp:rangeType`**：標準 Table Type 的 GET 回應即使是 dictionaryType 也帶著這個「看似多餘」的 builtInType 區塊，照抄不要省略，省略後系統的行為未知（本次修復是完整照抄 SFLIGHT_TAB2 的結構，沒有另外測試省略 builtInType 是否也會導致問題）。
 
-## 15. `adt-rfc-bridge` 不能拿來測一般 SICF HTTP Service（2026-07-12 實測，REST 課程 rs01/rs02）
+## 15. `adt-rfc-bridge` 不能拿來測一般 SICF HTTP Service（2026-07-12 實測，REST 課程 rs01/rs02；2026-08-02 「外網打不到」結論已推翻，見下方更正）
 
-- 在 SICF 掛好 Handler Class（`CL_REST_HTTP_HANDLER` 子類）並 Activate 後，若使用者當下不在能連到 SAP Host 內網的環境（例如在外網、只靠 SAP GUI 透過 SAProuter/dispatcher 連線），瀏覽器直接測那個 REST Service URL 會連不到——這是預期行為，不是設定錯誤：SAP GUI 走的是 dispatcher 連線（Activate 這類後端維護動作不受影響），但瀏覽器測 HTTP Service 走的是 ICM 的 HTTP Port，是完全不同的一條連線路徑，目前只有內網（或 VPN）走得通。
-- **不能**拿 `adt-rfc-bridge`（`127.0.0.1:8410`）當跳板繞過這個限制：直接 curl 打 `http://127.0.0.1:8410/sap/bc/<自訂 SICF 路徑>`（例如 `/sap/bc/zrest_training/rs01/hello`）會回 `404 No application class found for URI: ...`。這代表 bridge 只認得它自己內部映射的 ADT 專用路徑（`/sap/bc/adt/*`），不是通用的 HTTP-to-RFC 轉發器，沒辦法用來呼叫任意 SICF Service。
-- **結論**：自訂 SICF Service（REST 課程、或其他掛 Handler Class 的服務）的瀏覽器/Postman 實測，只能在使用者連得到 SAP Host 內網（或透過 VPN）的環境下進行，沒有繞過內網限制的 workaround；Claude 這邊能做的只有確認物件已建立、已啟用、程式邏輯正確，實際連線測試要等使用者回到內網環境再做。
+- ⚠️ **2026-08-02 更正：「外網連不到 ICM HTTP Port」這個結論是錯的，原始測試當時很可能用錯了主機名稱／Port**。RAP 課程查證階段，使用者在確認自己身處外網的情況下，直接瀏覽器打 `https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs01/hello`（這個系統對外的正式 HTTPS 位址＋Port 44300），**正常回傳 `Hello REST! 現在伺服器時間是 ...`**，代表這個 REST 課程的 SICF Service 從一開始就是外網可達的，不需要等回到內網／VPN。原本 2026-07-12 測試「連不到」的真正原因不明（推測是當時 curl／瀏覽器打的是內網固定 IP `192.168.68.56` 或其他錯誤的 Port，不是這個系統真正對外開放的 `erpdemo01.itts.com.tw:44300`），不是 ICM HTTP Port 本身外網不可達。
+- **底下第一、二點（`adt-rfc-bridge` 不能當 SICF 跳板）依然成立，只是原因跟「外網限制」無關**：直接 curl 打 `http://127.0.0.1:8410/sap/bc/<自訂 SICF 路徑>`（例如 `/sap/bc/zrest_training/rs01/hello`）會回 `404 No application class found for URI: ...`——這是 `adt-rfc-bridge` 本身的限制（只認得自己內部映射的 ADT 專用路徑 `/sap/bc/adt/*`，不是通用的 HTTP-to-RFC 轉發器），跟使用者在哪個網路無關，Claude 這邊永遠沒辦法透過 bridge 直接呼叫任意 SICF Service（包含 OData 服務，見第 40.8/40.10 節）。
+- **正確結論**：只要使用者知道正確的對外主機名稱＋Port（這個系統是 `erpdemo01.itts.com.tw:44300`，HTTPS），SICF Service／OData Service **在外網也能直接用瀏覽器/Postman 測試**，不需要內網或 VPN；`adt-rfc-bridge` 的限制純粹是「Claude 端沒有一個通用管道能主動呼叫任意 HTTP 端點」，跟使用者自己用瀏覽器/Postman 測試完全是兩回事，不要混為一談。之前 REST 課程 README（`src/ABAP_Training_REST/README.md`）與教材裡任何「只能內網測試」的措辭都需要一併更正。
 - **`GET_ROOT_HANDLER` 直接回傳 `CL_REST_RESOURCE` 子類實例（未用 `CL_REST_ROUTER`）時，Resource 完全不檢查剩餘 URI 路徑**：`CL_REST_RESOURCE~DO_HANDLE` 只依 HTTP 方法（GET/POST/…）dispatch，不看路徑，所以像 rs01 這種「一個 service 只有一個資源」的設計，`/sap/bc/zrest_training/rs01`（不帶任何子路徑）跟 `/sap/bc/zrest_training/rs01/hello`（帶任意子路徑）會呼叫到同一個 `GET` 方法、回傳完全一樣的內容——只有用 `CL_REST_ROUTER~ATTACH` 註冊過路由的 Service（如 rs02）才會真的依路徑分流，路徑不對會是 404。
 
 ## 16. AMDP／CDS DDL Source（Table Function）建立與簽章規則（2026-07-19 實測，AMDP 課程 am01~am09）
@@ -488,4 +488,220 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **連帶踩到的 DDIC Structure 建立坑**：
   1. `DEFINE STRUCTURE` 的必填 annotation，官方文件（`ABENDDICDDL_DEFINE_STRUCT_PROPS`）字面寫的是 `@AbapCatalog.enhancement.category`（帶點），但這個系統實際存入 DDL 原始碼、系統自動產生的樣板顯示的是 **`@AbapCatalog.enhancementCategory`（駝峰單詞，不帶點）**——照文件字面抄會導致 PUT 一律回 `ExceptionResourceAlreadyExists: Can't save due to errors in source`（但 `checkruns` 卻回報無錯誤，兩者矛盾，這個矛盾本身就是「annotation 名稱錯但系統沒把它當語法錯誤來報」的線索）。**排錯技巧**：懷疑 annotation 名稱寫錯時，直接 GET 該物件剛建立、還沒寫入內容前的預設樣板（`component_to_be_changed : abap.string(0);` 那種），看樣板裡系統自己產生的 annotation 打法，比照抄官方文件字面更可靠。
   2. 兩個欄位共用同一個金額型 DE（如 `S_PRICE`，`CURR` 型別）時，啟用會報 `ZTR15_FLIGHT_REV-REVENUE (specify reference table AND reference field)`——金額欄位需要一個參考幣別欄位，兩個金額欄位模糊了自動推導。修法：加一個 `CURRENCY : s_currcode;` 欄位，並在每個金額欄位加 `@Semantics.amount.currencyCode : 'ztr15_flight_rev.currency'` annotation 明確指向它。
-- **連帶踩到的 DDIC Table Type 建立坑（第 14 節的再次驗證＋新發現）**：即使 POST 建立時就帶了正確的 `Content-Type: application/vnd.sap.adt.tabletype.v1+xml`（單數、v1）跟正確的 `ttyp:rowType`（`dictionaryType`/`ZTR15_FLIGHT_REV`/`STRU`），**POST 回應雖然 201 且內容正確，但啟用後讀回 `active` 版本卻悄悄退回 `predefinedAbapType`/`CHAR(1)` 預設值**——這次連 Content-Type 都對了還是被丟棄，代表第 14 節記載的「Content-Type 錯了才會丟棄」不是唯一觸發條件，**POST（建立）本身對 Table Type 這個物件型別可能永遠不可靠**。Workaround 跟第 8 節 Data Element 標籤的模式一樣：**POST 建立空殼之後，一定要再走一次 LOCK→PUT（同一份 XML）→UNLOCK→Activate**，PUT 這一步才會真的把 `rowType` 存進去；光靠 POST 不夠，不管 POST 當下的 Content-Type 對不對。
+
+## 40. RAP（ABAP RESTful Application Programming Model）可行性查證：這個系統是「Classic RAP」世代——沒有 View Entity 語法、沒有 strict mode，但 Managed BDEF 全鏈路可以透過 ADT 建立並啟用；Service Binding「Publish」無 ADT API（2026-08-02 實測，開課前查證，`$TMP` 物件 `ZRAPT01`/`ZI_RAPT01`/`ZRAPT01_SD`/`ZRAPT01_SB`）
+
+**背景**：使用者評估要不要在目前這個系統（GET discovery 顯示 `adtcore:masterSystem="S4H"`，非單純 ECC 1909）開 RAP 課程，先查證這個 MCP／ADT 環境對 RAP 物件（BDEF/DDLX/SRVD/SRVB）的支援程度，用一個最小 Managed RAP BO 端對端驗證。
+
+### 40.1 Discovery 確認四個 RAP 物件型別都有 ADT collection
+
+`/sap/bc/adt/discovery` 找得到：
+- `/sap/bc/adt/bo/behaviordefinitions`（BDEF，`Content-Type: application/vnd.sap.adt.blues.v1+xml`，root `blue:blueSource`——跟 Table/Structure 共用同一個 schema 家族）
+- `/sap/bc/adt/ddic/srvd/sources`（Service Definition，`application/vnd.sap.adt.ddic.srvd.v1+xml`，root `srvd:srvdSource`，namespace `http://www.sap.com/adt/ddic/srvdsources`）
+- `/sap/bc/adt/ddic/ddlx/sources`（Metadata Extension，`application/vnd.sap.adt.ddic.ddlx.v1+xml`）
+- `/sap/bc/adt/businessservices/bindings`（Service Binding，`application/vnd.sap.adt.businessservices.servicebinding.v1+xml`，root `srvb:serviceBinding`，namespace `http://www.sap.com/adt/ddic/ServiceBindings`）
+
+quickSearch（`objectType=BDEF/BDO`／`SRVD/SRV`／`SRVB/SVB`／`DDLX/EX`）證實系統裡有大量標準內容（如 `C_SALESORDERMANAGE_SD`），代表這些物件型別在這個系統上是**真實運作中的框架**，不是空殼。
+
+### 40.2 ⚠️ 這是「Classic RAP」——CDS 編譯器不支援 View Entity 語法
+
+用新式語法 `define root view entity ZI_RAPT01 as select from zrapt01 { ... }` 啟用直接報 **`Syntax error: Keyword ENTITY not allowed`**。讀標準物件 `C_SalesOrderManage` 的 DDL 原始碼確認，這系統的 RAP 範例一律用**舊式 CDS View 語法**：`define root view C_SalesOrderManage as select from I_SalesOrder as SalesOrder composition [0..*] of ...`（用 `composition [0..*] of` 表達關聯，不是 View Entity 世代的 `association to`/ON 條件簡化語法）。
+
+**Workaround／正確語法**：拿掉 `entity` 關鍵字，改用 `define root view <name> as select from <table> { key ..., ... }`；根 View 必須加 `@AbapCatalog.preserveKey: true`（缺了會報 `"@AbapCatalog.preserveKey: true" missing for entity in BO structure`，即使用的是舊式 `view` 而非 `view entity`，這個 annotation 一樣要）＋ `@ObjectModel.compositionRoot: true`。
+
+### 40.3 ⚠️ BDEF 不支援 `strict` mode 語法
+
+`strict ( 2 );` 啟用報 `Unexpected character "2"`；改成不帶參數的 `strict;` 也報 `"internal | with" expected, not "strict"`——**這個系統的 BDEF 語法完全沒有 `strict` 子句這個語言元素**（`strict` mode 是後期版本才加入、用來管控哪些檢查該報錯而非警告的語言特性）。Workaround：BDEF header 只留 `managed;`（或 `managed implementation in class ... unique;`），不要寫 `strict` 那一行。
+
+### 40.4 ✅ 完整驗證成功的 Managed RAP 最小鏈路
+
+依序建立、全部走 ADT（Table／CDS View 用 MCP `sap_set_source` 原生支援；BDEF 因下一條記載的工具 bug 改手動 curl）：
+
+1. **Table** `ZRAPT01`（`key client : mandt not null; key root_id : abap.char(10) not null; descr : abap.char(40);`）
+2. **CDS Root View** `ZI_RAPT01`（`@AbapCatalog.preserveKey: true` + `@ObjectModel.compositionRoot: true`，`define root view ... as select from zrapt01 { key root_id, descr }`，欄位不加 alias 以免需要額外的 `mapping for` 區塊）
+3. **Managed BDEF** `ZI_RAPT01`：
+   ```
+   managed;
+
+   define behavior for ZI_RAPT01 alias Root
+   persistent table zrapt01
+   lock master
+   {
+     create;
+     update;
+     delete;
+   }
+   ```
+4. **Service Definition** `ZRAPT01_SD`：`define service ZRAPT01_SD { expose ZI_RAPT01 as Root; }`
+
+四個物件全部 `sap_inactive_objects` 回 0 筆、GET `version=active` 內容比對相符，**證實這個環境完全可以建出一個能啟用的 Managed RAP BO**，不需要走「單一 Interface View + 獨立 Projection View」兩層（這系統的標準內容本身也是這種單層模式，Interface View 直接掛 BDEF，Consumption View 只是另一個直接 select 的 View，不是強制要有 `projection;` BDEF 的兩層架構）。
+
+### 40.5 Service Binding：物件可建立，但「Publish」步驟找不到 ADT API
+
+POST `/sap/bc/adt/businessservices/bindings`（root `srvb:serviceBinding`，內嵌 `srvb:services`／`srvb:content`／`srvb:serviceDefinition`／`srvb:binding type="ODATA" version="V4"`）建立成功，GET 讀回 `adtcore:version="active"`（Service Binding 建立後**直接是 active**，不像其他物件需要額外 activation 呼叫）——但 `srvb:published` 屬性固定是 `false`；嘗試：
+- 對已建立物件重新 `LOCK`→PUT 帶 `srvb:published="true"` 的 XML → 回 200，但讀回來 `published` 還是 `false`（屬性被伺服器忽略，不是客戶端可寫的欄位）
+- GET/POST `/sap/bc/adt/businessservices/odatav4/<name>` 這個子資源 → 一律 `404 No suitable resource found`
+- discovery 全文搜尋 `publish` 關鍵字 → 完全沒有命中
+
+**結論**：Service Binding 的「Publish」（讓它變成真正可以打 `/sap/opu/odata4/...` 測試的 OData 端點，SAP GUI／Eclipse 裡是編輯畫面上的一個按鈕）目前這個 ADT／MCP 環境**沒有對應的寫入 API**——跟本檔記載的其他「GUI-only 收尾」模式（第 15 節 SICF、第 19 節 Smartform、第 28 節權限物件）同一類：物件本身（Service Binding 這個 Repository 物件）可以透過 ADT 完整建立，但「讓它在執行期真正生效」這個動作要回 SAP GUI／Fiori 的 RAP Business Services 應用手動按 Publish。
+
+### 40.6 MCP 工具版本已更新過，但 BDEF 的內部路徑有 bug
+
+`sap_set_source`/`sap_lock`/`sap_unlock` 的 `objectType` enum 現在直接列出 `DDLS`／`SRVD`／`DDLX`／`BDEF`（比本檔第 1～39 節撰寫時的版本新，代表 MCP server 有更新過）。TABL／DDLS 用原生工具測試正常（含自動處理殘留鎖 workaround 的 403 → `sap_lock`→`sap_unlock`→手動 curl activation 標準流程，見第 5 節）。但 **`sap_set_source(objectType=BDEF, ...)` 內部組出的 LOCK 路徑是 `/sap/bc/adt/bopf/bdef/sources/<name>`，跟 discovery 記載的真正 collection `/sap/bc/adt/bo/behaviordefinitions` 不一致**，直接報 `HTTP 404 No suitable resource found`——這是工具本身的 bug（沿用了較舊或錯誤的 BOPF 路徑慣例），BDEF 一律要走手動 curl（LOCK 用 `Accept: application/vnd.sap.as+xml;charset=UTF-8;dataname=com.sap.adt.lock.result` 這個舊式 Accept，同第 8 節 DDIC 物件模式）。**沒有驗證過 SRVD／DDLX 用原生工具是否也有同樣的路徑 bug**（這次 SRVD 直接走了手動 curl，未實測原生工具）——之後若要用這幾個新 objectType，先各自測一次原生工具，失敗再套用本節的手動 curl workaround。
+
+### 40.7 對「值不值得在這個系統開 RAP 課程」的結論
+
+- **技術上可行**：Managed RAP 的核心鏈路（Table→CDS View→BDEF→Service Definition）能建、能啟用，框架是真的在跑，不是查不到路徑的空殼限制。
+- **但教出來的是「Classic RAP」語法**（無 View Entity、無 strict mode），跟目前 SAP 官方教材／認證（多半基於 2021+ 或 BTP ABAP Environment，預設 View Entity＋strict(2)）有落差，学生之後转去新版系统会需要重新适应两处语法差异（`view entity`關鍵字、`strict`子句）——这点第一輪回覆已經提過，這次查證是**補強證據**，不是推翻。
+- **實務練習的最後一哩路（Publish→實際用 Postman/瀏覽器打 OData 端點驗證 CRUD）需要使用者在 SAP GUI／Fiori 手動按 Publish**，跟 REST 課程（第 15 節）的處境一樣——Claude 能做完物件建立與語法驗證，最終的「服務真的能用」需要使用者那端配合一步。
+- 若決定開課，內容應該包含：明確告知「這是 Classic RAP 語法，不是最新 View Entity 語法」的說明、`strict` 相關的新舊語法差異需要另外補充講義文字（因為學生查官方文件會看到 `strict(2)` 但這裡用不了）、以及每個練習最後的 Service Binding Publish 步驟要設計成「操作指引＋使用者截圖回報」的形式（比照 Smartform 課程模式）。
+
+### 40.8 ⚠️ 已更正（2026-08-02）：OData 端點外網其實打得到，只是 `adt-rfc-bridge` 這條路徑本身不能拿來當通用 HTTP 轉發器
+
+**原始判斷（下方保留供對照）是錯的**——當時援引第 15 節「SICF 服務外網打不到」的結論，但那個結論本身已經在同一天被推翻（見第 15 節更正）：使用者在確認自己身處外網的情況下，直接瀏覽器打正確的對外位址 `https://erpdemo01.itts.com.tw:44300/sap/opu/odata/sap/ZRAPT01_SB3/`，**正常回傳服務的 Atom Service Document**（列出 `Root` collection，`member-title` 正確顯示 `RAP Test Root Interface View`）。這代表 OData V2 端點**外網直接可達**，不需要內網或 VPN，也不需要下面記載的自我呼叫 workaround 才能測試——**真人使用者拿瀏覽器/Postman 測，直接打對外主機名稱＋Port 就可以了**。
+
+**唯一還成立的部分**：`adt-rfc-bridge`（`127.0.0.1:8410`，Claude 這邊在用的內部橋接）對 `/sap/opu/odata4/...` 與 `/sap/opu/odata/...` 這兩種路徑依然回 `404 No application class found for URI: ...`——但這純粹是 **bridge 自己的限制**（只認得自己內部映射的 `/sap/bc/adt/*` 專用路徑），跟「外網連不連得到」完全無關，是兩個不同層次的問題：**Claude 沒辦法透過 bridge 主動呼叫任意 OData/HTTP 端點**（這條依然成立），但**使用者自己拿瀏覽器/Postman 測是完全沒問題的**（這條原本判斷錯了，已更正）。
+
+**下方原始內容（`cl_http_client` 自我呼叫 workaround）保留參考價值**：這個做法本身沒有錯，仍然是「Claude 端不依賴使用者手動操作、自主驗證 OData 服務」的唯一手段（因為 Claude 沒有通用的外部 HTTP 呼叫工具能直接打 `erpdemo01.itts.com.tw:44300`）；只是它的必要性從「唯一能測的方法」降級成「Claude 想自己驗證時的選項之一」，**使用者手動測試已經不再需要它**，直接拿瀏覽器/Postman 打對外網址即可，比寫一支 ABAP 報表更直接。
+
+---
+
+**原始記載（2026-08-02 早先，判斷有誤，保留供對照）**：
+
+`adt-rfc-bridge` 對 `/sap/opu/odata4/...` 與 `/sap/opu/odata/...` 這兩種路徑（OData V4／V2 標準端點）一律回 `404 No application class found for URI: ...`——**跟第 15 節記載的 SICF REST Service 完全同一個錯誤訊息、同一個成因**：OData 服務本質上也是掛在 SICF／ICM HTTP Port 底下的一個節點，跟自訂 REST Service 走的是同一條連線路徑，`adt-rfc-bridge` 只認得自己內部映射的 `/sap/bc/adt/*` 專用路徑，不是通用的 HTTP-to-RFC 轉發器。
+
+這代表：~~即使之後真的解決了 Service Binding Publish 的問題（第 40.5 節），只要使用者當下是透過 SAProuter／dispatcher 連線（不在能連到 SAP Host 內網或 VPN 的環境），瀏覽器/Postman 直接打這個 OData 端點一樣連不到~~——**已證實不成立**，見上方更正。
+
+**已驗證有效的 workaround（沿用 REST 課程 rs07 的做法）**：寫一支 ABAP 報表，用 `cl_http_client=>create_by_url`（或標準demo程式 `SPROX_HTTP_REQUEST`）在 **SAP 系統內部**呼叫這個 OData 服務自己的 URL。RAP 課程 rap04（Service Definition／Binding 與發布流程）出題時，這支自我呼叫的驗證報表**仍值得納入教材**（作為 Claude 端無頭驗證的手段，見上方更正後的定位），並且理論上可以直接用 `programrun` 無頭執行（報表本身只是呼叫 HTTP API 再 `WRITE` 回應內容，不牽涉畫面互動，符合第 37 節「無頭可驗證」的模式）。
+
+### 40.9 ✅ 已解決：Service Binding 一定要用 Eclipse 官方精靈建立，用 ADT REST API 手動 POST 會缺少後端註冊步驟（2026-08-02 使用者實測確認）
+
+- **現象**：`ZRAPT01_SB2`（用第 40.5 節記載的原始 ADT REST API `POST /sap/bc/adt/businessservices/bindings` 手動建立的 OData V2 Service Binding）不管是透過 ADT API 呼叫 `publishjobs`、還是透過 SAP GUI `/IWFND/MAINT_SERVICE` 的 `Add Selected Services`，都得到同一個具體錯誤：`SAP Backend Error Log`（`/IWBEP/ERROR_LOG`）裡的 Error Context 顯示 **`MSGID = SDDIC_ADT_SRVB`、`MSGNO = 011`**，訊息文字「Service Definition is not available」；`SICF` 底下 `/sap/opu/odata/sap` 完全沒有出現對應節點，代表失敗發生在 Gateway/IWBEP 解析 Metadata 這一步，連 ICF Node 都還沒建立。
+- **根本原因（已驗證）**：Eclipse 官方的「New → Service Binding」精靈在建立 Service Binding 時，除了寫入 DDIC Repository 物件本身，背後還會觸發一個**只有精靈流程才會做的後端註冊/模型產生步驟**（把 Service Definition 的 Metadata 編譯登錄進 Gateway 執行期模型快取）。用原始 XML `POST` 手動建立的 Service Binding，即使 DDIC 物件本身完全 Active、Schema 正確，也**缺少這個背景註冊動作**，導致 Gateway 執行期永遠找不到對應的已編譯 Metadata，不管事後怎麼重試 Publish／`/IWFND/MAINT_SERVICE` 都無法補救。
+- **✅ 解法（使用者實測成功）**：改在 **Eclipse ADT** 裡，對著已存在的 Service Definition（`ZRAPT01_SD`）右鍵 → `New` → `Other ABAP Repository Object` → 選 **Service Binding**，精靈跑完之後（本例命名 `ZRAPT01_SB3`，Binding Type = `OData V2 - UI`），直接在編輯器裡點 `Publish`——**一次成功**，`Local Service Endpoint` 狀態變成 `Published`，`Unpublish` 按鈕出現，且用編輯器內建的 `Preview...` 按鈕成功開出 Fiori Elements List Report 畫面（顯示 `No data found` 是預期行為，因為 `ZRAPT01` 這張表從頭到尾沒有寫入過任何測試資料，不是失敗）。
+- **OData V2 技術服務名稱＝ Service Binding 物件名稱，不是 Service Definition 名稱**：Preview 畫面顯示的 `Service URL` 是 `/sap/opu/odata/sap/ZRAPT01_SB3`（對應 Binding 名稱 `ZRAPT01_SB3`），不是 `ZRAPT01_SD`——這點更正了 40.5／`/IWFND/MAINT_SERVICE` 畫面顯示 `Technical Service Name = ZRAPT01_SD` 一度造成的誤解（那個畫面看到的是尚未成功材料化前、Gateway 用 Service Definition 名稱當佔位顯示的搜尋結果，不是最終正式的技術服務名稱）。
+- **結論／教學上的意義**：**RAP 課程 rap04 的 Service Binding 建立步驟，一律要教「Eclipse 精靈手動建立」，不能沿用其他物件類型（Table／CDS View／BDEF／Service Definition）用 ADT REST API workaround 建立的模式**——這是本檔記錄過的所有 GUI-only 案例裡，第一個「表面上物件建立成功（201/Active），但缺少一個完全看不出來、只有精靈才會觸發的隱藏後端步驟，導致下游功能整個失效」的案例，比單純「這個物件型別沒有 ADT API」更隱蔽，值得在教材裡特別強調：**Service Binding 這個物件，Claude 只能負責建立 Service Definition 之前的所有物件並驗證到位，Service Binding 本身務必請使用者在 Eclipse 手動建立＋Publish，不要嘗試用 API workaround 生成。**
+
+### 40.10 `@UI.*` Annotation（Fiori Elements）跟「Classic RAP vs ABAP Cloud RAP」是兩條獨立軸線——這個系統完全支援 `@UI.*`，只是 Metadata Extension（DDLX）語句本身一樣是舊式語法（2026-08-02 查證）
+
+- **背景**：RAP 課程規劃時誤導使用者以為這個系統可能因為是「Classic RAP」而不支援 `@UI.*` Annotation（Fiori Elements 用的 UI 標記，如 `@UI.headerInfo`／`@UI.lineItem`）——這個推論是錯的，已用系統既有標準物件 `C_SETTLMTDOCOPG`（Metadata Extension）驗證推翻。
+- **確認結果**：讀取 `GET /sap/bc/adt/ddic/ddlx/sources/c_settlmtdocopg/source/main` 看到完整、大量的 `@UI.headerInfo`／`@UI.facet`／`@UI.fieldGroup`／`@UI.lineItem`／`@UI.selectionField`／`@UI.dataPoint` 實際使用範例——證實 `@UI.*` 這套 Annotation 詞彙**完全不受 View Entity／`strict` 這條「新舊 RAP 語法」軸線影響**，`@UI.*` 其實比 RAP 本身還早出現（源自更早期的 CDS-based Fiori Elements），這個系統上完全可用。
+- **但 Metadata Extension 語句本身也是舊式語法**：這份標準物件開頭是 `annotate view C_SettlmtDocOPg with { ... }`——用 `annotate view`，不是 View Entity 世代對應的 `annotate entity`。這是「第 40.2 節 CDS View 用 `define root view` 而非 `define root view entity`」同一種模式在 DDLX 物件上的對應版本，屬於同一條「Classic RAP／Classic CDS」語法軸線，跟 `@UI.*` Annotation 本身能不能用是兩回事——**Annotation 詞彙（`@UI.*` 有哪些欄位可以填）不受影響，但外層包裹這些 Annotation 的語句關鍵字（`annotate view` vs `annotate entity`）會受影響**，跟 CDS View／BDEF 的情況一致。
+- **對課程規劃的影響**：本課程範圍不含 UI／Fiori Elements（見 README／rap01 聲明），所以這個發現目前不影響教材內容；但如果之後真的要開一門涵蓋 Metadata Extension／`@UI.*` 的延伸課程，DDLX 的建立要用 `annotate view`（不是 `annotate entity`），跟 rap02 教的 CDS View 語法版本一致，不會有額外的版本落差。
+
+### 40.11 BDEF 的 `etag master <欄位>` 語法在這系統也不支援，正確寫法是 `etag <欄位>`（不帶 `master`）（2026-08-02 實測，rap03）
+
+- **現象**：`ZI_RAP02_TASK` 的 Managed BDEF 寫 `etag master created_at`（官方教材／新式 ABAP Cloud RAP 常見的寫法），啟用直接報 `"authorization | draft | late | { | ~" expected, not "created_at".`——錯誤訊息裡列出的合法後續 token（`authorization`／`draft`／`late`／`{`／`~`）完全沒有 `etag` 這個字，代表這系統的 BDEF 文法根本不認得 `etag master` 這個組合關鍵字。
+- **根本原因／查證方法**：回頭比對本節查證階段已經讀過的系統既有標準 BDEF 原始碼（第 40 節開頭列出的 `SCR_E_DBDEV`／`A_ProductionSupplyArea`），兩者都是寫 **`etag chgdAt`／`etag LastChangeDateTime`——單純 `etag <欄位>`，完全沒有 `master` 這個字**。這代表這系統的 Classic RAP／Classic CDS 世代，`etag` 子句本身就沒有「`master`／`dependent`」這種依附在 Composition 階層（區分根節點自己的 etag vs 子節點沿用父節點 etag）的語法分支，一律是最簡單的 `etag <欄位>` 形式，跟 `strict`／View Entity 屬於同一條「較舊、較精簡文法」的軸線。
+- **修法**：BDEF header 拿掉 `master`，改成 `etag created_at`（放在 `persistent table` 之後、`lock master`之前或之後皆可，這次實測放在 `lock master` 前面正常啟用）。
+- **教訓**：跟 `strict`／View Entity 這兩個已知差異一樣，**遇到 RAP 語法報「預期關鍵字」類型的錯誤時，直接讀錯誤訊息列出的合法後續 token 清單，比死記官方教材寫法更可靠**——這次的錯誤訊息其實已經直接暗示了「這系統的文法不認得 etag 這整個子句要跟 master 連用」，只是需要對照既有標準物件的寫法才能確認正確替代語法是什麼。之後任何 BDEF 新語法元素踩到類似錯誤，優先用這個方法（讀錯誤訊息的合法 token 清單＋比對系統既有標準物件），比憑印象改寫更快找到正確語法。
+
+## 41. ⚠️ 重要：SICF「Test Service」開出的網址是內網主機名稱／Port，Eclipse Service Binding「Preview」開出的才是外網可用的網址——兩者不能混用（2026-08-02 使用者實測發現）
+
+- **現象**：同一套系統，兩個入口點自動產生的測試網址完全不同：
+  - SICF 交易碼裡對某個自訂 Service 節點按右鍵 `Test Service`，瀏覽器自動開啟的網址是 `http://s4d1909fps01.itts.com.tw:50000/sap/bc/<service>?sap-client=130`——**主機名稱是系統的內部真實主機名稱（`s4d1909fps01`），Port 50000，純 HTTP**
+  - Eclipse 裡對一個 Service Binding 按 `Publish` 之後點 `Preview...`，自動開啟的網址是 `https://erpdemo01.itts.com.tw:44300/sap/bc/adt/businessservices/odatav2/feap?feapParams=...`——**主機名稱是對外別名（`erpdemo01`），Port 44300，HTTPS**
+  - 使用者身處外網時，`s4d1909fps01.itts.com.tw:50000` 這組網址**打不通**（甚至連 `sap/bc` 底下其他服務也一樣打不通，即使那個服務本身跟 Test Service 開出來的是同一個），但把主機名稱／Port 換成 `erpdemo01.itts.com.tw:44300` 之後，同一個 `/sap/bc/...` 路徑就**打得通**（實測 `zqm005`／`rs01`／`rs03` 皆確認可通，回應內容正確或至少是應用層級的回應如 `HTTP method GET not supported`，不是網路層級的連線失敗）
+- **根本原因（Basis／網路架構層級，非 ADT／MCP 限制）**：這套系統的外網存取是透過 Reverse Proxy／SAP Web Dispatcher／防火牆 NAT 之類的邊界元件轉送進來的——**外部看到的主機名稱與 Port，跟系統內部 ICM 實際監聽的主機名稱與 Port 完全是兩件事，中間的對應關係是 Basis／網管設定的，不會自動同步**。`erpdemo01.itts.com.tw:44300` 是這套系統對外公開的統一入口（Eclipse ADT 遠端連線本來就需要這個入口才能運作），`s4d1909fps01.itts.com.tw:50000` 是系統自己回報的內部真實主機名稱／Port，只有內網／VPN 環境能連到；外部通常在邊界做 SSL Termination，所以外部一律走 HTTPS（如 `44300`），內部維持單純 HTTP（如 `50000`）。
+- **⚠️ 這代表 SICF 的「Test Service」按鈕自動組出來的網址，在使用者身處外網時大機率不能直接拿來測試**——它只是老實地把系統自己認知的主機名稱／Port 拼進網址，不會幫你換成對外可用的別名。**Eclipse Service Binding 的「Preview」按鈕之所以能開出正確可用的外網網址，是因為 Eclipse 本身連線這套系統時，用的本來就是 `erpdemo01.itts.com.tw:44300` 這個位址（Eclipse 遠端開發的連線設定），所以它產生的所有網址自然而然沿用同一個對外主機名稱**——不是 Eclipse 這個工具本身比較聰明，純粹是連線來源不同。
+- **實務做法**：任何 SICF 服務（不管是自訂 REST Service 還是 OData），只要拿到 SICF「Test Service」自動開出的網址發現連不到，**先嘗試把主機名稱／Port 換成已知可用的外網對外別名（這套系統是 `erpdemo01.itts.com.tw:44300`），保留原本網址裡 `/sap/bc/...` 或 `/sap/opu/odata/...` 那段路徑不變**，再重新測試——這幾乎每次都能解決「明明服務已經建好啟用、卻打不通」的困惑，不需要真的懷疑服務本身有問題。這套系統目前只確認了一個對外別名／Port（`erpdemo01.itts.com.tw:44300`），如果日後要開放其他對外 Port／別名，屬於 Basis／網路團隊的設定範圍，ADT／MCP 這邊完全看不到也管不到，需要的話要直接跟他們提出需求。
+
+## 42. ⚠️⚠️ 已更正（2026-08-02，見第 43／44 節）：「EML 在 `programrun` 會卡住」的原始推測是錯的，真正原因是第 43 節的 Managed Runtime 白名單 Dump
+
+**原始記錄（下方保留供對照）判斷有誤**——當時以為 EML 語句本身有某種 headless 環境相容性問題，跟 `cl_salv_table`／`VIEW_MAINTENANCE_CALL` 同一類。**第 44 節已用 Unmanaged BDEF 的 EML 測試程式（`ZR_RAP03_UMTEST`）在 `programrun` 底下完整成功執行**（沒有卡住、沒有逾時，CREATE／COMMIT ENTITIES／資料庫驗證全部正常回應），證實 **EML 本身完全可以無頭執行**，問題不在 EML 這個語言機制。
+
+真正的原因是第 43 節記載的：**Managed Runtime 在這個系統上被 SAP 標記為「尚未對外釋出」，任何 Managed BDEF 的 CUD 操作執行到底層都會觸發 `MESSAGE ... TYPE 'X'`（Dump 等級）的訊息**——這類致命 Dump 透過 RFC Bridge 傳回時，很可能沒辦法乾淨地轉成一般 HTTP 錯誤回應，而是讓連線卡住、最終逾時／`RFC_CLOSED`。也就是說，`ZR_RAP03_DEMO`（呼又 Managed BDEF `ZI_RAP02_TASK` 的 EML）當初卡住，根本原因不是「EML 語法」，而是「呼叫到了必然會 Dump 的 Managed Runtime」。
+
+**教學上的更正**：EML **可以**用 `programrun` 無頭驗證，前提是背後的 BDEF 是 Managed 且這個系統的 Managed Runtime 沒被鎖住（目前已知被鎖，見第 43 節），**或者 BDEF 是 Unmanaged**（第 44 節證實完全不受這個限制影響）。RAP 課程如果要靠 `programrun` 做無頭驗證，這個系統目前只有 **Unmanaged BDEF 這條路走得通**。
+
+---
+
+**原始記錄（2026-08-02 早先，判斷有誤，保留供對照）**：
+
+- **現象**：為了無頭驗證 rap03 的 Managed BDEF（`ZI_RAP02_TASK`）CRUD 是否真的動得起來，寫了一支 `ZR_RAP03_DEMO` 用 EML（`MODIFY ENTITIES OF zi_rap02_task ENTITY Task CREATE ... COMMIT ENTITIES.`）呼叫 Managed BDEF 的 CREATE／UPDATE／DELETE，語法檢查與啟用都成功，但 `POST /sap/bc/adt/programs/programrun/zr_rap03_demo` 直接回 `502 ADT-RFC bridge error: 6 (rc=6): key=RFC_CLOSED`。**沒有重試**（記取第 38 節教訓：同一物件重試只會反覆打到已經卡死的殭屍 Session），改用第 38 節「建全新最小化物件隔離變因」的方法論，另建一支只含最精簡 EML CREATE 的 `ZR_RAP03_EMLTEST`，結果 `programrun` 直接**逾時（curl exit code 28，20 秒無回應）**，證實問題不是 `ZR_RAP03_DEMO` 這個物件本身卡住，~~是 EML 語句本身在 headless programrun 環境會卡住~~——**已證實不成立，見上方更正**。
+- ~~推測原因：跟第 5／16 節記載的 VIEW_MAINTENANCE_CALL／cl_salv_table 同一類……~~——**已證實不成立，見上方更正**。
+- **殘留物件**：`ZR_RAP03_DEMO`／`ZR_RAP03_EMLTEST` 這兩個 `$TMP` 物件呼叫 `programrun` 會卡住（因為背後是 Managed BDEF），不要再對它們呼叫 `programrun`；`ZR_RAP03_DEMO` 仍可當 rap03 講義的 Managed 語法範例程式（語法正確），只是實際執行驗證要換成 Unmanaged 版本，或請使用者在 SAP GUI 用 SE38（F8）跑（依然會 Dump，但那是預期中的、已經解釋清楚原因的 Dump）。
+
+## 43. ⚠️⚠️ 重大發現：這個系統的 RAP **Managed Runtime**（寫入／CUD）被 SAP 官方標記為「尚未對外釋出」，任何 Managed BDEF 的 CUD 操作一律 Dump（2026-08-02 實測＋SAP Community 佐證，RAP 課程 rap03）
+
+- **現象**：使用者在 SAP GUI 用 SE38（F8）執行 `ZR_RAP03_DEMO`（呼叫 Managed BDEF `ZI_RAP02_TASK` 的 EML CREATE），得到 Runtime Error：
+  ```
+  Category: ABAP programming error
+  Runtime Errors: MESSAGE_TYPE_X_TEXT
+  ABAP Program: CL_CSP_MD_METADATA_FACTORY====CP
+  Application Component: BC-ESI-RAP-CSP
+  ```
+  原始碼摘錄（`LIF_ASSERTER~EXECUTION_ALLOWED` 方法）：
+  ```abap
+  SELECT obj_name FROM tadir
+    WHERE pgmid = 'R3TR' AND object = 'DDLS' AND obj_name = @iv_entity_name AND (
+      devclass LIKE 'SBOI_RAP_CSP_TST%' OR devclass IN
+      ( '/BOBF/RAP_MIGRATION', '/BOBF/RAP_MIG_ADMINISTRATOR' ) )
+    UNION ALL
+  SELECT obj_name FROM tadir
+    JOIN tdevc ON tdevc~devclass = tadir~devclass
+    JOIN df14l ON df14l~fctr_id = tdevc~component AND df14l~as4local = 'A' AND ( df14l~... IN ( 'BC-SRV-NWD-XBR', 'BC-DWB-DIC' ) )
+    WHERE tadir~pgmid = 'R3TR' AND tadir~object = 'DDLS' AND tadir~obj_name = @iv_entity_name
+    INTO TABLE @DATA(lt_obj_name).
+
+  " *** csp isn't released for public usage until now ***
+  IF lt_obj_name IS INITIAL.
+    MESSAGE 'Managed runtime is not released for productive usage (entity: ...)' TYPE 'X'.
+  ENDIF.
+  ```
+  這段邏輯（連程式碼裡都留了開發者自己寫的英文註解「csp isn't released for public usage until now」）會檢查：這個 CDS Entity 所在的套件，是不是在一份**硬編碼白名單**裡（`SBOI_RAP_CSP_TST%` 套件前綴，或 `/BOBF/RAP_MIGRATION`／`/BOBF/RAP_MIG_ADMINISTRATOR`，或特定 Application Component `BC-SRV-NWD-XBR`／`BC-DWB-DIC`）——不在清單裡（例如 `$TMP` 或任何自訂客戶套件）就用 `MESSAGE ... TYPE 'X'`（致命訊息，直接 Dump）擋下來。
+- **佐證**：用 `mcp__sap-docs__sap_community_search` 查到 SAP Community 一篇 **2019-11-18** 的貼文，一字不差回報同樣的錯誤訊息「Managed runtime is not released for productive usage」，情境也是「Fiori app with ABAP RESTful programming model, everything works except CUD operations」。這個時間點與這套系統的 Eclipse Project 顯示的 **`S4D_1909`**（S/4HANA 1909，2019 年 9 月發行）高度吻合——**這代表 Managed RAP 的通用「寫入」執行期，在 1909 這個版本的初期（甚至可能延續到目前這套系統的 Support Package 等級）仍處於 SAP 內部白名單管控階段，尚未對客戶自訂套件開放**。
+- **範圍**：這個檢查只卡在**真正執行到寫入邏輯**的時候（CREATE/UPDATE/DELETE），**純讀取不受影響**——這解釋了為什麼第 40.9 節 Service Binding Publish 之後的 Fiori Elements Preview 能正常顯示「No data found」（那只是 SELECT，沒有觸發這段白名單檢查）。
+- **教學上的影響**：這系統上**任何 Managed BDEF 的 CUD 操作都無法真正執行**（不管是透過 EML、OData、Fiori Elements Create 按鈕，走的都是同一套底層 Managed Runtime），只能停留在「語法正確、成功啟用」層級，沒辦法端對端驗證。RAP 課程如果要教「真的能寫入資料」的完整流程，這個系統目前只能靠 **Unmanaged**（見第 44 節，已證實不受這個限制影響）。
+- **待確認**：需要使用者／Basis 查證這套系統目前的 `SAP_BASIS`／`S4CORE` Support Package 等級，並視需要向 SAP Support Portal 查詢對應的 OSS Note（搜尋關鍵字 `Managed runtime is not released for productive usage` 或 `CL_CSP_MD_METADATA_FACTORY`）——Claude 這邊沒有 S-user 帳號，查不到官方 Note 編號與解除限制所需的確切 SP／Note。
+
+## 44. ✅ Unmanaged BDEF 完全不受第 43 節的白名單限制影響，已端對端驗證成功（含 `programrun` 無頭驗證）（2026-08-02 實測，RAP 課程 rap03）
+
+- **背景**：第 43 節發現後，用最小化隔離物件驗證「Unmanaged 能不能繞過這個限制」的假說——依據是這系統既有標準物件 `C_SalesOrderManage`（第 40 節查證階段就已確認是 Unmanaged）本身是正常運作中的標準 Fiori 銷售訂單功能，如果 Unmanaged 也被同一個白名單擋住，這個標準功能不可能正常運作，這已經是很強的間接證據。
+- **驗證物件**（`$TMP`，全新獨立測試，不影響 rap02/rap03 已發布的 Managed 教材物件）：
+  - Table `ZRAP03_UMTEST`（`key client : mandt; key id : abap.char(10); descr : abap.char(40);`）
+  - CDS Root View `ZI_RAP03_UMTEST`（跟 Managed 版本同樣的必要 annotation：`preserveKey`／`compositionRoot`）
+  - BDEF：`implementation unmanaged in class zbp_i_rap03_um4 unique; define behavior for ZI_RAP03_UMTEST alias Test lock master { create; }`——**注意 Unmanaged BDEF 不寫 `persistent table` 子句**（跟 Managed 不同，因為資料庫存取完全由實作類別自己處理，不是框架生成）
+  - 實作類別 `ZBP_I_RAP03_UM4`：Global 類別本體只是空殼＋`FOR BEHAVIOR OF <view>` 子句，真正的 Handler 邏輯寫在 **Local Types Include**（`/sap/bc/adt/oo/classes/<class>/includes/implementations`，跟第 7 節 Test Class Include 走同一套 PUT 路徑，只是換成 `implementations` 這個 include 名稱），內容仿照系統既有標準物件 `CL_SD_BEHV_SALESORDERMANAGE`（`C_SalesOrderManage` 的實作類別）的寫法：
+    ```abap
+    CLASS lcl_handler DEFINITION INHERITING FROM cl_abap_behavior_handler.
+      PRIVATE SECTION.
+        METHODS lock FOR LOCK IMPORTING it_lock FOR LOCK test.
+        METHODS create FOR MODIFY IMPORTING it_create FOR CREATE test.
+        METHODS read FOR READ IMPORTING it_read FOR READ test RESULT et_result.
+    ENDCLASS.
+    CLASS lcl_handler IMPLEMENTATION.
+      METHOD lock.
+      ENDMETHOD.
+      METHOD create.
+        LOOP AT it_create INTO DATA(ls_create).
+          INSERT zrap03_umtest FROM @( VALUE #( client = sy-mandt id = ls_create-id descr = ls_create-descr ) ).
+        ENDLOOP.
+      ENDMETHOD.
+      METHOD read.
+        LOOP AT it_read INTO DATA(ls_key).
+          SELECT SINGLE id, descr FROM zrap03_umtest WHERE id = @ls_key-id INTO @DATA(ls_data).
+          IF sy-subrc = 0.
+            APPEND VALUE #( %key = ls_key-%key id = ls_data-id descr = ls_data-descr ) TO et_result.
+          ENDIF.
+        ENDLOOP.
+      ENDMETHOD.
+    ENDCLASS.
+    ```
+  - 啟用時出現一個**警告（非錯誤）**：`The operation "SAVER" for entity "..." is not implemented`——代表沒有實作額外的 Saver 相關 Hook（`check_before_save`／`finalize`／`save`／`cleanup`），但不影響本次最小化測試的啟用與執行，正式課程若要教完整生命週期才需要處理。
+  - EML 測試程式 `ZR_RAP03_UMTEST`：`MODIFY ENTITIES OF zi_rap03_umtest ENTITY Test CREATE FIELDS ( id descr ) WITH VALUE #( ( %cid = 'C1' id = 'UM0001' descr = 'Unmanaged Test' ) ) FAILED ... REPORTED ... . COMMIT ENTITIES.`，接著用一般 `SELECT` 讀回資料庫驗證。
+- **✅ 結果（`programrun` 無頭執行，非 SAP GUI）**：
+  ```
+  before EML
+  after EML, failed is initial: X
+  after commit entities
+  DB check OK, descr = Unmanaged Test
+  ```
+  **完全成功，沒有卡住、沒有逾時、沒有 Dump**，資料真的寫進資料庫。
+- **踩到的兩個小語法坑**（過程記錄，供之後參考）：
+  1. Local Implementation Include 裡 `VALUE #( mandt = ... )` 寫錯——**表格的 Client 欄位如果自己取名叫 `client`（不是內建型別 `mandt` 這個字面欄位名），VALUE 建構子就要用 `client =`，不是 `mandt =`**，這只是單純的欄位名稱對應錯誤，不是 RAP 語法限制。
+  2. READ 方法結果表的技術鍵欄位是 **`%key`**，不是 `%tky`（`%tky` 是另一種情境用的名稱，這系統報錯訊息裡直接建議了 `%key` 這個正確名稱）。
+- **重大結論**：
+  1. **第 42 節「EML 無法無頭驗證」的推測正式推翻**——EML 本身完全支援 `programrun` 無頭執行，先前的卡住是第 43 節的 Managed Runtime Dump 造成的，不是 EML 的問題。
+  2. **這系統要教「完整可執行的 RAP CRUD」，目前只有 Unmanaged 這條路走得通**——Managed BDEF 依然可以教語法、可以啟用，但沒辦法讓學生看到真正的端對端執行結果（第 43 節的白名單會擋住）。
+  3. **Unmanaged 實作類別的 Local Implementation Include 可以透過 ADT 手動 curl 建立與寫入**（跟第 7 節 Test Class Include 同一套機制，只是 include 名稱換成 `implementations`），不需要依賴 Eclipse 精靈才能建立——這點跟 Service Binding（第 40.9 節，精靈是必要條件）不同，Unmanaged 實作類別是可以完全交給 Claude 自動化建立的。

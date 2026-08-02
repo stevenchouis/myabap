@@ -220,7 +220,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
 1. SICF 交易碼，在 `zrest_training` node 上右鍵 → **New Sub-Element**，Service Name 填 `rs07`
 2. Handler List 掛 `ZCL_RS07_APP`
 3. Activate Service
-4. 用 `SPROX_HTTP_REQUEST` 測試（PUT 一樣需要自訂 Request Body，瀏覽器網址列做不到）。**URL 一律填完整網址**（`http://<主機>:<port>/sap/bc/zrest_training/rs07/...?sap-client=130`）：
+4. 用 `SPROX_HTTP_REQUEST` 測試（PUT 一樣需要自訂 Request Body，瀏覽器網址列做不到）。**URL 一律填完整網址**（`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs07/...?sap-client=130`）：
 
    - **GET 現況**（更新前）：`.../rs07/flights/LH/400/20190104`，HTTP Method **GET**，預期看到 `price` 是 `666.00`、`currency` 是 `EUR`
    - **PUT 成功更新（`200`）**：同一個 URL，HTTP Method **PUT**，Req. Body：

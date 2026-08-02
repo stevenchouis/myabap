@@ -145,13 +145,13 @@ ADT 端物件已由課程準備好（`$TMP`）：
 1. SICF 交易碼，在 `zrest_training` node 上右鍵 → **New Sub-Element**，Service Name 填 `rs05`
 2. Handler List 掛 `ZCL_RS05_APP`
 3. Activate Service
-4. 用 `SPROX_HTTP_REQUEST`（或連得到內網時用瀏覽器）測幾種組合：**URL 要填完整網址（含 `http://` 與主機:port），不能只填 `/sap/bc/...` 相對路徑**——`SPROX_HTTP_REQUEST` 雖然是在 Application Server 上跑的 ABAP 程式、位於內網，但它執行的是一支真正的 HTTP request（呼叫 ICM 的 HTTP Port），不是程式內部呼叫，沒給 host:port 會找不到這個 API endpoint
-   - 不帶任何 Query Parameter：`http://<主機>:<port>/sap/bc/zrest_training/rs05/flights?sap-client=130`（跟 rs03/rs04 的集合查詢結果一樣，`UP TO 20 ROWS` 截斷後 20 筆）
-   - 單一篩選：`http://<主機>:<port>/sap/bc/zrest_training/rs05/flights?carrid=AA&sap-client=130`（`AA` 資料庫實際符合 26 筆，但受 `UP TO 20 ROWS` 上限截斷，只會回傳前 20 筆）
-   - 多條件組合（等值＋等值）：`http://<主機>:<port>/sap/bc/zrest_training/rs05/flights?carrid=AA&connid=17&sap-client=130`（鎖定同一條航線，剛好 13 筆，不受 20 筆上限影響，全部回傳）
-   - 多條件組合（等值＋範圍）：`http://<主機>:<port>/sap/bc/zrest_training/rs05/flights?carrid=AA&fromdate=20190101&sap-client=130`（同一家航空公司從 2019-01-01 起的所有航班，剛好 20 筆，橫跨不同 `connid`、不同 `fldate`，這是範圍篩選正確的行為，不是截斷造成的巧合——資料庫真實比對到的就是剛好 20 筆）
-   - 刻意測一個不存在的航空公司代碼，確認回應是 `404`：`http://<主機>:<port>/sap/bc/zrest_training/rs05/flights?carrid=ZZ&sap-client=130`
-   - 刻意測一個合法但篩不出資料的組合，確認回應是 `200` + `[]`：`http://<主機>:<port>/sap/bc/zrest_training/rs05/flights?carrid=AA&fromdate=20991231&sap-client=130`
+4. 用瀏覽器（外網也可以，用系統對外的正確主機名稱＋Port，不要用內網固定 IP，見 `.claude/rules/sap-adt-mcp.md` 第 15 節 2026-08-02 更正）或 `SPROX_HTTP_REQUEST` 測幾種組合：**URL 要填完整網址（含 `http://`/`https://` 與主機:port），不能只填 `/sap/bc/...` 相對路徑**——`SPROX_HTTP_REQUEST` 雖然是在 Application Server 上跑的 ABAP 程式，但它執行的是一支真正的 HTTP request（呼叫 ICM 的 HTTP Port），不是程式內部呼叫，沒給 host:port 會找不到這個 API endpoint
+   - 不帶任何 Query Parameter：`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs05/flights?sap-client=130`（跟 rs03/rs04 的集合查詢結果一樣，`UP TO 20 ROWS` 截斷後 20 筆）
+   - 單一篩選：`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs05/flights?carrid=AA&sap-client=130`（`AA` 資料庫實際符合 26 筆，但受 `UP TO 20 ROWS` 上限截斷，只會回傳前 20 筆）
+   - 多條件組合（等值＋等值）：`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs05/flights?carrid=AA&connid=17&sap-client=130`（鎖定同一條航線，剛好 13 筆，不受 20 筆上限影響，全部回傳）
+   - 多條件組合（等值＋範圍）：`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs05/flights?carrid=AA&fromdate=20190101&sap-client=130`（同一家航空公司從 2019-01-01 起的所有航班，剛好 20 筆，橫跨不同 `connid`、不同 `fldate`，這是範圍篩選正確的行為，不是截斷造成的巧合——資料庫真實比對到的就是剛好 20 筆）
+   - 刻意測一個不存在的航空公司代碼，確認回應是 `404`：`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs05/flights?carrid=ZZ&sap-client=130`
+   - 刻意測一個合法但篩不出資料的組合，確認回應是 `200` + `[]`：`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs05/flights?carrid=AA&fromdate=20991231&sap-client=130`
 
 ## 預期輸出（範例，皆已對 `SFLIGHT` 實際查詢驗證過）
 

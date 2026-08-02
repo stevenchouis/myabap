@@ -65,9 +65,9 @@ ADT 端物件已由課程準備好（`$TMP`）：
 2. Handler List 掛 `ZCL_RS03_APP`
 3. Activate Service
 4. 測試路徑：
-   - `http://<主機>:<port>/sap/bc/zrest_training/rs03/flights?sap-client=130`
+   - `https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs03/flights?sap-client=130`
 
-如果所在網路連不到 SAP Host 內網，改用 SAP GUI 內的標準程式 `SPROX_HTTP_REQUEST` 測試。**注意 URL 一樣要填完整網址（含 `http://` 與主機:port），不能只填 `/sap/bc/...` 相對路徑**——`SPROX_HTTP_REQUEST` 雖然是在 Application Server 上跑的 ABAP 程式、位於內網，但它執行的是一支真正的 HTTP request（呼叫 ICM 的 HTTP Port），不是程式內部呼叫，沒給 host:port 會找不到這個 API endpoint（跟上面瀏覽器測試用的是同一組完整 URL）。
+**⚠️ 2026-08-02 更正**：原本以為連不到 SAP Host 內網時才需要改用 `SPROX_HTTP_REQUEST`——已實測推翻，只要用系統對外的正確主機名稱＋Port（不是內網固定 IP），瀏覽器/Postman 在外網一樣直接連得到，不需要等內網／VPN。`SPROX_HTTP_REQUEST` 依然是可用的替代測試方式（例如懶得開瀏覽器、或想在 ABAP 端直接看 Response），但不是「外網限定才需要」的 workaround。**注意 URL 一樣要填完整網址（含 `http://` 或 `https://` 與主機:port），不能只填 `/sap/bc/...` 相對路徑**——`SPROX_HTTP_REQUEST` 雖然是在 Application Server 上跑的 ABAP 程式，但它執行的是一支真正的 HTTP request（呼叫 ICM 的 HTTP Port），不是程式內部呼叫，沒給 host:port 會找不到這個 API endpoint（跟瀏覽器測試用的是同一組完整 URL）。
 
 ## 預期輸出（範例）
 

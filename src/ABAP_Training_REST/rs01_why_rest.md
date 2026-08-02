@@ -23,6 +23,8 @@ REST（Representational State Transfer）不是一個特定技術，而是一種
 
 這三層的分工讓你完全不用自己處理「怎麼解析 HTTP 請求」「例外要轉成什麼狀態碼」這些底層問題——`CL_REST_HTTP_HANDLER`/`CL_REST_RESOURCE` 已經幫你做好了，這也是為什麼這門課從第一題就可以直接寫業務邏輯，不用自己刻一個 HTTP Server。
 
+**這門課的 SICF 路徑跟 `/sap/bc/` 這個命名空間的定位**：本課程每個 Service 的網址都是 `/sap/bc/zrest_training/rsNN/...`——`/sap/bc/` 是 ICF（Internet Communication Framework）底下**通用、完全開放給開發者自由命名**的空間，BSP 網頁、自訂 REST/HTTP Handler（`CL_REST_HTTP_HANDLER`／`IF_HTTP_EXTENSION`）都掛在這裡，`zrest_training`、`rs01` 這些節點名稱都是你自己在 SICF 手動打的，SAP 完全不干涉這段路徑要怎麼組織。這點在之後如果接觸到 RAP／OData（`src/ABAP_Training_RAP/`）會形成明顯對比：OData Service 走的是 `/sap/opu/odata/`（V2）／`/sap/opu/odata4/`（V4）這個**框架保留、自動產生**的命名空間，路徑結構是固定公式、不是開發者手動掛出來的，這是因為 OData 服務需要讓 Fiori Launchpad、Service Catalog 這類工具用統一規則去發現/呼叫，跟 REST 課程「開發者自己管自己的路徑」是完全不同的設計考量。
+
 ## 學習目標
 
 - 說得出 HTTP 動詞的語意（GET 查詢／POST 建立／PUT 整筆更新／DELETE 刪除）與「冪等性」是什麼意思
@@ -66,9 +68,13 @@ REST（Representational State Transfer）不是一個特定技術，而是一種
 5. 在 `zrest_training` node 上按右鍵 → **New Sub-Element**，Service Name 填 `rs01`，Description 填「REST 練習 1」，確定
 6. 開啟 `rs01` node，切到 **Handler List** 頁籤，新增一筆 Handler Class：`ZCL_RS01_APP`，儲存
 7. 若圖示是灰色（未啟用），在 `rs01` node 上按右鍵 → **Activate Service**
-8. 測試：在 `rs01` node 上按右鍵 → **Test Service**（會開瀏覽器），或直接連 `http://<主機>:<port>/sap/bc/zrest_training/rs01/hello?sap-client=130`
+8. 測試：在 `rs01` node 上按右鍵 → **Test Service**（會開瀏覽器），或直接連 `https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs01/hello?sap-client=130`
 9. 瀏覽器可能會跳出 Basic Auth 帳密框，輸入你的 SAP User/Password
 10. 預期看到純文字回應，類似：`Hello REST! 現在伺服器時間是 14:32:07`
+
+**⚠️ 珍貴經驗（2026-08-02 使用者實測發現）：SICF「Test Service」按鈕自動開出來的網址，如果你人在外網，很可能打不通**——這個按鈕只是老實地把系統自己認知的**內部真實主機名稱**拼進網址（例如 `http://s4d1909fps01.itts.com.tw:50000/...`），這串主機名稱／Port 只有內網／VPN 環境連得到，外網通常沒有直接開放。這套系統對外公開的正確位址是 `erpdemo01.itts.com.tw:44300`（HTTPS）——外部存取實際上是透過 Reverse Proxy／SAP Web Dispatcher 之類的邊界元件轉送進來的，**外部看到的主機名稱／Port 跟系統內部 ICM 實際監聽的完全是兩回事，中間的對應關係是 Basis／網管設定的，不會自動同步**，外部通常在邊界做 SSL Termination（所以外部走 HTTPS，內部維持單純 HTTP）。
+
+**遇到「明明服務已經建好啟用、卻打不通」時，不要急著懷疑服務本身有問題**——先確認瀏覽器網址列裡的主機名稱是不是 Test Service 自動帶出來的那個內部名稱，把它換成已知可用的外網對外別名（這套系統是 `erpdemo01.itts.com.tw:44300`），路徑部分（`/sap/bc/zrest_training/rs01/hello` 這一段）維持不變，通常就能解決。這個技巧之後每一題都用得到，SICF 掛好、Activate 之後，測試一律用完整外網網址，不要依賴 Test Service 按鈕自動開出來的內網版本。
 
 ## 預期輸出（範例）
 

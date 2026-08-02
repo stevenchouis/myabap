@@ -87,7 +87,7 @@ ENDCLASS.
 
 - **`Access-Control-Allow-Origin` 回填的值必須是「比對白名單後、原封不動的 `lv_origin`」，不能圖方便寫死 `*`**：`*` 代表「任何來源都允許」，一來不安全（等於沒做白名單管控），二來瀏覽器規定 `*` 不能跟需要帶 Cookie/認證資訊的請求（`credentials: 'include'`）並用——只要前端 fetch 有帶 `credentials`，伺服器就一定要回填「精確比對到的來源」而不是 `*`，這也是上面範例先查白名單、再回填 `lv_origin` 本身的原因
 - **這段程式碼放的位置是 `IF_HTTP_EXTENSION~HANDLE_REQUEST`，不是 `IF_REST_APPLICATION~GET_ROOT_HANDLER`**——`GET_ROOT_HANDLER` 只負責回傳 router，不會被呼叫在「連 CSRF/路由都還沒開始跑」的最外層時間點；`HANDLE_REQUEST` 才是整個 `CL_REST_HTTP_HANDLER` 框架的入口，這也是 rs01 團隊實務備註提過「`GET_ROOT_HANDLER` 是唯一要覆寫的方法」在這個延伸情境下的例外
-- **這門課用的測試工具測不出 CORS 問題**：`SPROX_HTTP_REQUEST`、curl、Postman 都不是瀏覽器，不會執行同源政策檢查，就算沒加任何 CORS header 它們一樣能正常呼叫、正常拿到回應內容——CORS 只有真正的瀏覽器（或瀏覽器裡跑的 JS）才會擋。想驗證伺服器有沒有回對 header，可以用 `curl -i -H "Origin: https://frontend.example.com" http://<主機>:<port>/sap/bc/zrest_training/rs02/carriers` 看 Response Header 裡有沒有 `Access-Control-Allow-Origin`，但這只能驗證「伺服器行為對不對」，驗證不了「瀏覽器真的會放行」——真要驗證後者，得有一支部署在不同來源的網頁實際用 `fetch()` 呼叫
+- **這門課用的測試工具測不出 CORS 問題**：`SPROX_HTTP_REQUEST`、curl、Postman 都不是瀏覽器，不會執行同源政策檢查，就算沒加任何 CORS header 它們一樣能正常呼叫、正常拿到回應內容——CORS 只有真正的瀏覽器（或瀏覽器裡跑的 JS）才會擋。想驗證伺服器有沒有回對 header，可以用 `curl -i -H "Origin: https://frontend.example.com" https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs02/carriers` 看 Response Header 裡有沒有 `Access-Control-Allow-Origin`，但這只能驗證「伺服器行為對不對」，驗證不了「瀏覽器真的會放行」——真要驗證後者，得有一支部署在不同來源的網頁實際用 `fetch()` 呼叫
 
 ## 事前準備
 
@@ -117,8 +117,8 @@ ADT 端物件已由課程準備好（`$TMP`）：
 2. Handler List 掛 `ZCL_RS02_APP`（不是 `ZCL_RS01_APP`）
 3. Activate Service
 4. 測試兩個路徑：
-   - `http://<主機>:<port>/sap/bc/zrest_training/rs02/hello?sap-client=130`
-   - `http://<主機>:<port>/sap/bc/zrest_training/rs02/carriers?sap-client=130`
+   - `https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs02/hello?sap-client=130`
+   - `https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs02/carriers?sap-client=130`
 
 ## 預期輸出（範例）
 

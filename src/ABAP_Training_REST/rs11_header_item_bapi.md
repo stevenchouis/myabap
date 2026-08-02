@@ -159,7 +159,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
 
    **第一步，先用 `testrun=true` 預覽**（不會真的建立訂單）：
    ```
-   POST http://<主機>:<port>/sap/bc/zrest_training/rs11/salesorders?testrun=true&sap-client=130
+   POST https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs11/salesorders?testrun=true&sap-client=130
    ```
    ```json
    {
@@ -176,7 +176,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
 
    **第二步，拿掉 `testrun`，正式建立**：
    ```
-   POST http://<主機>:<port>/sap/bc/zrest_training/rs11/salesorders?sap-client=130
+   POST https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs11/salesorders?sap-client=130
    ```
    （body 同上）
    - 確認回應是 `201`，`salesDocument` 有值，`testrun:false`

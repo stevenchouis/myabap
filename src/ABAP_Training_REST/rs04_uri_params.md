@@ -80,9 +80,9 @@ ADT 端物件已由課程準備好（`$TMP`）：
 1. SICF 交易碼，在 `zrest_training` node 上右鍵 → **New Sub-Element**，Service Name 填 `rs04`
 2. Handler List 掛 `ZCL_RS04_APP`
 3. Activate Service
-4. 用 `SPROX_HTTP_REQUEST`（或連得到內網時用瀏覽器）測兩種路徑：**URL 要填完整網址（含 `http://` 與主機:port），不能只填 `/sap/bc/...` 相對路徑**——`SPROX_HTTP_REQUEST` 雖然是在 Application Server 上跑的 ABAP 程式、位於內網，但它執行的是一支真正的 HTTP request（呼叫 ICM 的 HTTP Port），不是程式內部呼叫，沒給 host:port 會找不到這個 API endpoint
-   - 集合：`http://<主機>:<port>/sap/bc/zrest_training/rs04/flights?sap-client=130`
-   - 單筆（先從集合結果挑一筆真實存在的 `carrid`/`connid`/`fldate`，`connid` 用 JSON 給的數字即可、`fldate` 記得去掉短橫線）：`http://<主機>:<port>/sap/bc/zrest_training/rs04/flights/AA/17/20260115?sap-client=130`
+4. 用瀏覽器（外網也可以，用系統對外的正確主機名稱＋Port，不要用內網固定 IP，見 `.claude/rules/sap-adt-mcp.md` 第 15 節 2026-08-02 更正）或 `SPROX_HTTP_REQUEST` 測兩種路徑：**URL 要填完整網址（含 `http://`/`https://` 與主機:port），不能只填 `/sap/bc/...` 相對路徑**——`SPROX_HTTP_REQUEST` 雖然是在 Application Server 上跑的 ABAP 程式，但它執行的是一支真正的 HTTP request（呼叫 ICM 的 HTTP Port），不是程式內部呼叫，沒給 host:port 會找不到這個 API endpoint
+   - 集合：`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs04/flights?sap-client=130`
+   - 單筆（先從集合結果挑一筆真實存在的 `carrid`/`connid`/`fldate`，`connid` 用 JSON 給的數字即可、`fldate` 記得去掉短橫線）：`https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs04/flights/AA/17/20260115?sap-client=130`
    - 刻意測一個不存在的組合（例如 `fldate` 亂填），確認回應是 `404`
 
 ## 預期輸出（範例）

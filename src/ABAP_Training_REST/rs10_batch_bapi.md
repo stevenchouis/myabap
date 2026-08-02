@@ -146,7 +146,7 @@ ADT 端物件已由課程準備好（`$TMP`）：
 1. SICF 交易碼，在 `zrest_training` node 上右鍵 → **New Sub-Element**，Service Name 填 `rs10`
 2. Handler List 掛 `ZCL_RS10_APP`
 3. Activate Service
-4. 用 `SPROX_HTTP_REQUEST` 測試（**URL 一律填完整網址**）：`POST http://<主機>:<port>/sap/bc/zrest_training/rs10/bookings/batch?sap-client=130`，Req. Body（混合一筆會成功、一筆會失敗的示範，客戶 id 先用 SE16 查一筆 `SCUSTOM` 真實存在的 `ID`）：
+4. 用 `SPROX_HTTP_REQUEST` 測試（**URL 一律填完整網址**）：`POST https://erpdemo01.itts.com.tw:44300/sap/bc/zrest_training/rs10/bookings/batch?sap-client=130`，Req. Body（混合一筆會成功、一筆會失敗的示範，客戶 id 先用 SE16 查一筆 `SCUSTOM` 真實存在的 `ID`）：
    ```json
    [
      {"carrid":"LH","connid":400,"fldate":"20270101","customid":"00000001","class":"Y","passname":"Mickey Mouse","counter":"00000001"},

@@ -16,7 +16,7 @@ OOP 課程（`src/ABAP_Training_OOP/`，op01–op13）的續篇。課綱草案�
 - 答案物件命名：`ZCL_RSnn_*`（Application / Resource / Service 類別）/ `ZCX_RSnn_*`（例外類別），套件 `$TMP`
 - 資料模型：沿用 SCARR/SFLIGHT/SBOOK 航班訓練模型，與 OOP 課程一致，不額外建 DDIC 表
 - **SICF 節點掛載無 ADT API**（跟 T-code、Search Help 一樣是 GUI-only，見 `.claude/rules/sap-adt-mcp.md` 第 9/12 節），每題若要在瀏覽器/Postman 實測，SICF 手動掛載步驟寫在題目 md 裡，由學員（你）在 SAP GUI 操作；Claude 負責 Handler/Resource/Service 類別的程式碼與 ADT 端啟用
-- **`SPROX_HTTP_REQUEST` 測試一律要填完整網址（`http://<主機>:<port>/sap/bc/...`），不能只填 `/sap/bc/...` 相對路徑**：這支程式雖然是在 Application Server 上跑、位於內網，但執行的是一支真正發出去的 HTTP request（呼叫 ICM 的 HTTP Port），不是程式內部呼叫，缺 host:port 會找不到 API endpoint；每題 md 的 SICF 測試步驟都要用 `http://<主機>:<port>/...` 這種完整格式，不要只寫路徑（2026-07-12 曾在 rs04/rs05 漏寫，已修正）
+- **`SPROX_HTTP_REQUEST` 測試一律要填完整網址（`https://erpdemo01.itts.com.tw:44300/sap/bc/...`），不能只填 `/sap/bc/...` 相對路徑**：這支程式雖然是在 Application Server 上跑、位於內網，但執行的是一支真正發出去的 HTTP request（呼叫 ICM 的 HTTP Port），不是程式內部呼叫，缺 host:port 會找不到 API endpoint；每題 md 的 SICF 測試步驟都要用 `https://erpdemo01.itts.com.tw:44300/...` 這種完整格式，不要只寫路徑（2026-07-12 曾在 rs04/rs05 漏寫，已修正）
 
 ## 課綱（草案，待逐題出題與驗收）
 
