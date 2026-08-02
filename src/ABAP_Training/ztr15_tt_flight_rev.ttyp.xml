@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 唯讀快照：DDIC Table Type 沒有 source-based 原始碼（見 .claude/rules/sap-adt-mcp.md 第 14 節），
+     這裡只保留有意義的 metadata，省略 API 回應裡的靜態列舉值清單（valueHelps）。 -->
+<ttyp:tableType xmlns:ttyp="http://www.sap.com/dictionary/tabletype" xmlns:adtcore="http://www.sap.com/adt/core"
+  adtcore:name="ZTR15_TT_FLIGHT_REV"
+  adtcore:type="TTYP/DA"
+  adtcore:description="TR15 Part4: table type of flight revenue"
+  adtcore:version="active">
+  <adtcore:packageRef adtcore:name="$TMP"/>
+  <ttyp:rowType>
+    <ttyp:typeKind>dictionaryType</ttyp:typeKind>
+    <ttyp:typeName>ZTR15_FLIGHT_REV</ttyp:typeName>
+    <ttyp:builtInType>
+      <ttyp:dataType>STRU</ttyp:dataType>
+      <ttyp:length>000000</ttyp:length>
+      <ttyp:decimals>000000</ttyp:decimals>
+    </ttyp:builtInType>
+    <ttyp:rangeType/>
+  </ttyp:rowType>
+  <ttyp:accessType>standard</ttyp:accessType>
+  <ttyp:primaryKey>
+    <ttyp:definition>standard</ttyp:definition>
+    <ttyp:kind>nonUnique</ttyp:kind>
+  </ttyp:primaryKey>
+</ttyp:tableType>

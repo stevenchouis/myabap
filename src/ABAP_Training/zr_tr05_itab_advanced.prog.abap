@@ -73,3 +73,54 @@ START-OF-SELECTION.
     WRITE: / sy-tabix, gs_student-id, gs_student-name,
              gs_student-score, gs_student-grade.
   ENDLOOP.
+
+*----------------------------------------------------------------------*
+* Part 6：Deep Structure 練習
+*   EXAMS 欄位本身是一整張表（tt_exam）——結構裡包一整張表，1 對多，
+*   不是講義 3 教的「結構包結構」（1 對 1）。詳見講義 5 第 9 節。
+*----------------------------------------------------------------------*
+  TYPES: BEGIN OF ty_exam,
+           exam_no TYPE i,
+           score   TYPE i,
+         END OF ty_exam.
+  TYPES tt_exam TYPE STANDARD TABLE OF ty_exam WITH NON-UNIQUE KEY exam_no.
+
+  TYPES: BEGIN OF ty_student_deep,       " ← Deep Structure：EXAMS 欄位是一整張表
+           id        TYPE c LENGTH 5,
+           name      TYPE string,
+           exams     TYPE tt_exam,
+           avg_score TYPE p LENGTH 4 DECIMALS 1,
+         END OF ty_student_deep.
+
+  DATA: gt_students_deep TYPE STANDARD TABLE OF ty_student_deep WITH NON-UNIQUE KEY id,
+        gs_student_deep  TYPE ty_student_deep,
+        gv_total         TYPE i.
+
+  CLEAR gs_student_deep.
+  gs_student_deep-id   = 'S0005'.
+  gs_student_deep-name = '林小華'.
+  APPEND VALUE #( exam_no = 1 score = 78 ) TO gs_student_deep-exams.
+  APPEND VALUE #( exam_no = 2 score = 85 ) TO gs_student_deep-exams.
+  APPEND VALUE #( exam_no = 3 score = 90 ) TO gs_student_deep-exams.
+  APPEND gs_student_deep TO gt_students_deep.
+
+  CLEAR gs_student_deep.
+  gs_student_deep-id   = 'S0006'.
+  gs_student_deep-name = '黃小芳'.
+  APPEND VALUE #( exam_no = 1 score = 60 ) TO gs_student_deep-exams.
+  APPEND VALUE #( exam_no = 2 score = 72 ) TO gs_student_deep-exams.
+  APPEND VALUE #( exam_no = 3 score = 55 ) TO gs_student_deep-exams.
+  APPEND gs_student_deep TO gt_students_deep.
+
+  WRITE / '=== Deep Structure：每位學生的小考成績與平均 ==='.
+  LOOP AT gt_students_deep INTO gs_student_deep.
+    gv_total = 0.
+    LOOP AT gs_student_deep-exams INTO DATA(gs_exam).      " 內層 LOOP：巢狀表
+      WRITE: / gs_student_deep-name, '第', gs_exam-exam_no, '次小考：', gs_exam-score.
+      gv_total = gv_total + gs_exam-score.
+    ENDLOOP.
+    gs_student_deep-avg_score = gv_total / lines( gs_student_deep-exams ).
+    MODIFY gt_students_deep FROM gs_student_deep TRANSPORTING avg_score
+      WHERE id = gs_student_deep-id.
+    WRITE: / gs_student_deep-name, '平均：', gs_student_deep-avg_score.
+  ENDLOOP.

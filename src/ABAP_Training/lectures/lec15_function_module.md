@@ -57,10 +57,25 @@ ENDFUNCTION.
 | IMPORTING | 呼叫端 → FM（輸入） | `iv_` / `is_` / `it_` |
 | EXPORTING | FM → 呼叫端（輸出） | `ev_` / `es_` / `et_` |
 | CHANGING | 雙向 | `cv_` / `cs_` / `ct_` |
-| TABLES | 內表（舊式，維護會遇到；新介面用 IMPORTING/EXPORTING 傳表格型別） | `t_` |
+| TABLES | 內表（**官方標記 obsolete**，維護舊 FM 會遇到；新介面用 CHANGING 或 IMPORTING/EXPORTING 傳表格型別，原因見下方 3.1 節） | `t_` |
 | EXCEPTIONS | 具名的錯誤情況，用 `RAISE 名稱.` 觸發 | 小寫底線命名 |
 
 參數型別建議參考 DDIC（如 `s_price`），跨程式介面才有一致的語意。
+
+### 3.1 為什麼 `TABLES` 是「舊式」：官方文件的棄用理由
+
+`TABLES` 參數在 SAP 官方 ABAP Keyword Documentation 裡被明確標記為 obsolete（`ABENFUNCTION_MODULES_OBSOLETE`／`ABAPTABLES_PARAMETERS_OBSOLETE`），原文寫著：「Table parameters are obsolete `CHANGING` parameters that are typed as internal standard tables with a header line.」——`TABLES` 本質上就是舊式的 `CHANGING` 參數，只是型別被限定成「帶 Header Line 的內部表」（Header Line 是什麼、為什麼有問題，見講義 5 第 8 節）。
+
+拼合官方文件多處說明，具體原因有四個：
+
+1. **繼承 Header Line 的雙義問題**：`TABLES` 參數在 FM 內部會自動生成一個同名 work area，容易搞混存取的是整張表還是單筆。
+2. **只能傳址，不能傳值**：官方文件明講「Pass by value is not possible in formal parameters defined using `TABLES`」——限制比 `CHANGING`／`IMPORTING`／`EXPORTING` 都嚴格。
+3. **型別受限**：只能是 DDIC Table Type（flat line type 的 Standard Table）或泛型 `STANDARD TABLE`，不能用 Sorted/Hashed Table 或深層結構。
+4. **Class 裡完全禁用**：這也是為什麼 Method（OOP 課程會學到）從來沒有 `TABLES` 這個選項——OO ABAP 設計時直接排除了整套有問題的機制，只留 `IMPORTING`/`EXPORTING`/`CHANGING`/`RETURNING`。
+
+**新 FM 的建議寫法**：把 `TABLES it_xxx` 換成 `CHANGING it_xxx TYPE <table_type>`；如果表格資料其實是單向的（只進不出、或只出不進），用 `IMPORTING`／`EXPORTING` 搭配表格型別更精確，比一律用 `CHANGING` 更清楚表達方向。
+
+**⚠️ 例外**：Remote-enabled FM（RFC／BAPI）如果 RFC log 沒設成 basXML，`TABLES` 傳輸實際上比 `CHANGING` **明顯更快**——這是官方文件列出的唯一還留著 `TABLES` 的實務理由，也是為什麼很多老 BAPI（如 `BAPI_*`）至今介面上還看得到 `TABLES`，不是設計不良，是效能考量下刻意保留。
 
 ## 4. SE37 單獨測試
 

@@ -397,6 +397,9 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - 主程式要連同其 INCLUDE 一起匯出；多支程式共用的 INCLUDE 只存一份。
 - **CMOD Project 底下生成的 Function Exit Include（如 en02 的 `ZXVBZU01`/`ZXVBZU02`、en08 案例一的 `ZXCO1U01`）也適用這條慣例**：本質是普通 `PROG/I`，一樣用 `<include名小寫>.prog.abap` 匯出，不需要額外記錄 CMOD Project 本身（CMOD Project／Assign／Activate 是 GUI-only 設定，沒有可匯出的原始碼）。
 - **Lock Object（ENQU）不適用 `.abap` 慣例**：它是結構化 DDIC 物件、沒有純文字原始碼，改存 `.enqu.xml`（GET 該物件 ADT 回應的 pretty-print 版本），見上方第 33 節。
+- **DDIC Structure（STRU）是 source-based（`DEFINE STRUCTURE` DDL），適用 `.abap` 慣例**：存成 `<物件名小寫>.stru.abap`（如 `ztr15_flight_rev.stru.abap`），跟 Table（`.tabl.abap`）同一類。
+- **DDIC Table Type（TTYP）不是 source-based**（第 14／39 節），沒有純文字原始碼，改存 `<物件名小寫>.ttyp.xml`（GET 該物件 ADT 回應的精簡版，只留 `rowType`/`accessType`/`primaryKey` 等有意義欄位，省略 API 回應裡的靜態列舉值清單）。
+- Function Module（FUGR/FF）沒有獨立物件字尾慣例，用 `.func.abap`（如 `z_tr15_calc_revenue_tab.func.abap`），跟既有的 `z_tr15_calc_revenue.func.abap` 一致。
 - `src/` 是**單向快照**：SAP 端修改後需重新匯出；本地修改要用 `sap_set_source` 寫回系統才算數。
 
 ## 34. 「以可重建角度全面 Review」的方法論，與非 `.abap` 快照的完整命名規則（2026-07-30 實測，Enhancement 課程 en01~en08 收尾稽核）
@@ -476,3 +479,13 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
   1. **`programrun` 連續卡住 `RFC_CLOSED` 時，不要無止盡調整程式碼猜測原因**——先用一個全新建立的最小化測試物件（結構抄一份，資料寫死）重現同樣的呼叫方式，如果新物件正常，就能直接排除「程式碼邏輯有問題」，把懷疑方向轉成「這個特定物件的 Session 卡住了」。
   2. **懷疑物件被卡住時，檢查是不是曾經呼叫過已知會卡住 headless 環境的邏輯**（`VIEW_MAINTENANCE_CALL`、`cl_salv_table`、或任何會開全螢幕互動畫面的呼叫，見第 5／16 節）——特別是像 `ZR_TR28_PARAM_MAINT` 這種「權限檢查+維護畫面」的 Wrapper 程式，隨著使用者在背景逐步完成 PFCG 授權，同一支程式在不同時間點呼叫可能從「權限不足、快速返回」變成「權限通過、卡在維護畫面」——**程式本身沒有改，但外部狀態（授權是否到位）變了，導致 `programrun` 的行為從能測變成不能測**，這不是 bug，是預期之內的行為轉變。
   3. **目前沒有已知的 ADT 端 workaround 可以清除這個卡住的 Session**（不是 ENQUEUE 鎖，`sap_lock`/`sap_unlock` 對這個無效；也不是 activation 殘留，`sap_inactive_objects` 一路都是 0 筆）。這種情況下：程式碼本身如果已經過 `checkruns` 語法檢查確認無誤、且邏輯已經用其他方式驗證過（例如用一個全新測試物件驗證同樣的呼叫結構能正常執行），就可以合理判斷**程式碼是對的，只是這個物件的 headless 驗證管道暫時不可用**，请使用者改到 SAP GUI（SE38 F8／T-code）直接測試即可，不需要繼續在 ADT 這邊除錯。
+
+## 39. FM 的 `CHANGING`/`TABLES` 介面參數型別不能引用 Function Group Top Include 的本地 `TYPES`，只能是 DDIC 型別或 Type Group（2026-08-02 實測，基礎課 ex15 Part 4）
+
+- **現象**：在 Function Group `ZFG_TR15` 的 Top Include（`LZFG_TR15TOP`）宣告一組本地 `TYPES`（`ty_flight_rev` + `tt_flight_rev TYPE STANDARD TABLE OF ty_flight_rev ...`），確認該 Include 已成功啟用（GET `version=active` 內容正確）後，建立新 FM `Z_TR15_CALC_REVENUE_TAB`，`CHANGING VALUE(ct_flights) TYPE tt_flight_rev` 引用這組本地型別——啟用時一律報 `"TT_FLIGHT_REV" is not a predefined type or a type from a type group.`（出現在系統自動產生的介面展開 Include，如 `LZFG_TR15$02`）。嘗試過：① 分開先啟用 TOP 再啟用 FM、② 整個 Function Group 一起啟用、③ 重新寫入 FM 原始碼再啟用，**全部同樣的錯誤**，確認不是啟用順序或殘留鎖的問題，是真正的語法限制。
+- **根本原因**：FM 的正式介面（`IMPORTING`/`EXPORTING`/`CHANGING`/`TABLES` 的型別）必須能被**呼叫端獨立語法檢查**，不能依賴「這支 FM 所屬的 Function Group 是否已經被載入」——Function Group 的 Top Include 只有在該 Group 被載入（呼叫過裡面某支 FM）時才會生效，對「還沒呼叫過、只是要對這次 CALL FUNCTION 做語法檢查」的呼叫端程式來說是不可見的。錯誤訊息裡的「or a type from a type group」是關鍵字：**FM 介面參數合法的型別來源只有 DDIC 型別、或（舊式）Type Group（`TYPE-POOLS`）**，本地 `TYPES`（不管宣告在 Top Include 或 FM 本體）都不算數。DATA 宣告（FM 內部的區域變數）則完全沒有這個限制，可以自由用 Top Include 的本地型別。
+- **Workaround**：改用 DDIC Table Type（`TTYP`，第 14 節記載的建立方式：先建 DDIC Structure 當 Line Type，再建 Table Type 指向它）。這也更貼近「CHANGING + Table Type 取代 TABLES」這個教學重點原本想強調的做法——用真正的 DDIC Global Type，而不是包裝在另一種區域型別裡。
+- **連帶踩到的 DDIC Structure 建立坑**：
+  1. `DEFINE STRUCTURE` 的必填 annotation，官方文件（`ABENDDICDDL_DEFINE_STRUCT_PROPS`）字面寫的是 `@AbapCatalog.enhancement.category`（帶點），但這個系統實際存入 DDL 原始碼、系統自動產生的樣板顯示的是 **`@AbapCatalog.enhancementCategory`（駝峰單詞，不帶點）**——照文件字面抄會導致 PUT 一律回 `ExceptionResourceAlreadyExists: Can't save due to errors in source`（但 `checkruns` 卻回報無錯誤，兩者矛盾，這個矛盾本身就是「annotation 名稱錯但系統沒把它當語法錯誤來報」的線索）。**排錯技巧**：懷疑 annotation 名稱寫錯時，直接 GET 該物件剛建立、還沒寫入內容前的預設樣板（`component_to_be_changed : abap.string(0);` 那種），看樣板裡系統自己產生的 annotation 打法，比照抄官方文件字面更可靠。
+  2. 兩個欄位共用同一個金額型 DE（如 `S_PRICE`，`CURR` 型別）時，啟用會報 `ZTR15_FLIGHT_REV-REVENUE (specify reference table AND reference field)`——金額欄位需要一個參考幣別欄位，兩個金額欄位模糊了自動推導。修法：加一個 `CURRENCY : s_currcode;` 欄位，並在每個金額欄位加 `@Semantics.amount.currencyCode : 'ztr15_flight_rev.currency'` annotation 明確指向它。
+- **連帶踩到的 DDIC Table Type 建立坑（第 14 節的再次驗證＋新發現）**：即使 POST 建立時就帶了正確的 `Content-Type: application/vnd.sap.adt.tabletype.v1+xml`（單數、v1）跟正確的 `ttyp:rowType`（`dictionaryType`/`ZTR15_FLIGHT_REV`/`STRU`），**POST 回應雖然 201 且內容正確，但啟用後讀回 `active` 版本卻悄悄退回 `predefinedAbapType`/`CHAR(1)` 預設值**——這次連 Content-Type 都對了還是被丟棄，代表第 14 節記載的「Content-Type 錯了才會丟棄」不是唯一觸發條件，**POST（建立）本身對 Table Type 這個物件型別可能永遠不可靠**。Workaround 跟第 8 節 Data Element 標籤的模式一樣：**POST 建立空殼之後，一定要再走一次 LOCK→PUT（同一份 XML）→UNLOCK→Activate**，PUT 這一步才會真的把 `rowType` 存進去；光靠 POST 不夠，不管 POST 當下的 Content-Type 對不對。
