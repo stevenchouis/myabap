@@ -22,6 +22,16 @@ CLASS lcl_handler IMPLEMENTATION.
     DATA(ls_info) = determine_creation_info( ).
 
     LOOP AT it_create INTO DATA(ls_create).
+      IF ls_create-descr IS INITIAL.
+        APPEND VALUE #( %cid = ls_create-%cid ) TO failed-test.
+        APPEND VALUE #( %cid = ls_create-%cid
+                         %msg = new_message_with_text(
+                           severity = if_abap_behv_message=>severity-error
+                           text     = 'Description must not be empty' ) )
+          TO reported-test.
+        CONTINUE.
+      ENDIF.
+
       INSERT zrap03_umtest FROM @( VALUE #(
         client     = sy-mandt
         id         = ls_create-id

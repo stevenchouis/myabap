@@ -12,4 +12,5 @@ lock master
   field ( mandatory ) description;
 
   determination setCreationInfo on save { create; }
+  validation validateStatus on save { field status; }
 }
