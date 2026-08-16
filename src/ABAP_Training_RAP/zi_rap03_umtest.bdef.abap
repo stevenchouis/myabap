@@ -6,4 +6,6 @@ lock master
   create;
 
   field ( readonly ) created_at, created_by;
+
+  action touch result [1] $self;
 }

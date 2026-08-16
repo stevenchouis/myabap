@@ -13,4 +13,6 @@ lock master
 
   determination setCreationInfo on save { create; }
   validation validateStatus on save { field status; }
+
+  action markDone result [1] $self;
 }

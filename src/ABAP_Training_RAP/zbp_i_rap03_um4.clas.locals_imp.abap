@@ -9,6 +9,9 @@ CLASS lcl_handler DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS read FOR READ
       IMPORTING it_read FOR READ test RESULT et_result.
 
+    METHODS touch FOR MODIFY
+      IMPORTING keys FOR ACTION test~touch RESULT result.
+
     METHODS determine_creation_info
       RETURNING VALUE(rs_info) TYPE zrap03_umtest.
 ENDCLASS.
@@ -57,6 +60,27 @@ CLASS lcl_handler IMPLEMENTATION.
           descr      = ls_data-descr
           created_at = ls_data-created_at
           created_by = ls_data-created_by ) TO et_result.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD touch.
+    DATA(ls_info) = determine_creation_info( ).
+
+    LOOP AT keys INTO DATA(ls_key).
+      UPDATE zrap03_umtest
+        SET created_at = @ls_info-created_at,
+            created_by = @ls_info-created_by
+        WHERE id = @ls_key-id.
+    ENDLOOP.
+
+    LOOP AT keys INTO ls_key.
+      SELECT SINGLE id, descr, created_at, created_by
+        FROM zrap03_umtest WHERE id = @ls_key-id INTO @DATA(ls_data).
+      IF sy-subrc = 0.
+        APPEND VALUE #(
+          %key   = ls_key-%key
+          %param = ls_data ) TO result.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.

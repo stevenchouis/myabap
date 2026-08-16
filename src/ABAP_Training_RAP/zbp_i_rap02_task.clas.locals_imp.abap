@@ -5,6 +5,9 @@ CLASS lhc_task DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS validateStatus FOR VALIDATION Task~validateStatus
       IMPORTING keys FOR Task.
+
+    METHODS markDone FOR MODIFY
+      IMPORTING keys FOR ACTION Task~markDone RESULT result.
 ENDCLASS.
 
 CLASS lhc_task IMPLEMENTATION.
@@ -40,6 +43,25 @@ CLASS lhc_task IMPLEMENTATION.
           TO reported.
       ENDIF.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD markDone.
+    MODIFY ENTITIES OF zi_rap02_task IN LOCAL MODE
+      ENTITY task
+        UPDATE FIELDS ( status )
+        WITH VALUE #( FOR ls_key IN keys (
+          %key   = ls_key-%key
+          status = 'D' ) ).
+
+    READ ENTITIES OF zi_rap02_task IN LOCAL MODE
+      ENTITY task
+        FIELDS ( description status priority due_date created_at created_by )
+        WITH CORRESPONDING #( keys )
+      RESULT DATA(tasks).
+
+    result = VALUE #( FOR ls_task IN tasks (
+      %key   = ls_task-%key
+      %param = ls_task ) ).
   ENDMETHOD.
 
 ENDCLASS.
