@@ -8,6 +8,7 @@
   - `src/`：正式程式快照（ZDQM 系列、Z_INVENTORY_COST_REPORT 等）
   - `src/ABAP_Training/`：基礎 ABAP 教育訓練教材——題目 md + PDF 講義 + 答案程式快照（SAP 端 `ZR_TRnn_*`），見該目錄 README 的題目索引與授課順序
   - `src/ABAP_Training_OOP/`：OOP 課程（op01–op12，答案物件 `ZCL_OOnn_*` 等），課綱已定稿、出題中，見該目錄 README
+  - `src/ABAP_Training_RAP/`：RAP（RESTful Application Programming Model）後端課程，課綱規劃中、出題中，見該目錄 README。**教學分工原則**（2026-08-02 定案）：Service Binding 建立與 Publish 一律由使用者在 Eclipse ADT 手動操作＋Publish（技術上必要，ADT REST API 手動建的缺少精靈才會觸發的後端註冊步驟，見 `.claude/rules/sap-adt-mcp.md` 第 40.9 節）；Table／CDS View／BDEF 這類物件，rap01～rap03 由 Claude 建立示範，**自 rap04 起改為使用者在 Eclipse ADT 手動建立、Claude 負責驗證（讀取比對／語法檢查）與除錯**——講義裡要寫清楚 Eclipse ADT 的詳細操作步驟（選單路徑、精靈畫面欄位、按鈕順序），不能只寫籠統描述；若講義描述的步驟跟使用者實際看到的畫面有落差，由使用者回報後 Claude 再修正講義。
   - `tools/`：輔助腳本，如 `md2pdf.js`（教材 md 改後重產 PDF 講義，`node tools/md2pdf.js [目錄]`）
 - SAP 系統資訊：請填入 System ID / Client / 語言
   - DEV: <補上>

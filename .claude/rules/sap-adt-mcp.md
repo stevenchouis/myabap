@@ -581,6 +581,7 @@ POST `/sap/bc/adt/businessservices/bindings`（root `srvb:serviceBinding`，內�
 - **✅ 解法（使用者實測成功）**：改在 **Eclipse ADT** 裡，對著已存在的 Service Definition（`ZRAPT01_SD`）右鍵 → `New` → `Other ABAP Repository Object` → 選 **Service Binding**，精靈跑完之後（本例命名 `ZRAPT01_SB3`，Binding Type = `OData V2 - UI`），直接在編輯器裡點 `Publish`——**一次成功**，`Local Service Endpoint` 狀態變成 `Published`，`Unpublish` 按鈕出現，且用編輯器內建的 `Preview...` 按鈕成功開出 Fiori Elements List Report 畫面（顯示 `No data found` 是預期行為，因為 `ZRAPT01` 這張表從頭到尾沒有寫入過任何測試資料，不是失敗）。
 - **OData V2 技術服務名稱＝ Service Binding 物件名稱，不是 Service Definition 名稱**：Preview 畫面顯示的 `Service URL` 是 `/sap/opu/odata/sap/ZRAPT01_SB3`（對應 Binding 名稱 `ZRAPT01_SB3`），不是 `ZRAPT01_SD`——這點更正了 40.5／`/IWFND/MAINT_SERVICE` 畫面顯示 `Technical Service Name = ZRAPT01_SD` 一度造成的誤解（那個畫面看到的是尚未成功材料化前、Gateway 用 Service Definition 名稱當佔位顯示的搜尋結果，不是最終正式的技術服務名稱）。
 - **結論／教學上的意義**：**RAP 課程 rap04 的 Service Binding 建立步驟，一律要教「Eclipse 精靈手動建立」，不能沿用其他物件類型（Table／CDS View／BDEF／Service Definition）用 ADT REST API workaround 建立的模式**——這是本檔記錄過的所有 GUI-only 案例裡，第一個「表面上物件建立成功（201/Active），但缺少一個完全看不出來、只有精靈才會觸發的隱藏後端步驟，導致下游功能整個失效」的案例，比單純「這個物件型別沒有 ADT API」更隱蔽，值得在教材裡特別強調：**Service Binding 這個物件，Claude 只能負責建立 Service Definition 之前的所有物件並驗證到位，Service Binding 本身務必請使用者在 Eclipse 手動建立＋Publish，不要嘗試用 API workaround 生成。**
+- **✅ 補充（2026-08-02，rap04 使用者實際操作截圖比對確認）：實際觸發精靈的路徑比原記錄更直接，而且中間多一個「$TMP 不需要傳輸請求」的畫面**：對著 Service Definition 右鍵，選單裡**直接就有 `New Service Binding` 這個項目**，不需要繞經 `New` → `Other ABAP Repository Object` 精靈再篩選——這個系統的 ADT Plugin 版本已經把常用的 RAP 物件類型（Service Binding／Metadata Extension 等）內建成右鍵選單的直接捷徑。填完 Name／Package／Binding Type／Service Definition 按 **Next**（不是 Finish）之後，會先跳出一個「**Select Transport Request**」畫面——套件是 `$TMP` 時畫面會顯示提示文字「No change recording enabled for package $TMP」，代表不需要傳輸請求，**什麼都不選，直接按 Finish** 即可，不會卡住也不會出錯。這一步在正式套件（非 `$TMP`）底下應該會需要真的選一個傳輸請求，屬於本檔一貫的「正式套件物件寫入需要 `transport` 參數」規則（見第 21 節）在 Service Binding 這個 GUI-only 物件上的對應版本。
 
 ### 40.10 `@UI.*` Annotation（Fiori Elements）跟「Classic RAP vs ABAP Cloud RAP」是兩條獨立軸線——這個系統完全支援 `@UI.*`，只是 Metadata Extension（DDLX）語句本身一樣是舊式語法（2026-08-02 查證）
 
@@ -595,6 +596,19 @@ POST `/sap/bc/adt/businessservices/bindings`（root `srvb:serviceBinding`，內�
 - **根本原因／查證方法**：回頭比對本節查證階段已經讀過的系統既有標準 BDEF 原始碼（第 40 節開頭列出的 `SCR_E_DBDEV`／`A_ProductionSupplyArea`），兩者都是寫 **`etag chgdAt`／`etag LastChangeDateTime`——單純 `etag <欄位>`，完全沒有 `master` 這個字**。這代表這系統的 Classic RAP／Classic CDS 世代，`etag` 子句本身就沒有「`master`／`dependent`」這種依附在 Composition 階層（區分根節點自己的 etag vs 子節點沿用父節點 etag）的語法分支，一律是最簡單的 `etag <欄位>` 形式，跟 `strict`／View Entity 屬於同一條「較舊、較精簡文法」的軸線。
 - **修法**：BDEF header 拿掉 `master`，改成 `etag created_at`（放在 `persistent table` 之後、`lock master`之前或之後皆可，這次實測放在 `lock master` 前面正常啟用）。
 - **教訓**：跟 `strict`／View Entity 這兩個已知差異一樣，**遇到 RAP 語法報「預期關鍵字」類型的錯誤時，直接讀錯誤訊息列出的合法後續 token 清單，比死記官方教材寫法更可靠**——這次的錯誤訊息其實已經直接暗示了「這系統的文法不認得 etag 這整個子句要跟 master 連用」，只是需要對照既有標準物件的寫法才能確認正確替代語法是什麼。之後任何 BDEF 新語法元素踩到類似錯誤，優先用這個方法（讀錯誤訊息的合法 token 清單＋比對系統既有標準物件），比憑印象改寫更快找到正確語法。
+
+### 40.12 Service Definition（SRVD）建立空殼的正確 schema：`srvd:srvdSourceType="S"` 屬性，不是猜測的子元素；`sap_set_source(objectType=SRVD)` 沒有第 40.6 節記載的 BDEF 路徑 bug（2026-08-02 實測，rap04）
+
+- **建立空殼**：discovery 找到 `/sap/bc/adt/ddic/srvd/sourceTypes` 這個輔助端點，GET 回傳唯一合法值 `S`（`Service Definition`）；POST `/sap/bc/adt/ddic/srvd/sources`（Content-Type `application/vnd.sap.adt.ddic.srvd.v1+xml`）第一次不帶這個資訊直接回 400「Source type '' does not exist」——**正確位置是 root 元素 `srvd:srvdSource` 上的屬性 `srvd:srvdSourceType="S"`**，不是猜測中的子元素或 body 內容，這個結論是照抄既有標準物件 `C_SALESORDERMANAGE_SD`（quickSearch `C_SALESORDERMANAGE*` 找到）的 GET 回應反查出來的，不是用猜的：
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <srvd:srvdSource srvd:srvdSourceType="S" xmlns:srvd="http://www.sap.com/adt/ddic/srvdsources" xmlns:adtcore="http://www.sap.com/adt/core"
+    adtcore:name="ZRAP04_SD" adtcore:type="SRVD/SRV" adtcore:description="...">
+    <adtcore:packageRef adtcore:name="$TMP"/>
+  </srvd:srvdSource>
+  ```
+- **寫入內容**：空殼建好後，原生 MCP 工具 `sap_set_source(objectType=SRVD, ...)` 可以正常寫入 `define service ... { expose ... as ...; }` 內容——**第 40.6 節記載「沒有驗證過 SRVD／DDLX 是否也有跟 BDEF 一樣的路徑 bug」，這次確認 SRVD 沒有這個 bug**，跟 TABL／DDLS 一樣走原生工具就能用。自動啟用一樣會踩到殘留鎖 403（`User XXX is currently editing`），走第 5 節標準流程（`sap_lock`→`sap_unlock`→手動 curl activation）即可排除，不是 SRVD 特有的問題。
+- **常見警告**：`@EndUserText.label` 這個 annotation 的值上限是 **40 字元**（`String(40)`），超過只會是 Warning（`type="W"`，不擋啟用），但建議還是控制在限制內，訊息比較乾淨。
 
 ## 41. ⚠️ 重要：SICF「Test Service」開出的網址是內網主機名稱／Port，Eclipse Service Binding「Preview」開出的才是外網可用的網址——兩者不能混用（2026-08-02 使用者實測發現）
 
@@ -705,3 +719,114 @@ POST `/sap/bc/adt/businessservices/bindings`（root `srvb:serviceBinding`，內�
   1. **第 42 節「EML 無法無頭驗證」的推測正式推翻**——EML 本身完全支援 `programrun` 無頭執行，先前的卡住是第 43 節的 Managed Runtime Dump 造成的，不是 EML 的問題。
   2. **這系統要教「完整可執行的 RAP CRUD」，目前只有 Unmanaged 這條路走得通**——Managed BDEF 依然可以教語法、可以啟用，但沒辦法讓學生看到真正的端對端執行結果（第 43 節的白名單會擋住）。
   3. **Unmanaged 實作類別的 Local Implementation Include 可以透過 ADT 手動 curl 建立與寫入**（跟第 7 節 Test Class Include 同一套機制，只是 include 名稱換成 `implementations`），不需要依賴 Eclipse 精靈才能建立——這點跟 Service Binding（第 40.9 節，精靈是必要條件）不同，Unmanaged 實作類別是可以完全交給 Claude 自動化建立的。
+
+## 45. ⚠️ 自我呼叫（`cl_http_client=>create_by_destination('NONE')`）透過 `programrun` 讀取「真實 RAP/OData 資料」會卡死斷線，跟哪個服務無關——`$metadata` 不受影響，但真正的 Entity GET 一律觸發跟第 38 節同樣的 `RFC_CLOSED`（2026-08-02 實測，RAP 課程 rap04）
+
+- **背景**：rap04 發布 `ZRAP04_SB` 後，用第 40.8 節記錄過的自我呼叫技巧（`ZR_RAP04_SELFTEST`）想無頭驗證 OData CRUD，第一次執行就 `502 RFC_CLOSED`。
+- **隔離排查（比照第 38 節「建全新最小化物件排除變因」的方法論）**：
+  1. 縮到只剩一行 `GET TaskManaged?$top=1` 的探測程式（`ZR_RAP04_PROBE2`）——一樣卡住 `RFC_CLOSED`。
+  2. **改打查證階段已經確認能正常運作、Eclipse Preview 也顯示過資料的既有服務 `ZRAPT01_SB3`**（`GET Root?$top=1`）——**一樣卡住**。這排除了「`ZRAP04_SB` 這個服務本身有問題」的可能性，證實是**自我呼叫讀取真實 RAP Entity 資料**這件事本身在這套系統上會卡死，不分服務、不分 Managed/Unmanaged。
+  3. 對照組：同一個 session 稍早用一模一樣的自我呼叫手法打 `ZRAPT01_SB3` 的 **`$metadata`**（純中繼資料，不觸發 CDS/RAP 執行期），是 200 OK 秒回、完全正常（見第 40 節查證階段）。
+- **推測機制**：`programrun` 本身是透過 RFC 呼叫進 ABAP，佔用這套小型系統本來就有限的 Dialog Work Process；`cl_http_client` 的自我呼叫是**對同一個 Instance 再發一個新的 HTTP 請求**，這個新請求要能被處理，一樣需要一個空出來的 Dialog Work Process——如果系統可用的 Dialog Work Process 數量很少（這種訓練/開發用的小型系統很常見），觸發真正需要跑 RAP/CDS 執行期邏輯的資料 GET，會需要**在原本那個呼叫尚未釋放的情況下**再拿到一個新的 Work Process，形成自我等待的僵局（deadlock），最終被 RFC Bridge 的逾時機制切斷連線回報 `RFC_CLOSED`。`$metadata` 之所以不受影響，合理推測是 Gateway 把 EDMX 中繼資料快取住、用更輕量的方式回應，不需要走到這一層資源競爭。
+- **嘗試過的替代方案／已排除**：
+  - 加大 `cl_http_client->send( timeout = ... )` 沒有意義——如果真的是 Work Process 僵局，拉長 Client 端逾時只會讓卡住的時間更久，最終還是被 RFC Bridge 自己的逾時切斷，不會讓自我呼叫真的完成。
+  - 改用 `WebFetch`（Claude 端直接打外網網址 `https://erpdemo01.itts.com.tw:44300/...`）想繞過自我呼叫，改成完全獨立的外部連線路徑——結果 `WebFetch` 直接回 `unable to verify the first certificate`（外部工具不信任這套系統的憑證鏈），且就算憑證問題解決，OData 呼叫通常還需要登入帳密，`WebFetch` 也沒有管道處理認證，這條路目前對 Claude 端不可行。
+- **結論／教學上的影響**：**這系統上，Claude 沒有任何可靠的無頭管道能驗證「已發布 Service Binding 的真實資料讀寫」**——第 40.8 節記錄的自我呼叫技巧，適用範圍要更正縮小為「只能驗證 `$metadata` 這類輕量、不觸發完整執行期的請求」，不能拿來驗證實際 Entity 資料的 CRUD。真正的資料驗證只能靠：① 使用者在 Eclipse 用 **Preview** 直接操作看結果（本課程既有做法）；② 使用者自己用瀏覽器/Postman 打外網網址（第 41 節），Claude 都無法越俎代庖。**跟第 38 節的教訓合起來看：這套系統只要牽涉「從系統內部反過來呼叫自己」的模式（不管是自我呼叫 HTTP、還是某支程式卡過一次 Dump 之後的殭屍 Session），都要優先懷疑是系統資源／Work Process 層級的限制，不是程式碼邏輯錯誤，不要浪費時間重試或改寫程式碼去排查。**
+- **後續処理**：`ZR_RAP04_SELFTEST`／`ZR_RAP04_PROBE`／`ZR_RAP04_PROBE2` 三支程式都保留在 `$TMP`（語法正確、有教學/記錄價值），但講義要更正：不要再嘗試用 `programrun` 執行 `ZR_RAP04_SELFTEST` 的完整版本（GET 真實資料那幾段一律會卡住），改成請使用者直接在 Eclipse Preview 操作驗證。
+
+**✅ 更正（2026-08-02，同日稍晚）：在 SE38（真人 GUI Session，F8 執行）跑同一支 `ZR_RAP04_SELFTEST`，讀取（GET）完全成功、沒有卡住**——證實上面「Work Process 僵局」的推測方向正確，卡住的關鍵變因是 **`programrun`／RFC Bridge 這條執行管道本身**，不是「自我呼叫」這個技巧不可行。`programrun` 透過 RFC 呼叫佔用的 Dialog Work Process，跟使用者自己在 GUI 登入 Session 裡執行報表佔用的 Work Process，是兩種不同的資源池／連線路徑，後者不會卡在同一個僵局裡。**更正後的結論**：自我呼叫讀取真實資料，在 **SE38 手動執行**是可行的；只有透過 **`programrun`** 執行才會卡死。之後如果需要驗證「自我呼叫技巧能不能動」，優先请使用者在 SE38 跑一次，不要只靠 `programrun` 就判定整條路不通。
+
+**⚠️⚠️ 但緊接著在 SE38 遇到第二層、獨立的問題：CSRF Token 驗證失敗**——GET 部分完全正常（`TaskManaged`／`TestUnmanaged` 都讀到真實資料），`X-CSRF-Token: Fetch` 也順利換到看起來合法的 Token，但接下來的 `POST`（Create）一律回 `403 Forbidden` / `CSRF token validation failed`。已嘗試**明確擷取 Token 換發回應裡的 `Set-Cookie`，手動組成 `Cookie` Header 附加在 `POST` 請求上**（不依賴 `cl_http_client` 內建的隱式 Cookie Jar），結果仍然一樣失敗——代表問題不是「Cookie 沒有帶到」這麼單純。合理推測（未完全查證根因）：這系統可能是多台 Application Server 的架構，Gateway 的 CSRF Token 快取／驗證可能綁定在**核發 Token 當下那台 App Server**，而自我呼叫的 GET（換 Token）與 POST（送出 Token）兩次獨立的 HTTP 請求，即使 Session Cookie 一致，也可能被 Message Server／負載平衡分派到不同的 App Server 節點處理，導致後者驗證不到前者核發的 Token（這是 SAP Gateway 多節點环境常見的已知痛點，通常要靠 Server Affinity／Sticky Session 機制解決，`cl_http_client` 對 `destination='NONE'` 這種自我呼叫的連線，不保證有這種親和性）。
+- **結論／教學上的影響**：**自我呼叫技巧在這系統上，「讀取」（GET）可靠（前提是用 SE38 而非 `programrun`），但「寫入」（POST/PUT/DELETE，涉及 CSRF）目前找不到可靠的 workaround**，且這是比第 45 節前段記載的「Work Process 僵局」更難排查、可能牽涉系統底層架構（多節點 Session 親和性）的問題，投入產出比低，**不建議繼續深挖**。任何課程如果需要驗證「真的能透過 OData 寫入資料」，最終手段一律是**使用者透過 Eclipse Fiori Elements Preview 或瀏覽器/Postman 手動操作**（這些走的是正常瀏覽器 Session，天生具備 Server 親和性，不會遇到這個自我呼叫特有的限制）。
+
+## 46. Fiori Elements（OData V2）Preview 端對端排錯全紀錄：`@UI.facet` 語法放錯位置、內建型別無 Data Element 導致標籤空白、List Report 不按 Go 會誤判成無資料（2026-08-02 實測，RAP 課程 rap04 收尾，`ZI_RAP03_UMTEST`）
+
+rap03 建立 `ZI_RAP03_UMTEST` 時完全沒有做 UI Annotation（當時重點是驗證 Unmanaged BDEF 能不能跑，不是畫面），到了 rap04 用 Eclipse Fiori Elements Preview 實際點 `TestUnmanaged` 的 `Create` 才第一次暴露出畫面層的問題，依序踩過三層坑：
+
+1. **⚠️ 完全沒有 Metadata Extension（DDLX）時，List Report 能顯示、但 Create 按下去整頁空白**：`GET /sap/bc/adt/repository/informationsystem/search?...ZI_RAP03_UMTEST*` 查證確認當時只有 `DDLS/DF`＋`BDEF/BDO`，沒有 `DDLX/EX`。Fiori Elements 沒有任何 `@UI.*` 標記可用時，List Report 至少能用欄位技術名稱當標題硬顯示出來，但 Object Page（Create／Detail）完全不知道要排版什麼，直接空白，也沒有任何錯誤訊息——**這跟第 43 節的 Managed Runtime Dump 是完全不同的兩種「空白/失敗」，前者是白名單擋下來的 Dump 畫面，這裡是純粹「沒有 UI 中繼資料可畫」的靜默空白，畫面上看起來很像，但成因、修法都不同，遇到空白畫面不要直接套用第 43 節的結論**。
+2. **✅ 建了 DDLX＋`@UI.identification` 之後，List Report 有欄位標題了，Object Page 還是空白**：這系統版本（S/4HANA 1909）的 Fiori Elements OData V2 範本，`@UI.identification` 單獨存在**不會**自動生成 Object Page 的欄位區塊（比較新版本的 UI5 才有這種自動生成的便利功能），必須額外明確加 `@UI.facet`（`type: #IDENTIFICATION_REFERENCE`）才會把標了 `@UI.identification` 的欄位實際排到畫面上。
+3. **⚠️⚠️ `@UI.facet` 的正確語法位置，跟直覺猜測的不一樣，猜錯兩次才找到**：
+   - 猜測 1（錯）：放進 `@UI: { headerInfo: {...}, facet: [...] }` 這種組合物件裡——啟用報 `Annotation 'UI.facet.id' used at wrong position (wrong scope)`。
+   - 猜測 2（錯）：拆成獨立的 `@UI.facet: [...]` 一行，但放在 `annotate view X with` **之前**（跟 `@UI.headerInfo` 同一層）——一樣報 `wrong scope`。
+   - **✅ 正確**：`@UI.facet: [...]` 要放在 `annotate view X with { ... }` 區塊**裡面**，當作第一個「浮動」的區塊層級標記（不綁在任何特定欄位上，寫在第一個欄位宣告之前）：
+     ```abap
+     annotate view ZI_RAP03_UMTEST with
+     {
+       @UI.facet: [
+         { id: 'GeneralInformation', purpose: #STANDARD, type: #IDENTIFICATION_REFERENCE, label: 'General Information', position: 10 }
+       ]
+
+       @UI.identification: [{ position: 10 }]
+       id;
+       ...
+     }
+     ```
+     這跟 `@UI.headerInfo`（維持在 `annotate view` **外面**）的放置規則剛好相反，兩個標記位置不能類推，遇到「wrong scope」錯誤，優先懷疑是不是放錯了內/外層，不要照抄另一個標記的位置。
+4. **✅ Object Page 欄位區塊出現後，欄位還是沒有標題文字**：根因是底層表格欄位用內建型別（`abap.char`）沒有掛 Data Element——這正是專案 `abap-style.md` 記載的硬性規則背後的實務後果（不只 SM30 欄位標題會變 `+`，Fiori Elements 的篩選欄位／表格欄位／Object Page 欄位標籤全部都會是空的）。**修法**：不需要另外建 Domain／Data Element，直接在 CDS View 的欄位上加 `@EndUserText.label: '...'` 即可（CDS 層級的欄位標籤標記，跟 Data Element 的效果等價，Fiori Elements 兩者都認）：
+   ```abap
+   @EndUserText.label: 'ID'
+   key id,
+
+   @EndUserText.label: 'Description'
+   descr
+   ```
+5. **⚠️ 修完標籤後，實際 Save 存檔會讓畫面變空白，容易誤判成又失敗了**：對 `TestUnmanaged` 按 `Create`、填欄位、按 `Save`，畫面立刻變空白（跟前面幾層的「空白」外觀類似，但這次背景其實已經存檔成功）——**這是這個舊版 Fiori Elements（S/4HANA 1909）Save 後導轉頁面的顯示小毛病，不是功能性失敗**。判斷方法：回到 List Report 按 `Go` 重新查詢，資料真的有進去就代表存檔成功，畫面空白純粹是導轉/渲染的 Cosmetic 問題，不用當作錯誤繼續排查。
+6. **⚠️ List Report 預設不會主動查詢，容易誤判成「沒有資料」**：這個 OData V2 List Report 範本的初始狀態固定顯示「To start, set the relevant filters.」，必須明確按 `Go`（或 Enter）才會真正送出查詢——過程中好幾次看到「Tests (0)」都只是因為還沒按 `Go`，不是資料庫真的沒資料，任何「Fiori Elements 畫面顯示零筆」的回報，第一件事都要先確認有沒有按過 `Go`，不要直接當作資料庫層級的問題來排查。
+
+**總結／方法論**：這五層坑外觀高度相似（畫面空白／零筆／沒有欄位），但成因完全不同（Dump／缺 Metadata Extension／缺 Facet／缺 Data Element 標籤／導轉 Cosmetic 問題／忘記按 Go），**每一層都要靠實際截圖＋逐步排除，不能看到「畫面空白」就套用先前某一次的結論**，這也是這次排錯反覆來回好幾輪才收斂的主因。
+
+## 47. ⚠️⚠️ Eclipse ADT 的「New Table Index」精靈在這系統上對長表名（>10 碼，幾乎涵蓋所有 `ZRAPnn_` 命名的表）根本無法使用；改用 SE11 才是可靠路徑（2026-08-02 使用者實測，RAP 課程 rap02 補課）
+
+- **對著 Table（或套件）按右鍵，選單裡直接有 `New Database Table`／`New Data Definition`／`New Table Index`／`New Extension Index`／`New Customer Data Browser Object`／`New Append Structure` 這些項目**，不需要繞經 `Other ABAP Repository Object` 精靈再篩選——這是這個 ADT Plugin 版本的一貫模式（第 40.9 節記過 Service Binding 也是同樣道理），常用的 DDIC／CDS 物件類型都被內建成右鍵選單的直接捷徑，之後任何課程要教「怎麼在 Eclipse 建立某個物件」，優先假設「對著相關物件或套件按右鍵可能就有直接捷徑」，不用預設一定要走 `Other ABAP Repository Object` 這條路。
+- **⚠️⚠️ `New Table Index` 精靈的 `Name` 欄位是一個組合了兩種語意、互相矛盾的欄位，導致長表名根本填不進去**：
+  1. 這個欄位長度上限只有 **10 個字元**，比一般 Z 物件（Table／CDS View／Class 等通常可以到 30 碼）短很多——實測 `ZRAP02_TASK_I1`（14 碼）直接被 ADT 擋下，錯誤訊息 `14 characters exceed the maximum of 10 characters in field 'Name'`。
+  2. **這個欄位的預設值就是你右鍵點的那張表本身的名稱**（對著 `ZRAP02_TASK1` 右鍵，`Name` 預設帶出 `ZRAP02_TASK1`）——證實這個欄位背後其實是被當成「要建索引的目標表名」在用，不是「新索引物件自己的名字」。
+  3. 矛盾點：這系統的表名慣例（`ZRAPnn_<實體>`）幾乎必然超過 10 碼（連 `ZRAP02_TASK` 都已經 11 碼），代表**這個欄位的預設值本身就會先觸發 10 碼上限錯誤，你唯一能做的只有硬改成一個更短、但不是真表名的字串**（例如 `ZRAP02IX1`）。
+  4. **後果**：硬填一個假名稱過關後，精靈會切到一個內嵌的傳統 `Dictionary: Change Index` 畫面（透過「Start workbench application」內嵌 SAP GUI 顯示），畫面上的 `Table Name`／`Index Name` 兩個欄位會顯示你剛才填的假名稱，且**完全鎖死無法編輯**（連只改 Description 都不受影響、但 Table Name／Index 代號的部分是灰的）；接著點 `Table Fields` 選欄位時，系統會報 `Table <假名稱> is not active in ABAP Dictionary`——因為那根本不是一張真實存在的表。**這條路徑在這系統上對於 11 碼以上的表名是死路，沒有已知的 workaround 能在 ADT 精靈內部修正。**
+- **✅ 確認可行的替代方案：直接用 SAP GUI 的 `SE11` 交易碼建，完全繞過 ADT 精靈**（已實測成功，`ZRAP02_TASK1~001`，`Status: Active／Saved`）：
+  1. `SE11` → **Database table** 輸入完整表名（可以超過 10 碼，SE11 沒有這個限制）→ **Display**。
+  2. 選單 **Goto → Indexes**（或畫面上的 **Indexes** 按鈕）。
+  3. **Create** → **Index ID** 填 3 碼英數字（自訂的 Z 表，Index ID 不能用 `Y`／`Z`／`J`／`H` 開頭，用數字最安全，例如 `001`）。
+  4. 填 Short Description，勾選要索引的欄位。
+  5. 存檔 → Activate。
+- **教訓**：這是本檔記錄過的又一個「Eclipse ADT 精靈表面上支援某個物件類型，但欄位設計本身有 bug／限制，導致特定情境（本例是長表名）完全走不通」的案例，跟第 34 節「Table Type 用錯 Content-Type 會靜默丟資料」、第 45 節「自我呼叫 CSRF 驗證失敗」同一類——**遇到 ADT 精靈卡住或行為詭異時，不要無止盡在精靈內部試錯，適時改用對應的傳統 SAP GUI 交易碼（本例 `SE11`）往往是更快、更可靠的路**，尤其是這類已經存在數十年、功能成熟穩定的經典 DDIC 維護畫面。
+
+## 48. ⚠️⚠️ CDS View 的「DDL View Name」跟「SQL View Name」該用哪個，要看工具是不是比 CDS 更早存在——一開始整理成「一律用 DDL Name」是錯的，已被使用者實測推翻（2026-08-02，RAP 課程 rap02 補課）
+
+- **背景**：CDS View（`define view`，V1 舊式語法）有兩個名字——`define view <名稱>` 的 **DDL View Name**（邏輯名稱，最長 30 碼，寫 ABAP 程式／Eclipse ADT／quickSearch 都用這個）跟 `@AbapCatalog.sqlViewName` annotation 指定的 **SQL View Name**（資料庫底層實體物件名稱，最長 16 碼，官方文件稱為「purely technical helper construct」）。
+- **原始（錯誤）結論**：查證官方文件（`ABENABAP_SQL_CDS_OBSOLETE`／`ABENCDS_ACCESS_OBSOLETE`）確認 Open SQL 一定要用 DDL Name（直接用 SQL View Name 在 Open SQL 裡是 Obsolete、ABAP 7.62 Strict Mode 甚至禁止），因此一開始**類推**「SE11 應該也是用 DDL Name」——這個類推沒有實際驗證，只是邏輯推論。
+- **✅ 已被使用者實測推翻**：
+  - SE11 對著 `ZI_RAP02_TASK` 這個 CDS View 做 Display，查詢欄位本身就明確標示 **`DDL SQL View`**，實際要輸入的是 **SQL View Name**（`ZIRAP02TASK`）才查得到；查到之後的畫面上另外有個 **`DDL Source`** 欄位（顯示 `ZI_RAP02_TASK`）回頭告訴你這個底層 SQL View 對應哪個 CDS DDL 定義。
+  - SQ02（InfoSet／SAP Query）的「Table join using basis table」欄位輸入 DDL Name（`ZI_RAP02_TASK`）直接報 `Table ZI_RAP02_TASK is not in ABAP Dictionary`——同樣只認 SQL View Name。
+- **真正的規則**：**這個工具是不是「比 CDS 更早就存在的傳統交易碼」**——SE11 的 View 瀏覽畫面、SQ02 InfoSet 這類工具的機制是直接對應資料庫底層的物理物件，CDS View 只是後來「掛」進這套舊機制，查詢入口天生認的是實體名稱（SQL View Name）；Open SQL、Eclipse ADT、quickSearch、Where-Used 這類 CDS 之後才有（或跟 CDS 一起演進）的現代化管道，才是用 DDL View Name。**Table 物件沒有這個問題**（技術名稱只有一個，沒有雙名字設計），只有 View（含 CDS-based View）才有這個分裂，容易誤判成「DDIC 物件查詢都用同一種名字」。
+- **教訓**：**類推出來的結論（沒有實際操作驗證過的）要明確標記成「推論」而不是「確認」，遇到新工具／新畫面優先假設「可能跟預期不一樣」，等使用者實際操作回報後才真正寫進「已確認」的結論**——這次的錯誤本身沒有造成操作損失（只是文件講錯），但如果換成教別的、有副作用的操作步驟，這種「邏輯類推當結論」的習慣可能會更早導致誤導使用者做錯事。
+- **通用化**：SQ02／SQ01 InfoSet 只認 SQL View Name 這條規則**不是 `ZI_RAP02_TASK` 這個特定 View 的個案，適用任何掛在 `define view`（V1）物件上的 CDS View**——包含 AMDP 課程（第 16 節）教過的「Code to Data」設計（邏輯下推到資料庫執行的 CDS View／CDS Table Function），只要最終物件型別是 V1 `define view`，InfoSet 要串接就一律要用 `@AbapCatalog.sqlViewName` 那個 SQL View Name，不能填 CDS DDL 邏輯名稱。
+- **⚠️ 附帶確認：這系統的 ADT SQL Console 沒有內建 Explain Plan／執行計畫分析功能**——依序找過工具列 `Run` 按鈕旁的下拉箭頭、最上方選單列的 `Run`、查詢文字上按右鍵，都只有 `Check`／`Run`（F8，真的會執行）兩個選項，`Run As` 子選單展開後是 `(none applicable)`。開啟 SQL Console 的正確路徑也一併確認：要對著 **Project 最上層節點**（不是 `$TMP` 套件、不是帳號節點）按右鍵才有這個選項。判斷這系統這個版本的 SQL Console 是比較輕量的實作，Explain Plan 這類分析功能通常要靠獨立的 **SAP HANA Database Explorer**（另一個工具／Perspective），這系統沒有配置，之後遇到「要看查詢執行計畫」的需求，不要再嘗試從 ADT SQL Console 裡找，直接跟使用者說明這系統做不到。
+
+## 49. ⚠️⚠️ 已更正：`SE80`（Object Navigator）能完整唯讀顯示 RAP 現代物件（DDLX／BDEF／SRVD／SRVB）的原始碼，不是只有基本資訊——原本的猜測太保守，已被使用者實測推翻（2026-08-03，RAP 課程 rap02 補課）
+
+- **背景**：`SE11` 已確認查不到 Metadata Extension（DDLX）——因為它不是 DDIC／資料庫層物件，`SE11` 天生就不認得這種型別（見第 48 節記載的「Table 有 SQL/DDL 雙名字、DDLX 連資料庫物件都沒有」的脈絡）。原本推測 `SE80` 大概也差不多，最多只能查到「物件存在、屬於哪個套件」這種基本資訊，看不到 `@UI.*` 實際內容——**這個推測沒有實測驗證，只是邏輯類推，已被使用者實測推翻**。
+- **✅ 已被使用者實測推翻**：`SE80` 的 Repository Browser，展開套件（`$TMP`）之後，樹狀結構裡有**專屬的 `Metadata Extensions` 節點**，跟 `Behavior Definitions`／`Service Bindings`／`Service Definitions` 平行並列；點開 `ZI_RAP02_TASK`（Metadata Extension）會開啟「Display Metadata Extension」畫面，**`Source Code` 頁籤直接完整顯示 DDLX 的原始碼**（`@UI: { headerInfo: {...} }`、`annotate view ... with { ... }` 整段都看得到），唯讀（Display 模式）但內容完整不打折扣。畫面上還有一個 **`ADT Link`** 欄位（例如 `adt://S4H/sap/bc/adt/ddic/ddlx/sources/zi_rap02_task`），可以從 SE80 一鍵連結到 Eclipse ADT 開啟同一個物件編輯。
+- **推測可以擴大到整個 RAP 五層架構**：使用者這次的截圖同時看到 `Behavior Definitions`（`ZI_RAP02_TASK`／`ZI_RAP03_UMTEST`／`ZI_RAPT01`）、`Service Bindings`（`ZRAP04_SB`／`ZRAPT01_SB`……）、`Service Definitions`（`ZRAP04_SD`／`ZRAPT01_SD`）都列在同一棵樹裡，代表 `SE80` 對整個 RAP 現代物件家族（DDLX／BDEF／SRVD／SRVB）都有專屬分類節點，合理推測都能用同樣方式唯讀瀏覽——但這個更大範圍的推測本身**還沒有針對 BDEF／SRVD／SRVB 逐一實測過內容顯示是否也一樣完整**，只是根據 DDLX 這一個案例＋畫面上看到的樹狀分類做的合理外推，之後有需要時應該找機會針對其他型別個別驗證，不要直接當「已確認」使用。
+- **結論／教學上的意義**：**`SE80` 是比 `SE11` 更好用的唯讀瀏覽工具，適合「想快速看一眼某個 RAP 物件內容、又不想開 Eclipse」的情境**（`SE11` 只認 DDIC／資料庫層物件，`SE80` 對 Repository 物件的涵蓋範圍廣得多，包含現代 RAP 物件）；但真正要**編輯**內容，還是只能用 Eclipse ADT，`SE80` 這裡看到的都是唯讀顯示。
+- **教訓**（呼應第 48 節同一個模式）：**「這個工具大概也查不到／查得到但只有基本資訊」這種沒有實測過的猜測，一律要明確標記成推論，不要當結論寫**——這次猜錯的方向是「低估了 SE80 的能力」，跟第 48 節「高估了 SE11 認得 DDL Name」是同一類錯誤（對沒操作過的畫面做主觀假設），只是方向相反，再次印證「遇到新工具／新畫面，直接問使用者實測比自己瞎猜準」。
+
+## 50. Eclipse ADT 建立 Metadata Extension 的「Templates」畫面，一樣有「新式 entity 語法 vs 舊式 view 語法」的選錯陷阱，跟建 CDS View 是同一個模式（2026-08-03 使用者實測，RAP 課程 rap02 補課）
+
+- **背景**：對著 CDS View 右鍵有 `New Metadata Extension` 直接捷徑（跟這系統一貫的「常用物件類型內建右鍵捷徑」模式一致），填完 Name／Package／Extended Entity 後會跳出「Templates」畫面。
+- **⚠️⚠️ 畫面預設可能停在 `Annotate Entity (creation)` 分類**（底下有 `annotateEntity`／`annotateEntityWithParameters` 兩個模板），這個分類產生的骨架是**新式語法**：
+  ```abap
+  @Metadata.layer: ${layer}
+  annotate entity ${entity_name}
+    with
+  {
+    ${element_name};
+    ${cursor}
+  }
+  ```
+  關鍵字是 `annotate entity`（帶 `entity`）——**這系統不支援，會啟用失敗，跟第 40.2 節「CDS 編譯器不支援 `define view entity`」是完全同一個限制在 Metadata Extension 這個物件類型上的對應版本**。使用者實測踩到：選了這個分類，最後產生的原始碼確實是 `annotate entity ZI_RAP02_TASKS`。
+- **✅ 正確做法**：Templates 畫面裡還有一個收合的 `Annotate View (creation)` 分類，要展開選那裡面的模板，才會產生不帶 `entity` 的 `annotate view` 骨架，跟這系統既有的 CDS View（`define view`，非 `define view entity`）搭配一致。
+- **骨架本身還有兩個預設值不能直接用，一定要手動補**：
+  1. `@Metadata.layer: layer`——`layer` 是純文字佔位符，不是合法列舉值，一定要手動改成 `#CORE`／`#LOCALIZATION`／`#INDUSTRY`／`#PARTNER`／`#CUSTOMER` 其中之一（查證官方語法文件 `ANNOTATE ENTITY` 取得的完整清單；客戶／企業自建物件一律用 `#CUSTOMER`）。
+  2. **骨架預設完全沒有 `@UI: { }` 這個 Entity 層級 Annotation 區塊**——如果要設定 `headerInfo` 這類不屬於單一欄位的 Entity 層級標記，精靈不會幫忙產生，要自己在 `@Metadata.layer` 那一行後面手動加上整段 `@UI: {...}`。
+- **教訓**：**這系統只要是「Eclipse 精靈跳出多種語法版本模板可選」的情境（CDS View 的 Data Definition 精靈、這裡的 Metadata Extension 精靈），預設/排在前面的選項很可能是這系統不支援的新式語法，一律要留意有沒有「obsolete」或收合分類裡藏著舊式版本，不能照預設一路按到底**——這是繼第 40 節 CDS View 精靈之後，第二個確認到同樣選錯陷阱的物件類型，之後遇到 BDEF／SRVD 之類的 Eclipse 建立精靈如果也有多重模板選擇畫面，應該優先假設可能有同樣的陷阱，主動提醒使用者仔細看清楚每個模板的預覽內容再選。
