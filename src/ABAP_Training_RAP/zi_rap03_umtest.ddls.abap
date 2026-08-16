@@ -11,5 +11,11 @@ define root view ZI_RAP03_UMTEST
   key id,
 
   @EndUserText.label: 'Description'
-  descr
+  descr,
+
+  @EndUserText.label: 'Created At'
+  created_at,
+
+  @EndUserText.label: 'Created By'
+  created_by
 }

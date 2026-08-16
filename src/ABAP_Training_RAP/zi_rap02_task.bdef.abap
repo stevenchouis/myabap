@@ -1,4 +1,4 @@
-managed;
+managed implementation in class zbp_i_rap02_task unique;
 
 define behavior for ZI_RAP02_TASK alias Task
 persistent table zrap02_task
@@ -10,5 +10,6 @@ lock master
   delete;
 
   field ( mandatory ) description;
-  field ( readonly ) created_at, created_by;
+
+  determination setCreationInfo on save { create; }
 }

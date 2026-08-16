@@ -25,4 +25,12 @@ annotate view ZI_RAP03_UMTEST with
   @UI.lineItem: [{ position: 20 }]
   @UI.identification: [{ position: 20 }]
   descr;
+
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 30 }]
+  created_at;
+
+  @UI.lineItem: [{ position: 40 }]
+  @UI.identification: [{ position: 40 }]
+  created_by;
 }

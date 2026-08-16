@@ -7,5 +7,7 @@ define table zrap03_umtest {
   key client : mandt not null;
   key id     : abap.char(10) not null;
   descr      : abap.char(40);
+  created_at : timestampl;
+  created_by : syuname;
 
 }
