@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<blue:wbobj xmlns:blue="http://www.sap.com/wbobj/dictionary/dtel" xmlns:adtcore="http://www.sap.com/adt/core" adtcore:responsible="MONICA" adtcore:masterLanguage="EN" adtcore:masterSystem="S4H" adtcore:name="ZRAP09_ORDSTATUS" adtcore:type="DTEL/DE" adtcore:changedAt="2026-08-17T15:01:15Z" adtcore:version="active" adtcore:createdAt="2026-08-17T00:00:00Z" adtcore:changedBy="MONICA" adtcore:createdBy="MONICA" adtcore:description="RAP09 Order Status" adtcore:language="EN">
+  <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="/sap/bc/adt/vit/wb/object_type/dtelde/object_name/ZRAP09_ORDSTATUS" rel="self" type="application/vnd.sap.sapgui" title="Representation in SAP Gui"/>
+  <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="/sap/bc/adt/vit/docu/object_type/de/object_name/zrap09_ordstatus?masterLanguage=E&amp;mode=edit" rel="http://www.sap.com/adt/relations/documentation" type="application/vnd.sap.sapgui" title="Documentation"/>
+  <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="/sap/bc/adt/ddic/logs/db/ACTDTELZRAP09_ORDSTATUS" rel="http://www.sap.com/adt/relations/ddic/activationlog" type="application/vnd.sap.adt.logs+xml" title="Activation Log"/>
+  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP" adtcore:description="Temporary Objects (never transported!)"/>
+  <dtel:dataElement xmlns:dtel="http://www.sap.com/adt/dictionary/dataelements">
+    <dtel:typeKind>domain</dtel:typeKind>
+    <dtel:typeName>ZRAP09_ORDSTATUS</dtel:typeName>
+    <dtel:dataType>CHAR</dtel:dataType>
+    <dtel:dataTypeLength>000001</dtel:dataTypeLength>
+    <dtel:dataTypeDecimals>000000</dtel:dataTypeDecimals>
+    <dtel:shortFieldLabel>Status</dtel:shortFieldLabel>
+    <dtel:shortFieldLength>10</dtel:shortFieldLength>
+    <dtel:shortFieldMaxLength>10</dtel:shortFieldMaxLength>
+    <dtel:mediumFieldLabel>Status</dtel:mediumFieldLabel>
+    <dtel:mediumFieldLength>20</dtel:mediumFieldLength>
+    <dtel:mediumFieldMaxLength>20</dtel:mediumFieldMaxLength>
+    <dtel:longFieldLabel>Order Status</dtel:longFieldLabel>
+    <dtel:longFieldLength>40</dtel:longFieldLength>
+    <dtel:longFieldMaxLength>40</dtel:longFieldMaxLength>
+    <dtel:headingFieldLabel>Order Status</dtel:headingFieldLabel>
+    <dtel:headingFieldLength>55</dtel:headingFieldLength>
+    <dtel:headingFieldMaxLength>55</dtel:headingFieldMaxLength>
+    <dtel:searchHelp/>
+    <dtel:searchHelpParameter/>
+    <dtel:setGetParameter/>
+    <dtel:defaultComponentName>ZRAP09_ORDSTATUS</dtel:defaultComponentName>
+    <dtel:deactivateInputHistory>false</dtel:deactivateInputHistory>
+    <dtel:changeDocument>false</dtel:changeDocument>
+    <dtel:leftToRightDirection>false</dtel:leftToRightDirection>
+    <dtel:deactivateBIDIFiltering>false</dtel:deactivateBIDIFiltering>
+  </dtel:dataElement>
+</blue:wbobj>

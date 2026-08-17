@@ -902,3 +902,33 @@ rap03 建立 `ZI_RAP03_UMTEST` 時完全沒有做 UI Annotation（當時重點�
   - **Workaround／正確寫法**：改用 `%key-<父鍵欄位>` 直接指定父實體的正式 Key（例如 `%key-order_id = 'V001'`），問題立刻解決，`programrun` 驗證 Header＋2 筆 Item 一次建立成功。
   - **一句話記憶**：父 Key 是**框架自動編號**才需要 `%cid_ref`；父 Key 是**使用者自己指定**，直接用 `%key-<欄位>`。這個規則官方文件沒有明講（範例剛好都是自動編號情境），只能靠實測才會發現，是本課程目前記錄過「兩種寫法都能編譯、但語意選錯導致靜默失敗」最隱蔽的一個案例——比第 34 節的 Table Type Content-Type、第 45 節的自我呼叫 CSRF 都更難排查，因為連 EML 的標準回應參數（FAILED/REPORTED）都不會顯示任何異狀。
 - **這次驗證流程本身也是「教學分工原則」下 Claude 新的工作模式示範**：Claude 用跟正式課程物件不同名的暫時性物件做 R&D 驗證，確認語法/程式碼完全正確後，才把驗證過的內容寫進講義交給使用者在 Eclipse 建立正式課程物件——這樣使用者照著講義操作，不會重複 Claude 已經踩過的坑，同時保留「使用者親自在 Eclipse 建立物件」的動手練習價值。
+
+## 55. `field(readonly:update)`／`field(readonly:create)` 這種帶冒號的「靜態限定操作」語法這系統不支援，但語意相近的 `field(features:instance)` 動態欄位控制可行（換一個機制達成同樣效果）；`GET PERMISSIONS ONLY INSTANCE FEATURES ENTITY ... REQUEST ...` 這個 EML 完整語句也不支援（2026-08-17 實測，RAP 課程 rap09 加碼）
+
+- **背景**：Header 的 Key（`order_id`）、Item 的 Key（`item_id`）在 Fiori Elements Edit 模式下會被誤標成可編輯，直覺解法是官方文件 `ABENBDL_FIELD_CHAR` 列出的靜態限定語法 `field(readonly:update) field_e;`（Create 時可填、Update 時唯讀，語意上正好對應 Key 欄位這種「建立時使用者指定、之後不該再改」的需求）。
+- **❌ `field(readonly:update)`／`field(mandatory:create)` 這種 `field(關鍵字:操作)` 語法一律不支援**：直接在真實物件的 BDEF 加 `field ( readonly : update ) order_id;`，Eclipse 編輯器立刻標紅，`checkruns` 回報：
+  ```text
+  ") | ," expected, not ":".
+  "( | ;" expected, not ")".
+  ```
+  跟這門課一路遇到的 obsolete 語法模式一致（`strict`／`view entity`／`etag master`／`FOR DETERMINATION` 而非 `FOR DETERMINE ON SAVE`）——這系統的 BDL 剖析器版本比官方現行文件描述的舊。
+- **✅ 但語法上同樣帶冒號的 `field(features:instance)`（動態欄位控制，官方文件裡是完全獨立的另一個機制）意外可以編譯、啟用**：一開始因為兩者長得很像（都是 `field(關鍵字:值)` 格式）以為會踩到同一個限制，實測用暫時性驗證物件（`ZI_RAP08VU_H`）測試才發現 `field(features:instance) order_id;` 完全正常過關，跟 `readonly:update` 的行為不一致——**遇到「某個帶冒號/子句的語法不支援」，不要直接假設所有語法上相似的變體都會一起中招，值得逐一實測，官方文件裡語意不同的替代機制常常是另外一套剖析規則**。
+- **配套的 Handler Method 宣告要拿掉可選字 `INSTANCE`**：官方文件 `ABAPHANDLER_METH_FEATURES` 明講 `FOR [INSTANCE] FEATURES` 的 `INSTANCE` 是可選字，但這系統的剖析器不接受它出現，報 `"INSTANCE" is not valid.`——寫成 `FOR FEATURES`（不含 `INSTANCE`）才編譯成功：
+  ```abap
+  METHODS get_instance_features FOR FEATURES
+    IMPORTING keys REQUEST requested_features FOR Header RESULT result.
+
+  METHOD get_instance_features.
+    result = VALUE #( FOR ls_key IN keys
+      ( %key            = ls_key-%key
+        %field-order_id = if_abap_behv=>fc-f-read_only ) ).
+  ENDMETHOD.
+  ```
+  欄位層級的動態控制是**每個實體各自宣告、各自實作**——Header 補了 `field(features:instance) order_id;`＋`get_instance_features`，Item 實體（`lhc_item`）要另外補一組同樣結構的 `field(features:instance) item_id;`＋`get_instance_features`（`%field-item_id`），Header 補了不會自動套用到 Item。
+- **原理／為什麼能達成同樣效果**：`FOR FEATURES` Handler 只有在框架要查詢「**已存在**的實例」該有什麼欄位限制時才會被呼叫；新建立中、還沒有 Key 的實例（Create 階段）不會觸發這個查詢，欄位照樣可填。只有查詢/編輯已存在的實例（Update 情境）才會呼叫這個方法、拿到 `if_abap_behv=>fc-f-read_only`，把欄位鎖住。跟 `readonly:update` 想達成的靜態效果語意等價，只是實現方式從「宣告式規則」換成「依實例狀態動態回答」。
+- **⚠️ 無法完整無頭驗證執行期效果**：官方文件 `ABENGET_PERM_FORMS_ABEXA` 教的驗證方式是 EML `GET PERMISSIONS ONLY INSTANCE FEATURES ENTITY <bdef> FROM VALUE #(...) REQUEST <req> RESULT DATA(result) ...`，這系統對這個完整型式也報語法錯：
+  ```text
+  ".", "LATE.", "FIELDS ...", or "LATE FIELDS ..." expected after "PERMISSIONS".
+  ```
+  代表 `GET PERMISSIONS` 這個 EML 語句本身也停在更舊／不同的語法版本（沒有進一步深挖找替代寫法，判斷投入產出比低——這條路的驗證意義主要是給 Claude 自己看，真正的驗收管道本來就是使用者的 Eclipse Preview）。**只確認了語法編譯／啟用乾淨、`programrun` 重跑既有情境無回歸，執行期「Update 時欄位真的變唯讀」這件事最終是靠使用者在 Eclipse Preview 手動確認的。**
+- **方法論小結**：這是本課程第二次「官方語法 A 不支援，但語意相近的官方替代方案 B 意外可行」的案例（第一次是第 40.12/後續節的 Service Definition schema 反查）——遇到某個 RAP BDL 語法報錯，不要只滿足於「確認不支援、放棄需求」，可以進一步想「這個需求有沒有另一套官方機制能達成同樣效果」，再逐一實測，往往能找到比預期更好的解法。

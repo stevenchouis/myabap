@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<doma:domain xmlns:doma="http://www.sap.com/dictionary/domain" xmlns:adtcore="http://www.sap.com/adt/core" adtcore:responsible="MONICA" adtcore:masterLanguage="EN" adtcore:masterSystem="S4H" adtcore:name="ZRAP08_ORDERID" adtcore:type="DOMA/DD" adtcore:changedAt="2026-08-17T08:33:55Z" adtcore:version="active" adtcore:createdAt="2026-08-17T00:00:00Z" adtcore:changedBy="MONICA" adtcore:createdBy="MONICA" adtcore:language="EN">
+  <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="/sap/bc/adt/vit/wb/object_type/domadd/object_name/ZRAP08_ORDERID" rel="self" type="application/vnd.sap.sapgui" title="Representation in SAP Gui"/>
+  <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="/sap/bc/adt/vit/docu/object_type/do/object_name/zrap08_orderid?masterLanguage=E&amp;mode=edit" rel="http://www.sap.com/adt/relations/documentation" type="application/vnd.sap.sapgui" title="Documentation"/>
+  <atom:link xmlns:atom="http://www.w3.org/2005/Atom" href="/sap/bc/adt/ddic/logs/db/ACTDOMAZRAP08_ORDERID" rel="http://www.sap.com/adt/relations/ddic/activationlog" type="application/vnd.sap.adt.logs+xml" title="Activation Log"/>
+  <adtcore:packageRef adtcore:uri="/sap/bc/adt/packages/%24tmp" adtcore:type="DEVC/K" adtcore:name="$TMP" adtcore:description="Temporary Objects (never transported!)"/>
+  <doma:content>
+    <doma:typeInformation>
+      <doma:datatype>CHAR</doma:datatype>
+      <doma:length>000010</doma:length>
+      <doma:decimals>000000</doma:decimals>
+    </doma:typeInformation>
+    <doma:outputInformation>
+      <doma:length>000010</doma:length>
+      <doma:style>00</doma:style>
+      <doma:conversionExit/>
+      <doma:signExists>false</doma:signExists>
+      <doma:lowercase>false</doma:lowercase>
+      <doma:ampmFormat>false</doma:ampmFormat>
+    </doma:outputInformation>
+    <doma:valueInformation>
+      <doma:valueTableRef/>
+      <doma:appendExists>false</doma:appendExists>
+      <doma:fixValues/>
+    </doma:valueInformation>
+  </doma:content>
+</doma:domain>

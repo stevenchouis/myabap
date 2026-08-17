@@ -49,6 +49,25 @@ define service ZRAP04_SD {
 
 Service Definition 只是一份「這個服務裡有哪些實體」的宣告，本身不能被外部呼叫。要讓它變成一個真正能打 `GET`/`POST` 的 HTTP 端點，需要 **Service Binding**：指定要用哪種協定（本課用 **OData V2 - UI**，這是目前這系統驗證過確實能跑 Fiori Elements 預覽的組合；V4 概念上也存在，但這系統偏舊、沒有特別驗證過 V4 的完整發布流程，不強求）。Service Binding 建立後還要按一個 **Publish** 按鈕，系統才會真的在 ICF（Internet Communication Framework，管理這個系統所有 HTTP 端點的地方）底下掛一個新節點——這一步之前也在 REST 課程學過類似概念（`SICF`），只是 RAP 這邊是透過 Eclipse 精靈自動完成 ICF 註冊，不需要自己手動開 `SICF` 交易碼設定。
 
+**Binding Type 除了協定版本（V2／V4）之外，還有一個「UI」跟「Web API」的分類要選，兩者差異不小（查證 SAP 官方文件 *Service Binding* 頁面確認）**：
+
+| | OData V2 - UI | OData V2 - Web API |
+|---|---|---|
+| 用途 | 讓 SAP Fiori Elements 或其他 UI 客戶端能接上這個服務 | 給「UI 以外」的所有用途用，可以被不特定的消費者（unknown consumer）透過 OData 呼叫 |
+| `$metadata` 內容 | **含 UI 專屬資訊**（標籤、Value Help、Side Effects……這些就是從 rap02 教的 `@UI.*` Annotation／Metadata Extension 轉譯進去的） | **不含任何 UI 專屬資訊**，是一份純技術性的 OData 服務 |
+| Eclipse ADT 的 Preview 功能 | 可以直接開出 Fiori Elements 畫面 | 官方文件明講「Fiori Elements preview: Not available」，沒有這個功能 |
+| 設計定位 | 給你自己的 Fiori 前端用 | 給外部系統整合、第三方消費用，官方建議命名字首用 `API_`（UI 服務對應用 `UI_`） |
+
+**這門課一律選 UI**：因為我們是靠 Eclipse 的 **Preview** 按鈕直接看到 Fiori Elements 畫面來驗證資料對不對，這個功能只有 UI 類型才有；如果選 Web API，Publish 之後只能拿 URL 去 Postman／瀏覽器打純 JSON，看不到渲染出來的畫面，也看不到 rap02 教的 `@UI.*` Annotation 有沒有生效。如果之後你自己的專案裡，這個 OData 服務的目的是給別的系統呼叫（不是你自己的 Fiori 應用），才該選 Web API。
+
+**⚠️ 容易誤解的地方：「Postman／任何 OData 客戶端都能呼叫 UI 類型」不代表兩者沒差**——rap08 用 Postman 直接打過 `ZRAP08_SB`（UI 類型）完全成功，這證實了「能不能被外部工具呼叫」本身**不是** UI 跟 Web API 的差異點，兩者底層都是標準 OData V2 協定，語法、CRUD 操作完全一樣。真正的差異在**定位與治理**，不是技術呼叫能力：
+
+- **穩定性承諾（Release Contract）**：官方文件的 OData Exposure Comparison 表格顯示，只有 **Web API** 類型能在 ADT 右鍵選單走「API State」流程正式**釋出成受保管的 API 契約**（C1／C2 Contract）——一旦釋出，SAP 承諾這個服務的欄位、行為在未來版本升級**不會無預警破壞相容性**。UI 類型沒有這個釋出機制，設計上就是「跟著你的 Fiori 畫面走」，你隨時可能為了改善畫面調整欄位，SAP 不會（也不該）保證它長期穩定。如果有另一個系統要長期依賴你的服務做整合，用 UI 類型技術上「能動」，但沒有任何穩定性保證，你哪天調整了 CDS View，對方可能就悄悄壞掉、沒人事先警告。
+- **`$metadata` 精簡，減少無關雜訊**：同一份文件表格顯示，**UI Service V2 會自動多帶 `SAP__Currencies`／`SAP__UnitsOfMeasure` 這兩個內建 Entity Set**（給 Fiori 畫面的幣別/單位下拉選單用），**Web API V2 完全不會有**——外部系統整合用不到「畫面下拉選單」這種概念，多帶出來只是雜訊。
+- **命名慣例是治理信號**：官方建議 Web API 用 `API_` 字首、UI 服務用 `UI_` 字首，讓團隊一眼分得出「這是給外部系統依賴的正式契約」還是「這是跟著某個 Fiori App 走的內部實作細節」，避免有人誤把 UI 服務當穩定 API 拿去給別的系統整合。
+
+**一句話**：即使 Postman 兩邊都打得通，UI 類型是「支撐我自己的 Fiori 前端」、Web API 是「讓另一套系統長期穩定依賴」，兩者的差異是**承諾等級**，不是**技術能力**。
+
 **⚠️ 為什麼 Service Binding 一定要用 Eclipse 精靈，不能用 ADT API 手動建？** 已經實測過：直接用 curl 對 `POST /sap/bc/adt/businessservices/bindings` 送一份格式完全正確、Schema 完全對的 XML，物件確實會被建立、也能啟用成 Active，但不管怎麼重試 Publish，Gateway 永遠回報 `Service Definition is not available`（`SDDIC_ADT_SRVB 011`）——因為 Eclipse 精靈在建立 Service Binding 的過程中，除了寫入這個 DDIC 物件本身，還會**額外觸發一個只有精靈流程才會做的背景步驟**：把 Service Definition 的 Metadata 編譯、登錄進 Gateway 執行期的模型快取。手動 API 建立完全跳過了這一步，事後也沒有任何方法補救，只能整個物件重新用精靈建一次。
 
 ### Eclipse ADT 操作步驟：建立並發布 Service Binding
