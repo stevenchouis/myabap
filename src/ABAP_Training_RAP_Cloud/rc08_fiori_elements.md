@@ -111,6 +111,25 @@ ENDMETHOD.
 
 **兩相對照，結論非常明確**：SAP Fiori Elements 的 List Report／Object Page 標準範本，Create／Edit 這兩個核心 CRUD 入口是**綁定 Draft 機制**設計的——不是「非 Draft 實體的 Create/Edit 功能比較陽春」，是**標準範本從設計上根本不會為非 Draft 實體生成這兩個按鈕**，即使底層 OData 協定完全支援。這代表：「要不要幫一個 RAP BO 加上 Draft」除了 rc05 教過的「資料一致性、多步驟編輯」考量之外，還有一個很實際的附加後果——**它同時決定了你能不能直接套用 SAP 官方標準生成的 UI 就有完整 CRUD 體驗，還是得放棄標準範本自己客製化畫面（或接受一個功能被閹割的唯讀為主 App）**。
 
+### 實務對照：Report App／標準範本 Maintain App／客製化 Maintain App，BDEF 分別該怎麼設計
+
+上面的結論丟出一個很實際的問題：一般公司開發 Fiori App，有些純粹是報表（Report），有些必須能維護資料（Maintain）——同一個 BDEF＋Draft 的組合，要怎麼對應這幾種不同需求？逐一查證官方文件／範例，三種情境各有明確答案，不是憑空推論：
+
+**情境 1：純 Report（唯讀顯示，不需要任何寫入）**——查證官方 openSAP 教材的課程架構本身就是最好的證據：`week2`（唯讀 List Report App）整週的步驟是「建 DB Table → CDS Data Model → Projection → 加 UI Metadata → 建 Service → 加權限」，**完全沒有 BDEF**；`week3` 標題直接是「Enabling the **Transactional** Behavior of an App」，這才是 BDEF 第一次出場。**結論：純 Report App 不需要 BDEF，CDS View 直接透過 Service Definition 曝露就好**——沒有 BDEF 就沒有任何 CUD 能力，Fiori Elements 自然只會生成唯讀的 List Report／Analytical 畫面，Draft 完全不相關（Draft 是「寫入」概念，沒有寫入動作就沒有 Draft 要解決的問題）。這門課的 rc01（`ZI_RC01_TASK` 剛建好、BDEF 還沒寫）其實就短暫處於這個狀態。
+
+**情境 2：要用官方標準範本自動生成完整 Create／Edit／Delete（跟這一課的 `ZRC08_SB` 一樣）**——查證整個 RAP BDL 語法文件（`ABENBDL_WITH_DRAFT`／`ABENRAP_DRAFT_HANDLING_GLOSRY` 等），**RAP 完全沒有「Sticky Session」這種語法**（這是舊 SAP Gateway V2／CAP 才有的機制，ABAP RAP 的 BDL 文法裡找不到對應關鍵字）。`with draft;` 是 RAP 讓官方標準範本自動生成 Create／Edit 按鈕的**唯一路徑**，沒有第二條路可以繞——這就是這一課已經實測證實的結論，這裡補上「查過官方文件確認真的沒有替代方案」這一步。
+
+**情境 3：需要維護資料，但不想要 Draft 那套「可以存一半、多 Session 續編、按 Activate 才真正生效」的語意**（例如簡單的設定型維護畫面，填完就直接存檔生效，不需要草稿概念）——BDEF 依然宣告 `create;`/`update;`/`delete;`（非 Draft，跟這一課的 `ZI_RC01_TASK` 一樣，OData 協定層完全支援，rc07 已用 Swagger 證實），但**不能指望框架自動生按鈕**，實務上有兩條路：
+
+  - **放棄標準範本，自己刻 UI**：用 Fiori Elements 的 Custom Page／manifest 擴充點手動加一個 Create 按鈕去打 `POST`，或整個改用 Freestyle SAPUI5——工程量最大，但完全不用碰 Draft 的額外機制（Draft Table、五個標準 Action、`%is_draft`）。
+  - **用 RAP 的 Factory Action**（查證官方範例 `ABENBDL_ACTION3_ABEXA`）：BDEF 宣告 `factory action <名稱> [1];`（instance-bound，複製一筆既有實例的值）或 `static factory action <名稱> [1];`（static，不需要來源實例，直接帶預設值建一筆新的），**本質上內部一樣是走 `CREATE`**，只是包成一個具名 Action 對外曝露。因為這一課已經證實 Action 按鈕（`@UI.lineItem: [{ type: #FOR_ACTION, ... }]`）**在非 Draft 實體上完全正常顯示**（`ZI_RC01_TASK` 的 Mark Done 按鈕），Factory Action 可以借同一招掛出一個「New」風格的按鈕，繞開框架綁定 Draft 才給 Create 的限制——代價是使用者體驗變成一個明確命名的 Action 按鈕（如「New Task」），不是標準內建的「+」圖示，但換來完全不用管理 Draft Table／Draft Action 這一整套機制。
+
+| 情境 | BDEF 設計 | 標準範本會不會自動生按鈕 |
+|---|---|---|
+| 純 Report | 不建 BDEF，只曝露 CDS View | 唯讀，不適用 Create/Edit 的問題 |
+| 標準 Maintain App | `create;`/`update;`/`delete;` ＋ `with draft;` | 會，Create／Edit 全自動生成（這一課 `ZRC08_SB` 已驗證） |
+| 客製化 Maintain App（不要 Draft） | `create;`/`update;`/`delete;`，非 Draft，＋ Factory Action 或自訂 UI | 不會自動生，要自己做（Factory Action 按鈕或客製化畫面） |
+
 ## 學習目標
 
 - 能寫出 `@UI.headerInfo`／`@UI.facet`／`@UI.lineItem`／`@UI.identification`／`@UI.selectionField` 的基本語法，知道 headerInfo/facet 跟 lineItem/identification 分別寫在 `annotate entity ... with` 區塊的外面/裡面
@@ -119,6 +138,7 @@ ENDMETHOD.
 - 知道 RAP Query Provider 的「完整性檢查」機制：呼叫端實際觸碰到的每個查詢面向（分頁／排序／篩選）都要呼叫對應 getter 確認知情，即使選擇忽略回傳值，不然會報 `RAP_RUNTIME/014`；知道用 Swagger 測過一輪不代表涵蓋所有真實呼叫情境，Fiori Elements 元件的實際請求可能觸發更多面向
 - 知道 `@Metadata.allowExtensions: true` 是 CDS View 能不能掛 Metadata Extension 的前提，缺了會在啟用 Metadata Extension 時直接報錯
 - **能講出這門課最重要的收尾結論**：OData V4 UI 服務如果背後實體沒有 Draft，Fiori Elements 標準範本的 List Report／Object Page 天生不會生成 Create／Edit 按鈕（即使協定層完全支援），這是 SAP 官方在 Service Binding 編輯器裡就寫明的行為；要有標準範本的完整 CRUD 體驗，Draft 是必要前提
+- 能對照三種實務情境選擇對應的 BDEF 設計：純 Report（不建 BDEF，只曝露 CDS View）、標準 Maintain App（`create;`/`update;`/`delete;` + `with draft;`，唯一能讓框架自動生 Create/Edit 按鈕的路，RAP 沒有 Sticky Session 這種替代機制）、客製化 Maintain App（非 Draft + Factory Action 按鈕或自己刻 UI，代價是要自己處理按鈕/畫面）
 
 ## 物件清單
 
@@ -143,7 +163,7 @@ ENDMETHOD.
 
 ## 思考題
 
-1. 這一課發現「非 Draft 實體在標準範本裡沒有 Create/Edit 按鈕」。如果你手上有一個像 `ZI_RC01_TASK` 這樣、基於教學考量刻意不用 Draft 的既有實體，但業務需求就是要在 Fiori 畫面上做到新增/編輯，你會怎麼選？（提示：至少三個方向——事後幫它加 Draft、放棄標準範本自己開發 UI、或接受只能靠 Postman/自訂 Action 操作，各自的代價是什麼）
+1. 講義的「實務對照」表格列出三種情境（Report／標準 Maintain／客製化 Maintain）。如果要幫 `ZI_RC01_TASK` 加一個 Factory Action（例如 `static factory action createDefault [1];`，用預設值建一筆新 Task），BDEF 跟 Metadata Extension 各要改哪裡？（提示：BDEF 語法可以直接照抄 `ABENBDL_ACTION3_ABEXA` 的 `static factory action`；UI 那邊要照抄這一課 `markDone` 掛 `@UI.lineItem`/`@UI.identification` 的 `{ type: #FOR_ACTION, ... }` 寫法，這一課還沒實際做過，是留給你的動手練習）
 2. `IF_RAP_QUERY_PROVIDER` 的完整性檢查這一課只踩到 `get_paging`／`get_sort_elements` 兩個。如果 Value Help 的篩選欄位（Status Text）被使用者實際輸入文字查詢，你覺得會不會再冒出 `get_filter` 相關的完整性檢查要求？要怎麼設計一個實驗驗證（提示：這一課的 `TRY...CATCH cx_rap_query_filter_no_range` 已經呼叫過 `get_filter()->get_as_ranges()`，但没有真的照篩選條件過濾 `lt_result`，這個實驗可以順便補上這個缺口）
 3. 這門課從 rc01 到 rc08，走過 CDS View Entity、`strict(2)`、CUD、Determination/Validation、Action、Draft、Composition、Service Binding、UI Annotation——如果要用一句話跟同事介紹「這個 Cloud 環境跟舊 On-Premise 系統的關鍵差異」，你會怎麼講？（提示：不是「語法比較新」這麼籠統，具體想想 rc02（白名單 Dump）、rc07（Swagger 直接測）、這一課（Draft/CRUD）分別代表哪一種「舊系統做不到、這裡做得到」的能力）
 
