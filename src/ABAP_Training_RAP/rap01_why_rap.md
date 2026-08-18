@@ -99,18 +99,48 @@ lock master
 
 ABAP Cloud 語言版本要 S/4HANA **2022 以後**的 On-Premise 系統，或 SAP BTP ABAP Environment（Cloud）才能啟用——這個系統的套件沒有這個開關，所以連帶地新式 CDS View Entity／BDEF strict 語法也用不了（這兩者是 ABAP Cloud 世代一起引進的語言特性）。
 
-### RAP 在 On-Premise 版本的演進歷程（2026-08-18 查證，用來釐清「這個系統的限制」跟「RAP 本身的成熟度」是兩件事）
+### RAP 在 On-Premise 版本的演進歷程（2026-08-18 查證，用官方逐版語法對照表取代網路二手轉述）
 
-網路上流傳一個版本演進說法：1709/1809 沒有 RAP（只有舊式 ABAP Programming Model for SAP Fiori，靠 BOPF+CDS+SEGW）；1909 RAP 初代只支援 Unmanaged Non-Draft，完全不支援 Managed／Draft；2020 才引進 Managed 與 Draft 基礎；2021 起 Unmanaged＋Draft 才算真正成熟（子表格動態新增、Side Effects、完整 Feature Control 等）。這個敘事整體方向沒錯（RAP 的**完整度／穩定度／官方推薦程度**確實逐年提升），但拿去對照官方 ABAP Keyword Documentation 的逐版 Release Note 後，發現兩個具體版本點需要更正：
+網路上流傳一個版本演進說法：1709/1809 沒有 RAP；1909 RAP 初代只支援 Unmanaged Non-Draft，完全不支援 Managed／Draft；2020 才引進 Managed 與 Draft 基礎；2021 起 Unmanaged＋Draft 才算真正成熟。查證後找到最權威的第一手資料——官方 ABAP Keyword Documentation 的 **`ABENRAP_FEATURE_TABLE`**，這份文件逐一列出**每一個 RAP BDL 語法元素**在四個維度的導入版本：ABAP Cloud 季度版號、**ABAP Release On-Premise 版號**、SAP BTP ABAP Environment、SAP S/4HANA Cloud Public Edition。對照這系統已確認的版本（`SAP_BASIS 754` = On-Premise 7.54 = **S/4HANA 1909**），可以把常見的版本號換算成年份：7.53≈1809、7.54=1909、7.55≈2020、7.56≈2021、7.57≈2022、7.58≈2023（逐年遞增 0.01，這個對照關係本身沒有官方單一頁面直接列出，是用「這系統確認是 7.54=1909」這個錨點反推的，屬於合理推論不是官方逐字聲明）。
 
-- **❌「1909 完全不支援 Managed BO」不準確**——官方文件 `ABENNEWS-754-CDS_BDL`（ABAP 7.54 版本異動說明）白紙黑字寫著：「新的 `managed` 陳述式可以用來建立 Managed RAP BO……這個情境是給從零開始的 Greenfield 開發用的」。**ABAP 7.54 正是這個系統確認的版本**（AMDP 課程開課前已查證 `SAP_BASIS 754` = **S/4HANA 1909**）——代表 `managed` 這個 BDL 關鍵字，語法上從 1909 一開始就有，不是 2020 才出現。
-- **❌「1909 完全不支援 Draft」也不準確**——官方 `with draft` 語法元素本身沒有在 1909 之後才出現的證據；更直接的是，**這系統實測**：用暫時性驗證物件寫 `managed implementation in class ... unique; with draft; define behavior for ... { create; update; delete; }`，`checkruns` 語法檢查完全沒有對 `with draft;` 這一行報錯（唯一的錯誤是別的地方，跟 draft 語法無關）——代表這個 1909 系統的 BDL 剖析器本身認得 `with draft` 這個語法元素。**但這只確認了「語法能編譯」，沒有進一步端對端驗證 Unmanaged＋Draft 組合在這系統上實際執行是否正常**（本課程從未實際測過這個組合，如果之後有需要，要另外完整驗證，不能只憑編譯通過就假設能用）。
+**查表結果，需要更正的地方比原本更多**：
 
-**這兩點跟這門課已經記錄的重大發現（見 rap03）合起來看，能拼出更精確的圖像**：這個系統的 RAP **語言層（BDL 語法）**其實比「1909 = 只有 Unmanaged Non-Draft」這個簡化敘事支援更多東西（`managed`、`with draft` 都編譯得過）；真正卡住這門課、逼我們從 rap03 起改教 Unmanaged 的，是**執行層**的另一個獨立限制——`CL_CSP_MD_METADATA_FACTORY` 這個類別會檢查 Managed RAP BO 所在套件是否在一份 SAP 內部硬編碼白名單裡，不在清單裡（任何客戶自訂套件都不在）就用致命訊息擋下 CUD 操作，程式碼裡甚至留著開發者自己寫的英文註解「csp isn't released for public usage until now」。**這不是「這個 ABAP 版本沒有 Managed 這個語言功能」，而是「這一版的 Managed 執行引擎，SAP 官方還沒把它對客戶套件正式開放」**——是語言語法可用性（跟版本綁定）跟框架執行期是否正式對外開放（可能是同一版本內的功能開關／逐步 Rollout 決策，不一定完全跟 ABAP 版本號綁死）這兩個不同維度的差異。網路上「1909 不支援 Managed」這種說法，很可能就是把「用了會 Dump、SAP 沒開放」簡化成了「沒有這個功能」，兩者實際體驗確實很像（都是用不了），但背後機制不同，值得說清楚。
+| 語法元素 | On-Premise 版號 | 對應年份（推算） | 備註 |
+|---|---|---|---|
+| `unmanaged`（基礎關鍵字） | **7.53** | **≈1809** | 比 `managed` 早一版，代表 Unmanaged RAP 的起點比常見說法早一個年度版本 |
+| `managed`（基礎關鍵字） | **7.54** | **1909** | 官方逐版文件白紙黑字記載，這系統就是這個版本 |
+| `create`/`update`/`delete`（CRUD） | Unmanaged 7.53／Managed 7.54 | 1809／1909 | 兩種模式從各自起點就有基本 CRUD |
+| `with draft`／`draft table`（Draft 機制本身） | **7.55** | **≈2020** | 官方表格記載 Draft **不是** 1909 就有，是下一版才加入 |
+| `with additional save`／`with unmanaged save`（Managed 存檔策略） | 7.55 | ≈2020 | |
+| `field(mandatory:create)`／`field(readonly:update)`（欄位動態限定語法） | 7.55 | ≈2020 | 這正是本課程 rap09 加碼段落實測不支援的那個語法——**跟這系統版本推算一致**：7.54 這系統理論上不該有這個語法 |
+| `authorization master(global)`／`lock:none`／`strict`（一般模式） | 7.56 | ≈2021 | |
+| `strict(2)`（官方建議的版本） | **7.57** | **≈2022** | |
+| Late Numbering：**Unmanaged BO with Draft** 與 Managed BO | **7.57** | **≈2022** | 官方表格特別把「Unmanaged 不帶 Draft」（7.53）跟「Unmanaged 帶 Draft」（7.57）分兩欄列，差了整整 4 個版本 |
+| RAP Extensibility（`extensible`）／`with full data` | 7.57 | ≈2022 | |
+| **Side Effects**（`side effects { ... }`，欄位聯動更新） | **7.58** | **≈2023** | |
 
-**對這門課的實務意義沒有改變**：不管是哪一種原因，這個系統上 Managed BDEF 的 CUD 操作一律無法端對端執行，Unmanaged 依然是唯一能真正驗證的路線，rap03 起的教學安排不需要調整。這段更正的價值純粹是**知識準確度**——讓學員知道「哪個版本開始有哪個功能」跟「這個系統上這個功能能不能用」是要分開判斷的兩件事，遇到其他系統（尤其版本 ≥ 2020/2021）時，不能直接套用這系統的限制去推論那些系統也一樣受限。
+**對使用者原本兩個問題的回答**：
 
-**2020／2021 這兩個版本點目前沒有查到對應的官方逐版語法佐證**（官方 Release Note 是按 ABAP 語言版本號編號，不是按年份，要交叉比對版本號對照表才能精確定位，這部分還沒逐一查完），先如實記錄「這個方向的敘事大致可信、但兩個具體版本點的細節需要訂正」這個結論，之後如果有需要更精確的版本對照，再進一步查證。
+- **Unmanaged BO 要有「完整功能」（含 Draft、正確的 Late Numbering、Side Effects 這類真正影響 Fiori Elements 互動體驗的機制），落在 On-Premise 7.57～7.58 ≈ S/4HANA 2022～2023**，比網路上常說的「2021 起成熟」還要晚一到兩個年度版本——關鍵卡點是「Unmanaged BO with Draft」的 Late Numbering 要到 7.57 才有官方支援（7.53～7.56 之間雖然 Unmanaged+Draft 語法可能已經能寫，但編號機制不完整），Side Effects 更是要等到 7.58。
+- **Managed BO 要有「完整功能」（含 `strict(2)` 官方建議的嚴格模式、完整 Extensibility、`with full data` 存檔策略），落在 On-Premise 7.57 ≈ S/4HANA 2022**；如果只要「基本能動」（CRUD、Association、Action、Validation、Determination），On-Premise 7.54 ≈ **S/4HANA 1909** 就有了（跟先前版本已經更正過的結論一致——`managed` 語法本身從 1909 就存在）。
+
+**⚠️ 這系統本身有一個目前無法解釋的矛盾，如實記錄**：官方表格說 `with draft` 要 On-Premise 7.55 才有，但這系統確認是 7.54——照理說 `with draft;` 這行應該編譯不過。可是本課程用暫時性驗證物件實測（`managed implementation in class ... unique; with draft; define behavior for ...`），`checkruns` 完全沒有對 `with draft;` 這一行報錯（跟這系統對 `strict`／`readonly:update` 這些真正不支援的語法會給出的明確 token 錯誤完全不同）。可能的解釋：這系統的 Support Package 可能對 BDL 剖析器做過零星回補（Patch 有時會把下一版的個別語法元素提前開放，不代表整個版本的功能集都跟著補齊）；也可能是官方表格本身有誤差。**沒有進一步查證的管道**（Claude 沒有 S-user 帳號查不到這系統精確的 SP 清單），如實記錄這個矛盾，不強行給出結論。不影響本課程的教學安排——不管 `with draft` 語法能不能編譯，Managed CUD 執行期一律被 `CL_CSP_MD_METADATA_FACTORY` 白名單擋住（見 rap03），Unmanaged Non-Draft 依然是這系統唯一能端對端驗證的路線，這門課也從未測過 Draft（不管 Managed 或 Unmanaged）在這系統上的實際執行結果。
+
+**為什麼只列 On-Premise，沒有列 Cloud（Private/Public）**：`ABENRAP_FEATURE_TABLE` 其實同時列了四個維度（上面只挑了 On-Premise 這欄講），Cloud 那兩欄（SAP BTP ABAP Environment／S/4HANA Cloud Public Edition）用的是**季度發布代碼**（`YYMM` 格式，例如 `2208` = 2022 年 8 月），不是年度版本號，而且這兩個 Cloud 版本幾乎每次都同步拿到同一個功能（代表 ABAP Cloud 語言版本是共用同一套底層基礎設施）。之所以只講 On-Premise，單純是因為**這個專案／這門課連的系統就是 On-Premise S/4HANA**（`SAP_BASIS 754`），Cloud 版本的時程對這個系統沒有直接意義；但既然官方表格本來就有 Cloud 資料，這裡補上對照——**Cloud 版本幾乎每個功能都比對應的 On-Premise 版本早 4～9 個月拿到**（例如 `strict(2)`：Cloud 是 `2208`＝2022 年 8 月，On-Premise 7.57 對應的 S/4HANA 2022 是同年稍晚才發行；Side Effects：Cloud `2302`＝2023 年 2 月，On-Premise 7.58 對應 S/4HANA 2023 要到年底），這是 SAP「Cloud-first」交付模式的典型現象——新語言特性先在 Cloud（BTP ABAP Environment／S/4HANA Cloud）上線驗證，隔幾個月才打包進下一個 On-Premise 年度版本。如果之後要接上一個真正的 ABAP Cloud 語言版本系統（rap01 前面提過的規劃），到時候應該直接查 Cloud 這兩欄的版號，不能沿用這裡整理的 On-Premise 對照。
+
+### RAP BO（Business Object）這個詞是什麼？
+
+這門課從 rap01 開始就一直用「BO」這個縮寫（Managed BO／Unmanaged BO／RAP BO），這裡正式說明：**BO＝Business Object（業務物件），在 RAP 的語境下全稱是 RAP Business Object（RAP BO）**，是官方 ABAP Keyword Documentation 定義的正式詞彙（`ABENRAP_BO_GLOSRY`）。
+
+一個 RAP BO 代表現實世界的一個業務實體（例如「訂單」「客戶」「產品」），主要由一份 **Behavior Definition（BDEF）** 描述——BDEF 針對一組階層式排列的 CDS Entity（Root Entity + Child Entity，透過 Composition 串起來，就是這門課一路在講的 Table→CDS View→BDEF 那個結構），定義它的 **RAP BO Operations**（CRUD、Action、Function 這些能做的操作）跟 **Behavior Characteristics**（欄位限定、鎖定、權限這些規則）。RAP BO 的資料在執行期存在一個叫 **Transactional Buffer**（交易緩衝區）的暫存區，直到 `COMMIT ENTITIES` 才真正寫回資料庫。
+
+官方文件把 RAP BO 分成三種（依「Transactional Buffer 由誰提供」區分）：
+
+- **Managed RAP BO**：Buffer 全部或部分由框架自動提供（**Managed RAP BO Provider**）——這就是這門課 Part A 教的 `managed;` 語法，CRUD 不用自己寫底層存取邏輯。
+- **Unmanaged RAP BO**：Buffer 由開發者自己在 **ABAP Behavior Implementation**（就是這門課的 `lhc_header`/`lhc_item` 這些 Local Handler 類別）裡提供——這就是這系統上真正能跑的路線。
+- **BOPF-based RAP BO**：從既有的 CDS-based BOPF Business Object（比 RAP 更早的框架）遷移過來的，不能從零開始新建，這門課沒有涉及。
+
+**這跟你在 rap01 開頭讀到的「舊式 ABAP Programming Model for SAP Fiori（基於 BOPF+CDS+SEGW）」的 BOPF 是同一個概念家族**——BOPF（Business Object Processing Framework）本身也有自己的「Business Object」概念，RAP 是 BOPF 之後的下一代框架，兩者的「BO」在精神上一脈相承（都是「用宣告式方式定義一個業務實體的資料+行為」），但技術實作完全不同（RAP BO 靠 CDS+BDEF+EML，BOPF BO 靠自己的一套 Node/Association/Action Repository API），不能直接互換概念——這也是為什麼「BOPF-based RAP BO」需要一個專門的遷移機制，而不是直接相容。
 
 ### ⚠️ OData 服務發布：V2 能力有限，V4 完全不能透過 ADT 發布
 
@@ -157,6 +187,8 @@ Publish 成功之後，Eclipse Service Binding 編輯器的 `Preview...` 按鈕�
 - 能講出 ABAP Cloud 限制語法大致限制了哪些傳統寫法（Released API、無 Classical Dynpro、無 FORM/PERFORM 等）
 - 能講出本課程 OData 服務發布的實際限制（V2 API 存在但卡在 Gateway 設定、V4 無 ADT 發布 API），知道最後一步要靠 SAP GUI 手動操作
 - 知道本課程的範圍界線：後端 OData Service＋CDS View 的 `@UI.*` Annotation 語法基礎（為銜接 Fiori Elements 課程鋪路），但不包含完整的 Fiori Elements 畫面設計技巧
+- 知道「BO」是 RAP Business Object 的縮寫，知道 Managed／Unmanaged／BOPF-based 三種 RAP BO 的差異來自「Transactional Buffer 由誰提供」
+- 能講出 Unmanaged／Managed BO 要有「完整功能」（Draft、Late Numbering、Side Effects 等）大約要到哪個 On-Premise 版本區間（≈S/4HANA 2022～2023），並知道這個資訊查證自官方 `ABENRAP_FEATURE_TABLE` 逐版語法對照表，不是網路二手轉述
 
 ## 下一步預告
 

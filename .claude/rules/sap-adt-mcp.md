@@ -669,7 +669,11 @@ POST `/sap/bc/adt/businessservices/bindings`（root `srvb:serviceBinding`，內�
 - **教學上的影響**：這系統上**任何 Managed BDEF 的 CUD 操作都無法真正執行**（不管是透過 EML、OData、Fiori Elements Create 按鈕，走的都是同一套底層 Managed Runtime），只能停留在「語法正確、成功啟用」層級，沒辦法端對端驗證。RAP 課程如果要教「真的能寫入資料」的完整流程，這個系統目前只能靠 **Unmanaged**（見第 44 節，已證實不受這個限制影響）。
 - **待確認**：需要使用者／Basis 查證這套系統目前的 `SAP_BASIS`／`S4CORE` Support Package 等級，並視需要向 SAP Support Portal 查詢對應的 OSS Note（搜尋關鍵字 `Managed runtime is not released for productive usage` 或 `CL_CSP_MD_METADATA_FACTORY`）——Claude 這邊沒有 S-user 帳號，查不到官方 Note 編號與解除限制所需的確切 SP／Note。
 
-**⚠️ 措辭精確度更正（2026-08-18，查證 RAP 版本演進歷程時發現）**：上面「1909 這個版本的初期……仍處於白名單管控階段」這句話容易被誤讀成「1909 這個 ABAP 版本語法上不支援 Managed」——**這是不準確的**。官方 ABAP Keyword Documentation 的 `ABENNEWS-754-CDS_BDL`（ABAP 7.54 版本異動說明，7.54 正是這套系統確認的版本，也是官方對照表裡的 S/4HANA 1909）明確記載：「新的 `managed` 陳述式可以用來建立 Managed RAP BO……這個情境是給從零開始的 Greenfield 開發用的」——代表 `managed` 這個 BDL 關鍵字**語法上**從 1909 一開始就存在，不是後來版本才加入的。另外用暫時性驗證物件實測 `with draft;` 語法，`checkruns` 完全沒有對這一行報錯，代表這系統的 BDL 剖析器也認得 `with draft`。**正確的說法是**：Managed／Draft 的 **BDL 語言語法**從 1909 就已經存在，這裡卡住的是**執行期**——`CL_CSP_MD_METADATA_FACTORY` 這個白名單機制決定「Managed Runtime 的寫入引擎要不要對這個套件開放」，這是一個獨立於「語言版本號」的功能閘門／Rollout 決策（可能跟 Support Package 等級或 SAP 內部產品化進度有關，不是單純「ABAP 7.54 沒有這個語言功能」）。完整查證過程與更多版本佐證見 `src/ABAP_Training_RAP/rap01_why_rap.md` 新增的「RAP 在 On-Premise 版本的演進歷程」段落。
+**⚠️ 措辭精確度更正（2026-08-18，查證 RAP 版本演進歷程時發現，後續同日找到更權威的官方逐版對照表後再次更新）**：上面「1909 這個版本的初期……仍處於白名單管控階段」這句話容易被誤讀成「1909 這個 ABAP 版本語法上不支援 Managed」——**這是不準確的**。官方 ABAP Keyword Documentation 的 `ABENNEWS-754-CDS_BDL`（ABAP 7.54 版本異動說明，7.54 正是這套系統確認的版本，也是官方對照表裡的 S/4HANA 1909）明確記載：「新的 `managed` 陳述式可以用來建立 Managed RAP BO……這個情境是給從零開始的 Greenfield 開發用的」——代表 `managed` 這個 BDL 關鍵字**語法上**從 1909 一開始就存在，不是後來版本才加入的。**正確的說法是**：Managed 的 **BDL 語言語法**從 1909 就已經存在，這裡卡住的是**執行期**——`CL_CSP_MD_METADATA_FACTORY` 這個白名單機制決定「Managed Runtime 的寫入引擎要不要對這個套件開放」，這是一個獨立於「語言版本號」的功能閘門／Rollout 決策。
+
+**⚠️⚠️ Draft 的部分後續發現更複雜、留下一個未解的矛盾**：後來找到更權威的官方文件 `ABENRAP_FEATURE_TABLE`（逐一列出每個 RAP BDL 語法元素在 On-Premise／Cloud 各版本的導入時間點），裡面明確記載 `with draft`／`draft table` 是 **On-Premise 7.55**（≈S/4HANA 2020）才導入，不是 7.54（1909）——這代表這系統（確認是 7.54）理論上不該認得 `with draft` 語法。但本課程用暫時性驗證物件實測（`managed implementation in class ... unique; with draft; define behavior for ...`），`checkruns` 完全沒有對 `with draft;` 這一行報錯（跟這系統對 `strict`／`readonly:update` 這些真正不支援的語法會給出的明確 token 錯誤完全不同）。**這是一個目前無法解釋的矛盾，如實記錄，沒有進一步查證管道**（可能是這系統的 Support Package 對 BDL 剖析器做過零星語法回補，也可能是官方表格跟這系統的實際行為有落差；Claude 沒有 S-user 帳號查不到這系統精確的 SP 清單）。不影響教學安排——不管 `with draft` 語法能不能編譯，Managed CUD 執行期一律被白名單擋住，這門課也從未測過 Draft（Managed 或 Unmanaged）在這系統上的實際執行結果。
+
+**完整查證過程、`ABENRAP_FEATURE_TABLE` 的更多版本對照數據、Managed／Unmanaged 各自「完整功能」對應的版本區間（Managed≈2022／Unmanaged+Draft≈2022~2023），見 `src/ABAP_Training_RAP/rap01_why_rap.md` 的「RAP 在 On-Premise 版本的演進歷程」段落**——這是查詢 RAP 任何語法元素導入版本的標準查證管道，之後遇到類似「這個語法哪個版本才有」的問題，優先查 `ABENRAP_FEATURE_TABLE` 這份文件，比對照零散的 `ABENNEWS-nnn-CDS_BDL` 逐版 Release Note 或憑印象猜測更快更準——它是唯一一份把所有 BDL 語法元素、按官方四個版本維度（Cloud 季度版／On-Premise 年度版／BTP ABAP Environment／S/4HANA Cloud Public Edition）整理在同一張表的權威來源。
 
 ## 44. ✅ Unmanaged BDEF 完全不受第 43 節的白名單限制影響，已端對端驗證成功（含 `programrun` 無頭驗證）（2026-08-02 實測，RAP 課程 rap03）
 
@@ -934,3 +938,20 @@ rap03 建立 `ZI_RAP03_UMTEST` 時完全沒有做 UI Annotation（當時重點�
   ```
   代表 `GET PERMISSIONS` 這個 EML 語句本身也停在更舊／不同的語法版本（沒有進一步深挖找替代寫法，判斷投入產出比低——這條路的驗證意義主要是給 Claude 自己看，真正的驗收管道本來就是使用者的 Eclipse Preview）。**只確認了語法編譯／啟用乾淨、`programrun` 重跑既有情境無回歸，執行期「Update 時欄位真的變唯讀」這件事最終是靠使用者在 Eclipse Preview 手動確認的。**
 - **方法論小結**：這是本課程第二次「官方語法 A 不支援，但語意相近的官方替代方案 B 意外可行」的案例（第一次是第 40.12/後續節的 Service Definition schema 反查）——遇到某個 RAP BDL 語法報錯，不要只滿足於「確認不支援、放棄需求」，可以進一步想「這個需求有沒有另一套官方機制能達成同樣效果」，再逐一實測，往往能找到比預期更好的解法。
+
+## 56. `ABENRAP_FEATURE_TABLE`：查證 RAP BDL 任何語法元素「哪個版本才有」的權威單一來源，含 On-Premise／Cloud 四維度版號對照（2026-08-18 發現，RAP 課程回頭補課）
+
+- **背景**：使用者提供一段網路流傳的 RAP 版本演進說法（1909/2020/2021 各自支援什麼），要求查證。一開始只查到零散的 `ABENNEWS-<版本>-CDS_BDL` 逐版 Release Note（例如 `ABENNEWS-754-CDS_BDL` 提到 `managed` 語句），這種查法效率低（要一個版本一個版本翻）、且容易漏掉「這個語法在哪個版本才『完整』」這種細節（例如 Late Numbering 對 Unmanaged+Draft 跟對 Unmanaged 沒有 Draft 是兩個不同的導入版本）。
+- **✅ 找到更好的查證管道**：`ABENRAP_FEATURE_TABLE` 這份官方文件，把**幾乎所有 RAP BDL 語法元素**（從 `managed`/`unmanaged` 這種基礎關鍵字，到 `side effects`／`instance hierarchy`／`copy action` 這種進階功能）整理成一張表，每個語法元素同時列出四個版本維度：
+  1. **ABAP Release, quarterly**（Cloud 內部技術版號，遞增很快）
+  2. **ABAP Release, on-premise**（就是這系統確認的 `7.54` 這種版號，年度遞增）
+  3. **SAP BTP ABAP Environment**（Cloud Private，`YYMM` 季度代碼，如 `2208`＝2022年8月）
+  4. **SAP S/4HANA Cloud Public Edition**（幾乎每次都跟 BTP ABAP Environment 同步拿到）
+- **On-Premise 版號跟年份的換算**：這份文件本身沒有直接寫「7.54＝1909」這種換算，但拿這個專案已經確認的錨點（`SAP_BASIS 754`＝這系統＝S/4HANA 1909）反推，可以得到 7.53≈1809、7.54=1909、7.55≈2020、7.56≈2021、7.57≈2022、7.58≈2023 這個對照（逐年遞增 0.01）——**這是合理推論，不是官方單一頁面直接聲明的**，日後如果要更精確驗證，可以找官方 S/4HANA 版本與 SAP_BASIS 對照表交叉確認。
+- **查表得到的具體發現**（完整內容已寫進 `src/ABAP_Training_RAP/rap01_why_rap.md`「RAP 在 On-Premise 版本的演進歷程」段落）：
+  - `unmanaged` 基礎關鍵字是 **7.53**（≈1809），比 `managed`（7.54＝1909）早一版——代表 Unmanaged RAP 的起點比「1909 才有 RAP」這種常見說法還要早一個年度版本。
+  - `with draft`／`draft table` 是 **7.55**（≈2020），不是 1909 就有（但這系統實測 `with draft;` 語法能編譯，形成一個記錄在案、未解的矛盾，見上面第 43 節的更新）。
+  - Late Numbering 對「**Unmanaged BO with Draft**」跟「Managed BO」都要到 **7.57**（≈2022）才支援，跟「Unmanaged BO without Draft」的 7.53 差了整整 4 個版本——這是判斷「Unmanaged+Draft 何時真正成熟」最關鍵的一筆資料。
+  - `strict(2)`（官方建議的 BDEF 嚴格模式版本）是 **7.57**（≈2022）；Side Effects（`side effects { ... }`）是 **7.58**（≈2023）。
+  - 綜合結論：**Managed BO「完整功能」落在 On-Premise 7.57≈S/4HANA 2022；Unmanaged BO「完整功能」（含 Draft 的完整 Late Numbering、Side Effects）落在 7.57～7.58≈S/4HANA 2022～2023**——都比網路上常見的「2021 起成熟」說法要晚。
+- **方法論教訓**：遇到「這個 SAP 語法/功能哪個版本才有」這類問題，**優先搜尋官方是否有整理成單一對照表的文件**（關鍵字可以試 `feature table`／`release overview`／`syntax elements and release`），比逐一翻閱零散的逐版 Release Note 更有效率、更不容易漏掉細節（尤其是「同一個語法在不同情境下導入版本不同」這種細節，例如這次的 Late Numbering 分 Unmanaged 有無 Draft 兩欄）。這份 `ABENRAP_FEATURE_TABLE` 之後任何 RAP 課程問到版本相關問題都應該優先查這裡。
