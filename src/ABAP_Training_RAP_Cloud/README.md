@@ -1,6 +1,6 @@
 # RAP Cloud 實戰課程（SAP BTP ABAP Environment）
 
-RAP 課程（`src/ABAP_Training_RAP/`，rap01–rap09，2026-08-17 正式結案）的延伸篇。2026-08-18 定案開課，課綱規劃中，尚未出題。
+RAP 課程（`src/ABAP_Training_RAP/`，rap01–rap09，2026-08-17 正式結案）的延伸篇。2026-08-18 定案開課，rc01～rc08（期末）已全部出題並驗收完成，**2026-08-19 正式結案**。
 
 ## 為什麼要開這門課、跟既有 RAP 課程的分工
 
@@ -68,7 +68,7 @@ RAP 課程（`src/ABAP_Training_RAP/`，rap01–rap09，2026-08-17 正式結案�
 | rc05 | Draft | 舊課程完全驗證不了的部分 | ✅ 已完成（2026-08-19，全新獨立實體 `ZI_RC05_NOTE`／`ZRC05_NOTE`／`ZRC05_NOTE_D`，`with draft;`＋五個標準 Draft Action，`run_unit_tests` ALL TESTS PASSED 2/2，兩測試一次過、無需除錯；核心發現：Draft 完全由框架處理，不需要任何 ABP 實作，是這門課第一次不用碰 Local Types 的一課） |
 | rc06 | Composition／Association（Header-Item） | 對照舊課程 rap08，含 `%cid_ref` vs `%key` 的父鍵引用規則 | ✅ 已完成（2026-08-19，`ZI_RC06_ORDER`／`ZI_RC06_ORDER_I` Header-Item，`run_unit_tests` ALL TESTS PASSED 2/2；核心發現：`lock dependent by _Header` 官方現行語法直接可用（對照舊課程 workaround）、Managed Composition 的 Cascading Delete 完全由框架處理（`ZBP_I_RC06_ORDER` 純空殼）、EML 父子關聯要用 `%cid_ref`（推翻舊課程 rap08 的 `%key` 結論）） |
 | rc07 | Service Definition／Binding／Publish | 這次應該能真正 Publish 成功，走 Fiori Launchpad | ✅ 已完成（2026-08-18，`ZRC07_SD`／`ZRC07_SB`（OData V4 - UI）Publish 成功；用 Eclipse 內建 Swagger UI 直接測 OData 協定：`GET /Task` 200 查到真實資料、`POST /Task` 201 驗證 Determination 透過真正 OData Create 也會觸發、Action 因 `etag master` 被 OData V4 標準的 `428 If-Match` 併發控制擋下（非失敗，已完整解釋）；額外發現 BTP 個人帳號只能走 OAuth 不能 Basic Auth） |
-| rc08（期末整合） | Fiori Elements 基礎＋整合 | `@UI.*` 實際看到畫面效果，整合前面所有主題 | 待出題 |
+| rc08（期末整合） | Fiori Elements 基礎＋整合 | `@UI.*` 實際看到畫面效果，整合前面所有主題 | ✅ 已完成（2026-08-19，`ZI_RC01_TASK`／`ZI_RC05_NOTE` 加 `@UI.*` Metadata Extension，`ZI_RC08_STATUS_VH`＋`ZCL_RC08_STATUS_VH` 實作 Value Help（CDS Custom Entity＋`IF_RAP_QUERY_PROVIDER`）；🏆 核心收尾發現：OData V4 UI 服務若背後實體無 Draft，Fiori Elements 標準範本天生不會產生 Create／Edit 按鈕（即使協定層完全支援），用 `ZRC07_SB`（非 Draft，無 Create/Edit）vs 新建 `ZRC08_SB`（`ZI_RC05_NOTE`，Draft，有 Create/Edit＋Editing Status 篩選）實測對照證實） |
 
 ## 出題工作流程
 
@@ -91,3 +91,4 @@ RAP 課程（`src/ABAP_Training_RAP/`，rap01–rap09，2026-08-17 正式結案�
 - [x] rc05 出題（2026-08-19，Draft，`run_unit_tests` ALL TESTS PASSED 2/2，一次過無需除錯；核心結論：Draft 完全由框架處理，不需要任何 ABP 實作）
 - [x] rc06 出題（2026-08-19，Composition／Association，`run_unit_tests` ALL TESTS PASSED 2/2；核心發現：`lock dependent by _Header` 直接可用、Cascading Delete 框架自動處理、`%cid_ref` 推翻舊課程 `%key` 結論）
 - [x] rc07 出題（2026-08-18，Service Definition／Binding／Publish，`ZRC07_SD`／`ZRC07_SB` Publish 成功；用 Eclipse 內建 Swagger UI 直接驗證 OData V4：GET 查到真資料、POST 驗證 Determination 透過真正協定觸發、Action 因 ETag 併發控制被 428 擋下並完整解釋；額外發現 BTP 個人帳號只能走 OAuth 不能 Basic Auth）
+- [x] rc08 出題（2026-08-19，Fiori Elements 基礎＋整合，`@UI.*` Metadata Extension＋Value Help Custom Entity；核心收尾發現：Draft 是 Fiori Elements 標準範本 Create/Edit 按鈕的前提，`ZRC07_SB`（非 Draft）vs `ZRC08_SB`（`ZI_RC05_NOTE`，Draft）實測對照證實——**RAP Cloud 課程 rc01～rc08 全課程正式結案**）

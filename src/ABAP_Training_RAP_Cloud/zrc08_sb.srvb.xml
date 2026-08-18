@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<srvb:serviceBinding
+    srvb:contract="C1"
+    srvb:releaseSupported="true"
+    srvb:published="true"
+    srvb:bindingCreated="true"
+    srvb:allowedAction="UNPUBLISH"
+    adtcore:name="ZRC08_SB"
+    adtcore:type="SRVB/SVB"
+    adtcore:description="ZRC08_SB Service Binding"
+    adtcore:abapLanguageVersion="cloudDevelopment"
+    xmlns:srvb="http://www.sap.com/adt/ddic/ServiceBindings"
+    xmlns:adtcore="http://www.sap.com/adt/core">
+
+  <adtcore:packageRef adtcore:name="ZRAPCLOUD"/>
+
+  <srvb:services srvb:name="ZRC08_SD">
+    <srvb:content srvb:version="0001" srvb:minorVersion="0" srvb:patchVersion="0" srvb:releaseState="NOT_RELEASED">
+      <srvb:serviceDefinition
+          adtcore:uri="/sap/bc/adt/ddic/srvd/sources/zrc08_sd"
+          adtcore:type="SRVD/SRV"
+          adtcore:name="ZRC08_SD"/>
+    </srvb:content>
+  </srvb:services>
+
+  <srvb:binding srvb:type="ODATA" srvb:version="V4" srvb:category="0">
+    <!-- category="0" = OData V4 - UI -->
+    <srvb:implementation adtcore:name="ZRC08_SB"/>
+  </srvb:binding>
+
+</srvb:serviceBinding>
+
+<!--
+  這個 Service Binding 曝露 ZI_RC05_NOTE（rc05 的 Draft 實體）。
+  Publish 後透過 Preview 實測：List Report 出現 Create 按鈕、
+  Object Page 出現 Edit 按鈕、篩選列多出 Draft 專屬的
+  「Editing Status」欄位（All/Draft/Active）——證實 Draft 是
+  Fiori Elements 標準範本產生完整 CRUD 畫面的前提。
+  對照 ZRC07_SB（ZI_RC01_TASK，非 Draft）：只有 Delete／自訂 Action，
+  沒有 Create／Edit，即使 OData 協定本身完全支援 POST/PATCH。
+-->
