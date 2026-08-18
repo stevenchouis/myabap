@@ -115,7 +115,19 @@ ENDMETHOD.
 
 上面的結論丟出一個很實際的問題：一般公司開發 Fiori App，有些純粹是報表（Report），有些必須能維護資料（Maintain）——同一個 BDEF＋Draft 的組合，要怎麼對應這幾種不同需求？逐一查證官方文件／範例，三種情境各有明確答案，不是憑空推論：
 
-**情境 1：純 Report（唯讀顯示，不需要任何寫入）**——查證官方 openSAP 教材的課程架構本身就是最好的證據：`week2`（唯讀 List Report App）整週的步驟是「建 DB Table → CDS Data Model → Projection → 加 UI Metadata → 建 Service → 加權限」，**完全沒有 BDEF**；`week3` 標題直接是「Enabling the **Transactional** Behavior of an App」，這才是 BDEF 第一次出場。**結論：純 Report App 不需要 BDEF，CDS View 直接透過 Service Definition 曝露就好**——沒有 BDEF 就沒有任何 CUD 能力，Fiori Elements 自然只會生成唯讀的 List Report／Analytical 畫面，Draft 完全不相關（Draft 是「寫入」概念，沒有寫入動作就沒有 Draft 要解決的問題）。這門課的 rc01（`ZI_RC01_TASK` 剛建好、BDEF 還沒寫）其實就短暫處於這個狀態。
+**情境 1：純 Report（唯讀顯示，不需要任何寫入）**——查證官方 openSAP 教材的課程架構本身就是最好的證據：`week2`（唯讀 List Report App）整週的步驟是「建 DB Table → CDS Data Model → Projection → 加 UI Metadata → 建 Service → 加權限」，**完全沒有 BDEF**；`week3` 標題直接是「Enabling the **Transactional** Behavior of an App」，這才是 BDEF 第一次出場。查證官方語法文件 `ABENCDS_SERVICE_DEFINITIONS` 拿到更精確的機制說明：
+
+> Service definitions can expose **regular CDS entities** and **root entities of RAP business objects**：曝露 regular CDS entity（沒有 BDEF 的一般 CDS View）只能做查詢；曝露 RAP BO 的 root entity（有 BDEF）才能做 transactional write。
+
+**結論：純 Report App 完全不需要 BDEF，CDS View 也不需要 `root` 關鍵字，直接拿一個普通的 `define view entity` 建 Service Definition／Service Binding 就能產生一個 Fiori App**。完整步驟：
+
+1. CDS View 本體：`define view entity ZI_RCxx_REPORT as select from <表/其他View> { ... }`——不用 `root`（`root` 是給 RAP BO Composition Root 用的標記，純查詢不需要），不用建 BDEF
+2. Service Definition：`expose ZI_RCxx_REPORT as <alias>;`——這就是官方文件講的「曝露 regular CDS entity」情境
+3. Service Binding：跟這門課一路的做法一樣，選 OData V4 - UI（要 Fiori 畫面）或 OData V4 - Web API（純資料串接，不需要 UI），Publish
+4. `@UI.*` Metadata Extension：一樣可以加 `headerInfo`／`facet`／`lineItem`／`selectionField` 排版 List Report，只是**完全不會有任何 `{ type: #FOR_ACTION, ... }` 這種按鈕標記**，因為沒有 BDEF、沒有 Action 可以掛
+5. Preview：List Report 純顯示，**連 Delete 都不會出現**——這點要跟 `ZI_RC01_TASK` 的情況分清楚：`ZI_RC01_TASK` 雖然沒有 Draft、拿不到 Create/Edit，但它**還是有 BDEF**（`create;`/`update;`/`delete;` 都宣告了），所以還是有 Delete 跟 Mark Done 按鈕；**完全沒有 BDEF 的純 Report CDS View，是徹底的唯讀，連 Delete 都不存在**，這是比「非 Draft」更乾淨的唯讀狀態
+
+這門課的 rc01（`ZI_RC01_TASK` 剛建好、BDEF 還沒寫）其實就短暫處於這個狀態——只是當時還沒有 Service Binding，沒有機會透過畫面驗證。
 
 **情境 2：要用官方標準範本自動生成完整 Create／Edit／Delete（跟這一課的 `ZRC08_SB` 一樣）**——查證整個 RAP BDL 語法文件（`ABENBDL_WITH_DRAFT`／`ABENRAP_DRAFT_HANDLING_GLOSRY` 等），**RAP 完全沒有「Sticky Session」這種語法**（這是舊 SAP Gateway V2／CAP 才有的機制，ABAP RAP 的 BDL 文法裡找不到對應關鍵字）。`with draft;` 是 RAP 讓官方標準範本自動生成 Create／Edit 按鈕的**唯一路徑**，沒有第二條路可以繞——這就是這一課已經實測證實的結論，這裡補上「查過官方文件確認真的沒有替代方案」這一步。
 
