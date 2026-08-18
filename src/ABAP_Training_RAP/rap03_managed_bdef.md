@@ -336,7 +336,9 @@ DB check OK, descr = Unmanaged Test
 | 這系統能不能真正執行 CUD | ❌（見下方原因） | ✅ 已驗證成功 |
 | 適合的情境 | 全新設計的資料物件（官方主推方向） | 包一層 RAP 介面在既有系統/邏輯之上（這系統的標準物件 `C_SalesOrderManage` 就是這樣） |
 
-**為什麼這系統的 Managed CUD 一律失敗**：使用者在 SAP GUI 執行 Managed BDEF 的 EML CREATE，得到 Runtime Error（`MESSAGE_TYPE_X_TEXT`，元件 `BC-ESI-RAP-CSP`），根本原因是 `CL_CSP_MD_METADATA_FACTORY` 裡一段檢查邏輯——這個 CDS Entity 所在的套件，必須在一份**硬編碼白名單**裡（`SBOI_RAP_CSP_TST%` 套件前綴、或幾個 SAP 內部套件/元件），不在清單裡（我們的 `$TMP` 或任何自訂套件都不在）就用致命訊息擋下來，程式碼裡甚至留了開發者自己寫的英文註解：「csp isn't released for public usage until now」。查證 SAP Community 找到一篇 **2019-11** 一字不差的同款回報，時間點跟這套系統的 **S/4HANA 1909** 高度吻合——**這是 1909 版本 Managed Runtime 尚未對客戶開放寫入功能的已知限制，不是我們哪裡設定錯了**。這個檢查只卡在**真正寫入**的時候，純讀取（如 Fiori Elements Preview 顯示清單）不受影響。
+**為什麼這系統的 Managed CUD 一律失敗**：使用者在 SAP GUI 執行 Managed BDEF 的 EML CREATE，得到 Runtime Error（`MESSAGE_TYPE_X_TEXT`，元件 `BC-ESI-RAP-CSP`），根本原因是 `CL_CSP_MD_METADATA_FACTORY` 裡一段檢查邏輯——這個 CDS Entity 所在的套件，必須在一份**硬編碼白名單**裡（`SBOI_RAP_CSP_TST%` 套件前綴、或幾個 SAP 內部套件/元件），不在清單裡（我們的 `$TMP` 或任何自訂套件都不在）就用致命訊息擋下來，程式碼裡甚至留了開發者自己寫的英文註解：「csp isn't released for public usage until now」。查證 SAP Community 找到一篇 **2019-11** 一字不差的同款回報，時間點跟這套系統的 **S/4HANA 1909** 高度吻合——**這是這套系統 Managed Runtime 尚未對客戶套件開放寫入功能的已知限制，不是我們哪裡設定錯了**。這個檢查只卡在**真正寫入**的時候，純讀取（如 Fiori Elements Preview 顯示清單）不受影響。
+
+**⚠️ 措辭精確度更正（見 rap01 的補充查證）**：這裡不能簡化成「1909 這個版本不支援 Managed BO」——官方 ABAP Keyword Documentation 的版本 Release Note（`ABENNEWS-754-CDS_BDL`）明確記載 `managed` 這個 BDL 關鍵字語法從 **ABAP 7.54**（就是這套系統確認的版本，也對應 S/4HANA 1909）就已經存在；`with draft` 語法在這系統上實測也能正常編譯（沒有語法錯誤）。代表**「Managed BDEF 的語言語法」跟「Managed Runtime 執行引擎有沒有對這套系統正式開放」是兩件不同的事**——這裡踩到的白名單，是後者（執行期的功能閘門，SAP 可能用 Support Package／內部 Rollout 決定要不要打開，不完全等同於版本號本身），不是前者（語言語法從一開始就有）。完整版本演進查證見 rap01。
 
 **⚠️ 這個白名單有沒有辦法讓我們自己的套件加進去？——結論是「技術上碰不到、就算碰得到也不建議」，這不是一個該去繞過的設定項**。白名單的兩組條件分別是：
 

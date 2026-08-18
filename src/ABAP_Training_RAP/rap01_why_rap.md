@@ -99,6 +99,19 @@ lock master
 
 ABAP Cloud 語言版本要 S/4HANA **2022 以後**的 On-Premise 系統，或 SAP BTP ABAP Environment（Cloud）才能啟用——這個系統的套件沒有這個開關，所以連帶地新式 CDS View Entity／BDEF strict 語法也用不了（這兩者是 ABAP Cloud 世代一起引進的語言特性）。
 
+### RAP 在 On-Premise 版本的演進歷程（2026-08-18 查證，用來釐清「這個系統的限制」跟「RAP 本身的成熟度」是兩件事）
+
+網路上流傳一個版本演進說法：1709/1809 沒有 RAP（只有舊式 ABAP Programming Model for SAP Fiori，靠 BOPF+CDS+SEGW）；1909 RAP 初代只支援 Unmanaged Non-Draft，完全不支援 Managed／Draft；2020 才引進 Managed 與 Draft 基礎；2021 起 Unmanaged＋Draft 才算真正成熟（子表格動態新增、Side Effects、完整 Feature Control 等）。這個敘事整體方向沒錯（RAP 的**完整度／穩定度／官方推薦程度**確實逐年提升），但拿去對照官方 ABAP Keyword Documentation 的逐版 Release Note 後，發現兩個具體版本點需要更正：
+
+- **❌「1909 完全不支援 Managed BO」不準確**——官方文件 `ABENNEWS-754-CDS_BDL`（ABAP 7.54 版本異動說明）白紙黑字寫著：「新的 `managed` 陳述式可以用來建立 Managed RAP BO……這個情境是給從零開始的 Greenfield 開發用的」。**ABAP 7.54 正是這個系統確認的版本**（AMDP 課程開課前已查證 `SAP_BASIS 754` = **S/4HANA 1909**）——代表 `managed` 這個 BDL 關鍵字，語法上從 1909 一開始就有，不是 2020 才出現。
+- **❌「1909 完全不支援 Draft」也不準確**——官方 `with draft` 語法元素本身沒有在 1909 之後才出現的證據；更直接的是，**這系統實測**：用暫時性驗證物件寫 `managed implementation in class ... unique; with draft; define behavior for ... { create; update; delete; }`，`checkruns` 語法檢查完全沒有對 `with draft;` 這一行報錯（唯一的錯誤是別的地方，跟 draft 語法無關）——代表這個 1909 系統的 BDL 剖析器本身認得 `with draft` 這個語法元素。**但這只確認了「語法能編譯」，沒有進一步端對端驗證 Unmanaged＋Draft 組合在這系統上實際執行是否正常**（本課程從未實際測過這個組合，如果之後有需要，要另外完整驗證，不能只憑編譯通過就假設能用）。
+
+**這兩點跟這門課已經記錄的重大發現（見 rap03）合起來看，能拼出更精確的圖像**：這個系統的 RAP **語言層（BDL 語法）**其實比「1909 = 只有 Unmanaged Non-Draft」這個簡化敘事支援更多東西（`managed`、`with draft` 都編譯得過）；真正卡住這門課、逼我們從 rap03 起改教 Unmanaged 的，是**執行層**的另一個獨立限制——`CL_CSP_MD_METADATA_FACTORY` 這個類別會檢查 Managed RAP BO 所在套件是否在一份 SAP 內部硬編碼白名單裡，不在清單裡（任何客戶自訂套件都不在）就用致命訊息擋下 CUD 操作，程式碼裡甚至留著開發者自己寫的英文註解「csp isn't released for public usage until now」。**這不是「這個 ABAP 版本沒有 Managed 這個語言功能」，而是「這一版的 Managed 執行引擎，SAP 官方還沒把它對客戶套件正式開放」**——是語言語法可用性（跟版本綁定）跟框架執行期是否正式對外開放（可能是同一版本內的功能開關／逐步 Rollout 決策，不一定完全跟 ABAP 版本號綁死）這兩個不同維度的差異。網路上「1909 不支援 Managed」這種說法，很可能就是把「用了會 Dump、SAP 沒開放」簡化成了「沒有這個功能」，兩者實際體驗確實很像（都是用不了），但背後機制不同，值得說清楚。
+
+**對這門課的實務意義沒有改變**：不管是哪一種原因，這個系統上 Managed BDEF 的 CUD 操作一律無法端對端執行，Unmanaged 依然是唯一能真正驗證的路線，rap03 起的教學安排不需要調整。這段更正的價值純粹是**知識準確度**——讓學員知道「哪個版本開始有哪個功能」跟「這個系統上這個功能能不能用」是要分開判斷的兩件事，遇到其他系統（尤其版本 ≥ 2020/2021）時，不能直接套用這系統的限制去推論那些系統也一樣受限。
+
+**2020／2021 這兩個版本點目前沒有查到對應的官方逐版語法佐證**（官方 Release Note 是按 ABAP 語言版本號編號，不是按年份，要交叉比對版本號對照表才能精確定位，這部分還沒逐一查完），先如實記錄「這個方向的敘事大致可信、但兩個具體版本點的細節需要訂正」這個結論，之後如果有需要更精確的版本對照，再進一步查證。
+
 ### ⚠️ OData 服務發布：V2 能力有限，V4 完全不能透過 ADT 發布
 
 Service Binding 決定要用哪個 OData 版本對外發布。查證這個系統的 ADT discovery 文件（`/sap/bc/adt/discovery`）發現：

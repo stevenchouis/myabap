@@ -669,6 +669,8 @@ POST `/sap/bc/adt/businessservices/bindings`（root `srvb:serviceBinding`，內�
 - **教學上的影響**：這系統上**任何 Managed BDEF 的 CUD 操作都無法真正執行**（不管是透過 EML、OData、Fiori Elements Create 按鈕，走的都是同一套底層 Managed Runtime），只能停留在「語法正確、成功啟用」層級，沒辦法端對端驗證。RAP 課程如果要教「真的能寫入資料」的完整流程，這個系統目前只能靠 **Unmanaged**（見第 44 節，已證實不受這個限制影響）。
 - **待確認**：需要使用者／Basis 查證這套系統目前的 `SAP_BASIS`／`S4CORE` Support Package 等級，並視需要向 SAP Support Portal 查詢對應的 OSS Note（搜尋關鍵字 `Managed runtime is not released for productive usage` 或 `CL_CSP_MD_METADATA_FACTORY`）——Claude 這邊沒有 S-user 帳號，查不到官方 Note 編號與解除限制所需的確切 SP／Note。
 
+**⚠️ 措辭精確度更正（2026-08-18，查證 RAP 版本演進歷程時發現）**：上面「1909 這個版本的初期……仍處於白名單管控階段」這句話容易被誤讀成「1909 這個 ABAP 版本語法上不支援 Managed」——**這是不準確的**。官方 ABAP Keyword Documentation 的 `ABENNEWS-754-CDS_BDL`（ABAP 7.54 版本異動說明，7.54 正是這套系統確認的版本，也是官方對照表裡的 S/4HANA 1909）明確記載：「新的 `managed` 陳述式可以用來建立 Managed RAP BO……這個情境是給從零開始的 Greenfield 開發用的」——代表 `managed` 這個 BDL 關鍵字**語法上**從 1909 一開始就存在，不是後來版本才加入的。另外用暫時性驗證物件實測 `with draft;` 語法，`checkruns` 完全沒有對這一行報錯，代表這系統的 BDL 剖析器也認得 `with draft`。**正確的說法是**：Managed／Draft 的 **BDL 語言語法**從 1909 就已經存在，這裡卡住的是**執行期**——`CL_CSP_MD_METADATA_FACTORY` 這個白名單機制決定「Managed Runtime 的寫入引擎要不要對這個套件開放」，這是一個獨立於「語言版本號」的功能閘門／Rollout 決策（可能跟 Support Package 等級或 SAP 內部產品化進度有關，不是單純「ABAP 7.54 沒有這個語言功能」）。完整查證過程與更多版本佐證見 `src/ABAP_Training_RAP/rap01_why_rap.md` 新增的「RAP 在 On-Premise 版本的演進歷程」段落。
+
 ## 44. ✅ Unmanaged BDEF 完全不受第 43 節的白名單限制影響，已端對端驗證成功（含 `programrun` 無頭驗證）（2026-08-02 實測，RAP 課程 rap03）
 
 - **背景**：第 43 節發現後，用最小化隔離物件驗證「Unmanaged 能不能繞過這個限制」的假說——依據是這系統既有標準物件 `C_SalesOrderManage`（第 40 節查證階段就已確認是 Unmanaged）本身是正常運作中的標準 Fiori 銷售訂單功能，如果 Unmanaged 也被同一個白名單擋住，這個標準功能不可能正常運作，這已經是很強的間接證據。
