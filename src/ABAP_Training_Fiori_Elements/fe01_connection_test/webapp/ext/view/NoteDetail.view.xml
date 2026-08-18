@@ -1,0 +1,27 @@
+<mvc:View
+    controllerName="fe01connectiontest.ext.controller.NoteDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout"
+>
+    <Page showNavButton="true" navButtonPress=".onNavBack">
+        <customHeader>
+            <Bar>
+                <contentMiddle>
+                    <Title text="{title}" level="H2"/>
+                </contentMiddle>
+            </Bar>
+        </customHeader>
+        <content>
+            <layout:VerticalLayout class="sapUiContentPadding" width="100%">
+                <ObjectAttribute title="Note ID" text="{note_id}" class="sapUiSmallMarginBottom"/>
+                <ObjectAttribute title="Last Changed" text="{changed_at}" class="sapUiMediumMarginBottom"/>
+
+                <Panel headerText="Content" width="100%" class="sapUiResponsiveMargin">
+                    <FormattedText htmlText="{content}" class="sapUiSmallMargin"/>
+                </Panel>
+            </layout:VerticalLayout>
+        </content>
+    </Page>
+</mvc:View>

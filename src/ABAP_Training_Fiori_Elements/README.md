@@ -58,10 +58,10 @@ VS Code 裡用 SAP Fiori tools 的 Application Generator 連 BTP ABAP Cloud Envi
 
 | # | 主題 | 內容重點 | 狀態 |
 |---|---|---|---|
-| fe01 | 環境介紹＋連線設定 | VS Code Fiori tools Extension Pack 安裝、Generator 精靈完整操作、**BTP ABAP Cloud OData Service 連線 Step by Step**（System URL／Reentrance Ticket 的坑）、本機執行、跟 rc08 ADT Preview 的差異對照 | 待出題 |
-| fe02 | 專案結構解讀 | `manifest.json`／`ui5.yaml`／`webapp/` 結構逐項解說，Routing、`sap.fe` 設定 | 待出題 |
-| fe03 | List Report／Object Page 深化 | 真實 App 裡驗證 rc08 教過的 Annotation 效果，Table Settings、Section／SubSection、FieldGroup | 待出題 |
-| fe04 | Custom Page | 超出範本能表達的客製化畫面 | 待出題 |
+| fe01 | 環境介紹＋連線設定 | VS Code Fiori tools Extension Pack 安裝、Generator 精靈完整操作、**BTP ABAP Cloud OData Service 連線 Step by Step**（System URL／Reentrance Ticket 的坑）、本機執行、跟 rc08 ADT Preview 的差異對照 | ✅ 已出題並驗收（2026-08-19） |
+| fe02 | 專案結構解讀 | `manifest.json`／`ui5.yaml`／`webapp/` 結構逐項解說，Routing、`sap.fe` 設定 | ✅ 已出題（2026-08-19） |
+| fe03 | List Report／Object Page 深化 | 真實 App 裡驗證 rc08 教過的 Annotation 效果，Table Settings、Section／SubSection、FieldGroup | ✅ 已出題（2026-08-19） |
+| fe04 | Custom Page | 超出範本能表達的客製化畫面 | ✅ 已出題（2026-08-19） |
 | fe05 | Controller Extension | Extension Point 加 JS 邏輯客製化行為 | 待出題 |
 | fe06 | 部署 | `fiori deploy` 回 ABAP UI5 Repository | 待出題 |
 | fe07 | Fiori Launchpad | Tile 設定、Semantic Object/Action、App-to-App 導航 | 待出題 |
@@ -73,4 +73,8 @@ VS Code 裡用 SAP Fiori tools 的 Application Generator 連 BTP ABAP Cloud Envi
 
 - [x] 開課定案，README 草案完成
 - [ ] 確認課綱（8 課）
-- [ ] fe01 出題
+- [x] fe01 出題並驗收（2026-08-19，`fe01_connection_test`，`ZRC08_SB`／`ZI_RC05_NOTE`）
+- [x] fe02 出題（2026-08-19，深度解析 fe01 已產生的專案，未產生新物件）
+- [x] fe03 出題（2026-08-19，本機 Annotation 疊加＋Table Settings，實測「同 Target/Term 整個覆蓋不是合併」的關鍵行為）
+- [x] fe04 出題（2026-08-19，Custom Page 取代 NoteObjectPage，Page Map 的 `+` 需要 Navigation Property 才能用，Custom Page 會失去範本自動生成的 CRUD 工具列）
+- [ ] fe05 出題
