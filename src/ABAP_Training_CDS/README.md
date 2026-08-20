@@ -62,7 +62,7 @@ RAP 課程的 rap02 已經教過一部分 CDS View 基礎（Eclipse 建立步驟
 | cds13 | Value Help Annotation | `@Consumption.valueHelpDefinition`、`@ObjectModel.text.association`；重用 cds01 的 `ZI_CDS01_CARRIER` 當 Value Help 來源，確認純中繼資料不影響查詢行為 |✅ 已完成（2026-08-20，`ZI_CDS13_FLIGHT_VH`＋`ZR_CDS13_DEMO`）|
 | cds14 | Hierarchy CDS View | `@ObjectModel: { dataCategory: #HIERARCHY }`＋`@hierarchy.parentChild`，照抄標準物件 `I_GLAccountHierarchyNode`；新建自我參照表 `ZTCDS14_ORGUNIT`；誠實記錄 Open SQL `HIERARCHY_DESCENDANTS()` 巡覽語法六種嘗試皆失敗，樹狀呈現留給 Eclipse Data Preview 驗證 |✅ 已完成（2026-08-20，`ZTCDS14_ORGUNIT`＋`ZI_CDS14_ORGUNIT_HIER`＋`ZR_CDS14_SETUP`＋`ZR_CDS14_DEMO`）|
 | cds15 | 效能與除錯 | `GET RUN TIME FIELD` 量測技巧；確認無 Explain Plan 工具；量到反直覺結果（小資料量下 CDS 聚合比手動迴圈慢）＋符合直覺結果（消費 Association 較慢）；整理 cds01~14 累積的效能地雷清單 |✅ 已完成（2026-08-20，`ZR_CDS15_DEMO`，重用 cds03/cds07 既有物件）|
-| cds16（期末整合） | 綜合實作 | 整合 Analytical Annotation＋Virtual Element＋Value Help＋Hierarchy，設計一個能直接被 Fiori Elements／分析工具消費的完整 CDS View（呼應 RAP 課程 `@UI.*` 但這裡聚焦資料建模而非 Behavior） |待出題|
+| cds16（期末整合） | 綜合實作 | 整合 Analytical Annotation＋Virtual Element＋Value Help＋Hierarchy，設計一個能直接被 Fiori Elements／分析工具消費的完整 CDS View（呼應 RAP 課程 `@UI.*` 但這裡聚焦資料建模而非 Behavior） |✅ 已完成（2026-08-20，`ZI_CDS16_ORGUNIT_FINAL`＋`ZCL_CDS16_LABEL_CALC`＋`ZR_CDS16_DEMO`，四種技巧一次啟用成功無衝突）|
 
 ## 出題工作流程（比照 RAP/AMDP 課程）
 
@@ -124,4 +124,12 @@ cds02 開課前，使用者提出：目前專案除了地端 S4H（1909），也
 - **cds14**（Hierarchy CDS View）：新建自我參照表 `ZTCDS14_ORGUNIT`（組織架構）+ `ZI_CDS14_ORGUNIT_HIER`（`@ObjectModel: {dataCategory: #HIERARCHY}` + `@hierarchy.parentChild`，照抄標準物件 `I_GLAccountHierarchyNode`），DDL 建模完整驗證成功。**誠實記錄**：Open SQL 的 `HIERARCHY_DESCENDANTS()` 樹狀巡覽語法嘗試了六種變體全部失敗（詳細錯誤訊息見講義），結論是這系統的 Open SQL Hierarchy 巡覽函數只支援 `CHILD TO PARENT ASSOCIATION` 變體，不支援直接把已有 DDL Hierarchy annotation 的實體當 bare SOURCE 使用——這是 cds10/cds12 那個「DDL annotation 只服務特定框架」模式的第三次印證。樹狀呈現效果留給使用者在 Eclipse Data Preview 驗證。
 - **cds15**（效能與除錯）：`GET RUN TIME FIELD` 量測技巧示範，量到一個**違反直覺的真實結果**——小資料量（356 筆）下 CDS 聚合（23,240 微秒）反而比手動 ABAP 迴圈聚合（7,131 微秒）慢三倍多，講義誠實保留這個「對 CDS 不利」的數字並解釋原因（多層解析的固定成本 vs. 資料量太小無法體現下推效益）；Association 消費 vs. 不消費的量測則符合直覺（消費較慢）。整理 cds01~14 累積的完整效能地雷清單。
 
-**進階篇 cds09～cds15 全部完成、全部 `programrun`（或 Mock 測試）驗證通過，已 commit（本地，尚未 push）**。全課程 16 題只剩 **cds16（期末整合）** 未出，動手練習全部依使用者指示暫緩處理。下一步：使用者確認 push 時機，以及是否繼續 cds16 收尾整個 CDS 課程。
+**進階篇 cds09～cds15 全部完成、全部 `programrun`（或 Mock 測試）驗證通過，已 commit（本地，尚未 push）**。
+
+## cds16（期末整合）完成，全課程 16 題正式結案（2026-08-20）
+
+以 cds14 的組織架構（`ZTCDS14_ORGUNIT`）為基礎，補上 `HeadCount` 欄位，把 cds11（Analytical）／cds12（Virtual Element）／cds13（Value Help）／cds14（Hierarchy）四種進階技巧疊進同一個 `ZI_CDS16_ORGUNIT_FINAL`：`ParentId` 的 Value Help 指向自己（自我參照階層資料的常見模式）、`OrgUnitName`/`HeadCount` 標 Dimension/Measure、`DisplayLabel` 用 `ZCL_CDS16_LABEL_CALC`（SADL Exit）執行期組合顯示字串、整個 View 仍保留 Hierarchy annotation。**四種技巧一次啟用成功，完全沒有相容性衝突**，證明前面各課分開驗證過的每項技巧都是可以自由組合的積木。
+
+驗證延續全課程一貫的誠實邊界：Hierarchy／Analytics／Value Help 三項不影響 Open SQL，`programrun` 直接驗證（`HeadCount` 加總 61 正確）；Virtual Element 沿用 cds10/cds12 發明的 Mock 直接呼叫技巧驗證類別邏輯（正確組出 `ZROOT - CEO Office (5 staff)`），純 Open SQL 只看得到佔位空白值；樹狀展開／F4 下拉選單的真實呈現效果留給使用者在 Eclipse Data Preview 驗證。
+
+**CDS View 課程（cds01～cds16）全部完成、全部驗證通過，已 commit（本地，尚未 push）。全部動手練習依使用者指示暫緩，留給使用者後續在 Eclipse 補做並驗收。下一步：使用者確認 push 時機。**

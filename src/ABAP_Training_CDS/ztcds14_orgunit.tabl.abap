@@ -9,5 +9,6 @@ define table ztcds14_orgunit {
   parent_id      : abap.char(10);
   orgunit_name   : abap.char(40);
   seq_number     : abap.numc(4);
+  headcount      : abap.int4;
 
 }
