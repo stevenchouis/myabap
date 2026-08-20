@@ -400,6 +400,7 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 - **DDIC Structure（STRU）是 source-based（`DEFINE STRUCTURE` DDL），適用 `.abap` 慣例**：存成 `<物件名小寫>.stru.abap`（如 `ztr15_flight_rev.stru.abap`），跟 Table（`.tabl.abap`）同一類。
 - **DDIC Table Type（TTYP）不是 source-based**（第 14／39 節），沒有純文字原始碼，改存 `<物件名小寫>.ttyp.xml`（GET 該物件 ADT 回應的精簡版，只留 `rowType`/`accessType`/`primaryKey` 等有意義欄位，省略 API 回應裡的靜態列舉值清單）。
 - Function Module（FUGR/FF）沒有獨立物件字尾慣例，用 `.func.abap`（如 `z_tr15_calc_revenue_tab.func.abap`），跟既有的 `z_tr15_calc_revenue.func.abap` 一致。
+- **CDS DCL（`DCLS/DL`，Access Control Role）是 source-based（純文字 `define role ... { ... }`），適用 `.abap` 慣例**：存成 `<物件名小寫>.dcls.abap`（如 CDS 課程 cds06 的 `zi_cds06_flight.dcls.abap`），跟 CDS View 的 `.ddls.abap` 平行對應——注意 DCL Role 常常跟它保護的 CDS View 同名，兩者副檔名（`.ddls.abap` vs `.dcls.abap`）是唯一的區分依據，匯出時不要漏掉其中一個或搞混內容。見第 57 節。
 - `src/` 是**單向快照**：SAP 端修改後需重新匯出；本地修改要用 `sap_set_source` 寫回系統才算數。
 
 ## 34. 「以可重建角度全面 Review」的方法論，與非 `.abap` 快照的完整命名規則（2026-07-30 實測，Enhancement 課程 en01~en08 收尾稽核）
@@ -955,3 +956,33 @@ rap03 建立 `ZI_RAP03_UMTEST` 時完全沒有做 UI Annotation（當時重點�
   - `strict(2)`（官方建議的 BDEF 嚴格模式版本）是 **7.57**（≈2022）；Side Effects（`side effects { ... }`）是 **7.58**（≈2023）。
   - 綜合結論：**Managed BO「完整功能」落在 On-Premise 7.57≈S/4HANA 2022；Unmanaged BO「完整功能」（含 Draft 的完整 Late Numbering、Side Effects）落在 7.57～7.58≈S/4HANA 2022～2023**——都比網路上常見的「2021 起成熟」說法要晚。
 - **方法論教訓**：遇到「這個 SAP 語法/功能哪個版本才有」這類問題，**優先搜尋官方是否有整理成單一對照表的文件**（關鍵字可以試 `feature table`／`release overview`／`syntax elements and release`），比逐一翻閱零散的逐版 Release Note 更有效率、更不容易漏掉細節（尤其是「同一個語法在不同情境下導入版本不同」這種細節，例如這次的 Late Numbering 分 Unmanaged 有無 Draft 兩欄）。這份 `ABENRAP_FEATURE_TABLE` 之後任何 RAP 課程問到版本相關問題都應該優先查這裡。
+
+## 57. CDS DCL（`define role`，Access Control）物件建立走 ADT API，一定要加 `@MappingRole: true`（2026-08-20 實測，CDS 課程 cds06）
+
+- **DCL Role 沒有 MCP 工具支援**（`sap_get_source`/`sap_set_source`/`sap_create_object` 的 objectType/objtype enum 都沒有 DCL 相關選項），要走跟 DDIC 物件同一套「查 discovery 找 collection → POST 建空殼 → LOCK → PUT → UNLOCK → activation」流程。
+- **Collection／物件型別**：discovery 全文找 `dcl` 關鍵字，`/sap/bc/adt/acm/dcl/sources` 才是正確 collection（`acm` 開頭，不是猜測中的 `ddic`），`Content-Type`／`Accept` 是 `application/vnd.sap.adt.dclSource+xml`；ADT 物件型別是 **`DCLS/DL`**（用 `objectType=DCLS%2FDL` 做 quickSearch 篩選可以直接列出系統既有標準 DCL Role，例如 `I_CAPaymentOrder`）。POST 建空殼的 root XML element 是 `dcl:dclSource`（namespace `http://www.sap.com/adt/acm/dclsources`），寫法跟 `ddlSource:ddlSource` 平行對應：
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <dcl:dclSource xmlns:dcl="http://www.sap.com/adt/acm/dclsources" xmlns:adtcore="http://www.sap.com/adt/core"
+    adtcore:name="ZI_CDS06_FLIGHT" adtcore:type="DCLS/DL" adtcore:description="...">
+    <adtcore:packageRef adtcore:name="$TMP"/>
+  </dcl:dclSource>
+  ```
+- **物件名稱可以跟它保護的 CDS View 同名**——這是官方標準物件的命名慣例（`I_CAPaymentOrder` 的 DCL Role 也叫 `I_CAPaymentOrder`），因為 `DCLS/DL` 跟 `DDLS/DF` 是不同物件型別，不會撞名；這門課沿用同一個慣例（`ZI_CDS06_FLIGHT` 同時是 CDS View 跟 DCL Role 的名稱）。
+- **LOCK 要用舊式 Accept**（跟第 8 節 DDIC 物件同一套）：`Accept: application/vnd.sap.as+xml;charset=UTF-8;dataname=com.sap.adt.lock.result`，POST `/sap/bc/adt/acm/dcl/sources/<name>?_action=LOCK&accessMode=MODIFY`；PUT `/sap/bc/adt/acm/dcl/sources/<name>/source/main?lockHandle=...`（`text/plain; charset=utf-8`）；UNLOCK 用 `_action=UNLOCK&lockHandle=...`；啟用走標準 activation API，`adtcore:uri` 指到 `/sap/bc/adt/acm/dcl/sources/<name>`（不加 `/source/main`）。
+- **⚠️⚠️ 這系統的硬性限制：DCL Role 一定要加 `@MappingRole: true`，缺了啟用直接報錯**：
+  ```
+  DCLs without annotation "@MappingRole: true" are not supported
+  ```
+  這個結論不是猜測，是照抄系統既有標準物件 `I_CAPaymentOrder`（GET `/sap/bc/adt/acm/dcl/sources/i_capaymentorder/source/main`）驗證出來的——它的原始碼開頭就是 `@EndUserText.label: '...' @MappingRole: true define role I_CAPaymentOrder { ... }`，這系統上所有正常運作的標準 DCL Role 都帶著這個 annotation。
+- **`grant select on ... where ...` 語法**（最基本的字面值條件，官方文件 `ABENCDS_F1_COND_LITERAL` 確認）：
+  ```abap
+  @EndUserText.label: '...'
+  @MappingRole: true
+  define role <角色名稱> {
+    grant select on <CDS Entity>
+      where <element> = '<值>';
+  }
+  ```
+  官方文件確認 `WHERE` 條件除了字面值，也支援跟 Session Variable 比較，合法清單是 `$session.user`／`$session.user_date`／`$session.user_timezone`／`$session.system_date`／`$session.system_language`（**沒有 `$session.client`**，因為 Client 隔離本來就自動處理不需要另外寫規則）；也支援 `aspect pfcg_auth(...)` 串接傳統 PFCG 權限物件，但這條路線這系統走不通（第 28 節已記載：權限物件 SU21 完全沒有 ADT API），只能請使用者在 SU21 手動建好後回頭在 DCL 裡引用名稱。
+- **核心行為驗證**：CDS View 標 `@AccessControl.authorizationCheck: #CHECK` 後，即使呼叫端的 Open SQL 完全沒有寫 `WHERE` 條件，DCL Role 的限制依然會被系統自動套用——實測一個沒有任何篩選條件的 `SELECT ... FROM <#CHECK 的 View>` 只回傳了 DCL Role 允許的資料列，證實 Access Control 是資料庫層透明套用的隱性篩選，不是呼叫端自己要記得加的條件。

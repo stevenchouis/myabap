@@ -47,9 +47,9 @@ RAP 課程的 rap02 已經教過一部分 CDS View 基礎（Eclipse 建立步驟
 | cds03 | Association vs. JOIN | `association [cardinality] to <目標> as _別名 on ...`；path expression 何時才會真的轉成 SQL JOIN（只有被引用才轉譯，本課用三個 View 兩兩對照實測證明）；跟直接寫 JOIN 的差異與取捨 |✅ 已完成（2026-08-20，`ZI_CDS03_FLIGHT_SCHEDULE`／`ZC_CDS03_FLIGHT_WITH_CARRIER`／`ZI_CDS03_FLIGHT_JOIN`＋`ZR_CDS03_DEMO`，`programrun` 驗證通過）|
 | cds04 | Parameters 與 Session Variables | `with parameters` 語法、`$parameters.<name>`；內建 Session Variable（`$session.user`/`system_date` 等，含這系統實測「當函數參數用要先 CAST」的限制）；動態篩選的應用場景 |✅ 已完成（2026-08-20，`ZI_CDS04_FLIGHT`＋`ZR_CDS04_DEMO`，`programrun` 驗證通過）|
 | cds05 | CDS View 分層設計：Interface View → Composite View | View 命名分類慣例（I_/C_/P_/R_）；為什麼要分層（重用、單一職責，並實戰示範第三個好處：繞過 cds02 發現的「CASE WHEN 不能引用同層別名」限制）；疊層傳參數用冒號語法（跟 Open SQL 等號語法對照）；澄清「Foreign Key」是 DDIC 建表語法非 CDS View 語法 |✅ 已完成（2026-08-20，`ZI_CDS05_FLIGHT`＋`ZC_CDS05_FLIGHT_REPORT`＋`ZR_CDS05_DEMO`，`programrun` 驗證通過）|
-| cds06 | CDS Access Control | `define role` 語法、`@AccessControl.authorizationCheck` 的合法值與差異（`#CHECK`/`#NOT_REQUIRED`/`#PRIVILEGED_ONLY`）、跟 `AUTHORITY-CHECK` 的分工 |待出題|
-| cds07 | 聚合與分組 | CDS 內的 `SUM`/`AVG`/`COUNT`/`GROUP BY`，搭配 `@DefaultAggregation` 初探；跟應用層聚合（Open SQL 撈明細再迴圈算）的效能對比 |待出題|
-| cds08（期中整合） | 綜合實作 | 用 cds01~cds07 教過的技巧疊一個「航線營收分析」多層 CDS View，取代一支既有的 Open SQL 報表程式，並比較兩者可讀性/維護性 |待出題|
+| cds06 | CDS Access Control | `define role` 語法（含這系統實測「一定要加 `@MappingRole: true`」的限制）、`@AccessControl.authorizationCheck` 的合法值與差異（`#CHECK`/`#NOT_REQUIRED`/`#PRIVILEGED_ONLY`）、跟 `AUTHORITY-CHECK` 的分工 |✅ 已完成（2026-08-20，`ZI_CDS06_FLIGHT`(DDLS)＋`ZI_CDS06_FLIGHT`(DCLS)＋`ZR_CDS06_DEMO`，`programrun` 驗證通過）|
+| cds07 | 聚合與分組 | CDS 內的 `SUM`/`AVG`/`COUNT`/`GROUP BY`，搭配 `@DefaultAggregation` 初探；跟應用層聚合（Open SQL 撈明細再迴圈算）的效能對比 |✅ 已完成（2026-08-20，`ZI_CDS07_FLIGHT`＋`ZC_CDS07_ROUTE_STATS`＋`ZR_CDS07_DEMO`，`programrun` 驗證通過）|
+| cds08（期中整合） | 綜合實作 | 用 cds01~cds07 教過的技巧疊一個「航線營收分析」多層 CDS View，取代一支既有的 Open SQL 報表程式，並比較兩者可讀性/維護性 |✅ 已完成（2026-08-20，三層 View＋`ZR_CDS08_LEGACY_REPORT`＋`ZR_CDS08_DEMO`，兩種寫法逐筆數字比對一致）|
 
 ### 進階篇：CDS View 深化主題
 
@@ -100,4 +100,14 @@ cds02 開課前，使用者提出：目前專案除了地端 S4H（1909），也
 - **cds04**（Parameters 與 Session Variables）：`ZI_CDS04_FLIGHT`（基於 `SFLIGHT`，`with parameters p_carrid`＋`$session.system_date`／`$session.user`）＋ `ZR_CDS04_DEMO` 已建立、啟用、`programrun` 驗證通過（`p_carrid = 'AA'`／`'LH'` 兩種參數值查出不同資料集，`QueriedByUser` 正確顯示 `MONICA`）。實測發現一個真實限制：`$session.system_date` 直接當內建函數參數會報 `Function DATS_DAYS_BETWEEN: At position 1, only Expressions,Literals,Columns,P allowed`，要先 `CAST`（即使型別不變）才會被接受；純比較（不當函數參數）則不需要 CAST，且證實 Session Variable 可以安全放進 cds02 發現有限制的 `CASE WHEN` 條件（因為它不是運算式或函數呼叫）。直接回答了 cds02 思考題 2（用 `$session.system_date` 取代寫死參考日）。
 - **cds05**（分層設計：Interface View → Composite View）：`ZI_CDS05_FLIGHT`（Layer 1，含 Parameters／算術運算／Association 不消費）＋ `ZC_CDS05_FLIGHT_REPORT`（Layer 2，消費 Layer 1 的計算欄位＋Association）＋ `ZR_CDS05_DEMO` 已建立、啟用、`programrun` 驗證通過，實戰證明分層設計能繞過 cds02 發現的「CASE WHEN 不能引用同層別名」限制（Layer 1 算好的 `OccupancyRatePercent` 在 Layer 2 變成合法的來源欄位，可以直接被 `CASE WHEN` 引用）。同時確認疊層傳遞參數要用冒號語法（`view( p1: $parameters.p1 )`），跟 Open SQL 呼叫的等號語法（`view( p1 = 'X' )`）不同；並澄清課綱草案原列的「Foreign Key 語法」實際上是 DDIC 建表語法，CDS View 表達關聯用的是 Association，已更正講義內容。
 
-四課動手練習皆留給使用者在 Eclipse 建立，尚待使用者實際操作＋驗收。下一步：等使用者驗收 cds02～cds05 後，依「每批 2–3 題」原則繼續出 cds06～cds07。
+四課動手練習皆留給使用者在 Eclipse 建立，尚待使用者實際操作＋驗收。
+
+## cds06～cds08（期中整合）已完成，基礎篇正式結束（2026-08-20）
+
+使用者指示直接做到 cds08、動手練習稍後補、最後再一起 push，因此這一批一次做完基礎篇剩下的三題：
+
+- **cds06**（CDS Access Control）：`ZI_CDS06_FLIGHT`（CDS View，`#CHECK`）＋ `ZI_CDS06_FLIGHT`（DCL Role，同名不同型別 `DCLS/DL`）＋ `ZR_CDS06_DEMO` 已建立、啟用、`programrun` 驗證通過。實測發現這系統的硬性限制：DCL Role 一定要加 `@MappingRole: true`，缺了報 `DCLs without annotation "@MappingRole: true" are not supported`（照抄系統既有標準物件 `I_CAPaymentOrder` 驗證出正確寫法）。驗證程式證實核心觀念：完全沒寫 `WHERE` 條件的查詢，`#CHECK`＋DCL Role 的 View 依然被自動篩選到只剩 `carrid='AA'`（25 筆），對照 `#NOT_REQUIRED` 的 `ZI_CDS02_FLIGHT` 同樣查詢正常回傳 356 筆橫跨 8 家航空公司——證實 Access Control 是系統強制套用的隱性篩選，不是呼叫端自己加的條件。DCL Role 物件建立走 ADT API 直接 POST `/sap/bc/adt/acm/dcl/sources`（`sap_set_source`/`sap_create_object` 都不支援 DCLS 型別），LOCK 用舊式 `Accept: application/vnd.sap.as+xml;...`，跟 DDIC 物件同一套 workaround（詳見 `.claude/rules/sap-adt-mcp.md` 待補的 DCL 章節）。
+- **cds07**（聚合與分組）：`ZI_CDS07_FLIGHT`（明細層級，帶 `@DefaultAggregation` 提示）＋ `ZC_CDS07_ROUTE_STATS`（`GROUP BY carrid`＋`COUNT`/`SUM`/`AVG`）＋ `ZR_CDS07_DEMO` 已建立、啟用、`programrun` 驗證通過，CDS 聚合結果跟應用層手動迴圈累加結果逐項比對一致（`FlightCount`/`TotalSeatsOccupied`/`AvgPrice`），並量測傳輸筆數差異（聚合 8 列 vs. 單一航空公司明細 25 列）佐證「push-down 聚合減少傳輸資料量」的原則，明確不聲稱做過執行時間 Benchmark（測試資料量太小，時間差異沒有意義）。
+- **cds08（期中整合）**：三層 View——`ZI_CDS08_ROUTE_REVENUE`（Layer 1，Parameters＋雙重 Association＋算術運算）→ `ZC_CDS08_ROUTE_REVENUE_STATS`（Layer 2，疊層參數轉傳＋`GROUP BY` 聚合）→ `ZR_CDS08_ROUTE_REVENUE_REPORT`（Layer 3，引用 Layer 2 聚合欄位的 `CASE WHEN` 分級）——完整疊了 cds01~cds05、cds07 的技巧（cds06 Access Control 因跟 Parameters 設計意圖衝突，刻意不疊，講義有說明原因）。另建 `ZR_CDS08_LEGACY_REPORT`（等效傳統 Open SQL 報表，手動 `LOOP`/`READ TABLE`/`MODIFY...WHERE` 累加＋逐筆 `SELECT SINGLE` 查關聯資料）跟 `ZR_CDS08_DEMO`（比對驗證程式），兩種寫法對 `p_carrid='LH'` 的五條航線逐筆數字（`TotalRevenue`/`FlightCount`/`AvgSeatsOccupied`/`RevenueTier`）完全一致，證實正確性等價、差異純粹在程式碼組織方式。**實測新發現**：乘法（`price * seatsocc`，`CURR × INT2`）完全不需要 CAST 就能編譯，跟 cds02 學到的「除法要先 CAST 成 decfloat34」不同（甚至嘗試把 CAST 加上去反而報錯 `CAST PRICE of type CURR to type DECFLOAT34 is not possible`）——證實運算子限制因運算子而異，不能無條件套用前面學到的 workaround。
+
+**基礎篇（cds01～cds08）全部完成、全部 `programrun` 驗證通過，已 commit（本地）**。所有動手練習依使用者指示暫緩，等這批全部完成後再一起處理／驗收。下一步：使用者確認後決定是否 push，以及是否繼續進階篇 cds09（Extend View）起。
