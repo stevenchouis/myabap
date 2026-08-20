@@ -1,6 +1,6 @@
 # SAP ABAP CDS View 課程
 
-RAP 課程（`src/ABAP_Training_RAP/`，rap01–rap09）之後開的新課，2026-08-17 定案，2026-08-18 課綱確認、開課前查證完成。課綱規劃中，尚未出題。
+RAP 課程（`src/ABAP_Training_RAP/`，rap01–rap09）之後開的新課，2026-08-17 定案，2026-08-18 課綱確認、開課前查證完成，同日出題開始（cds01 已完成）。
 
 ## 開課前查證（2026-08-18）
 
@@ -42,7 +42,7 @@ RAP 課程的 rap02 已經教過一部分 CDS View 基礎（Eclipse 建立步驟
 
 | # | 主題 | 內容重點 | 狀態 |
 |---|---|---|---|
-| cds01 | CDS View 是什麼、為什麼要用 | Open SQL 直接查表 vs. CDS View 的差異（語意豐富化、可重用、下推執行）；這系統的 `define view`（無 `entity`）語法限制說明；Eclipse ADT 建立 CDS View Step by Step；最基本的 `@AbapCatalog.sqlViewName`／`@AccessControl.authorizationCheck`／`@EndUserText.label` annotation；SE11/SE16 驗證查詢結果 |待出題|
+| cds01 | CDS View 是什麼、為什麼要用 | Open SQL 直接查表 vs. CDS View 的差異（語意豐富化、可重用、下推執行）；這系統的 `define view`（無 `entity`）語法限制說明；Eclipse ADT 建立 CDS View Step by Step；最基本的 `@AbapCatalog.sqlViewName`／`@AccessControl.authorizationCheck`／`@EndUserText.label` annotation；SE11/SE16 驗證查詢結果 |✅ 已完成（2026-08-18，`ZI_CDS01_CARRIER`＋`ZR_CDS01_DEMO`，`programrun` 驗證通過；SE16 一段是推論尚未經使用者實測確認）|
 | cds02 | 欄位選取與運算 | 別名（`as`）、算術運算、字串/日期內建函數、`CASE WHEN`、常數欄位、`CAST` |待出題|
 | cds03 | Association vs. JOIN | `association [cardinality] to <目標> as _別名 on ...`；path expression 何時才會真的轉成 SQL JOIN（只有被引用才轉譯）；跟直接寫 JOIN 的差異與取捨 |待出題|
 | cds04 | Parameters 與 Session Variables | `with parameters` 語法、`$parameters.<name>`；內建 Session Variable（`$session.client`/`user`/`system_date` 等）；動態篩選的應用場景 |待出題|
@@ -74,4 +74,6 @@ Claude 用 ADT API 建立 CDS View／Metadata Extension 驗證語法可行 → �
 - cds10（Custom Entity）、cds13（Value Help）已查證可行，不受 GUI-only 限制影響
 - Hierarchy CDS View 已加入課綱（cds14），並確認系統既有標準物件可直接參照出題
 
-課綱定案，可以開始出 cds01。
+課綱定案，開始出題。
+
+**cds01 已完成（2026-08-18）**：`ZI_CDS01_CARRIER`（基於 `SCARR` 的最基本 CDS Interface View）＋ `ZR_CDS01_DEMO`（驗證程式，Open SQL 直查表 vs. 查 CDS View 筆數比對）已建立、啟用、`programrun` 驗證通過。動手練習（基於 `SPFLI` 的基本 CDS View）留給使用者在 Eclipse 建立，尚待使用者實際操作＋驗收；講義裡的 SE16 驗證段落是根據 SE11 已驗證規則的推論，尚未經使用者實測確認，需要使用者回報實際畫面。下一步：等使用者驗收 cds01 後，依「每批 2–3 題」原則繼續出 cds02～cds03。
