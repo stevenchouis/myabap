@@ -96,6 +96,23 @@ define view ZI_XXX as select from ...
 
 這不是「查不到路徑」這種空殼限制——這系統的 CDS View 框架是真的在運作，只是語法版本比較舊。SAP 自己出的標準內容在這個系統上也是用這種舊式語法（例如標準物件 `C_SalesOrderManage`），不是只有我們自己建的物件才這樣。
 
+### ⚠️ 新舊語法差異對照——這門課只教舊語法，但差異沒有想像中大
+
+這個專案除了這套地端系統，另外還有一個 BTP ABAP Cloud 環境（RAP Cloud／Fiori Elements 課程在用），那裡支援新式 `define view entity` 語法。開課前特別確認過一次：**這門課會不會因為只教舊語法而學到「過時」或「用不到」的東西？** 結論是不會——新舊語法的差異幾乎都集中在「怎麼宣告、怎麼包裝」，不是「怎麼設計查詢邏輯」：
+
+**幾乎完全一樣（這門課會教到的核心內容）**：Association／Composition 語法（地端既有標準物件 `C_SalesOrderManage` 就是用舊語法寫出 Composition，證實這套機制跟新舊語法無關）、內建函數（字串／日期／CASE WHEN／CAST／算術運算）、Parameters／Session Variables、Access Control（`@AccessControl.authorizationCheck`／`define role`）、聚合（`SUM`/`AVG`/`GROUP BY`）、Extend View、Analytics／Virtual Element／Value Help／Hierarchy 這些 Annotation——全部是 CDS DDL 表達式語言與 Annotation 框架本身的能力，不受 `entity` 關鍵字影響。
+
+**真正有差異的地方（不多，且都是包裝層，不是建模邏輯）**：
+
+| 項目 | 舊語法（這門課教的） | 新語法（`define view entity`） |
+|---|---|---|
+| 開頭關鍵字 | `define view`／`define root view` | `define view entity`／`define root view entity` |
+| `@AbapCatalog.sqlViewName` | **強制要求**，要額外指定一個 ≤16 碼的底層 SQL View 名稱（這一課稍後會解釋這是什麼、為什麼要分兩個名字） | **不需要**，View Entity 不會建出獨立的 SQL View 物件，這整套「兩個名字」的複雜度直接消失 |
+| `@AbapCatalog.preserveKey: true` | Root View 需要這個 annotation 才能被正確辨識為有主鍵的實體 | 不需要，鍵值語意是語言原生保證的 |
+| `strict`／`redirected to` | 不支援（見本檔 `.claude/rules/sap-adt-mcp.md` 第 40 節） | 支援，但這其實是 **RAP／BDEF** 銜接時才會用到的東西，嚴格說不是 CDS View 本身的查詢建模能力 |
+
+換句話說：**這門課教的核心技能（怎麼設計一個查詢單元、怎麼用 Association 取代 JOIN、怎麼分層設計）直接可以帶到新語法環境使用，需要重新調整的只有極少數包裝層的 annotation**。之後每一課只要教到會受這個差異影響的內容，會用同樣的表格對照標注；沒有特別標注的部分，代表新舊語法完全通用。
+
 ### Eclipse ADT 建立 CDS View：Step by Step
 
 現在動手建 `ZI_CDS01_CARRIER`：

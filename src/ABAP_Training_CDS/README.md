@@ -42,9 +42,9 @@ RAP 課程的 rap02 已經教過一部分 CDS View 基礎（Eclipse 建立步驟
 
 | # | 主題 | 內容重點 | 狀態 |
 |---|---|---|---|
-| cds01 | CDS View 是什麼、為什麼要用 | Open SQL 直接查表 vs. CDS View 的差異（語意豐富化、可重用、下推執行）；這系統的 `define view`（無 `entity`）語法限制說明；Eclipse ADT 建立 CDS View Step by Step；最基本的 `@AbapCatalog.sqlViewName`／`@AccessControl.authorizationCheck`／`@EndUserText.label` annotation；SE11/SE16 驗證查詢結果 |✅ 已完成（2026-08-18，`ZI_CDS01_CARRIER`＋`ZR_CDS01_DEMO`，`programrun` 驗證通過；SE16 一段是推論尚未經使用者實測確認）|
-| cds02 | 欄位選取與運算 | 別名（`as`）、算術運算、字串/日期內建函數、`CASE WHEN`、常數欄位、`CAST` |待出題|
-| cds03 | Association vs. JOIN | `association [cardinality] to <目標> as _別名 on ...`；path expression 何時才會真的轉成 SQL JOIN（只有被引用才轉譯）；跟直接寫 JOIN 的差異與取捨 |待出題|
+| cds01 | CDS View 是什麼、為什麼要用 | Open SQL 直接查表 vs. CDS View 的差異（語意豐富化、可重用、下推執行）；這系統的 `define view`（無 `entity`）語法限制說明＋新舊語法差異完整對照；Eclipse ADT 建立 CDS View Step by Step；最基本的 `@AbapCatalog.sqlViewName`／`@AccessControl.authorizationCheck`／`@EndUserText.label` annotation；SE11/SE16 驗證查詢結果 |✅ 已完成並驗收（2026-08-18/20，`ZI_CDS01_CARRIER`＋`ZR_CDS01_DEMO`，`programrun` 驗證通過；SE16 一段是推論尚未經使用者實測確認）|
+| cds02 | 欄位選取與運算 | 別名（`as`）、算術運算（含這系統實測「除法只允許浮點數」的限制）、字串/日期內建函數、`CASE WHEN`（含這系統實測「條件不能用運算式/函數/同層別名」的限制）、常數欄位、`CAST` |✅ 已完成（2026-08-20，`ZI_CDS02_FLIGHT`＋`ZR_CDS02_DEMO`，`programrun` 驗證通過）|
+| cds03 | Association vs. JOIN | `association [cardinality] to <目標> as _別名 on ...`；path expression 何時才會真的轉成 SQL JOIN（只有被引用才轉譯，本課用三個 View 兩兩對照實測證明）；跟直接寫 JOIN 的差異與取捨 |✅ 已完成（2026-08-20，`ZI_CDS03_FLIGHT_SCHEDULE`／`ZC_CDS03_FLIGHT_WITH_CARRIER`／`ZI_CDS03_FLIGHT_JOIN`＋`ZR_CDS03_DEMO`，`programrun` 驗證通過）|
 | cds04 | Parameters 與 Session Variables | `with parameters` 語法、`$parameters.<name>`；內建 Session Variable（`$session.client`/`user`/`system_date` 等）；動態篩選的應用場景 |待出題|
 | cds05 | CDS View 分層設計：Interface View → Composite View | View 命名分類慣例（I_/C_/P_/R_）；為什麼要分層（重用、單一職責）；Foreign Key 語法（`with foreign key`）；一個實戰練習：拿 cds01~cds04 疊出兩層 View |待出題|
 | cds06 | CDS Access Control | `define role` 語法、`@AccessControl.authorizationCheck` 的合法值與差異（`#CHECK`/`#NOT_REQUIRED`/`#PRIVILEGED_ONLY`）、跟 `AUTHORITY-CHECK` 的分工 |待出題|
@@ -76,4 +76,21 @@ Claude 用 ADT API 建立 CDS View／Metadata Extension 驗證語法可行 → �
 
 課綱定案，開始出題。
 
-**cds01 已完成（2026-08-18）**：`ZI_CDS01_CARRIER`（基於 `SCARR` 的最基本 CDS Interface View）＋ `ZR_CDS01_DEMO`（驗證程式，Open SQL 直查表 vs. 查 CDS View 筆數比對）已建立、啟用、`programrun` 驗證通過。動手練習（基於 `SPFLI` 的基本 CDS View）留給使用者在 Eclipse 建立，尚待使用者實際操作＋驗收；講義裡的 SE16 驗證段落是根據 SE11 已驗證規則的推論，尚未經使用者實測確認，需要使用者回報實際畫面。下一步：等使用者驗收 cds01 後，依「每批 2–3 題」原則繼續出 cds02～cds03。
+**cds01 已完成（2026-08-18）**：`ZI_CDS01_CARRIER`（基於 `SCARR` 的最基本 CDS Interface View）＋ `ZR_CDS01_DEMO`（驗證程式，Open SQL 直查表 vs. 查 CDS View 筆數比對）已建立、啟用、`programrun` 驗證通過。動手練習（基於 `SPFLI` 的基本 CDS View）留給使用者在 Eclipse 建立，尚待使用者實際操作＋驗收；講義裡的 SE16 驗證段落是根據 SE11 已驗證規則的推論，尚未經使用者實測確認，需要使用者回報實際畫面。cds01 已於 cds02 開課前驗收通過。
+
+## 環境決策（2026-08-20 確認）：課程主體維持地端 S4H，不切換 BTP Cloud
+
+cds02 開課前，使用者提出：目前專案除了地端 S4H（1909），也已經有一個 BTP ABAP Cloud Trial（RAP Cloud／Fiori Elements 課程用的環境），新版 CDS 語法（`define view entity`／`strict`）在那裡才支援，想確認這門課要鎖定哪個環境。討論後決定**維持地端 S4H，不切換**，理由：
+
+- **語法差異比想像中小**：這門課規劃的 16 題（欄位運算、Association、Parameters、分層設計、權限、聚合、Extend View、Custom Entity、Analytics、Virtual Element、Value Help、Hierarchy）幾乎全部是 CDS DDL 表達式語言／Annotation 框架本身的能力，跟 `entity` 關鍵字無關——地端既有標準物件 `C_SalesOrderManage` 用**舊語法**就寫出了 Composition，證實 Association/Composition 機制新舊語法完全通用。真正會因新舊語法而寫法不同的，只有 `@AbapCatalog.sqlViewName`（舊語法強制要指定一個 ≤16 碼的底層 SQL View 名稱，新語法不需要）跟 `@AbapCatalog.preserveKey: true`（舊語法 Root View 需要這個 annotation，新語法鍵值語意是語言原生保證的）這兩個「包裝層」annotation，`strict`／`redirected to` 這類差異則主要屬於 RAP／BDEF 銜接範疇，不是 CDS View 建模本身的差異。
+- **BTP Cloud Trial 的操作成本明顯更高**：物件建立功能整個故障（`CREATION_FAILED`，`abap-remote-fs` MCP 工具跟 VS Code 原生一樣），16 題全部要使用者先手動在 Eclipse 建空殼 Claude 才能接手；是公開／多人共用的社群 Trial（套件命名要防碰撞、資料有被重置風險）；資料模型是 `/DMO/*`，跟本專案其他課程（OOP/REST/AMDP/RAP）沿用的 SCARR/SFLIGHT/SBOOK 不一致（詳見 [[cloud-rap-exploration]]）。
+- **沿用本專案既有先例**：RAP 課程（rap01~09，地端舊語法）結案後才**另開一門 RAP Cloud（rc01~08）**在 BTP 上重講新語法，不是把 RAP 課程整個搬過去重寫。cds01 目前的寫法（在地端建立，內文明確標注語法限制）正是同一個模式的起手式，之後如果真的需要，可以比照這個先例另開「CDS Cloud」對照課，不需要現在就切換。
+
+**已落實**：cds01 補充了新舊語法差異的完整對照說明（見 `cds01_what_is_cds.md` 的「新舊語法差異對照」段落），確立本課程的一貫立場——之後每一課只要教到會受新舊語法影響的內容（目前只知道 `sqlViewName`／`preserveKey` 這兩處），會用同樣格式標注對照，其餘內容不特別重複提醒（因為差異不存在）。
+
+## cds02～cds03 已完成（2026-08-20）
+
+- **cds02**（欄位選取與運算）：`ZI_CDS02_FLIGHT`（基於 `SFLIGHT`，含別名／算術運算／CAST／字串函數／日期函數／CASE WHEN／常數欄位）＋ `ZR_CDS02_DEMO` 已建立、啟用、`programrun` 驗證通過。過程中實測發現兩個這系統獨有的真實限制，已寫入講義：① 除法運算子 `/` 只允許浮點數型別（`abap.decfloat34`），整數/定點小數欄位要先 `CAST` 才能相除，直接對整數欄位除法會報 `Division x/y is only allowed for float numbers`；② `CASE WHEN` 判斷條件完全不支援運算式（`Unexpected word "*"` / `"/"`）跟函數呼叫（含 CDS 內建函數，`User-defined functions are not supported in the SEARCHED CASE WHEN clause`），也不能引用同一句 SELECT 清單裡其他欄位的別名（`The column XXX is unknown`）——只能寫純欄位／常數比較，這一課已據此設計了合規的 `OccupancyStatus` 分類邏輯，並在講義裡完整記錄四種錯誤嘗試的除錯過程。
+- **cds03**（Association vs. JOIN）：`ZI_CDS03_FLIGHT_SCHEDULE`（宣告 `_Carrier` Association 但不消費）／`ZC_CDS03_FLIGHT_WITH_CARRIER`（消費 Association，觸發 JOIN）／`ZI_CDS03_FLIGHT_JOIN`（直接 INNER JOIN 對照組）＋ `ZR_CDS03_DEMO` 已建立、啟用、`programrun` 驗證通過，用兩兩對照的方式實測證明「Association 宣告但不引用不會產生 JOIN，只有真正取用底下欄位才會轉譯成 SQL JOIN」這個核心觀念，並確認 Association 路徑與直接 JOIN 路徑查出的資料完全一致。
+
+兩課動手練習（基於 `SPFLI` 的計算欄位 View、基於 `SFLIGHT`→`SPFLI` 的 Association View）留給使用者在 Eclipse 建立，尚待使用者實際操作＋驗收。下一步：等使用者驗收 cds02～cds03 後，依「每批 2–3 題」原則繼續出 cds04～cds05。
