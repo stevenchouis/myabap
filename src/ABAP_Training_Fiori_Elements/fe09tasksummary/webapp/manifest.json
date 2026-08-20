@@ -1,7 +1,7 @@
 {
   "_version": "1.86.0",
   "sap.app": {
-    "id": "fe01connectiontest",
+    "id": "fe09tasksummary",
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
@@ -13,7 +13,7 @@
     "sourceTemplate": {
       "id": "@sap/generator-fiori:lrop",
       "version": "1.31.0",
-      "toolsId": "e6efd002-89e5-4d3a-8e23-195f0327d91c"
+      "toolsId": "ef158ca0-7b31-4939-a2ad-dbe15d984b94"
     },
     "dataSources": {
       "annotation": {
@@ -24,7 +24,7 @@
         }
       },
       "mainService": {
-        "uri": "/sap/opu/odata4/sap/zrc08_sb/srvd/sap/zrc08_sd/0001/",
+        "uri": "/sap/opu/odata4/sap/zrc01_tasksum_sb/srvd/sap/zrc01_tasksum_sd/0001/",
         "type": "OData",
         "settings": {
           "annotations": [
@@ -54,15 +54,6 @@
   },
   "sap.ui5": {
     "flexEnabled": true,
-    "extends": {
-      "extensions": {
-        "sap.ui.controllerExtensions": {
-          "sap.fe.templates.ListReport.ListReportController": {
-            "controllerName": "fe01connectiontest.ext.controller.NoteListExt"
-          }
-        }
-      }
-    },
     "dependencies": {
       "minUI5Version": "1.148.7",
       "libs": {
@@ -79,7 +70,7 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "fe01connectiontest.i18n.i18n"
+          "bundleName": "fe09tasksummary.i18n.i18n"
         }
       },
       "": {
@@ -104,62 +95,49 @@
       "routes": [
         {
           "pattern": ":?query:",
-          "name": "NoteList",
-          "target": "NoteList"
+          "name": "TaskSummaryList",
+          "target": "TaskSummaryList"
         },
         {
-          "pattern": "Note({key}):?query:",
-          "name": "NoteObjectPage",
-          "target": "NoteObjectPage"
+          "pattern": "TaskSummary({key}):?query:",
+          "name": "TaskSummaryObjectPage",
+          "target": "TaskSummaryObjectPage"
         }
       ],
       "targets": {
-        "NoteList": {
+        "TaskSummaryList": {
           "type": "Component",
-          "id": "NoteList",
+          "id": "TaskSummaryList",
           "name": "sap.fe.templates.ListReport",
           "options": {
             "settings": {
-              "contextPath": "/Note",
+              "contextPath": "/TaskSummary",
               "variantManagement": "Page",
               "navigation": {
-                "Note": {
+                "TaskSummary": {
                   "detail": {
-                    "route": "NoteObjectPage"
-                  }
-                }
-              },
-              "content": {
-                "header": {
-                  "actions": {
-                    "showInfoAction": {
-                      "press": "fe01connectiontest.ext.CustomActions.showInfo",
-                      "visible": true,
-                      "text": "{i18n>showInfoActionText}"
-                    }
+                    "route": "TaskSummaryObjectPage"
                   }
                 }
               },
               "controlConfiguration": {
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
-                    "type": "ResponsiveTable",
-                    "selectionMode": "Multi",
-                    "condensedTableLayout": true
+                    "type": "ResponsiveTable"
                   }
                 }
               }
             }
           }
         },
-        "NoteObjectPage": {
+        "TaskSummaryObjectPage": {
           "type": "Component",
-          "id": "NoteObjectPage",
-          "name": "sap.fe.core.fpm",
+          "id": "TaskSummaryObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
-              "viewName": "fe01connectiontest.ext.view.NoteDetail",
-              "contextPath": "/Note"
+              "editableHeaderContent": false,
+              "contextPath": "/TaskSummary"
             }
           }
         }

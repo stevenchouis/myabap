@@ -1,0 +1,31 @@
+{
+  "changeType": "addXML",
+  "reference": "customer.fe06.travel",
+  "namespace": "apps/customer.fe06.travel/changes/",
+  "creation": "2026-08-19T03:05:57.258Z",
+  "projectId": "customer.fe06.travel",
+  "packageName": "$TMP",
+  "moduleName": "customer/fe06/travel/changes/fragments/CustomColumnHeader.fragment.xml",
+  "support": {
+    "generator": "@sap-ux/control-property-editor",
+    "sapui5Version": "1.151.0",
+    "compositeCommand": "id_1787108683018_238_composite",
+    "command": "addXML"
+  },
+  "originalLanguage": "EN",
+  "layer": "CUSTOMER_BASE",
+  "fileType": "change",
+  "fileName": "id_1787108683017_237_addXML",
+  "content": {
+    "targetAggregation": "columns",
+    "index": 13,
+    "fragmentPath": "fragments/CustomColumnHeader.fragment.xml"
+  },
+  "texts": {},
+  "selector": {
+    "id": "sap.demo.travel.v2::sap.suite.ui.generic.template.ListReport.view.ListReport::Travel--responsiveTable",
+    "idIsLocal": false
+  },
+  "dependentSelector": {},
+  "jsOnly": false
+}

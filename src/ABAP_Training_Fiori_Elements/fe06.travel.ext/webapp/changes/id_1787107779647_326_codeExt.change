@@ -1,0 +1,23 @@
+{
+  "changeType": "codeExt",
+  "reference": "customer.fe06.travel",
+  "namespace": "apps/customer.fe06.travel/changes/",
+  "creation": "2026-08-19T02:50:36.128Z",
+  "projectId": "customer.fe06.travel",
+  "moduleName": "customer/fe06/travel/changes/coding/TravelListExt",
+  "support": {
+    "generator": "@sap-ux/control-property-editor",
+    "sapui5Version": "1.151.0"
+  },
+  "originalLanguage": "EN",
+  "layer": "CUSTOMER_BASE",
+  "fileType": "change",
+  "fileName": "id_1787107779647_326_codeExt",
+  "content": {
+    "codeRef": "coding/TravelListExt.js"
+  },
+  "texts": {},
+  "selector": {
+    "controllerName": "sap.suite.ui.generic.template.ListReport.view.ListReport"
+  }
+}

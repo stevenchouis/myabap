@@ -1,0 +1,18 @@
+<!-- Use stable and unique IDs!-->
+<core:FragmentDefinition xmlns:core='sap.ui.core' xmlns='sap.m'>
+    <!-- viewName: sap.suite.ui.generic.template.ListReport.view.ListReport -->
+    <!-- controlType: sap.m.Table -->
+    <!-- targetAggregation: columns --> 
+    <!-- add your xml here -->
+     <Column id="column-0e2d78e7"
+        width="12em"
+        hAlign="Left"
+        vAlign="Middle">
+        <Text id="column-title-0e2d78e7" text="New column" />
+
+        <customData>
+            <core:CustomData key="p13nData" id="custom-data-0e2d78e7"
+                value='\{"columnKey": "column-0e2d78e7", "columnIndex": "13"}' />
+        </customData>
+    </Column>
+</core:FragmentDefinition>

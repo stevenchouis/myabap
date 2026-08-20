@@ -1,0 +1,28 @@
+{
+  "generationParameters": {
+    "generationDate": "Wed Aug 19 2026 14:26:01 GMT+0800 (Taiwan Standard Time)",
+    "generatorPlatform": "Visual Studio Code",
+    "serviceType": "SAP System (ABAP Cloud)",
+    "metadataFilename": "",
+    "serviceUrl": "https://a396c05d-a792-494b-a9f2-5b3f674def78.abap.ap21.hana.ondemand.com/sap/opu/odata4/sap/zrc01_tasksum_sb/srvd/sap/zrc01_tasksum_sd/0001/",
+    "appName": "fe09tasksummary",
+    "appTitle": "fe09tasksummary",
+    "appDescription": "fe09tasksummary report",
+    "appNamespace": "",
+    "ui5Theme": "sap_horizon",
+    "ui5Version": "1.148.7",
+    "enableEslint": true,
+    "enableTypeScript": false,
+    "showMockDataInfo": true,
+    "generatorVersion": "1.31.0",
+    "template": "List Report Page V4",
+    "generatorName": "SAP Fiori Application Generator",
+    "entityRelatedConfig": [
+      {
+        "type": "Main Entity",
+        "value": "TaskSummary"
+      }
+    ],
+    "launchText": "To launch the generated application, run the following from the generated application root folder:\n\n```\n    npm start\n```"
+  }
+}

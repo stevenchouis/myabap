@@ -1,0 +1,7 @@
+<core:FragmentDefinition xmlns:core='sap.ui.core' xmlns='sap.m'>
+    <!-- viewName: sap.suite.ui.generic.template.ListReport.view.ListReport -->
+    <!-- controlType: sap.m.Table -->
+    <!-- targetAggregation: cells --> 
+    <!-- add your xml here -->
+    <Text id="cell-text-b4ca15a5" text="Sample data" />
+</core:FragmentDefinition>
