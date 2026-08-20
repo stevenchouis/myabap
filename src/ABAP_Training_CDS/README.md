@@ -45,8 +45,8 @@ RAP 課程的 rap02 已經教過一部分 CDS View 基礎（Eclipse 建立步驟
 | cds01 | CDS View 是什麼、為什麼要用 | Open SQL 直接查表 vs. CDS View 的差異（語意豐富化、可重用、下推執行）；這系統的 `define view`（無 `entity`）語法限制說明＋新舊語法差異完整對照；Eclipse ADT 建立 CDS View Step by Step；最基本的 `@AbapCatalog.sqlViewName`／`@AccessControl.authorizationCheck`／`@EndUserText.label` annotation；SE11/SE16 驗證查詢結果 |✅ 已完成並驗收（2026-08-18/20，`ZI_CDS01_CARRIER`＋`ZR_CDS01_DEMO`，`programrun` 驗證通過；SE16 一段是推論尚未經使用者實測確認）|
 | cds02 | 欄位選取與運算 | 別名（`as`）、算術運算（含這系統實測「除法只允許浮點數」的限制）、字串/日期內建函數、`CASE WHEN`（含這系統實測「條件不能用運算式/函數/同層別名」的限制）、常數欄位、`CAST` |✅ 已完成（2026-08-20，`ZI_CDS02_FLIGHT`＋`ZR_CDS02_DEMO`，`programrun` 驗證通過）|
 | cds03 | Association vs. JOIN | `association [cardinality] to <目標> as _別名 on ...`；path expression 何時才會真的轉成 SQL JOIN（只有被引用才轉譯，本課用三個 View 兩兩對照實測證明）；跟直接寫 JOIN 的差異與取捨 |✅ 已完成（2026-08-20，`ZI_CDS03_FLIGHT_SCHEDULE`／`ZC_CDS03_FLIGHT_WITH_CARRIER`／`ZI_CDS03_FLIGHT_JOIN`＋`ZR_CDS03_DEMO`，`programrun` 驗證通過）|
-| cds04 | Parameters 與 Session Variables | `with parameters` 語法、`$parameters.<name>`；內建 Session Variable（`$session.client`/`user`/`system_date` 等）；動態篩選的應用場景 |待出題|
-| cds05 | CDS View 分層設計：Interface View → Composite View | View 命名分類慣例（I_/C_/P_/R_）；為什麼要分層（重用、單一職責）；Foreign Key 語法（`with foreign key`）；一個實戰練習：拿 cds01~cds04 疊出兩層 View |待出題|
+| cds04 | Parameters 與 Session Variables | `with parameters` 語法、`$parameters.<name>`；內建 Session Variable（`$session.user`/`system_date` 等，含這系統實測「當函數參數用要先 CAST」的限制）；動態篩選的應用場景 |✅ 已完成（2026-08-20，`ZI_CDS04_FLIGHT`＋`ZR_CDS04_DEMO`，`programrun` 驗證通過）|
+| cds05 | CDS View 分層設計：Interface View → Composite View | View 命名分類慣例（I_/C_/P_/R_）；為什麼要分層（重用、單一職責，並實戰示範第三個好處：繞過 cds02 發現的「CASE WHEN 不能引用同層別名」限制）；疊層傳參數用冒號語法（跟 Open SQL 等號語法對照）；澄清「Foreign Key」是 DDIC 建表語法非 CDS View 語法 |✅ 已完成（2026-08-20，`ZI_CDS05_FLIGHT`＋`ZC_CDS05_FLIGHT_REPORT`＋`ZR_CDS05_DEMO`，`programrun` 驗證通過）|
 | cds06 | CDS Access Control | `define role` 語法、`@AccessControl.authorizationCheck` 的合法值與差異（`#CHECK`/`#NOT_REQUIRED`/`#PRIVILEGED_ONLY`）、跟 `AUTHORITY-CHECK` 的分工 |待出題|
 | cds07 | 聚合與分組 | CDS 內的 `SUM`/`AVG`/`COUNT`/`GROUP BY`，搭配 `@DefaultAggregation` 初探；跟應用層聚合（Open SQL 撈明細再迴圈算）的效能對比 |待出題|
 | cds08（期中整合） | 綜合實作 | 用 cds01~cds07 教過的技巧疊一個「航線營收分析」多層 CDS View，取代一支既有的 Open SQL 報表程式，並比較兩者可讀性/維護性 |待出題|
@@ -93,4 +93,11 @@ cds02 開課前，使用者提出：目前專案除了地端 S4H（1909），也
 - **cds02**（欄位選取與運算）：`ZI_CDS02_FLIGHT`（基於 `SFLIGHT`，含別名／算術運算／CAST／字串函數／日期函數／CASE WHEN／常數欄位）＋ `ZR_CDS02_DEMO` 已建立、啟用、`programrun` 驗證通過。過程中實測發現兩個這系統獨有的真實限制，已寫入講義：① 除法運算子 `/` 只允許浮點數型別（`abap.decfloat34`），整數/定點小數欄位要先 `CAST` 才能相除，直接對整數欄位除法會報 `Division x/y is only allowed for float numbers`；② `CASE WHEN` 判斷條件完全不支援運算式（`Unexpected word "*"` / `"/"`）跟函數呼叫（含 CDS 內建函數，`User-defined functions are not supported in the SEARCHED CASE WHEN clause`），也不能引用同一句 SELECT 清單裡其他欄位的別名（`The column XXX is unknown`）——只能寫純欄位／常數比較，這一課已據此設計了合規的 `OccupancyStatus` 分類邏輯，並在講義裡完整記錄四種錯誤嘗試的除錯過程。
 - **cds03**（Association vs. JOIN）：`ZI_CDS03_FLIGHT_SCHEDULE`（宣告 `_Carrier` Association 但不消費）／`ZC_CDS03_FLIGHT_WITH_CARRIER`（消費 Association，觸發 JOIN）／`ZI_CDS03_FLIGHT_JOIN`（直接 INNER JOIN 對照組）＋ `ZR_CDS03_DEMO` 已建立、啟用、`programrun` 驗證通過，用兩兩對照的方式實測證明「Association 宣告但不引用不會產生 JOIN，只有真正取用底下欄位才會轉譯成 SQL JOIN」這個核心觀念，並確認 Association 路徑與直接 JOIN 路徑查出的資料完全一致。
 
-兩課動手練習（基於 `SPFLI` 的計算欄位 View、基於 `SFLIGHT`→`SPFLI` 的 Association View）留給使用者在 Eclipse 建立，尚待使用者實際操作＋驗收。下一步：等使用者驗收 cds02～cds03 後，依「每批 2–3 題」原則繼續出 cds04～cds05。
+兩課動手練習（基於 `SPFLI` 的計算欄位 View、基於 `SFLIGHT`→`SPFLI` 的 Association View）留給使用者在 Eclipse 建立，尚待使用者實際操作＋驗收。
+
+## cds04～cds05 已完成（2026-08-20）
+
+- **cds04**（Parameters 與 Session Variables）：`ZI_CDS04_FLIGHT`（基於 `SFLIGHT`，`with parameters p_carrid`＋`$session.system_date`／`$session.user`）＋ `ZR_CDS04_DEMO` 已建立、啟用、`programrun` 驗證通過（`p_carrid = 'AA'`／`'LH'` 兩種參數值查出不同資料集，`QueriedByUser` 正確顯示 `MONICA`）。實測發現一個真實限制：`$session.system_date` 直接當內建函數參數會報 `Function DATS_DAYS_BETWEEN: At position 1, only Expressions,Literals,Columns,P allowed`，要先 `CAST`（即使型別不變）才會被接受；純比較（不當函數參數）則不需要 CAST，且證實 Session Variable 可以安全放進 cds02 發現有限制的 `CASE WHEN` 條件（因為它不是運算式或函數呼叫）。直接回答了 cds02 思考題 2（用 `$session.system_date` 取代寫死參考日）。
+- **cds05**（分層設計：Interface View → Composite View）：`ZI_CDS05_FLIGHT`（Layer 1，含 Parameters／算術運算／Association 不消費）＋ `ZC_CDS05_FLIGHT_REPORT`（Layer 2，消費 Layer 1 的計算欄位＋Association）＋ `ZR_CDS05_DEMO` 已建立、啟用、`programrun` 驗證通過，實戰證明分層設計能繞過 cds02 發現的「CASE WHEN 不能引用同層別名」限制（Layer 1 算好的 `OccupancyRatePercent` 在 Layer 2 變成合法的來源欄位，可以直接被 `CASE WHEN` 引用）。同時確認疊層傳遞參數要用冒號語法（`view( p1: $parameters.p1 )`），跟 Open SQL 呼叫的等號語法（`view( p1 = 'X' )`）不同；並澄清課綱草案原列的「Foreign Key 語法」實際上是 DDIC 建表語法，CDS View 表達關聯用的是 Association，已更正講義內容。
+
+四課動手練習皆留給使用者在 Eclipse 建立，尚待使用者實際操作＋驗收。下一步：等使用者驗收 cds02～cds05 後，依「每批 2–3 題」原則繼續出 cds06～cds07。
