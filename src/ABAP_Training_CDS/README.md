@@ -55,13 +55,13 @@ RAP 課程的 rap02 已經教過一部分 CDS View 基礎（Eclipse 建立步驟
 
 | # | 主題 | 內容重點 | 狀態 |
 |---|---|---|---|
-| cds09 | Extend View | `extend view <既有 View> with { ... }`：不修改原始碼、幫既有（含標準）CDS View 加欄位；跟 DDIC Append Structure／Customer Include（RAP 課程 en02 教過的機制）的類比與差異 |待出題|
-| cds10 | Custom Entity | 資料來源不是 DB Table（例如 RFC/外部系統）時的 CDS 建模方式；`define custom entity`、Query Provider 實作類別的角色；**✅ 開課前已驗證 `define custom entity` 語法在這系統可編譯啟用**（`ZI_CDSPROBE_CE`） |待出題|
-| cds11 | Analytical Annotation 深入 | `@Analytics.query: true`、`@DefaultAggregation`、`@Semantics.amount`/`@Semantics.quantity`、Dimension vs. Measure 的標記方式；跟 cds07 聚合的銜接 |待出題|
-| cds12 | Virtual Element | `@ObjectModel.virtualElement`＋Exit Class（`IF_SADL_EXIT_CALC_ELEMENT_READ`）：執行期才計算、不存在資料庫的欄位 |待出題|
-| cds13 | Value Help Annotation | `@Consumption.valueHelpDefinition`、`@ObjectModel.text.element`（文字欄位關聯）；**✅ 開課前已驗證這是純 CDS Annotation，不受 Classic Search Help（SHLP）GUI-only 限制影響**（`ZI_CDSPROBE_VH`，引用標準 `I_Country` 測試成功） |待出題|
-| cds14 | Hierarchy CDS View | `@ObjectModel: { dataCategory: #HIERARCHY }`＋`@hierarchy.parentChild: { recurse: {...}, siblingsOrder: {...}, directory: ... }`：自遞迴模型（父子關係）的 CDS 建模方式；**✅ 開課前已用系統既有標準物件 `I_GLAccountHierarchyNode`（真實 active）確認語法可照抄**；練習用組織架構或料號 BOM 之類的自遞迴表 |待出題|
-| cds15 | 效能與除錯 | ADT Data Preview／`EXPLAIN PLAN` 觀念（本系統 ADT SQL Console 沒有 Explain Plan 功能，RAP 課程已查證，這裡改用觀念說明＋執行時間量測）；常見效能地雷（Association 誤用成大量 JOIN、CDS 疊太多層） |待出題|
+| cds09 | Extend View | `extend view <既有 View> with { ... }`：不修改原始碼、幫既有 CDS View 加欄位；跟 DDIC Append Structure／Customer Include 的類比與差異；實測發現不需要 `@Metadata.allowExtensions`（跟 Metadata Extension 的規則不同） |✅ 已完成（2026-08-20，`ZC_CDS09_CARRIER_EXT`＋`ZR_CDS09_DEMO`）|
+| cds10 | Custom Entity | 資料來源不是 DB Table 時的 CDS 建模方式；`define custom entity`、`IF_RAP_QUERY_PROVIDER` Query Provider 類別；實測發現純 Open SQL 完全無法查詢 Custom Entity（編譯期錯誤），發明 Mock Request/Response 直接呼叫類別驗證邏輯的技巧 |✅ 已完成（2026-08-20，`ZCL_CDS10_STATUS_QUERY`＋`ZI_CDS10_FLEET_STATUS`＋`ZR_CDS10_DEMO`）|
+| cds11 | Analytical Annotation 深入 | `@Analytics.query`／`@Analytics.dimension`／`@Analytics.measure`／`@Semantics.amount.currencyCode`；實測發現聚合函數參數不能是運算式（跟 cds02 CASE WHEN 限制同一類，靠 cds05 分層技巧解決） |✅ 已完成（2026-08-20，`ZI_CDS11_FLIGHT_REVENUE`＋`ZC_CDS11_ROUTE_ANALYTICS`＋`ZR_CDS11_DEMO`，數字與 cds08 交叉驗證一致）|
+| cds12 | Virtual Element | `@ObjectModel.virtualElementCalculatedBy`＋Exit Class（`IF_SADL_EXIT_CALC_ELEMENT_READ`，這系統用舊式 SADL 機制非新式 RAP Projection View）；實測發現跟 Custom Entity 同一模式：純 Open SQL 不觸發 Exit Class | ✅ 已完成（2026-08-20，`ZCL_CDS12_DAYS_CALC`＋`ZI_CDS12_FLIGHT_VIRTUAL`＋`ZR_CDS12_DEMO`）|
+| cds13 | Value Help Annotation | `@Consumption.valueHelpDefinition`、`@ObjectModel.text.association`；重用 cds01 的 `ZI_CDS01_CARRIER` 當 Value Help 來源，確認純中繼資料不影響查詢行為 |✅ 已完成（2026-08-20，`ZI_CDS13_FLIGHT_VH`＋`ZR_CDS13_DEMO`）|
+| cds14 | Hierarchy CDS View | `@ObjectModel: { dataCategory: #HIERARCHY }`＋`@hierarchy.parentChild`，照抄標準物件 `I_GLAccountHierarchyNode`；新建自我參照表 `ZTCDS14_ORGUNIT`；誠實記錄 Open SQL `HIERARCHY_DESCENDANTS()` 巡覽語法六種嘗試皆失敗，樹狀呈現留給 Eclipse Data Preview 驗證 |✅ 已完成（2026-08-20，`ZTCDS14_ORGUNIT`＋`ZI_CDS14_ORGUNIT_HIER`＋`ZR_CDS14_SETUP`＋`ZR_CDS14_DEMO`）|
+| cds15 | 效能與除錯 | `GET RUN TIME FIELD` 量測技巧；確認無 Explain Plan 工具；量到反直覺結果（小資料量下 CDS 聚合比手動迴圈慢）＋符合直覺結果（消費 Association 較慢）；整理 cds01~14 累積的效能地雷清單 |✅ 已完成（2026-08-20，`ZR_CDS15_DEMO`，重用 cds03/cds07 既有物件）|
 | cds16（期末整合） | 綜合實作 | 整合 Analytical Annotation＋Virtual Element＋Value Help＋Hierarchy，設計一個能直接被 Fiori Elements／分析工具消費的完整 CDS View（呼應 RAP 課程 `@UI.*` 但這裡聚焦資料建模而非 Behavior） |待出題|
 
 ## 出題工作流程（比照 RAP/AMDP 課程）
@@ -110,4 +110,18 @@ cds02 開課前，使用者提出：目前專案除了地端 S4H（1909），也
 - **cds07**（聚合與分組）：`ZI_CDS07_FLIGHT`（明細層級，帶 `@DefaultAggregation` 提示）＋ `ZC_CDS07_ROUTE_STATS`（`GROUP BY carrid`＋`COUNT`/`SUM`/`AVG`）＋ `ZR_CDS07_DEMO` 已建立、啟用、`programrun` 驗證通過，CDS 聚合結果跟應用層手動迴圈累加結果逐項比對一致（`FlightCount`/`TotalSeatsOccupied`/`AvgPrice`），並量測傳輸筆數差異（聚合 8 列 vs. 單一航空公司明細 25 列）佐證「push-down 聚合減少傳輸資料量」的原則，明確不聲稱做過執行時間 Benchmark（測試資料量太小，時間差異沒有意義）。
 - **cds08（期中整合）**：三層 View——`ZI_CDS08_ROUTE_REVENUE`（Layer 1，Parameters＋雙重 Association＋算術運算）→ `ZC_CDS08_ROUTE_REVENUE_STATS`（Layer 2，疊層參數轉傳＋`GROUP BY` 聚合）→ `ZR_CDS08_ROUTE_REVENUE_REPORT`（Layer 3，引用 Layer 2 聚合欄位的 `CASE WHEN` 分級）——完整疊了 cds01~cds05、cds07 的技巧（cds06 Access Control 因跟 Parameters 設計意圖衝突，刻意不疊，講義有說明原因）。另建 `ZR_CDS08_LEGACY_REPORT`（等效傳統 Open SQL 報表，手動 `LOOP`/`READ TABLE`/`MODIFY...WHERE` 累加＋逐筆 `SELECT SINGLE` 查關聯資料）跟 `ZR_CDS08_DEMO`（比對驗證程式），兩種寫法對 `p_carrid='LH'` 的五條航線逐筆數字（`TotalRevenue`/`FlightCount`/`AvgSeatsOccupied`/`RevenueTier`）完全一致，證實正確性等價、差異純粹在程式碼組織方式。**實測新發現**：乘法（`price * seatsocc`，`CURR × INT2`）完全不需要 CAST 就能編譯，跟 cds02 學到的「除法要先 CAST 成 decfloat34」不同（甚至嘗試把 CAST 加上去反而報錯 `CAST PRICE of type CURR to type DECFLOAT34 is not possible`）——證實運算子限制因運算子而異，不能無條件套用前面學到的 workaround。
 
-**基礎篇（cds01～cds08）全部完成、全部 `programrun` 驗證通過，已 commit（本地）**。所有動手練習依使用者指示暫緩，等這批全部完成後再一起處理／驗收。下一步：使用者確認後決定是否 push，以及是否繼續進階篇 cds09（Extend View）起。
+**基礎篇（cds01～cds08）全部完成、全部 `programrun` 驗證通過，已 commit（本地）**。所有動手練習依使用者指示暫緩，等這批全部完成後再一起處理／驗收。
+
+## 進階篇 cds09～cds15 全部完成，全課程 16 題只剩 cds16 期末整合（2026-08-20）
+
+使用者指示「cds09～cds15 也請一併進行，練習待後續補做」，一次做完整個進階篇（除了 cds16 期末整合）：
+
+- **cds09**（Extend View）：`ZC_CDS09_CARRIER_EXT` 擴充 cds01 的 `ZI_CDS01_CARRIER`，確認目標物件原始碼完全不受影響；實測發現不需要 `@Metadata.allowExtensions`（跟 fe08 學到的 Metadata Extension 規則不同，兩種擴充機制各自獨立）。
+- **cds10**（Custom Entity）：`ZI_CDS10_FLEET_STATUS` + `ZCL_CDS10_STATUS_QUERY`（`IF_RAP_QUERY_PROVIDER`）。實測發現 Custom Entity **完全不能用 Open SQL 查詢**（編譯期錯誤 `Entities like "..." cannot be used here`，不是執行期才發現），只有透過 RAP 框架存取才會觸發 Query Provider。**發明 Mock Request/Response 直接呼叫類別驗證邏輯**的技巧（自己實作 `IF_RAP_QUERY_REQUEST`/`IF_RAP_QUERY_RESPONSE` 最小化版本），繞過需要 Service Binding 才能測試的限制，這個技巧之後任何 RAP Query Provider 情境都能重用。
+- **cds11**（Analytical Annotation 深入）：`ZI_CDS11_FLIGHT_REVENUE` + `ZC_CDS11_ROUTE_ANALYTICS`（`@Analytics.dimension`/`@Analytics.measure`/`@Semantics.amount.currencyCode`）。實測發現聚合函數參數不能是運算式（`Expressions cannot be used as parameters of aggregate functions`），跟 cds02 的 CASE WHEN 限制同一類模式，一樣靠 cds05 分層技巧解決；驗證數字與 cds08 交叉比對完全一致。
+- **cds12**（Virtual Element）：`ZCL_CDS12_DAYS_CALC`（`IF_SADL_EXIT_CALC_ELEMENT_READ`）+ `ZI_CDS12_FLIGHT_VIRTUAL`。**重要澄清**：這系統用的是舊式 SADL-based Virtual Element 機制（`@ObjectModel.virtualElementCalculatedBy`），不是新式 RAP Projection View 專屬的 Virtual Element（那個需要 `define view entity ... as projection on`，這系統不支援）。實測發現跟 Custom Entity 同一模式：純 Open SQL 只看得到佔位值，Exit Class 不會被觸發；沿用 cds10 的 Mock 技巧驗證類別邏輯本身正確。踩到一個小坑：`sadl_entity_element` 型別是 STRING，`VALUE #(('FLDATE'))` 要改用反引號字串字面值才能通過型別檢查。
+- **cds13**（Value Help）：`ZI_CDS13_FLIGHT_VH`（`@Consumption.valueHelpDefinition` + `@ObjectModel.text.association`），重用 cds01 的 `ZI_CDS01_CARRIER` 當 Value Help 來源，確認純中繼資料不影響一般查詢（跟 cds10/cds12 的框架依賴機制形成對比）。
+- **cds14**（Hierarchy CDS View）：新建自我參照表 `ZTCDS14_ORGUNIT`（組織架構）+ `ZI_CDS14_ORGUNIT_HIER`（`@ObjectModel: {dataCategory: #HIERARCHY}` + `@hierarchy.parentChild`，照抄標準物件 `I_GLAccountHierarchyNode`），DDL 建模完整驗證成功。**誠實記錄**：Open SQL 的 `HIERARCHY_DESCENDANTS()` 樹狀巡覽語法嘗試了六種變體全部失敗（詳細錯誤訊息見講義），結論是這系統的 Open SQL Hierarchy 巡覽函數只支援 `CHILD TO PARENT ASSOCIATION` 變體，不支援直接把已有 DDL Hierarchy annotation 的實體當 bare SOURCE 使用——這是 cds10/cds12 那個「DDL annotation 只服務特定框架」模式的第三次印證。樹狀呈現效果留給使用者在 Eclipse Data Preview 驗證。
+- **cds15**（效能與除錯）：`GET RUN TIME FIELD` 量測技巧示範，量到一個**違反直覺的真實結果**——小資料量（356 筆）下 CDS 聚合（23,240 微秒）反而比手動 ABAP 迴圈聚合（7,131 微秒）慢三倍多，講義誠實保留這個「對 CDS 不利」的數字並解釋原因（多層解析的固定成本 vs. 資料量太小無法體現下推效益）；Association 消費 vs. 不消費的量測則符合直覺（消費較慢）。整理 cds01~14 累積的完整效能地雷清單。
+
+**進階篇 cds09～cds15 全部完成、全部 `programrun`（或 Mock 測試）驗證通過，已 commit（本地，尚未 push）**。全課程 16 題只剩 **cds16（期末整合）** 未出，動手練習全部依使用者指示暫緩處理。下一步：使用者確認 push 時機，以及是否繼續 cds16 收尾整個 CDS 課程。
