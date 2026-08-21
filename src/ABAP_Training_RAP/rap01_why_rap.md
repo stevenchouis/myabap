@@ -128,6 +128,30 @@ ABAP Cloud 語言版本要 S/4HANA **2022 以後**的 On-Premise 系統，或 SA
 
 **為什麼只列 On-Premise，沒有列 Cloud（Private/Public）**：`ABENRAP_FEATURE_TABLE` 其實同時列了四個維度（上面只挑了 On-Premise 這欄講），Cloud 那兩欄（SAP BTP ABAP Environment／S/4HANA Cloud Public Edition）用的是**季度發布代碼**（`YYMM` 格式，例如 `2208` = 2022 年 8 月），不是年度版本號，而且這兩個 Cloud 版本幾乎每次都同步拿到同一個功能（代表 ABAP Cloud 語言版本是共用同一套底層基礎設施）。之所以只講 On-Premise，單純是因為**這個專案／這門課連的系統就是 On-Premise S/4HANA**（`SAP_BASIS 754`），Cloud 版本的時程對這個系統沒有直接意義；但既然官方表格本來就有 Cloud 資料，這裡補上對照——**Cloud 版本幾乎每個功能都比對應的 On-Premise 版本早 4～9 個月拿到**（例如 `strict(2)`：Cloud 是 `2208`＝2022 年 8 月，On-Premise 7.57 對應的 S/4HANA 2022 是同年稍晚才發行；Side Effects：Cloud `2302`＝2023 年 2 月，On-Premise 7.58 對應 S/4HANA 2023 要到年底），這是 SAP「Cloud-first」交付模式的典型現象——新語言特性先在 Cloud（BTP ABAP Environment／S/4HANA Cloud）上線驗證，隔幾個月才打包進下一個 On-Premise 年度版本。如果之後要接上一個真正的 ABAP Cloud 語言版本系統（rap01 前面提過的規劃），到時候應該直接查 Cloud 這兩欄的版號，不能沿用這裡整理的 On-Premise 對照。
 
+### Deep Parameter（Abstract Entity 作為 Action 的巢狀輸入結構）版本演進（2026-08-21 查證＋實測，rap10）
+
+網路上流傳一個說法：Deep Parameter（用 CDS Abstract Entity 當 Action 的巢狀輸入，能一次傳整包 Header+Item 的深層 JSON）在 S/4HANA 2020 開始「部分／試行支援」，2021 才「完全成熟」，1909 則「完全不支援」。查 `ABENRAP_FEATURE_TABLE` 這份官方逐版語法對照表（同一份第 102 節已經用過的權威來源）核對，結論**方向對、細節要更正**：
+
+| 語法元素 | On-Premise 版號 | 對應年份（推算） |
+|---|---|---|
+| `abstract`（定義 Abstract BDEF 本身） | **7.56** | **≈2021** |
+| `with hierarchy`（Abstract BDEF Header，深層巢狀衍生型別的開關） | **7.56** | **≈2021** |
+| `deep [table] (parameter)`（Action／Function 的深層輸入參數） | **7.56** | **≈2021** |
+| `deep mapping for ...`（Abstract BDEF 內的深層欄位映射） | **7.56** | **≈2021** |
+| `association ... [with hierarchy]`（Abstract BDEF 內的巢狀關聯） | **7.56** | **≈2021** |
+
+**跟網路說法的差異**：官方表格顯示的是**單一版本（7.56≈2021）乾淨切換**——`abstract`／`with hierarchy`／`deep parameter`／`deep mapping` 這一整組構成 Deep Parameter 機制的語法元素，**全部同時**在 7.56 才出現，7.56 之前（含 7.55≈2020）完全沒有，沒有官方記載的「2020 部分／試行支援」這個中間階段。「1909 完全不支援」這個結論是對的，但不是因為 2020 有「部分」支援、2021 才「完全」成熟，而是 **7.55／2020 一樣是完全沒有，7.56／2021 才整組一次到位**。
+
+**這系統（7.54＝1909）的實測結果，跟官方表格完全吻合**：本課程 rap10 出題前查證階段，在 `$TMP` 建了一組 Abstract Entity + Composition（`ZA_RAP10_HDR`／`ZA_RAP10_DTL`）測試，結果分兩層：
+
+1. **CDS 層（`define abstract entity` + `composition`/`association to parent`）本身可以編譯、啟用成功**——這點比較意外，代表 CDS DDL 層的 Abstract Entity／Composition 語法比 BDL（Behavior Definition Language）層寬鬆，這系統的 CDS 編譯器已經認得這些關鍵字。
+2. **但 Abstract BDEF 的 `with hierarchy` 這一行直接編譯錯誤**：`"BOPF | draft" expected, not "hierarchy".`——證實這系統的 BDL 剖析器（跟 CDS DDL 剖析器是分開的元件）版本比 7.56 舊，合法的 `with` 後綴詞彙裡根本沒有 `hierarchy` 這個選項。
+3. **Action 定義裡的 `deep`／`deep table` 關鍵字，剖析器直接不認得**：`static action X deep table parameter Y;` 報 `"; | external | parameter | result" expected, not "deep".`——連「先允許語法、等執行期才報錯」的機會都沒有，這是剖析階段就被拒絕。
+
+**結論**：Deep Parameter 在這系統（On-Premise 7.54／S/4HANA 1909）**完全不可用**，不管是 CDS 層或 BDL 層都卡關（BDL 層是硬性卡關，CDS 層雖然能編譯但沒有 BDL 端點可用也是白搭）。**Workaround（rap10 採用的做法）**：不建 Abstract Entity，改成讓 Action 的**扁平（flat）`parameter` 直接引用一個既有的 classic DDIC 巢狀型別**（結構裡的某個欄位本身是 Table Type，例如 `header : zsqm005_inb_h; detail : ztt_qm005_inb_d;` 這種原生 ABAP 巢狀結構）——`parameter` 子句本身從 Unmanaged 7.53／Managed 7.54 就存在（見上面主表），**沒有版本限制**，且官方文件明講「輸入參數可以是 CDS Abstract Entity，也可以是 classic DDIC type」，兩者都合法。這代表：只要巢狀資料結構已經用**傳統 ABAP Structure/Table Type**（不透過 RAP 自己的 Composition 機制）事先定義好，Action 完全可以用「一個參數扛住整包深層資料」，不需要 Deep Parameter 這整組 7.56+ 才有的機制——差別只在於**型別檢查與 EML `%control`／`%param-%target` 這類 RAP 原生語法糖拿不到**，但對「純粹把資料整包塞進 Action、內部邏輯自己解析」這種情境完全夠用。詳細案例見 `src/ABAP_Training_RAP/rap10_legacy_integration.md`。
+
+**✅✅ Cloud 對照組驗證（2026-08-21，真正的 ABAP Cloud／BTP Trial，`SAP_BASIS` 版號比這系統新）**：上面的版本落差判斷已經用真正的 Cloud 系統驗證成立——`with hierarchy`／`deep table parameter` 在 Cloud 上完全能編譯、啟用，且用 ABAP Unit Test 端到端驗證過巢狀資料真的能從 EML 呼叫端傳遞到 Action Handler（不只是編譯過關）。**但緊接著發現一個比版本落差更根本的限制：`deep table parameter` 完全沒辦法透過 OData 曝露，不分 V2／V4**——建 Service Binding 不管走 OData V2 還是明確選 OData V4，Cloud 的編譯器都在 Service Binding 建立階段直接拒絕：「`Action SUBMIT: Deep table parameters are not supported for OData exposure`」。這代表**即使換到語法完整、版本夠新的系統，Deep Parameter 機制本質上也只是給 ABAP 端 EML 消費者用的，不是設計給 OData／Fiori 這種外部協定消費者用的**——rap10 選擇「扁平 Parameter＋Wire Adapter 自己解析 JSON」這條路，不是受限於系統版本才退而求其次的 workaround，而是**唯一能讓外部 HTTP 呼叫端（Postman、Fiori）碰得到巢狀資料的架構**，換到任何版本的系統結論都一樣。完整過程見 `rap10_legacy_integration.md`「Cloud 對照組」段落。
+
 ### RAP BO（Business Object）這個詞是什麼？
 
 這門課從 rap01 開始就一直用「BO」這個縮寫（Managed BO／Unmanaged BO／RAP BO），這裡正式說明：**BO＝Business Object（業務物件），在 RAP 的語境下全稱是 RAP Business Object（RAP BO）**，是官方 ABAP Keyword Documentation 定義的正式詞彙（`ABENRAP_BO_GLOSRY`）。
