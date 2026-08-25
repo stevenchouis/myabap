@@ -1,5 +1,7 @@
 # Fiori Elements 開發課程 4：Custom Page
 
+> **環境**：BTP ABAP Environment Trial（沿用 fe01 的 `fe01_connection_test` 專案）
+
 ## Lecture
 
 ### 這一課要解決的問題
@@ -134,6 +136,10 @@ livereload 自動刷新後，畫面完全符合預期：標題列顯示 `title`�
 1. 點進任一筆 Note，畫面變成自訂排版（標題＋`Note ID`／`Last Changed`＋獨立的 `Content` Panel），不再是原本的通用表單
 2. 確認畫面上**沒有** `Edit`／`Delete` 按鈕（Custom Page 不會自動繼承範本的工具列）
 3. **這一課實測結果**：已截圖確認 Custom Page 正確顯示，排版跟預期一致，`Edit`／`Delete` 消失的取捨也已驗證屬實
+
+## ⚠️ 後續課程提醒（2026-08-24 補記）
+
+**fe14（訊息模型）實測時踩到這個坑**：fe14 要在 Object Page 測試 Validation 錯誤訊息，預設會用這一課換掉的 Custom Page（唯讀，沒有可輸入的 `Input` 欄位），完全無法測試——如果之後要用 `fe01_connection_test` 測任何需要「真的能編輯欄位」的東西，記得先把 `manifest.json` 的 `NoteObjectPage` 切回本課最上面「改之前」的標準範本版本，測完再視需要切回來。這是「同一個專案被多堂課輪流疊加修改」的具體後遺症案例，見 fe14 講義開頭的完整說明。
 
 ## 思考題
 

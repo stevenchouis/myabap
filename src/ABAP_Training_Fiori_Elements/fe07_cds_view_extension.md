@@ -78,6 +78,41 @@ annotate view C_SlsDocFlfllmntAnalyzer with
 
 `annotate view` 的目標寫的是**原始標準 View 的名稱**（`C_SlsDocFlfllmntAnalyzer`），不是我們建的 CDS View Extension 名稱——這是因為 Metadata Extension 的職責是「幫某個 View 的欄位加 UI 標記」，而 `Personnel` 這個欄位（雖然是透過擴充加進去的）最終確實屬於 `C_SlsDocFlfllmntAnalyzer` 這個 View 的欄位集合。兩個物件都用 `sap_set_source` 寫入後遇到熟悉的殘留鎖 403（`.claude/rules/sap-adt-mcp.md` 第 5 節記錄過的常態模式），照標準流程 `sap_lock`→`sap_unlock`→手動 curl 啟用即可排除，都是一次就啟用成功。
 
+### 多個 Metadata Extension 指向同一個 View：不用改既有的，各自獨立建、框架自動合併
+
+`C_SlsDocFlfllmntAnalyzer` 這種標準 View，SAP 自己通常已經有一個（或多個）標準 Metadata Extension 負責既有欄位（Sales document／Sold-to Party 這些）的 `@UI` 標記。我們的 `ZC_SOFANALYZER_VE01_MDE` **不是去改那個既有物件**（跟標準 CDS View 一樣是唯讀的，改不了），而是**另外建一個完全獨立的新物件**，兩者剛好都用 `annotate view` 指向同一個 View 名稱——CDS 框架允許同一個 View 被多個 Metadata Extension 同時標註，啟用／執行期會自動把所有指向它的 Metadata Extension 內容合併起來，這也是「Enhancement 疊加而非 Modification」這條原則在 Metadata Extension 這個物件類型上的具體體現。
+
+**✅ 已用 Eclipse ADT 畫面實際確認**：在 Eclipse 開啟 `C_SLSDOCFLFLLMNTANALYZER` 這個 CDS View 的原始碼，編輯器左側裝訂線會出現一個 **enhance icon**，游標停在上面會彈出一個 tooltip，完整列出這個 View 目前被哪些擴充物件疊加：
+
+- **Extended with**：`ZC_SOFANALYZER_VE01`（我們建的 CDS View Extension，DDLS）
+- **Metadata extended with**：同時列出**兩個**物件——`C_SLSDOCFLFLLMNTANALYZER`（SAP 自己的標準 Metadata Extension，**物件名稱跟被擴充的 View 完全同名**，這正是官方文件講的 Metadata Extension 命名慣例——SAP 標準內容的 Metadata Extension 習慣跟它擴充的 CDS Entity 同名）與 `ZC_SOFANALYZER_VE01_MDE`（我們建的）
+
+這張截圖是這一課「多個獨立 Metadata Extension 可以同時指向同一個 View、框架自動合併」這個說法**最直接的證據**——不是靠讀原始碼比對推論出來的，是 Eclipse 這個 tooltip 直接把兩個 MDE 並列給你看。也連帶印證了上面「重要澄清」那段的結論：`Extended with` 只列了我們自己的 `ZC_SOFANALYZER_VE01`，代表 Eclipse 認定的「疊加關係」跟「直接修改」是兩種不同性質、會分開顯示的東西。**這個 enhance icon 是比 curl 打 ADT API 查證更快的方法**，之後想確認「某個標準 View 到底被哪些自訂物件擴充了」，優先看這個 tooltip，不用另外查 TADIR 或跑 quickSearch。
+
+**多個 Metadata Extension 合併時，誰的標記算數，由 `@Metadata.layer` 決定優先順序**（查證官方文件 `ABENCDS_META_DATA_EXTENSION_EVAL`／`Propagation of Annotations` 確認）：
+
+```text
+#CUSTOMER   ← 最高
+#PARTNER
+#INDUSTRY
+#LOCALIZATION
+#CORE       ← 最低（SAP 標準內容通常屬於這層）
+```
+
+- 系統從最高層開始找**同一個欄位、同一個 annotation**，一找到就用，**不會再往更低層找**——高層的值直接覆蓋低層，不是內容合併，是「贏者全拿」。`ZC_SOFANALYZER_VE01_MDE` 用的是 `@Metadata.layer: #CUSTOMER`（[fe07_cds_view_extension.md:67](fe07_cds_view_extension.md#L67)），是最高優先層，如果 SAP 標準那個是 `#CORE`，我們天生就贏。
+- **同一層裡如果有好幾個 Metadata Extension，系統用「找到的第一個」，順序官方文件形容為「不保證固定但穩定」（undefined but stable）**——不要設計成依賴同層多個 MDE 互相覆蓋來解決衝突。
+- 不管哪一層，**Metadata Extension 裡的 annotation，優先權永遠高於 CDS View 自己原始碼裡直接寫的 annotation**（例如標準 View 定義裡欄位前面直接掛的 `@UI.xxx`）——這也是為什麼「用獨立 Metadata Extension 疊加標記」這條路一定能蓋掉／補上想要的效果，不會被原始定義擋住。
+- **fe07 這個案例其實完全不會踩到 Priority 判斷**：Priority 只有在「**同一個欄位、同一個 annotation，被不只一個 Metadata Extension 標註、且值不一樣**」時才需要仲裁。`ZC_SOFANALYZER_VE01_MDE` 只標註我們自己新增的 `Personnel` 欄位——SAP 標準的 Metadata Extension 根本不知道有這個欄位存在，不可能對它下任何 annotation，兩者之間沒有真正的衝突，`#CUSTOMER` 這個宣告更多是「養成習慣、確保萬一將來真的衝突時我們會贏」，不是這次驗證有實際用到覆蓋效果。
+- 如果要實際檢查某個 CDS View 的 annotation 最終是從哪個物件、哪一層合併來的，Eclipse ADT 有專用工具：**Active Annotations View**（列出目前生效的 annotation 跟它的來源）與 **Annotation Propagation View**（同時顯示 active／inactive 的 annotation 值跟各自的來源物件，用顏色區分）。
+
+### 這三個 `@UI` 標記各自控制畫面上哪個地方
+
+`lineItem`／`selectionField`／`fieldGroup` 同時標在 `Personnel` 上，各自獨立控制不同位置，彼此不互斥：
+
+- **`@UI.selectionField`**——決定這個欄位要不要**直接顯示在篩選列（Filter Bar）上**。查證官方文件（`Configuring Filter Bars`）確認：**預設只有標了這個 annotation 的欄位（加上必填篩選欄位）才會直接出現在篩選列**，沒標的欄位只會待在使用者手動點開的 `Adapt Filters` 清單裡，要自己勾選才會顯示。這正好解釋了下面「端對端驗證」那段記錄的現象——`Personnel` 在 `Adapt Filters` 搜尋清單裡找不到，不是失敗，是因為 `@UI.selectionField` 已經讓它直接出現在篩選列上，不需要（也不會出現在）待加入清單裡。
+- **`@UI.lineItem`**——決定這個欄位要不要顯示成 List Report 表格的一欄，`position` 決定欄位排序（fe03／fe09／fe12 前面已經用過，這一課第一次正式補上說明）。
+- **`@UI.fieldGroup`**——把多個欄位**歸類成同一組**、以群組方式顯示（通常是表單一個接一個排列），跟 `lineItem` 是平行機制，只是用途從「表格欄」換成「群組顯示」。`qualifier` 是這個群組的**識別名稱**——關鍵在於：不同物件、不同 Metadata Extension 只要用同一個 `qualifier` 字串，就會被系統歸進同一組（呼應前面「多個 Metadata Extension 可以同時指向同一個 View、框架自動合併」的原理，只是這裡合併的粒度細到「同一個群組」）。這裡用的 `qualifier: 'NLPQuickView'` 很可能不是我們自己發明的名字，是 `C_SlsDocFlfllmntAnalyzer` 標準內容裡**本來就存在**的一個群組（推測是點擊 Smart Link／搜尋結果彈出的 Quick View 卡片要顯示的欄位清單），把 `Personnel` 標上同一個 `qualifier`，等於讓它也加入那個既有卡片的顯示內容，而不是我們自己另開一個新群組。⚠️ 這一點沒有反查系統驗證過（`NLPQuickView` 具體對應畫面上哪個彈出卡片），只是根據命名慣例與官方 Metadata Extension 合併機制的合理推測，之後若要精確確認，需要讀 `C_SlsDocFlfllmntAnalyzer` 既有標準 Metadata Extension 裡是否也用了同一個 `qualifier`。
+
 ### ⚠️⚠️ 重要澄清：PPT 的用詞容易誤會成「直接改標準物件」，但實際不是
 
 PPT 的操作說明寫著「開啟 Track Sales Orders 的 CDS View」「加入這一段程式碼」「開啟 Metadata Extensions」——這些用詞**很容易讓人以為是直接編輯標準物件本身**。這一課特地做了驗證：在我們的擴充物件啟用生效之後，**重新讀一次 `C_SlsDocFlfllmntAnalyzer` 的原始碼，內容跟最一開始一模一樣，一個字都沒變**。

@@ -1,5 +1,7 @@
 # Fiori Elements 開發課程 2：專案結構解讀
 
+> **環境**：BTP ABAP Environment Trial（沿用 fe01 建立的 `fe01_connection_test` 專案，本課未產生新物件）
+
 ## Lecture
 
 ### 這一課不重新建專案，直接深度解析 fe01 已經產生的東西
@@ -98,6 +100,38 @@ fe01 已經教過一個重要觀念：`Application Info` 面板不是檔案，�
 
 **這三份設定檔都是 Generator 精靈自動產生的**，不用自己手刻——這一課只需要知道它們的差異，之後真的要用到離線／Mock 開發模式時，直接換一個指令即可。
 
+### ⚠️⚠️ `npm start` 怎麼觸發 Proxy：跟一般前端開發（webpack-dev-server／Vite）的 Proxy 概念是同一件事
+
+`npm start` 執行的 `fiori run` 底層是 **`ui5 serve`**——UI5 Tooling 官方的開發伺服器，跑在 Node.js 上，架構跟 Express／Connect 同一類：**一條 Middleware Chain**，每個請求依序經過設定好的一串 middleware 處理。`ui5.yaml` 的 `server.customMiddleware` 就是在宣告這條 Chain 裡要插入哪些 middleware：
+
+```yaml
+server:
+  customMiddleware:
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ui5:
+          path: [/resources, /test-resources]
+          url: https://ui5.sap.com
+        backend:
+          - path: /sap
+            url: https://xxxxx.abap.ap21.hana.ondemand.com
+            authenticationType: reentranceTicket
+```
+
+`afterMiddleware: compression` 指定 `fiori-tools-proxy` 插在內建的 `compression` middleware 之後，跟 Express 裡 `app.use(someMiddleware)` 的宣告方式是同一個概念，只是這裡用 YAML 宣告順序，不是寫程式碼手動 `.use()`。
+
+**實際請求流程**：
+
+1. 瀏覽器打開 `localhost:8080`，頁面裡的 App 發出 AJAX 請求，例如 `GET /sap/opu/odata4/sap/zrc08_sb/.../Note`——因為 `manifest.json` 的 `mainService.uri` 是相對路徑，這個請求的目標**還是 `localhost:8080`**，瀏覽器不會碰到 CORS 問題（永遠打同一個 Origin）
+2. Node.js 開發伺服器收到請求，Middleware Chain 依序檢查：`fiori-tools-proxy` 看到路徑符合 `/sap` 規則，**攔截這個請求，在伺服器端（不受瀏覽器 CORS 限制）自己發一個新的 HTTP 請求**，轉發到真正的後端
+3. 因為設定了 `authenticationType: reentranceTicket`，這個 middleware 還會**自動處理 OAuth 認證**——沒有有效 Token 時觸發瀏覽器登入視窗，拿到後快取，之後每次轉發自動帶上
+4. 後端回應串流回瀏覽器，瀏覽器完全不知道背後實際打的是哪個網域
+
+**這就是一般前端開發熟悉的 Dev Server Proxy 概念**——跟 `webpack-dev-server` 的 `devServer.proxy`、Vite 的 `server.proxy`、Create React App `package.json` 裡的 `"proxy"`、Angular CLI 的 `proxy.conf.json` 解決的是同一個問題：本機開發伺服器要跟另一個 Origin 的真實後端溝通，讓瀏覽器永遠只跟同一個 Origin 講話，實際跨網域轉發交給 Node.js 伺服器進程處理（伺服器對伺服器沒有 CORS 限制）。**SAP Fiori tools 額外加的值**：一般 webpack/Vite proxy 通常只做「轉發」，認證要自己處理；`fiori-tools-proxy` 把 OAuth Reentrance Ticket（BTP）／Basic Auth（地端）這整套認證流程也包進 proxy 自動處理，不用自己管理 Token。
+
+`ui5` 那一段（`path: [/resources, /test-resources]` → `https://ui5.sap.com`）走的是同一套機制，只是轉發對象不同——本機專案沒有把完整的 SAPUI5 框架函式庫存在本地，這段規則把載入框架程式碼的請求轉發到 SAP 官方 CDN（除非用 `ui5-local.yaml` 那種指定 `framework:` 把函式庫真正下載到本機的設定）。
+
 ### `package.json` 的 `scripts`：每個指令在做什麼
 
 | Script | 實際指令 | 用途 |
@@ -119,6 +153,7 @@ fe01 已經教過一個重要觀念：`Application Info` 面板不是檔案，�
 - 能區分 `webapp/` 底下「真檔案」跟「工具執行期動態生成、實際不存在」的資源（`test/flp.html` 是後者，跟 fe01 教過的 `Application Info` 面板是同一類概念）
 - 知道 `@UI.*` Annotation 目前全部來自後端 `metadata.xml`（能用 `grep` 在裡面找到 `HeaderInfo`／`Facets`／`LineItem`／`DraftRoot`），`annotations/annotation.xml` 這個本機檔案目前是空的，但是前端**不改 ABAP、疊加/覆寫 Annotation** 的正式管道
 - 能講出 `ui5.yaml`／`ui5-local.yaml`／`ui5-mock.yaml` 三者的差異與對應的 `npm run` 指令
+- 能講出 `npm start` 怎麼觸發 `fiori-tools-proxy`：UI5 Tooling 的 Middleware Chain 架構（跟 Express/Connect 同一類）、實際請求轉發流程，並能對照到一般前端開發熟悉的 webpack-dev-server／Vite Proxy 概念——知道兩者解決的是同一個問題（避免 CORS，讓瀏覽器永遠打同一個 Origin），差異在 Fiori tools 的 Proxy 多包了 OAuth／Basic Auth 認證自動化
 - 知道 `Download value help metadata` 這個 Generator 選項具體會多產生 `localService/mainService/srvd_f4/` 這個子資料夾
 
 ## 物件清單

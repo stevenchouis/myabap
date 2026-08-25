@@ -1,5 +1,7 @@
 # Fiori Elements 開發課程 1：環境介紹＋連線設定
 
+> **環境**：BTP ABAP Environment Trial（本課要建立這條連線，詳見下文；跟 RAP Cloud 課程 rc01～rc08 是同一個系統）
+
 ## Lecture
 
 ### 這一課要解決什麼問題

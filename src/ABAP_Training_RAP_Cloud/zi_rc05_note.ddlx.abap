@@ -16,6 +16,7 @@ annotate entity ZI_RC05_NOTE
   @UI.selectionField: [ { position: 10 } ]
   @UI.lineItem: [ { position: 10 } ]
   @UI.identification: [ { position: 10 } ]
+  @Consumption.filter.defaultValue: 'MYID01'
   note_id;
 
   @UI.lineItem: [ { position: 20 } ]

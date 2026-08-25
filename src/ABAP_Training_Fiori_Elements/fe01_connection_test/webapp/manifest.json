@@ -152,17 +152,11 @@
             }
           }
         },
-        "NoteObjectPage": {
-          "type": "Component",
-          "id": "NoteObjectPage",
-          "name": "sap.fe.core.fpm",
-          "options": {
-            "settings": {
-              "viewName": "fe01connectiontest.ext.view.NoteDetail",
-              "contextPath": "/Note"
-            }
-          }
-        }
+"NoteObjectPage": {
+  "type": "Component", "id": "NoteObjectPage",
+  "name": "sap.fe.templates.ObjectPage",
+  "options": { "settings": { "editableHeaderContent": false, "contextPath": "/Note" } }
+}
       }
     }
   },
