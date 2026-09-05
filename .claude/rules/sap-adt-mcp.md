@@ -986,3 +986,66 @@ rap03 建立 `ZI_RAP03_UMTEST` 時完全沒有做 UI Annotation（當時重點�
   ```
   官方文件確認 `WHERE` 條件除了字面值，也支援跟 Session Variable 比較，合法清單是 `$session.user`／`$session.user_date`／`$session.user_timezone`／`$session.system_date`／`$session.system_language`（**沒有 `$session.client`**，因為 Client 隔離本來就自動處理不需要另外寫規則）；也支援 `aspect pfcg_auth(...)` 串接傳統 PFCG 權限物件，但這條路線這系統走不通（第 28 節已記載：權限物件 SU21 完全沒有 ADT API），只能請使用者在 SU21 手動建好後回頭在 DCL 裡引用名稱。
 - **核心行為驗證**：CDS View 標 `@AccessControl.authorizationCheck: #CHECK` 後，即使呼叫端的 Open SQL 完全沒有寫 `WHERE` 條件，DCL Role 的限制依然會被系統自動套用——實測一個沒有任何篩選條件的 `SELECT ... FROM <#CHECK 的 View>` 只回傳了 DCL Role 允許的資料列，證實 Access Control 是資料庫層透明套用的隱性篩選，不是呼叫端自己要記得加的條件。
+
+## 58. IDoc／ALE 三個核心物件的 ADT 支援程度完全不同：Message Type 無 TADIR 登記、Basic Type 有登記無曝光、🏆 Segment Type 本質是 DDIC Structure（2026-08-24 實測，ALE 課程 ale01 開課前查證）
+
+**背景**：新開 ALE／IDoc 整合課程前查證 `WE81`（Message Type）／`WE30`（Basic Type/IDoc Type）／`WE31`（Segment Type）三個核心物件是否有 ADT API。這次查證額外用了「先確認 MCP 連線本身是否可用」與「TADIR 反查物件真實登記型別」兩個新方法論，過程與結果都值得記錄。
+
+### 58.1 MCP 連線環境：`.mcp.json` 目前有兩個 sap-adt 端點＋一個獨立的 abap-remote-fs
+
+`.mcp.json` 實測時包含三個 SAP 相關 MCP server：`sap-adt`（`http://10.243.137.182:3000/mcp`）、`sap-adt-home`（`http://192.168.68.56:3000/mcp`，CLAUDE.md 記載的區網固定 IP）、`abap-remote-fs`（`http://localhost:4847/mcp`，VS Code Extension 提供，用 `connectionId` 參數區分連線，如 `SAP_Bridge`／`ABAP_CLOUD`）。**這三者不是同一套連線機制**：`abap-remote-fs__get_connected_systems` 回報的「已連線」狀態，跟 `sap-adt`/`sap-adt-home` 這兩個 HTTP MCP server 的可用性是各自獨立的——實測當下 `abap-remote-fs` 只有 `abap_cloud` 連線中、`SAP_Bridge` 回報 `not accessible`，但同一時間 `sap-adt`／`sap-adt-home` 兩個工具組（`sap_search_object`／`sap_object_structure`／`sap_get_source` 等）對 on-premise 系統完全正常（用 `sap_object_structure(objectName=MARA, objectType=TABL)` 驗證，兩個端點回傳完全一致的真實資料）。**排查連線問題時，不要只測一種工具就下「系統連不上」的結論，這幾個 MCP server 要分開驗證。**
+
+**這一版 `sap-adt`/`sap-adt-home` MCP 工具本身也比 `.claude/rules/sap-adt-mcp.md` 前面章節記載的舊版精簡很多**：`sap_get_source`/`sap_object_structure` 的 `objectType` enum 只剩 `CLAS`/`INTF`/`PROG`/`TABL`/`STRU`/`DDLS`/`CDS`/`DTEL`/`DOMA`/`SRVD`/`DDLX`/`BDEF` 十二種，沒有 IDoc 相關型別，也沒有第 40.6 節記載的 BDEF 路徑 bug 可測（新版工具結構整個不同，遇到問題要重新逐一驗證，不能直接套用舊版工具的已知限制清單）。
+
+### 58.2 三個 IDoc 核心物件的真實查證結果
+
+用 ADT discovery 全文搜尋 `idoc`/`segment`/`partner`/`message`/`ale`/`distribution` 關鍵字，完全沒有 IDoc 專屬 collection（只有無關的 Message Class `/sap/bc/adt/messageclass` 與 Enterprise Services Proxy `/sap/bc/esproxy/messagetypes`，PI/PO 用，字面命中但語意無關）。接著改用 `datapreview/freestyle` 直接查 `TADIR` 反查三個物件的真實登記型別，得到跟直覺完全不同的結果：
+
+| 物件 | 交易碼 | TADIR 查詢結果 | ADT 支援 |
+|---|---|---|---|
+| Message Type（如 `MATMAS`） | `WE81` | `SELECT * FROM TADIR WHERE OBJ_NAME='MATMAS'` → **0 筆** | 完全沒有 TADIR 個別登記，不是被追蹤的 Repository 物件；說明文字存在 `EDMSG`（實測 2327 筆）這類純資料表，語意上更接近「大量 Customizing 資料」而非「開發物件」。比 GUI-only 物件更徹底——連 TADIR 記錄都沒有 |
+| Basic Type／IDoc Type（如 `MATMAS05`） | `WE30` | `OBJECT='IDOC'`（套件 `MGV`） | 有 TADIR 登記、是真正可傳輸的 Repository 物件，但 discovery 無對應 collection、quickSearch 對 `IDOC` 型別也是 0 結果——「有 TADIR 但零 ADT 曝光」，連 T-code／CMOD 那種唯讀 metadata stub 都沒有 |
+| **Segment Type**（如 `E1MARAM`/`E1EDK01`） | `WE31` | 🏆 **`OBJECT='TABL'`**（套件 `IDOCLOGISTICS`） | **完全可以走一般 DDIC Structure API**！quickSearch 直接找到（`adtcore:type="TABL/DS"`），`sap_get_source(objectType=STRU, objectName=E1MARAM)` **已實測成功**完整讀出 `define structure e1maram { ... }` 原始碼（上百個欄位清一色 `abap.char(n)`——IDoc Segment 不管底層 Data Element 原生型別，一律存成字元型別，因為 IDoc 本質是純文字 EDI 格式） |
+
+**方法論教訓**：跟第 10／21 節已經示範過的手法一致——`sap_search_object`/quickSearch 對某個型別回 0 結果時，不能直接判定「沒有這個物件」或「這個型別沒有 API」，要用 `datapreview/freestyle` 查 `TADIR` 反查真實登記的 `OBJECT` 欄位，才能分辨是「真的沒有 TADIR 記錄」（Message Type 的情況）還是「有 TADIR 但 ADT 沒曝光」（Basic Type 的情況）還是「TADIR 型別其實跟猜測的不一樣、換個角度就查得到」（Segment Type 的情況，猜測型別是某種 `IDOC`/`SEGM`，實際是 `TABL`）。這次如果只憑「discovery 搜不到 idoc/segment 關鍵字」就下結論，會完全錯過 Segment Type 這個最重要的例外。
+
+### 58.3 對後續課程設計的影響
+
+- **Segment Type 的欄位結構本身，理論上可以用一般 DDIC Structure 流程（`sap_create_object`/`sap_set_source`，`objectType=STRU`）由 Claude 自動建立與驗證**，只有「把這張 Structure 登記成一個真正的 IDoc Segment」（版本管理、Release 狀態、掛進 Basic Type）這個動作需要 `WE31`/`WE30` GUI 手動完成——這是繼 en04（`ENHOXHH` 骨架 GUI-only、內容可 ADT 讀寫）之後，又一個「登記動作 GUI-only、底層資料結構可自動化」的案例，實際可行性（Claude 建的 Structure 能不能真的被 `WE31` 認出來當 Segment）待實際出題時驗證，不能只憑讀取成功就假設寫入/建立也一樣暢通（讀取跟建立是兩件事，第 14 節 Table Type 的教訓）。
+- `BD64`／`WE20`／`WE21`／`BD61`／`BD50`／`BD52`／`WE19`／`WE02`／`WE05`／`BD87` 十個 ALE Customizing／監控交易碼全部確認 TADIR 型別為 `TRAN`，延續第 12 節的結論，無 ADT API，一律 GUI-only 教學。
+- 系統上 `EDIDC`（IDoc Control Record）已有 334 筆真實資料，可用 `datapreview/freestyle` 查詢當作既有教材範例，不用每題都憑空生資料。
+
+### 58.4 ALE Customizing 底層字典表：正確表名要用 `DD02T` 反查說明文字找，猜測 `EDPxx` 系列命名容易踩空（2026-08-24 實測，ale02）
+
+`WE20`/`WE21`/`BD64` 這些 Customizing 交易碼底層存取的字典表，命名沒有規律可循，直接憑印象猜（如猜測 Port 主檔叫 `EDPP1`）容易查到**存在但語意不對**的表（`EDPP1` 實際是「EDI Partner (general partner profiles)」，不是 Port 表），比查無資料更危險——因為查詢會成功執行、只是結果對不上，不容易發現猜錯。**正確做法**：`SELECT TABNAME, DDTEXT FROM DD02T WHERE DDTEXT LIKE '%關鍵字%' AND DDLANGUAGE = 'E'`，用畫面上的英文標籤或概念關鍵字（如 `'Port %'`、`'%tRFC%'`）反查表名，比對 `DDTEXT` 說明文字確認語意相符，再用 `SELECT * FROM <表名>` 讀欄位。這次查證確認的 ALE 環境設定核心字典表：
+
+| 交易碼 | 用途 | 表名 | 關鍵欄位 |
+|---|---|---|---|
+| `WE21` | Port 主檔 | `EDIPORT` | `PORT`／`PORTTYP`／`DESCRI` |
+| `WE21` | ALE（Type A）Port 的 RFC 連線細節 | `EDIPOA` | `PORT`／**`LOGDES`**（RFC Destination 名稱，欄位名跟畫面標籤「RFC Destination」不同） |
+| `WE20` | Outbound Partner Profile | `EDP13` | `RCVPRN`／`RCVPRT`／`MESTYP`／`RCVPOR`（收件方 Port）／`OUTMOD`（輸出模式）／`IDOCTYP`（Basic Type） |
+| `WE20` | Inbound Partner Profile | `EDP21` | `SNDPRN`／`SNDPRT`／`MESTYP`／**`METHOD`**（就是畫面上的 Process Code，欄位名不叫 `PROCESSCODE` 或 `ROUTINE`） |
+
+**共通教訓**：SAP 內部資料庫欄位命名（`LOGDES`／`METHOD`）常常跟畫面標籤（「RFC Destination」／「Process Code」）不一樣，寫查詢前先用 `DD02T`／實際 `SELECT *` 讀欄位清單確認，不要直接照畫面標籤猜欄位名。
+
+## 59. Key User Extensibility 三支標準 App（Custom CDS Views／Custom Fields and Logic／Custom Business Objects）：On-Premise S/4HANA 1909 全部找得到，SAP BTP ABAP Environment Trial 完全沒有——分界線是「有沒有裝 S4CORE」，不是「Cloud vs. On-Premise」（2026-09-06 使用者截圖實測，Enhancement 課程 Key User Extensibility 延伸題規劃前查證）
+
+**背景**：規劃在 Enhancement 課程加一題 Key User Extensibility（`en README` 原本記載的候選項目，第 40.10 節提過 `/sap/bc/adt/businesslogicextensions/badis`），一開始查官方文件（`ABENDEV_EXTENSIBILITY_GLOSRY`／Contract C1／C0 文件）得到的字面結論是「Use in Key User Apps: In **SAP S/4HANA Cloud Public Edition**」，容易誤判成「這三個 App 只有 Cloud 版才有，On-Premise／BTP ABAP Environment 都沒有」。**這個誤判已被使用者實測截圖推翻**。
+
+**實測結果**（使用者直接在兩套系統的 Fiori Launchpad 用 App Finder 搜尋）：
+
+| App | On-Premise S/4HANA 1909（`erpdemo01.itts.com.tw:44300`，Client 130） | SAP BTP ABAP Environment Trial |
+|---|---|---|
+| **Custom CDS Views** | ✅ 找得到，`Data Sources` 清單顯示 **2,574 筆**標準 Released CDS View（如 `C_ApplicationDocStorDets`），`Create` 按鈕可用 | ❌ 完全沒有 |
+| **Custom Fields and Logic** | ✅ 找得到，含 `Custom Fields`／`Data Source Extensions`／`Custom Logic` 三個頁籤；`Custom Fields` 頁籤已有 **6 筆真實存在、大多 `Published`** 的自訂欄位（`ZZ1_CustomFieldHighRis`／`ZZ1_CustomFieldRiskMit`／`ZZ1_CustomFieldRiskRea`／`ZZ1_MARC1`（Not Published）／`ZZ1_SAPCODE_MARC1`／`ZZ1_ZZSAPCODE`，Business Context 都落在 `Master Data: Product General/Plant/Storage Location`） | ❌ 完全沒有 |
+| **Custom Business Objects** | ✅ 找得到（截圖顯示 0 筆，但 App 本身存在、`New`／`Copy`／`Republish` 按鈕都在） | ❌ 完全沒有 |
+
+**正確的分界線／原因**：不是 Cloud 版才有、On-Premise 沒有——**Key User Extensibility 這三支 App 依附的是「這個系統有沒有裝 S/4HANA 商業套件本體（S4CORE）」，不是「ABAP Cloud 語言版本有沒有開」**：
+- **On-Premise S/4HANA（本課程用的 1909）**：即使 ABAP Cloud 語言版本完全沒開（第 40 節已確認，CDS 只能用舊式 `define view`、BDEF 沒有 `strict`），這三支 Key User App 從 **S/4HANA 1610** 起就隨 S4CORE 標準內容一起交付，運作完全不受「這個系統是不是 ABAP Cloud」影響
+- **SAP BTP ABAP Environment（含 Trial）**：這是一套**空的**通用 ABAP 系統（俗稱 Steampunk），沒有安裝任何 S/4HANA 商業套件，這三支 App 依附的 Business Catalog／IWFND 服務註冊在這個環境裡根本不存在，所以完全搜不到、不是「權限不夠」或「Trial 功能閹割」的問題
+- Contract C1 文件寫「In SAP S/4HANA Cloud Public Edition」，指的是 **S/4HANA Cloud（Public/Private Edition）這條產品線**跟 **On-Premise S/4HANA** 一樣都算「完整 S/4HANA」，都有這三支 App；文件只是沒有特別提 On-Premise（因為那份文件的上下文是 ABAP Cloud／BTP 生態圈），不代表 On-Premise 沒有——**這是本檔第二次「官方文件字面沒提到某個環境，不代表那個環境沒有」的教訓**（第一次是第 48 節「SE11/SQ02 該用哪個 View 名稱」的類推錯誤），遇到「文件只列了 A／B 兩種環境」的敘述，不能直接假設「沒列到的 C 環境就是沒有」，能實測就實測。
+
+**對課程規劃的影響**：
+- **Key User Extensibility 延伸題完全不需要 BTP 環境，直接在既有 On-Premise 系統（Enhancement／RAP 課程共用的那套）上就能教**，比原本規劃的「先確認 ABAP Cloud 環境」簡單很多，環境現成可用，不用另外協調 BTP Trial 帳號
+- **⚠️ 這是共用 Demo 系統，Custom Fields 頁籤已有 6 筆其他人做的真實客製化（多數 `Published`）**：出題時新建的 Custom Field／Custom CDS View／Custom Business Object 要用清楚不會撞名的命名（比照 en08 案例三 `MB52` 殘留物件的教訓），不要點開/修改/刪除這 6 筆既有內容；`Published` 狀態的 Custom Field 一旦建立會觸發資料庫欄位新增（實際 DDIC 結構異動），比一般 `$TMP` Z 物件的可逆性低，建立前務必跟使用者確認清楚要建在哪個 Business Context、欄位命名為何
+- **這三支 App 目前沒有已知的 ADT API**（`/sap/bc/adt/businesslogicextensions/badis` 只涵蓋 Custom Logic 的 BAdI 實作這一小塊，且第 40.10 節尚未深入驗證讀寫）——延續 Smartform／CMOD／T-code 那一類「GUI-only、Claude 事後驗證」的教學模式：使用者在這三支 App 操作，Claude 負責用既有 ADT 工具事後檢查產生的底層物件（Custom Field 會生成 Append Structure／CDS 欄位擴充，理論上可以用 `sap_get_source`／`STRU` 讀取比對；Custom Business Object 底層是 Managed RAP BO，理論上可以在 ADT 用 `sap_search_object` 查到對應的 CDS View／BDEF；Custom Logic 生成的是 BAdI Implementation，理論上可以走本檔第 20／21／24／25 節已經驗證過的 Enhancement Spot／Implementation 讀取流程）——**這些「理論上」都還沒有實測驗證過，出題時要逐一查證，不能直接假設能讀到**。
