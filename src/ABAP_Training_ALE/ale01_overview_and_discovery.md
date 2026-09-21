@@ -45,6 +45,8 @@ IDoc／ALE 三個核心物件（Message Type／Basic Type／Segment Type）的 A
 
 **這對 ale06（自訂 IDoc 擴充）有直接的教學意義**：Segment 的**欄位結構本身**理論上可以走一般 DDIC Structure 的建立流程（`sap_create_object`/`sap_set_source`，`objectType=STRU`）由 Claude 自動建立與驗證，只有「把這個 Structure 登記成一個真正的 Segment」（版本管理、Release 狀態、掛進 Basic Type）這個動作需要 `WE31`/`WE30` GUI 手動完成——這是本課程繼 Enhancement 課程「en04 的 ENHOXHH 骨架 GUI-only、內容可以 ADT 讀寫」之後，又一個「物件登記動作 GUI-only、但底層資料結構可以 ADT 自動化」的案例，實際可行性會在 ale06 出題時進一步驗證（是否真的能用 `sap_create_object` 建出一個能被 `WE31` 辨識的新 Segment）。
 
+**（2026-09-21 補充細化，ale06 出題時發現）**：Segment 其實是**兩層** DDIC Structure——`E1MARAM`（Segment Type，欄位全是 `abap.char(n)`，對應 IDoc 資料記錄的扁平文字）與 `E2MARAM`（Segment Definition，欄位引用真正的 Data Element），中繼資料在 `EDISDEF`／`EDSAPPL`。ADT 可以讀這兩層 Structure，但**不能靠自建 Structure 來註冊 Segment**（`EDISDEF`／`EDSAPPL` 只有 `WE31` 會寫入），所以 ale06 的 Segment 建立仍走 GUI，詳見 ale06。
+
 **`BD64`／`WE20`／`WE21`／`BD61`／`BD50`／`BD52`／`WE19`／`WE02`／`WE05`／`BD87`** 十個交易碼全部確認 TADIR 物件型別是 `TRAN`——延續 `.claude/rules/sap-adt-mcp.md` 第 12 節已記載的結論，T-code 完全沒有 ADT API，這幾個 ALE 環境設定與監控交易碼一律走 GUI-only、Claude 寫操作指引的教學模式（ale02/ale03）。
 
 **附帶確認**：`EDIDC`（IDoc Control Record 表）本系統已有 **334 筆真實資料**——代表系統上已經有實際的 IDoc 收發歷史，之後可以用 `datapreview/freestyle` 查詢這些既有資料，找標準情境當教材範例，不用每次都憑空生資料。
