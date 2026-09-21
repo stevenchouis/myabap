@@ -47,7 +47,7 @@ AZ Alitalia
 
 1. `AT NEW carrid` 的觸發規則是「carrid **及其左邊所有欄位**任一變動」——如果把 `fldate` 移到結構第一欄，小計會變成什麼樣子？
 2. `SUM` 把 `price` 也加總了，為什麼「單價的合計」是個沒有意義的數字？
-3. 如果只要各公司合計、完全不要明細，除了 Control Break 還有什麼更省的做法？（提示：SELECT SUM ... GROUP BY）
+3. 如果只要各公司合計、完全不要明細，除了 Control Break 還有什麼更省的做法？（提示：SELECT SUM ... GROUP BY，答案見[練習 20a](ex20a_sql_aggregate.md)）
 
 ## 答案
 

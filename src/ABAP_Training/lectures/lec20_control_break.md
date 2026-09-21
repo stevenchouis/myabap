@@ -113,7 +113,7 @@ ENDAT.
 
 - Control Break 專屬 `LOOP AT ... INTO`（work area 型）；搭配 `ASSIGNING` 不能用 AT 區塊。
 - 迴圈若加了 `WHERE` 條件或中途 DELETE，群組判斷可能失真——要過濾就**先把資料整理成乾淨的內表**再 LOOP。
-- 只要「總計」不要明細時，別用 LOOP+AT LAST，直接 `SELECT SUM( ... ) GROUP BY`（資料庫端彙總）或 `COLLECT` 更省——課程期末後可自行延伸。
+- 只要「總計」不要明細時，別用 LOOP+AT LAST，直接 `SELECT SUM( ... ) GROUP BY`（資料庫端彙總）或 `COLLECT` 更省——資料庫端彙總的完整寫法見[講義 20a](lec20a_sql_aggregate.md)。
 
 ## 6. 常見錯誤與陷阱
 

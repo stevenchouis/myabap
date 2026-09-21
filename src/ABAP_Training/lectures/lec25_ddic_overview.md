@@ -99,7 +99,7 @@ DATA gv_carrid TYPE scarr-carrid.     " 透過表格路徑引用（兩者型別�
 
 ### 6.1 建立 Domain 與 Data Element（自建——因為「加成百分比」是我們公司獨有的概念）
 
-- **Domain** `ZTR25_SURPCT`：Data Type `DEC`，Length `5`、Decimals `2`；Value Range 頁籤設 Interval `0.00`～`100.00` → 啟用
+- **Domain** `ZTR25_SURPCT`：Data Type `DEC`，Length `6`、Decimals `2`（DEC 的 Length 要把小數點也算進去，`100.00` 需要 6 碼）；Value Range 頁籤設 Interval `0`～`100`（DEC 型別的值域上下限只接受整數，填 `0.00`／`100.00` 會啟用失敗）→ 啟用
 - **Data Element** `ZTR25_SURPCT`：參考上面的 Domain；Field Label 填「旺季加成百分比」→ 啟用
 
 ### 6.2 第三種 Global Type 模式：重用標準 Domain、自己補標籤

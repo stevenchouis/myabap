@@ -25,6 +25,7 @@
 | 15 | [lec22](lec22_texts_messages.md) | Message Class 與多語言文字元素：SE91 / Text Symbol | [ex22](../ex22_texts_messages.md) |
 | 16 | [lec11](lec11_join.md) | 多表 JOIN 與 CORRESPONDING FIELDS | [ex11](../ex11_join.md) |
 | 17 | [lec20](lec20_control_break.md) | Control Break 群組小計：AT NEW / AT END OF / SUM | [ex20](../ex20_control_break.md) |
+| 17a | [lec20a](lec20a_sql_aggregate.md) | SQL 聚合與子查詢：GROUP BY / HAVING / DISTINCT / 子查詢（傳統寫法） | [ex20a](../ex20a_sql_aggregate.md) |
 | 18 | [lec12](lec12_print_layout.md) | 列印排版與頁面規劃 | [ex12](../ex12_print_layout.md) |
 | 19 | [lec14](lec14_include_split.md) | INCLUDE 拆檔：TOP / F01 慣例 | [ex14](../ex14_include_split.md) |
 | 20 | [lec15](lec15_function_module.md) | Function Module：SE37 與 CALL FUNCTION | [ex15](../ex15_function_module.md) |

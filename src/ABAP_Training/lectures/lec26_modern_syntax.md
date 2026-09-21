@@ -35,7 +35,7 @@ WRITE: / |代碼轉大寫：{ gv_code CASE = UPPER }|.
 | `WIDTH = n` | 輸出寬度 |
 | `ALIGN = LEFT / RIGHT / CENTER` | 對齊方式 |
 | `PAD = 'x'` | 補齊字元（預設補空白） |
-| `CASE = (UPPER) / (LOWER)` | 轉大小寫 |
+| `CASE = UPPER / LOWER` | 轉大小寫（不加括號；`(UPPER)` 是動態參照語法，會當成變數名報 `Field "UPPER" is unknown`） |
 | `DECIMALS = n` | 數值小數位數 |
 
 - 對照講義 18：`CONCATENATE` 要先想好暫存變數、拼接多段要嵌套或用 `SEPARATED BY`；字串模板可以把文字與變數交錯寫在同一行，可讀性通常更好，尤其是組訊息文字（`MESSAGE`、ALV 欄位標題）。
@@ -59,6 +59,16 @@ SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
 - **`@` 是宿主變數跳脫符號**：只要 `SELECT` 欄位清單用逗號分隔的新式寫法（`scarr~carrid, sflight~connid, ...`），句子裡**所有**宿主變數（包含 `WHERE`/`INTO` 用到的變數）都要加 `@`，混用舊式 `INTO CORRESPONDING FIELDS OF TABLE itab`（不帶 `@`）也一樣要遵守，這是 `.claude/rules/sap-adt-mcp.md` 第 13 節記錄過的實測踩坑點。
 - `CASE WHEN ... THEN ... END AS alias`：在資料庫層就把分類算好，比撈回 ABAP 再用 `LOOP` + `IF` 判斷少一次資料搬移；`END AS` 給的別名會成為推導出結構的欄位名（`PRICE_LEVEL`）。
 - 位置規則複習（講義 11／25 已練過，這裡再次出現）：`ORDER BY` 要在 `INTO` 之前；`UP TO n ROWS` 要接在 `INTO` 之後。
+- **聚合函數裡可以直接放算式（呼應講義 20a 第 7 節）**：講義 20a 用傳統寫法時，`SUM( price * seatsocc )` 會報「must be separated using commas」，因為算式屬於新式語法；改成新式寫法就能在資料庫內直接算出講義 20 的各公司營收，不必撈明細再 `LOOP` 累加：
+
+  ```abap
+  SELECT carrid,
+         SUM( price * seatsocc ) AS revenue
+    FROM sflight
+    GROUP BY carrid
+    ORDER BY carrid
+    INTO TABLE @DATA(gt_rev).
+  ```
 
 ## 3. COND：依條件回傳一個值（取代 IF/ELSEIF 賦值）
 
