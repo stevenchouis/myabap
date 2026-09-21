@@ -1,6 +1,6 @@
 # SAP ALE／IDoc 整合開發課程
 
-企業間／系統間資料整合的經典技術——**ALE（Application Link Enabling）** 是分散式流程整合框架（決定「誰跟誰之間、什麼時候該同步什麼資料」），**IDoc（Intermediate Document）** 是 ALE 選定的標準資料載體格式。本課程教這一整套機制：從環境設定（Distribution Model／Partner Profile／Port／Change Pointer）、IDoc 基礎架構與監控，到自訂擴充與 Outbound/Inbound 客製化開發，最後用兩個真實企業情境（集團內部關聯交易自動對帳）收尾。**課綱為草案，尚未出題。**
+企業間／系統間資料整合的經典技術——**ALE（Application Link Enabling）** 是分散式流程整合框架（決定「誰跟誰之間、什麼時候該同步什麼資料」），**IDoc（Intermediate Document）** 是 ALE 選定的標準資料載體格式。本課程教這一整套機制：從環境設定（Distribution Model／Partner Profile／Port／Change Pointer）、IDoc 基礎架構與監控，到自訂擴充與 Outbound/Inbound 客製化開發，最後用兩個真實企業情境（集團內部關聯交易自動對帳）收尾。**ale01～ale10 已於 2026-09-21 全數出題；使用者 GUI 前置與回頭驗證見文末「待驗證項目盤點」。**
 
 ## 課程定位
 
@@ -32,7 +32,7 @@
 - 兩個期末案例會用兩個 Client（或兩個 Logical System 定義）模擬「兩家公司」，不需要真的有第二套實體系統
 - **⚠️ Schema 設計硬性規則（2026-08-22 使用者明確要求，呼應專案既有規則 `.claude/rules/abap-style.md`）**：本課程幾乎每個情境都對應一張真實標準表／標準單據（Master Data：`KNA1`/`MARA`/`LFA1`；Transaction Data：`MIRO` 底層的 `RBKP`/`RSEG`、Billing 的 `VBRK`/`VBRP`、會計憑證的 `BKPF`/`BSEG`）。**自訂 Segment（`WE31`）、自訂 Table、驗證程式用的本地結構，欄位一律要直接引用對應標準表既有欄位的 Data Element**，不可以另外用 `abap.char(...)` 這類內建型別或自建 Domain/DE 平行複製一份長得很像的型別——先用 quickSearch／讀標準表定義查出實際 Data Element 再引用，不要憑記憶猜。**能整段重用標準 Structure 更好**（例如 Segment 描述的剛好是某張標準單據的欄位子集，直接 `INCLUDE TYPE` 或引用該標準 Structure，不要逐欄位手動重新宣告），目的是讓自訂物件跟標準表在型別層級保持一致，日後串接 JOIN／BAPI 呼叫不需要額外轉換。
 
-## 課綱（草案，待逐題出題與驗收）
+## 課綱（ale01～ale10 已出題，待驗收）
 
 | # | 主題 | 內容重點 | 銜接前面課程 | 狀態 |
 |---|---|---|---|---|
@@ -42,9 +42,31 @@
 | ale04 | Master Data 分送實戰——Change Pointer 機制端對端 | Change Document vs. Change Pointer 概念釐清；`BD61`（已於 ale02 開）→`BD50`（訊息類型層級）→`BD52`（欄位層級，用 `MATMAS`/`MARC-EISBE` 安全庫存量）三層開關；`MM02` 異動主資料→`BD21`/`RBDMIDOC` 觸發→沿用 ale02 既有 Outbound/Inbound 管線送出→用 ale03 學到的 `WE02` 監控驗證；**沿用 ale02 自我迴圈設定，說明為何本題不需要重新配置 Partner Profile** | 承 ale03 | **✅ 已出題**（`ale04_master_data_change_pointer.md`；全程 GUI 操作，會真實異動一筆物料安全庫存量並要求還原，等待使用者完成後回報 IDoc 號碼與狀態碼供驗證） |
 | ale05 | Transaction Data 觸發機制 | Output Determination（`NAST`／條件技術／`NACE`／輸出類型如 `RD04`）vs. 手動/Enhancement 觸發（`MASTER_IDOC_DISTRIBUTE`）；三種觸發機制（Change Pointer／Output Determination／手動-Enhancement）完整對照表；全程唯讀觀察既有標準設定，不新增 Customizing | 承 ale04 | **✅ 已出題**（`ale05_transaction_data_triggers.md`；`NACE`/`VF03` 唯讀觀察步驟等待使用者回報實際畫面內容以核對講義措辭） |
 | ale06 | 自訂 IDoc 擴充 | Part A：Extension（`WE31` 建 `Z1ALE06`→`WE30` 建 Extension `ZALE06_MATEXT` 掛在 `MATMAS05` 的 `E1MARAM` 底下→`WE82` 指派）；Part B：自訂完整 Z 訊息類型骨架（`WE81` `ZALE06`＋表頭/明細 Segment＋`WE30` Basic Type `ZALE06_BT01`＋`WE82`）；兩條路線取捨表；Segment 兩層解剖（`E1` 扁平字元 vs. `E2` 引用 Data Element，中繼資料 `EDISDEF`/`EDSAPPL`）；欄位一律引用標準 DE（含 `MATNR18`、`ELIFN` 兩個易錯例子）。**待驗證項目已有結論：Claude 不能代建 Segment**（自建 Structure 不會寫入 `EDISDEF`/`EDSAPPL`），只能事後驗證。只定義結構，不送資料 | 承 ale03 | **✅ 已出題**（`ale06_custom_idoc_extension.md`；全程 GUI，等使用者建好後用 `EDISDEF`/`EDSAPPL`/`EDIMSG`/`EDBAS` 驗證並快照生成的 Structure） |
-| ale07 | Outbound 客製化開發 | 觸發時機設計：Change Pointer 驅動 vs. Enhancement/BTE 掛勾手動觸發（銜接 Enhancement 課程 en02/en04 技巧）；自訂/標準 Function Module 組 IDoc、呼叫 `MASTER_IDOC_DISTRIBUTE` 發送；**再次練習 Partner Profile Outbound 設定** | 承 ale05/ale06 | 未出題 |
-| ale08 | Inbound 客製化開發＋錯誤處理 | 自訂 Inbound Function Module（`WE57`/`BD51` 註冊 Process Code）；呼叫標準 BAPI 完成過帳；IDoc 狀態碼（51 錯誤／53 成功）；`BD87` 重新處理失敗 IDoc；**再次練習 Partner Profile Inbound 設定** | 承 ale07 | 未出題 |
-| ale09 | 期末案例一：MIRO 觸發 Paper Company 自動記 AR | 自訂 Z 訊息類型端對端；Outbound 觸發點用 Enhancement／BTE 掛在 `MIRO` 存檔；Inbound 呼叫 `BAPI_ACC_DOCUMENT_POST` 用 Customer 科目過帳出 AR（Company A 做 Invoice Verification 認列 AP，Paper Company 鏡射記 AR） | 承 ale06～ale08 全部技巧 | 未出題 |
-| ale10 | 期末案例二：STO Delivery Billing（`IV`）觸發對方 AP | 標準流程講解（`STO`→`Delivery`→`Billing IV`→輸出 `RD04`→標準 `INVOIC`／`IDOC_INPUT_INVOIC`→自動 AP，幾乎全靠 Customizing）；加客製化轉折（自訂 Z-Segment 擴充帶額外欄位，或掛 BAdI/User-Exit 做金額門檻覆核）——刻意跟 ale09（從零自訂）對照，示範「站在標準流程上加值」 | 承 ale06～ale09 | 未出題 |
+| ale07 | Outbound 客製化開發 | `MASTER_IDOC_DISTRIBUTE` 組 IDoc 與送出（接收方由 `BD64` 決定，沒設定＝靜默不產生）；`COMMIT WORK` 責任歸屬（Class 不 commit、Report 才 commit，呼應 en06）；自訂 `ZALE06` 訊息類型 Outbound（`ZCL_ALE07_PO_OUT`／`ZR_ALE07_SEND`，採購訂單→IDoc）；標準訊息 `MATMAS` 的 Extension 用 Customer Exit（`MGV00001`／`EXIT_SAPLMV01_002`／`ZXMGVU03`）填值，含 `idoc_cimtype` 陷阱；**再次練習 Partner Profile Outbound** | 承 ale05/ale06 | **✅ 已出題**（`ale07_outbound_customization.md`＋5 個答案快照；草稿未經 SAP 驗證，見下方待驗證盤點） |
+| ale08 | Inbound 客製化開發＋錯誤處理 | Inbound 處理鏈（`WE20`→`WE42`→`WE57`→`BD51`→FM）；標準 Inbound FM 介面（實測讀標準 FM 確認）與 `idoc_status` 回填（`53`／`51`）；FM 當轉接器、邏輯放 Class（`ZCL_ALE08_PO_IN`、`Z_IDOC_INPUT_ZALE06`、`ZALE08_CTRL`／`ZALE08_POLOG`）；`51` vs `56`、`BD87` 重新處理、冪等（`MODIFY`＋失敗不寫入）；**再次練習 Partner Profile Inbound**。本題以 Log 表代替真實 BAPI 過帳（真實 BAPI 留給 ale09） | 承 ale07 | **✅ 已出題**（`ale08_inbound_customization.md`＋6 個答案快照；草稿未經 SAP 驗證） |
+| ale09 | 期末案例一：MIRO 觸發 Paper Company 自動記 AR | 自訂 `ZALE09` 訊息類型端對端；Outbound 觸發點用 BAdI `INVOICE_UPDATE`～`CHANGE_IN_UPDATE`（實測介面）只寫待送佇列 `ZALE09_QUEUE`（自製 mini-NAST，回應 ale05 思考題）＋排程報表送出；安全閘 `ZALE09_CTRL`；Inbound 用 `BAPI_ACC_DOCUMENT_CHECK`／`POST` 記 AR（借正貸負、`test_mode` 預設只檢查不過帳、`ref_doc_no` 冪等）；`ZALE09_CTRL` 維護報表驗證主資料存在 | 承 ale06～ale08 全部技巧 | **✅ 已出題**（`ale09_capstone_miro_to_ar.md`＋11 個答案快照；草稿未經 SAP 驗證，⚠️ 過帳路徑需在測試專用公司代碼驗證） |
+| ale10 | 期末案例二：STO Delivery Billing（`IV`）觸發對方 AP | 標準流程講解，並**用系統上真實的 `INVOIC` IDoc 歷史當教材**（2020～2023，115 筆；`53`×7／`51`×91／`56`×9；`EDIDS` 真實失敗訊息、`EDID4` 58 個 Segment 的組成、`NAST` `V3`/`RD04`/媒介 `6`、`EDIFCT` 的 `IDOC_INPUT_INVOIC_FI`／`EDX_INPUT_INVOIC_MRM`、`INVF`／`INVL`）；加值轉折：`LVEDF001`（`EXIT_SAPLVEDF_001`／`002`）替 `INVOIC01` 掛 Extension `ZALE10_INVEXT`，達金額門檻的發票多帶覆核旗標 Segment `Z1ALE10`（插入位置＝`E1EDK01` 之後）——對照 ale09 從零自訂 | 承 ale06～ale09 | **✅ 已出題**（`ale10_capstone_sto_billing_invoic.md`＋4 個答案快照；Part A/B 為唯讀分析可直接做；Part C 草稿未經 SAP 驗證） |
 
 > ale01 環境查證已完成（2026-08-24），詳細方法與結果見 `.claude/rules/sap-adt-mcp.md` 第 58 節；後續逐題踩坑記錄會持續累積寫進同一份規則檔。
+
+## 待驗證項目盤點（ale02～ale10 出題完成後，尚未測試的全部清單）
+
+ale01～ale10 已全數出題（2026-09-21）。截至出題時：**ale02～ale06 的 GUI 步驟使用者都還沒做**（系統實測 `EDISDEF` 無 `Z1%` Segment、`EDIMSG` 無 `ZALE%` 指派、無新的 `MATMAS` IDoc、`EDP13` 沒有 `MATMAS` 的 Partner Profile），**ale07～ale10 的程式碼是草稿，全部未經 SAP 語法檢查與執行驗證**（依賴 ale06 才會建立的 Segment）。回頭盤點時依下列順序推進：
+
+**A. 使用者 GUI 前置（依序）**：ale02（`SM59`/`WE21`/`WE20`/`BD64`/`BD61`/`WE19`）→ ale04（`BD50`/`BD52`/`MM02`/`BD21`）→ ale06（`WE31`/`WE30`/`WE81`/`WE82`）→ ale07 Part A（Outbound Partner Profile／Model）→ ale08 Part B（`WE57`/`BD51`/`WE42`/Inbound Partner Profile）→ ale09 Part B → ale10 Part C 前置。ale03、ale05、ale10 Part A/B 為唯讀觀察，隨時可做。
+
+**B. Claude 側驗證（ale06 完成後才能編譯）**：
+
+1. 把 ale07～ale10 的快照推送到 SAP（`sap_create_object`/`sap_set_source`；Function Group／FM／Test Include／DDIC 表要走 ADT workaround，見規則檔第 6／7／8 節），逐一 `checkruns` 語法檢查與啟用
+2. ABAP Unit：`ZCL_ALE07_PO_OUT`、`ZCL_ALE08_PO_IN`、`ZCL_ALE09_MIRO_OUT`、`ZCL_ALE09_AR_POST`、`ZCL_ALE10_INVOIC_EXT` 五個測試類別（純邏輯、不碰資料庫，可先驗證）；⚠️ `cl_abap_unit_assert=>assert_equals` 對日期／數值型別要求 `act`／`exp` 型別一致，char 對 string 是否通過尚未確認
+3. `ZR_ALE07_SEND`／`ZR_ALE09_SENDQ` 的 `programrun`（`p_test` 模式）；⚠️ 遵守規則檔第 38／45 節：有 `COMMIT`／ALE 呼叫的程式碼不可用 `programrun` 反覆重試
+
+**C. 各題已知的不確定點（出題時刻意標記）**：
+
+- **ale06**：`WE31` 實際生成的 `Z1ALE06`／`Z2ALE06000` 結構、`EDSAPPL` 的 `EXPLENG`（尤其 `WRBTR`＝15、`NETWR` 待回報）
+- **ale07 Part C**：Extension Segment 在 `WE30` 的子節點順序 vs. Exit 的 APPEND 時機（IDoc 狀態 `26` 風險）；`MATMAS` 帶 Extension 送出後，Inbound 端 `WE57` 是否需要對應 Extension 才能處理（可能導致狀態 `56`／`51`）
+- **ale08**：`BD51` 輸入類型的實際選項文字；`WE42` 畫面欄位；Inbound FM 回填 `idoc_status`／`workflow_result` 的實際框架行為（`53`／`51` 是否如預期）；`00`/`398` 訊息文字
+- **ale09**：`INVOICE_UPDATE~CHANGE_IN_UPDATE` 內寫 `zale09_queue` 的實測（Update Task 中 `MODIFY`）；`BAPI_ACC_DOCUMENT_CHECK`／`POST` 的必填欄位（如 `bus_act`、期間、過帳碼）；`RSEG-WRBTR` 淨額與稅的處理；`rbkp-stblg` 沖銷判斷；真實過帳只能在測試專用公司代碼
+- **ale10**：`EXIT_SAPLVEDF_001` 的 `dvbdkr` 是否一定有值；Extension 插入位置與 IDoc 語法順序；`Z1ALE10` 的 `NETWR` 匯出長度；真實 STO→`IV` 計費資料是否可得
+
+**D. 已在出題過程中更正的舊講義錯誤**（2026-09-21，用 `DD07T`/`DD03L`/`NAST`/`TEDS2` 實測）：ale03 的 `EDIDC-DIRECT` 方向（`1`＝Outbound、`2`＝Inbound，原寫反）、`EDIDC` 欄位 `IDOCTP`（非 `IDOCTYP`）、`EDIDS` 欄位 `COUNTR`（非 `COUNTER`）；ale05 的 Application 編號（`V3`＝Billing，非 `V2`）；ale01 的 Segment 兩層結構。**教訓**：這門課多次因憑記憶撰寫字典表欄位與代碼而出錯，之後任何講義中的表名、欄位名、代碼含義都先用 `datapreview/freestyle` 查證再寫。

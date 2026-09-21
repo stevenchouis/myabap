@@ -10,6 +10,7 @@
   - `src/ABAP_Training_OOP/`：OOP 課程（op01–op12，答案物件 `ZCL_OOnn_*` 等），課綱已定稿、出題中，見該目錄 README
   - `src/ABAP_Training_RAP/`：RAP（RESTful Application Programming Model）後端課程，rap01~rap09 全課程已出題並驗收完成（2026-08-17 正式結案），見該目錄 README。**教學分工原則**（2026-08-02 定案，後續課程沿用）：Service Binding 建立與 Publish 一律由使用者在 Eclipse ADT 手動操作＋Publish（技術上必要，ADT REST API 手動建的缺少精靈才會觸發的後端註冊步驟，見 `.claude/rules/sap-adt-mcp.md` 第 40.9 節）；Table／CDS View／BDEF 這類物件，rap01～rap03 由 Claude 建立示範，自 rap04 起改為使用者在 Eclipse ADT 手動建立、Claude 負責驗證（讀取比對／語法檢查）與除錯——講義裡要寫清楚 Eclipse ADT 的詳細操作步驟（選單路徑、精靈畫面欄位、按鈕順序），不能只寫籠統描述；若講義描述的步驟跟使用者實際看到的畫面有落差，由使用者回報後 Claude 再修正講義。
   - `src/ABAP_Training_CDS/`：CDS View 課程（cds01~，基礎篇＋進階篇），2026-08-17 定案開課，課綱規劃中、尚未出題，見該目錄 README。與 rap02（CDS 基礎精簡版）、AMDP 課程（CDS Table Function）互補不重疊，沿用 RAP 課程的教學分工原則與寫作慣例。
+  - `src/ABAP_Training_ALE/`：ALE／IDoc 整合課程（ale01~ale10，2026-09-21 全數出題；ale02~ale06 為使用者 GUI 操作，ale07~ale10 答案程式為**草稿、尚未經 SAP 驗證**，待盤點清單見該目錄 README 文末）。沿用 RAP 課程的教學分工原則與寫作慣例；講義中的字典表名、欄位名、代碼含義一律先用 `datapreview/freestyle` 查證再寫（本課程曾多次因憑記憶出錯，見 README 待驗證盤點 D 段）。
   - `tools/`：輔助腳本，如 `md2pdf.js`（教材 md 改後重產 PDF 講義，`node tools/md2pdf.js [目錄]`）
 - SAP 系統資訊：請填入 System ID / Client / 語言
   - DEV: <補上>

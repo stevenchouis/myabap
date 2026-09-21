@@ -13,8 +13,8 @@ ale01 講過 IDoc 分 Control／Data／Status 三種 Record，這裡把每一種
 | 欄位 | 意義 |
 |---|---|
 | `DOCNUM` | IDoc 號碼（系統流水號，這是識別一筆 IDoc 最核心的 Key） |
-| `DIRECT` | 方向：`1`＝Inbound（送進來）、`2`＝Outbound（送出去） |
-| `IDOCTYP` | Basic Type（如 `MATMAS05`） |
+| `DIRECT` | 方向：`1`＝Outbound（送出去）、`2`＝Inbound（送進來）（2026-09-21 用 `DD07T` 查 Domain `EDI_DIRECT` 實測確認，注意順序容易記反） |
+| `IDOCTP` | Basic Type（如 `MATMAS05`）——⚠️ `EDIDC` 裡的欄位名是 `IDOCTP`（`EDP13`／`EDIMSG` 等其他表才叫 `IDOCTYP`） |
 | `CIMTYP` | Extension Type（如果有自訂擴充，見 ale06；沒有就是空的） |
 | `MESTYP` | Message Type（如 `MATMAS`） |
 | `SNDPOR` | 發送方 Port |
@@ -39,7 +39,7 @@ ale01 講過 IDoc 分 Control／Data／Status 三種 Record，這裡把每一種
 | 欄位 | 意義 |
 |---|---|
 | `DOCNUM` | 對應哪一筆 IDoc |
-| `COUNTER` | 第幾筆狀態記錄（`01`、`02`、`03`……依時間順序遞增） |
+| `COUNTR` | 第幾筆狀態記錄（⚠️ `EDIDS` 的欄位名是 `COUNTR`，`EDID4` 才叫 `COUNTER`；實測從 `0` 開始依時間順序遞增） |
 | `STATUS` | 狀態碼 |
 | `STATXT` | 狀態說明文字（人類看得懂的那句話） |
 | `LOGDAT` / `LOGTIM` | 這個狀態發生的日期/時間 |
@@ -55,7 +55,9 @@ ale01 講過 IDoc 分 Control／Data／Status 三種 Record，這裡把每一種
 | `03` | Outbound | Data passed to port OK——IDoc 已交給通訊層（tRFC），送出這一步本身沒有問題 |
 | `12` | Outbound | Dispatch OK——確認對方已經收到 |
 | `29` | Outbound | Error in ALE service——組 IDoc 或送出過程本身出錯（例如 Partner Profile 設定有誤） |
-| `64` | Inbound | IDoc ready to be transferred to application——已經收到，正準備交給 Inbound Function Module 處理 |
+| `50` | Inbound | IDoc added——IDoc 剛寫進系統（Inbound 成功路徑的起點，實測完整序列為 `50`→`64`→`62`→`53`） |
+| `64` | Inbound | IDoc ready to be passed to application——已經收到，正準備交給 Inbound Function Module 處理 |
+| `62` | Inbound | IDoc passed to application——已經交給應用層處理邏輯（狀態訊息「直接調用已啟動」），之後才會變成 `53` 或 `51` |
 | `53` | Inbound | **Application document posted**——完整成功，應用層資料已經真的寫進去了（自我迴圈測試的理想終點） |
 | `51` | Inbound | Application document not posted（error）——收到了，但 Inbound Function Module 執行失敗（例如資料不合法，或 ale08 會教的自訂驗證邏輯擋下來） |
 | `56` | Inbound | IDoc with errors added——語法/結構層級就有問題，甚至沒能正常送進 Inbound 處理邏輯 |
@@ -120,7 +122,7 @@ ale02 用的是 `WE19` 的 **Existing Data** 模式（拿一筆現有的應用�
 操作完成後回報：① 步驟 1 找到的原始 IDoc 號碼與其 Status Record 完整歷程 ② 步驟 3/4 產生的新 IDoc 號碼與最終狀態碼。我會用以下查詢幫你交叉確認（表名/欄位皆為標準 SAP 字典表，可直接查）：
 
 - `SELECT DOCNUM, DIRECT, MESTYP, STATUS, SNDPRN, RCVPRN FROM EDIDC WHERE DOCNUM IN ('<原始IDoc號>', '<新IDoc號>')`
-- `SELECT DOCNUM, COUNTER, STATUS, STATXT FROM EDIDS WHERE DOCNUM = '<新IDoc號>' ORDER BY COUNTER`
+- `SELECT DOCNUM, COUNTR, STATUS, STATXT FROM EDIDS WHERE DOCNUM = '<新IDoc號>' ORDER BY COUNTR`
 - `SELECT DOCNUM, SEGNUM, SEGNAM, SDATA FROM EDID4 WHERE DOCNUM = '<新IDoc號>' AND SEGNAM = 'E1MARAM'`——確認你改的那個欄位值真的反映在 `SDATA` 這條純文字字串裡對應的位置
 
 ## 思考題

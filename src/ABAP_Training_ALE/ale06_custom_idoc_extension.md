@@ -95,7 +95,7 @@ Segment、Basic Type／Extension 建立後都是**未釋出**狀態，要各自�
 - `Z1ALE06H`（表頭）：`EBELN`/`EBELN`、`BUKRS`/`BUKRS`、`ELIFN`/`ELIFN`
 - `Z1ALE06I`（明細）：`EBELP`/`EBELP`、`MATNR18`/`MATNR18`
 
-（Field name 用哪個名稱不影響驗證，建議跟 Data Element 同名方便對照。）兩個都存檔後各自 **Set Release**。
+（**⚠️ Field name 必須與 Data element 同名，且 Segment 名稱、欄位順序照上面寫的**——ale07／ale08 的 ABAP 程式碼直接引用 `z1ale06h-ebeln`、`z1ale06i-matnr18` 這類欄位名稱，名稱不同程式碼就編譯不過。Part A 的 `Z1ALE06`（`SAISJ`／`DATAB`）同理。）兩個都存檔後各自 **Set Release**。
 
 **步驟 6：`WE81` 建立 Message Type**
 

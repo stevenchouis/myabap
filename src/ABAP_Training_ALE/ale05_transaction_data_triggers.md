@@ -56,7 +56,7 @@ ale04 示範了 Master Data 的自動化觸發：改一個欄位、開三層開�
 ### 步驟 1：`NACE` 觀察 Output Type 的 Processing Routines
 
 1. 交易碼 `NACE`
-2. **Application** 選 `V2`（Billing，計費文件）
+2. **Application** 選 `V3`（Billing，計費文件；⚠️ `V1`＝Sales、`V2`＝Shipping、`V3`＝Billing，2026-09-21 用 `NAST` 實測：`RD04` 的 `KAPPL` 是 `V3`，`V2` 底下是 `LD00` 交貨單輸出）
 3. 工具列 **Output Types** → 找到 `RD04`（Invoice）→ 選取後點 **Processing Routines**
 4. 觀察畫面列出的每一列：**Transmission Medium** 欄位有哪些選項（留意有沒有一列的媒介是 EDI／External Send 這一類，跟其他列如「1＝Print」使用的欄位（`Form`／`Smartform`）是否不同——EDI 那一列通常改用 **Program／FORM Routine** 或直接是 **Function Module** 這類欄位，不會有列印用的 Form 名稱）
 5. 記下你實際看到的畫面內容（欄位名稱可能因版本略有差異，照你看到的實際內容記錄，不用照抄本題文字）

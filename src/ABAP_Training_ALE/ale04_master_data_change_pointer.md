@@ -89,7 +89,7 @@ README 課綱原本設計「在兩個 Client 各自配置 Partner Profile」—�
 操作完成後回報：① `BD21` 顯示處理了幾筆 Change Pointer、產生了哪個 IDoc 號碼 ② 該 IDoc 最終狀態碼。我會用以下查詢協助確認（`EDIDC`/`EDIDS`/`EDID4` 已在 ale03 驗證過表名與欄位正確）：
 
 - `SELECT DOCNUM, MESTYP, STATUS, CREDAT, CRETIM FROM EDIDC WHERE MESTYP = 'MATMAS' AND CREDAT = '<今天日期>' ORDER BY CRETIM DESCENDING`——找出今天新產生的 IDoc
-- `SELECT DOCNUM, COUNTER, STATUS, STATXT FROM EDIDS WHERE DOCNUM = '<IDoc號>' ORDER BY COUNTER`——確認完整狀態歷程
+- `SELECT DOCNUM, COUNTR, STATUS, STATXT FROM EDIDS WHERE DOCNUM = '<IDoc號>' ORDER BY COUNTR`——確認完整狀態歷程
 - `SELECT SDATA FROM EDID4 WHERE DOCNUM = '<IDoc號>' AND SEGNAM = 'E1MARCM'`——核對安全庫存量的新值是否正確出現在 Data Record 裡（如果 Segment 名稱跟我猜的 `E1MARCM` 不同，把你在 `WE02` 實際看到的名稱告訴我）
 
 ## 思考題
