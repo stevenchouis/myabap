@@ -9,7 +9,9 @@ FUNCTION z_tr15_calc_revenue_tab
 *   跟 TABLES 的差別：可以用 ASSIGNING 直接改原表列，型別也不受
 *   「flat line type」限制（見講義 15 第 3.1 節）
 
-  LOOP AT ct_flights ASSIGNING FIELD-SYMBOL(<fs_flight>).
+  FIELD-SYMBOLS <fs_flight> TYPE ztr15_flight_rev.
+
+  LOOP AT ct_flights ASSIGNING <fs_flight>.
     <fs_flight>-revenue = <fs_flight>-price * <fs_flight>-seatsocc.
   ENDLOOP.
 

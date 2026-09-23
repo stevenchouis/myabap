@@ -39,11 +39,11 @@ START-OF-SELECTION.
 *   ON：兩表的關聯條件
 *   INTO CORRESPONDING FIELDS OF TABLE：依「欄位名相同」自動對應
 *----------------------------------------------------------------------*
-  SELECT a~carrid, a~connid, a~cityfrom, a~cityto, b~carrname
-    INTO CORRESPONDING FIELDS OF TABLE @gt_routes
+  SELECT a~carrid a~connid a~cityfrom a~cityto b~carrname
+    INTO CORRESPONDING FIELDS OF TABLE gt_routes
     FROM spfli AS a
     INNER JOIN scarr AS b ON a~carrid = b~carrid
-    WHERE a~carrid IN @s_carrid.
+    WHERE a~carrid IN s_carrid.
 
   IF sy-subrc <> 0.
     WRITE / '查無航線資料！請先執行 SAPBC_DATA_GENERATOR'.
@@ -63,8 +63,8 @@ START-OF-SELECTION.
 * 右表（SPFLI）沒有對應資料時，右表欄位為初始值（空白）
 * 用途：找出「沒有開航線的航空公司」這類「左有右無」的需求
 *----------------------------------------------------------------------*
-  SELECT a~carrid, a~carrname, b~connid
-    INTO CORRESPONDING FIELDS OF TABLE @gt_carr
+  SELECT a~carrid a~carrname b~connid
+    INTO CORRESPONDING FIELDS OF TABLE gt_carr
     FROM scarr AS a
     LEFT OUTER JOIN spfli AS b ON a~carrid = b~carrid.
 

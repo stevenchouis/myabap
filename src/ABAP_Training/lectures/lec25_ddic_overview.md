@@ -5,7 +5,7 @@
 ## 本講重點
 
 - Data Dictionary（SE11）在系統裡的角色：一張物件地圖，程式與畫面共用同一份定義
-- **Global Type** 觀念：為什麼引用 DDIC 型別比寫死長度安全——一個真實的 SAP 升級案例
+- **Global Type** 回顧（觀念已在講義 6 第 1.1 節講過）：重點放在動手建自己的 Global Type
 - 為什麼要自建 Z 表：業務需求 + SM30 讓非工程師也能維護資料
 - Check Table／外鍵／Search Help：概念總覽（詳細動手在講義 21）
 - 程式裡引用表格／結構的三種寫法，以及「該重用標準型別、還是自建」的判斷
@@ -28,25 +28,13 @@
 
 關鍵觀念：**這些定義只寫一次，程式（用 `TYPE`）跟畫面（Dynpro/SM30）共用同一份**——這就是接下來 Global Type 觀念的基礎。
 
-## 2. Global Type：為什麼要引用 DDIC 型別，不要寫死
+## 2. Global Type 回顧：為什麼要引用 DDIC 型別，不要寫死
 
-講義 6 提過一句「表定義改了，程式的變數自動一致」，這裡把它講深：這不只是省打字，是**系統長期維護的安全機制**。
+Global Type 的觀念（內建型別／Local Type／Global Type 三層、判斷準則、為什麼不寫死長度）已經在[講義 6 第 1.1 節](lec06_sap_table.md)講過，這裡不重複，只回顧最關鍵的一點，接著把重心放在「怎麼動手建自己的 Global Type」。
 
-### 2.1 一個真實案例：物料號碼從 18 碼變 40 碼
+### 2.1 回顧：寫死長度是最陰險的 bug
 
-SAP 標準的物料號碼欄位 `MATNR`（Data Element），舊版本長度是 18 碼；S/4HANA 世代為了因應更長的編碼需求，把它**加長到 40 碼**。全世界所有 SAP 客戶的自訂程式，只要是這樣宣告的：
-
-```abap
-DATA lv_matnr TYPE mara-matnr.      " 引用 Global Type：升級後自動變 40 碼，程式不用改一行
-```
-
-一行都不用改，長度自動跟著系統升級。但如果當初圖方便寫死：
-
-```abap
-DATA lv_matnr TYPE c LENGTH 18.     " 寫死長度：升級後資料被截斷成 18 碼，資料悄悄壞掉
-```
-
-升級後這行完全不會報錯——**寫死長度的欄位不會抗議，只會默默截斷資料**，這是最陰險的一種 bug：不當機、不噴錯誤訊息，只是資料錯了，可能幾個月後才被發現。這正是 Global Type 存在的意義：**把「型別的定義權」交給系統唯一的來源（Domain/Data Element），你的程式只負責「引用」**。
+物料號碼 `MATNR` 從 18 碼加長到 40 碼：引用 Global Type 的程式（`TYPE mara-matnr`）升級後**一行都不用改**；寫死 `TYPE c LENGTH 18` 的程式資料被默默截斷，**不當機、不報錯**，可能幾個月後才被發現。**型別的定義權交給系統唯一的來源（Domain／Data Element），程式只負責「引用」**——本講後面的每一種做法，都是在這個前提下，決定「引用現成的」還是「自己建一個」。
 
 ### 2.2 什麼時候該重用標準型別、什麼時候該自建
 
@@ -162,16 +150,31 @@ key carrid : s_carr_id not null
 DATA gs_surchg TYPE ztr25_surchg.        " 整列：Global Type 宣告
 DATA gv_carrid TYPE s_carr_id.           " 直接引用標準 Data Element
 
-SELECT f~carrid, c~carrname, f~connid, f~fldate, f~seatsocc, f~price,
-       s~active, s~surcharge_pct
-  INTO TABLE @DATA(gt_rev)
+TYPES: BEGIN OF ty_rev,
+         carrid        TYPE s_carr_id,
+         carrname      TYPE scarr-carrname,
+         connid        TYPE sflight-connid,
+         fldate        TYPE sflight-fldate,
+         seatsocc      TYPE sflight-seatsocc,
+         price         TYPE sflight-price,
+         active        TYPE ztr25_surchg-active,
+         surcharge_pct TYPE ztr25_surchg-surcharge_pct,
+         revenue       TYPE p LENGTH 12 DECIMALS 2,
+         revenue_adj   TYPE p LENGTH 12 DECIMALS 2,
+       END OF ty_rev.
+DATA gt_rev TYPE STANDARD TABLE OF ty_rev.
+FIELD-SYMBOLS <ls_rev> TYPE ty_rev.      " 指向內表的一列（講義 16）
+
+SELECT f~carrid c~carrname f~connid f~fldate f~seatsocc f~price
+       s~active s~surcharge_pct
+  INTO CORRESPONDING FIELDS OF TABLE gt_rev
   FROM sflight AS f
   INNER JOIN scarr AS c ON c~carrid = f~carrid
   LEFT OUTER JOIN ztr25_surchg AS s ON s~carrid = f~carrid   " 沒設定過的公司也要出現，用 LEFT OUTER
   WHERE f~seatsocc > 0
-  ORDER BY f~carrid, f~connid, f~fldate.
+  ORDER BY f~carrid f~connid f~fldate.
 
-LOOP AT gt_rev ASSIGNING FIELD-SYMBOL(<ls_rev>).
+LOOP AT gt_rev ASSIGNING <ls_rev>.
   <ls_rev>-revenue = <ls_rev>-price * <ls_rev>-seatsocc.
   IF <ls_rev>-active = 'X'.
     <ls_rev>-revenue_adj = <ls_rev>-revenue * ( 1 + <ls_rev>-surcharge_pct / 100 ).
@@ -200,7 +203,7 @@ ENDLOOP.
 DATA gt_surchg TYPE ztr25_tt_surchg.        " 引用全域 Table Type，跟 TYPE STANDARD TABLE OF 效果相同
 
 FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.
-  SELECT * FROM ztr25_surchg INTO TABLE @ct_surchg.
+  SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.
 ENDFORM.
 ```
 

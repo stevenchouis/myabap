@@ -50,7 +50,7 @@
 依序完成：
 
 1. 宣告示範用的 Global Type 變數：`gv_carrid_global TYPE s_carr_id`（直接引用標準 Data Element）與 `gv_carrid_hard TYPE c LENGTH 3`（反面教材：寫死長度）；各自填入 `'LH'` 後 WRITE 輸出，並用註解說明兩者的差異（見講義 25 第 2.1 節）
-2. 寫一個 `FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.`——用第一部分建的 **DDIC Table Type** 當 CHANGING 參數型別，`SELECT * FROM ztr25_surchg INTO TABLE @ct_surchg.`；呼叫後 WRITE 輸出讀到的筆數
+2. 寫一個 `FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.`——用第一部分建的 **DDIC Table Type** 當 CHANGING 參數型別，`SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.`；呼叫後 WRITE 輸出讀到的筆數
 3. `SELECT` SFLIGHT INNER JOIN SCARR、**LEFT OUTER JOIN** `ZTR25_SURCHG`（依 CARRID），撈出：航空公司代碼/名稱、航線、日期、已售座位、票價、`ACTIVE`、`SURCHARGE_PCT`；`WHERE seatsocc > 0`
 4. 逐筆計算：`revenue = price * seatsocc`；`active = 'X'` 時 `revenue_adj = revenue * (1 + surcharge_pct / 100)`，否則 `revenue_adj = revenue`
 5. 輸出清單：航空公司、航線、日期、原始營收、加成後營收，並標明是否套用加成

@@ -7,11 +7,11 @@
 *&      Form  get_data
 *&---------------------------------------------------------------------*
 FORM get_data.
-  SELECT carrid, connid, fldate, seatsocc, price, currency
-    INTO CORRESPONDING FIELDS OF TABLE @gt_rev
+  SELECT carrid connid fldate seatsocc price currency
+    INTO CORRESPONDING FIELDS OF TABLE gt_rev
     FROM sflight
-    WHERE carrid IN @s_carrid
-      AND fldate IN @s_fldate.
+    WHERE carrid IN s_carrid
+      AND fldate IN s_fldate.
 
   LOOP AT gt_rev INTO gs_rev.
     gs_rev-revenue = gs_rev-price * gs_rev-seatsocc.

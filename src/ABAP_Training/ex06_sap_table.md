@@ -17,7 +17,7 @@
 ## 題目需求
 
 1. 宣告：`gt_carriers`（`SCARR` 的 internal table）、`gs_carrier`（`TYPE scarr`）、`gv_carrid`（`TYPE scarr-carrid`）
-2. `SELECT * FROM scarr INTO TABLE @gt_carriers UP TO 10 ROWS.` 讀資料，讀完檢查 `sy-subrc`，沒資料就輸出提示訊息並 `RETURN`
+2. `SELECT * FROM scarr INTO TABLE gt_carriers UP TO 10 ROWS.` 讀資料，讀完檢查 `sy-subrc`，沒資料就輸出提示訊息並 `RETURN`
 3. 輸出筆數與清單（代碼/名稱/幣別）
 4. 用 `SELECT SINGLE` 讀代碼 `'AA'` 的航空公司，檢查 `sy-subrc` 後輸出
 

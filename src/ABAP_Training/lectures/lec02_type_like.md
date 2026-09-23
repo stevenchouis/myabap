@@ -75,7 +75,7 @@ DATA gv_date3 LIKE gv_date1.     " LIKE：跟 gv_date1 同型別
 使用時機：
 
 - 想表達「跟某個既有欄位／變數保持一致」用 `LIKE`——來源改了，跟著的變數自動一致。
-- 其他情況用 `TYPE`。之後接觸 SAP 資料表後，`TYPE scarr-carrid`（參考資料字典欄位型別）會是最常見寫法（講義 6）。
+- 其他情況用 `TYPE`。本講先用內建型別（`i`、`c`、`d`……）學語法；但**內建型別只適合純區域暫存**（計數器、旗標），只要變數代表業務資料，實務上都是 `TYPE scarr-carrid` 這種參考資料字典欄位的寫法（Global Type，講義 6 第 1.1 節詳解）。
 - 進階常用：`DATA gs LIKE LINE OF gt_tab.`（宣告跟某內表一列同型別的 work area，講義 10 會用到）。
 
 ## 4. CONSTANTS 常數

@@ -5,6 +5,7 @@
 ## 本講重點
 
 - 資料字典（DDIC）與透明表：SE11 看定義、SE16N 看資料
+- **Global Type**：型別從哪裡來（內建型別／Local Type／Global Type），為什麼業務欄位要引用 DDIC 型別
 - SAP 練習用航班資料模型：SCARR / SPFLI / SFLIGHT
 - `SELECT ... INTO TABLE`、`SELECT SINGLE`、`WHERE`、`UP TO n ROWS`
 - `sy-subrc` 與 `sy-dbcnt`
@@ -27,7 +28,36 @@ DATA gs_carrier TYPE scarr.                     " 整列結構
 DATA gt_carriers TYPE STANDARD TABLE OF scarr.  " 內表：一列 = 一筆 SCARR
 ```
 
-好處：表定義改了，程式的變數自動一致；而且帶著欄位的語意（長度、轉換規則、檢核表）。這個「引用型別而非寫死」的觀念正式名稱是 **Global Type**，講義 25 會用一個真實的 SAP 升級案例把它講深。
+好處：表定義改了，程式的變數自動一致；而且帶著欄位的語意（長度、轉換規則、檢核表）。這個「引用型別而非寫死」的觀念正式名稱是 **Global Type**，下一小節先把它跟前面學過的型別放在一起比較。
+
+### 1.1 內建型別、Local Type、Global Type：型別從哪裡來
+
+宣告變數時，型別有三種來源，從「最靠近程式」到「最靠近系統」：
+
+| 層級 | 寫法 | 定義在哪 | 特性 |
+|---|---|---|---|
+| 內建型別 | `DATA a TYPE c LENGTH 3.` | ABAP 語言本身 | 長度、語意都寫死在這一行 |
+| Local Type | `TYPES ty_x ...` 再 `DATA a TYPE ty_x.`（講義 3、4） | 這支程式裡 | 只有本程式看得到，別的程式要用得再抄一份 |
+| **Global Type** | `DATA a TYPE scarr-carrid.`、`TYPE scarr`、`TYPE s_carr_id` | 資料字典（SE11） | 全系統共用**同一份**定義，帶著標籤、F4 說明、檢核表 |
+
+Global Type 涵蓋的範圍：**Data Element**（如 `s_carr_id`）、**表格欄位**（如 `scarr-carrid`，背後其實就是該欄位使用的 Data Element）、**Structure／整列**（如 `scarr`）、**Table Type**（表格型別，講義 25 詳述）。
+
+**為什麼要引用，不要寫死**：SAP 標準的物料號碼欄位 `MATNR`，舊版是 18 碼，S/4HANA 加長成 40 碼。
+
+```abap
+DATA lv_matnr TYPE mara-matnr.    " Global Type：升級後自動變 40 碼，程式一行不用改
+DATA lv_matnr TYPE c LENGTH 18.   " 寫死長度：升級後資料被默默截斷成 18 碼，也不會報錯
+```
+
+寫死長度的欄位不會當機、不會噴訊息，只是資料悄悄壞掉。**把型別的定義權交給系統唯一的來源（資料字典），程式只負責「引用」**，這就是 Global Type 存在的意義。
+
+**判斷準則**：
+
+- **純區域暫存**（迴圈計數器 `TYPE i`、只在本段用的旗標）→ 內建型別就好
+- **代表業務資料**（航空公司、物料、票價、日期……）→ 一律引用 Global Type：`TYPE 表-欄位`
+- **只有本程式用的欄位組合** → Local Type（`TYPES`）；**多支程式或 Function Module 都要用** → 升級成 DDIC 的 Structure／Table Type（講義 25）
+
+實務上，程式裡代表業務資料的變數絕大多數都是引用 Global Type，直接寫 `TYPE c LENGTH n` 來放業務欄位反而是少見、也不建議的寫法。講義 25 會進一步教怎麼動手建自己的 Domain／Data Element／Table Type，以及「該重用標準型別還是自建」的判斷。
 
 ## 2. 航班資料模型（訓練標準教材）
 

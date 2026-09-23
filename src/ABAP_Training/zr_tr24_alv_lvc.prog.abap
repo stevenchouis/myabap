@@ -30,6 +30,7 @@ DATA: gt_data     TYPE STANDARD TABLE OF ty_row,
       gt_fieldcat TYPE lvc_t_fcat,
       gs_fieldcat TYPE lvc_s_fcat,
       gt_events   TYPE slis_t_event,
+      gs_event    TYPE slis_alv_event,
       gs_layout   TYPE lvc_s_layo,
       gs_glay     TYPE lvc_s_glay.
 
@@ -83,8 +84,10 @@ FORM build_alv.
   gs_glay-edt_cll_cb   = 'X'.         " ★ 離開已編輯儲存格 → 觸發 DATA_CHANGED
 
 * 事件表：告訴 ALV「DATA_CHANGED 事件發生時，回呼哪個 FORM」
-  APPEND VALUE #( name = slis_ev_data_changed form = 'DATA_CHANGED' )
-    TO gt_events.
+  CLEAR gs_event.
+  gs_event-name = slis_ev_data_changed.
+  gs_event-form = 'DATA_CHANGED'.
+  APPEND gs_event TO gt_events.
 ENDFORM.
 
 *&---------------------------------------------------------------------*
@@ -162,9 +165,12 @@ ENDFORM.
 FORM confirm_selected.
   DATA: ls_style TYPE lvc_s_styl,
         lv_count TYPE i,
+        lv_count_txt TYPE c LENGTH 10,
         lv_msg   TYPE string.
 
-  LOOP AT gt_data ASSIGNING FIELD-SYMBOL(<ls_row>) WHERE sel = 'X'.
+  FIELD-SYMBOLS <ls_row> TYPE ty_row.       " 指向內表的一列（講義 16）
+
+  LOOP AT gt_data ASSIGNING <ls_row> WHERE sel = 'X'.
     <ls_row>-status = '已確認'.
     lv_count = lv_count + 1.
 
@@ -179,7 +185,8 @@ FORM confirm_selected.
   ENDLOOP.
 
   IF lv_count > 0.
-    lv_msg = |已確認 { lv_count } 筆，該列選取框與備註已鎖定|.
+    WRITE lv_count TO lv_count_txt LEFT-JUSTIFIED.
+    CONCATENATE '已確認' lv_count_txt '筆，該列選取框與備註已鎖定' INTO lv_msg SEPARATED BY space.
     MESSAGE lv_msg TYPE 'S'.
   ELSE.
     MESSAGE '請先勾選要確認的資料列' TYPE 'S' DISPLAY LIKE 'E'.

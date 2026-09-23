@@ -314,8 +314,10 @@ DEQUEUE_EZTR28_CARR
 `ZR_TR28_PRICE_CALC`：JOIN `SPFLI`／`SFLIGHT` 套用折扣算最終票價
 
 ```abap
-SELECT SINGLE discount_pct FROM ztr28_cdisc
-  WHERE carrid = @p_carrid INTO @DATA(lv_discount_pct).
+SELECT SINGLE discount_pct
+  INTO lv_discount_pct
+  FROM ztr28_cdisc
+  WHERE carrid = p_carrid.
 IF sy-subrc <> 0.
   lv_discount_pct = 0.        " 折扣是選配，查不到不擋報表
 ENDIF.

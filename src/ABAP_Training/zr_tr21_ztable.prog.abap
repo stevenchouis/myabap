@@ -6,9 +6,18 @@
 *&---------------------------------------------------------------------*
 REPORT zr_tr21_ztable.
 
+TYPES: BEGIN OF ty_join,
+         id     TYPE ztr21_stud-id,
+         name   TYPE ztr21_stud-name,
+         klasse TYPE ztr21_stud-klasse,
+         klname TYPE ztr21_class-klname,
+       END OF ty_join.
+
 DATA: gs_stud  TYPE ztr21_stud,          " 表名直接當結構型別
       gt_stud  TYPE STANDARD TABLE OF ztr21_stud,
-      gs_class TYPE ztr21_class.
+      gs_class TYPE ztr21_class,
+      gt_join  TYPE STANDARD TABLE OF ty_join,
+      gs_join  TYPE ty_join.
 
 START-OF-SELECTION.
 *----------------------------------------------------------------------*
@@ -148,15 +157,15 @@ START-OF-SELECTION.
 *     注意：MANDT 是 client field，JOIN 的 ON 條件不可寫出來，
 *     Client Handling 由編譯器自動處理（兩邊都會自動限定同一 client）
 *----------------------------------------------------------------------*
-  SELECT s~id, s~name, s~klasse, c~klname
+  SELECT s~id s~name s~klasse c~klname
     FROM ztr21_stud AS s
     LEFT OUTER JOIN ztr21_class AS c
       ON c~klasse = s~klasse
-    INTO TABLE @DATA(gt_join)
+    INTO CORRESPONDING FIELDS OF TABLE gt_join
     ORDER BY s~id.
 
   WRITE / '=== 學生 JOIN 班級（學號／姓名／班級代碼／班級名稱） ==='.
-  LOOP AT gt_join INTO DATA(gs_join).
+  LOOP AT gt_join INTO gs_join.
     WRITE: / gs_join-id, gs_join-name, gs_join-klasse, gs_join-klname.
   ENDLOOP.
 

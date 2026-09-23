@@ -87,7 +87,9 @@ TYPES: BEGIN OF ty_student,
 - `BEGIN OF` 開始、`END OF` 結束，中間每行一個欄位
 - 慣例：結構型別 `ty_` 開頭、表格型別 `tt_` 開頭
 - 只在本程式看得到 = **Local Type**
-  多支程式共用 → 改定義在 SE11（本課程先用 Local）
+  多支程式共用 → 定義在 SE11 = **Global Type**（講義 6）
+- 業務欄位實務上也是 `carrid TYPE scarr-carrid`
+  本講範例為了不依賴資料表才用內建型別
 
 ---
 

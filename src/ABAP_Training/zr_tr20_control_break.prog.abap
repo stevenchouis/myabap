@@ -18,6 +18,8 @@ TYPES: BEGIN OF ty_rev,
 DATA: gt_rev TYPE STANDARD TABLE OF ty_rev,
       gs_rev TYPE ty_rev.
 
+FIELD-SYMBOLS <ls_rev> TYPE ty_rev.      " 指向內表的一列（講義 16）
+
 START-OF-SELECTION.
   SELECT f~carrid c~carrname f~connid f~fldate
          f~seatsocc f~price
@@ -30,7 +32,7 @@ START-OF-SELECTION.
   ENDIF.
 
 * 算營收：就地修改用 ASSIGNING（講義 16）
-  LOOP AT gt_rev ASSIGNING FIELD-SYMBOL(<ls_rev>).
+  LOOP AT gt_rev ASSIGNING <ls_rev>.
     <ls_rev>-revenue = <ls_rev>-price * <ls_rev>-seatsocc.
   ENDLOOP.
 

@@ -21,6 +21,7 @@ TYPES: BEGIN OF ty_rev,
        END OF ty_rev.
 
 DATA: gt_rev            TYPE STANDARD TABLE OF ty_rev,
+      gs_rev            TYPE ty_rev,
       gv_carrid_global  TYPE s_carr_id,              " Global Type：引用標準 Data Element
       gv_carrid_hard    TYPE c LENGTH 3.             " 反面教材：寫死長度
 
@@ -71,7 +72,7 @@ ENDFORM.
 *&---------------------------------------------------------------------*
 FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.
   SELECT * FROM ztr25_surchg
-    INTO TABLE @ct_surchg.
+    INTO TABLE ct_surchg.
 ENDFORM.
 
 *&---------------------------------------------------------------------*
@@ -79,17 +80,18 @@ ENDFORM.
 *&      LEFT OUTER JOIN：沒被財務設定過的航空公司也要出現在報表上
 *&---------------------------------------------------------------------*
 FORM get_data.
-  SELECT f~carrid, c~carrname, f~connid, f~fldate, f~seatsocc, f~price,
-         s~active, s~surcharge_pct
+  FIELD-SYMBOLS <ls_rev> TYPE ty_rev.       " 指向內表的一列（講義 16）
+
+  SELECT f~carrid c~carrname f~connid f~fldate f~seatsocc f~price
+         s~active s~surcharge_pct
+    INTO CORRESPONDING FIELDS OF TABLE gt_rev UP TO 100 ROWS
     FROM sflight AS f
     INNER JOIN scarr AS c ON c~carrid = f~carrid
     LEFT OUTER JOIN ztr25_surchg AS s ON s~carrid = f~carrid
     WHERE f~seatsocc > 0
-    ORDER BY f~carrid, f~connid, f~fldate
-    INTO CORRESPONDING FIELDS OF TABLE @gt_rev
-    UP TO 100 ROWS.
+    ORDER BY f~carrid f~connid f~fldate.
 
-  LOOP AT gt_rev ASSIGNING FIELD-SYMBOL(<ls_rev>).
+  LOOP AT gt_rev ASSIGNING <ls_rev>.
     <ls_rev>-revenue = <ls_rev>-price * <ls_rev>-seatsocc.
     IF <ls_rev>-active = 'X'.
       <ls_rev>-revenue_adj = <ls_rev>-revenue * ( 1 + <ls_rev>-surcharge_pct / 100 ).
@@ -109,7 +111,7 @@ FORM display_data.
   ENDIF.
 
   WRITE / '=== 航班加成營收 ==='.
-  LOOP AT gt_rev INTO DATA(gs_rev).
+  LOOP AT gt_rev INTO gs_rev.
     WRITE: / gs_rev-carrid, gs_rev-carrname, gs_rev-connid, gs_rev-fldate,
              '原始營收', gs_rev-revenue CURRENCY 'USD',
              '加成後', gs_rev-revenue_adj CURRENCY 'USD'.

@@ -94,28 +94,29 @@ START-OF-SELECTION.
 
   DATA: gt_students_deep TYPE STANDARD TABLE OF ty_student_deep WITH NON-UNIQUE KEY id,
         gs_student_deep  TYPE ty_student_deep,
+        gs_exam          TYPE ty_exam,          " 內層 LOOP 的 work area
         gv_total         TYPE i.
 
   CLEAR gs_student_deep.
   gs_student_deep-id   = 'S0005'.
   gs_student_deep-name = '林小華'.
-  APPEND VALUE #( exam_no = 1 score = 78 ) TO gs_student_deep-exams.
-  APPEND VALUE #( exam_no = 2 score = 85 ) TO gs_student_deep-exams.
-  APPEND VALUE #( exam_no = 3 score = 90 ) TO gs_student_deep-exams.
+  gs_exam-exam_no = 1. gs_exam-score = 78. APPEND gs_exam TO gs_student_deep-exams.
+  gs_exam-exam_no = 2. gs_exam-score = 85. APPEND gs_exam TO gs_student_deep-exams.
+  gs_exam-exam_no = 3. gs_exam-score = 90. APPEND gs_exam TO gs_student_deep-exams.
   APPEND gs_student_deep TO gt_students_deep.
 
   CLEAR gs_student_deep.
   gs_student_deep-id   = 'S0006'.
   gs_student_deep-name = '黃小芳'.
-  APPEND VALUE #( exam_no = 1 score = 60 ) TO gs_student_deep-exams.
-  APPEND VALUE #( exam_no = 2 score = 72 ) TO gs_student_deep-exams.
-  APPEND VALUE #( exam_no = 3 score = 55 ) TO gs_student_deep-exams.
+  gs_exam-exam_no = 1. gs_exam-score = 60. APPEND gs_exam TO gs_student_deep-exams.
+  gs_exam-exam_no = 2. gs_exam-score = 72. APPEND gs_exam TO gs_student_deep-exams.
+  gs_exam-exam_no = 3. gs_exam-score = 55. APPEND gs_exam TO gs_student_deep-exams.
   APPEND gs_student_deep TO gt_students_deep.
 
   WRITE / '=== Deep Structure：每位學生的小考成績與平均 ==='.
   LOOP AT gt_students_deep INTO gs_student_deep.
     gv_total = 0.
-    LOOP AT gs_student_deep-exams INTO DATA(gs_exam).      " 內層 LOOP：巢狀表
+    LOOP AT gs_student_deep-exams INTO gs_exam.             " 內層 LOOP：巢狀表
       WRITE: / gs_student_deep-name, '第', gs_exam-exam_no, '次小考：', gs_exam-score.
       gv_total = gv_total + gs_exam-score.
     ENDLOOP.

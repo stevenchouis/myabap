@@ -128,7 +128,7 @@ footer { color: #999; }
 <li>ABAP 程式怎麼建立、怎麼執行（SE38 / Executable Program）</li>
 <li>statement 以句點 <code>.</code> 結束，可自由跨行</li>
 <li>兩種註解：<code>*</code>（整行）與 <code>&quot;</code>（行內）</li>
-<li>冒號 <code>:</code> 鏈式寫法</li>
+<li>冒號 <code>:</code> 鏈式寫法（Chain Statement）</li>
 <li>關鍵字不分大小寫與 Pretty Printer</li>
 <li><code>WRITE</code> 輸出與 <code>/</code> 換行</li>
 </ul>
@@ -409,7 +409,7 @@ blockquote {
 }
 footer { color: #999; }
 ;" data-marpit-pagination-total="12">
-<h2 id="4-%E5%86%92%E8%99%9F%E9%8F%88%E5%BC%8F%E5%AF%AB%E6%B3%95">4. 冒號鏈式寫法</h2>
+<h2 id="4-%E5%86%92%E8%99%9F%E9%8F%88%E5%BC%8F%E5%AF%AB%E6%B3%95chain-statement">4. 冒號鏈式寫法（Chain Statement）</h2>
 <p>開頭關鍵字相同的多個 statement，用 <code>:</code> 合併、<code>,</code> 分隔、<code>.</code> 收尾</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 三句分開寫：
 WRITE / 'A'.
@@ -671,9 +671,11 @@ footer { color: #999; }
 </table>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">WRITE 'It''s ok'.     &quot; 單引號：' 要寫兩次（Escape）
 WRITE `It's ok`.      &quot; 反引號：內部 ' 不用處理
-WRITE |It's ok|.      &quot; 字串模板（第 12 講）：一樣不用處理
 </code></pre>
 <p>逃脫的對象永遠是<strong>自己的分隔符號</strong></p>
+<blockquote>
+<p>補充：7.40 之後還有字串模板 <code>WRITE |It's ok|.</code>（分隔符號是 <code>|</code>，單引號同樣不用處理），講義 26 才教</p>
+</blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -734,8 +736,9 @@ footer { color: #999; }
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">lv_s = 'Hello   '.   &quot; strlen( lv_s ) = 5：尾端空白被丟掉
 lv_s = `Hello   `.   &quot; strlen( lv_s ) = 8：尾端空白保留
 
-DATA(lv_1) = 'SAP' &amp;&amp; ' ' &amp;&amp; 'ABAP'.   &quot; SAPABAP  （7 碼）
-DATA(lv_2) = `SAP` &amp;&amp; ` ` &amp;&amp; `ABAP`.   &quot; SAP ABAP （8 碼）
+DATA: lv_1 TYPE string, lv_2 TYPE string.
+lv_1 = 'SAP' &amp;&amp; ' ' &amp;&amp; 'ABAP'.   &quot; SAPABAP  （7 碼）
+lv_2 = `SAP` &amp;&amp; ` ` &amp;&amp; `ABAP`.   &quot; SAP ABAP （8 碼）
 </code></pre>
 <ul>
 <li>用 <strong><code>'...'</code></strong>：固定長度代碼（<code>'E'</code>、<code>'A'</code>）、<br />
@@ -824,7 +827,7 @@ footer { color: #999; }
 <td>只存檔沒啟用（Activate）</td>
 </tr>
 <tr>
-<td>鏈式寫法報錯</td>
+<td>鏈式寫法（Chain Statement）報錯</td>
 <td>中間用了句點、或最後用了逗號</td>
 </tr>
 <tr>

@@ -3,7 +3,9 @@ REPORT zr_tr28_param_maint.
 PARAMETERS: p_carrid TYPE ztr28_cdisc-carrid DEFAULT 'LH' OBLIGATORY,
             p_disp   AS CHECKBOX DEFAULT ' '.  " 勾選：只要顯示，不維護
 
-DATA: lv_actvt TYPE activ_auth.
+DATA: lv_actvt     TYPE activ_auth,
+      lv_mode_text TYPE string,
+      lv_action    TYPE c LENGTH 1.
 
 IF p_disp = 'X'.
   lv_actvt = '03'.
@@ -11,12 +13,19 @@ ELSE.
   lv_actvt = '02'.
 ENDIF.
 
+* 依模式決定訊息用字與 VIEW_MAINTENANCE_CALL 的 action（U 維護、S 只顯示）
+IF lv_actvt = '02'.
+  lv_mode_text = '維護'.
+  lv_action    = 'U'.
+ELSE.
+  lv_mode_text = '顯示'.
+  lv_action    = 'S'.
+ENDIF.
+
 * ---- 1. 權限檢查：這家航空公司折扣的維護/顯示權限 ----
 AUTHORITY-CHECK OBJECT 'ZTR28_CARR'
   ID 'ACTVT'  FIELD lv_actvt
   ID 'CARRID' FIELD p_carrid.
-
-DATA(lv_mode_text) = COND string( WHEN lv_actvt = '02' THEN '維護' ELSE '顯示' ).
 
 IF sy-subrc <> 0.
   WRITE: / '權限不足：無法對航空公司', p_carrid, '執行', lv_mode_text, '（sy-subrc =', sy-subrc, '）'.
@@ -60,7 +69,7 @@ APPEND ls_sellist TO lt_sellist.
 
 CALL FUNCTION 'VIEW_MAINTENANCE_CALL'
   EXPORTING
-    action    = COND #( WHEN lv_actvt = '03' THEN 'S' ELSE 'U' )
+    action    = lv_action
     view_name = 'ZTR28_CDISC'
   TABLES
     dba_sellist = lt_sellist

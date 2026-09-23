@@ -128,7 +128,8 @@ DATA gv_date3 LIKE gv_date1.     " LIKE：跟 gv_date1 同型別
 ```
 
 - 「跟某個既有欄位保持一致」用 `LIKE`——來源改了自動跟
-- 之後最常見：`TYPE scarr-carrid`（DDIC 欄位型別，講義 6）
+- 內建型別只適合**純區域暫存**（計數器、旗標）
+  業務資料實務上都是 `TYPE scarr-carrid`（Global Type，講義 6）
 - 進階：`DATA gs LIKE LINE OF gt_tab.`（講義 10）
 
 ---

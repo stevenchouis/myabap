@@ -50,7 +50,7 @@ ABAP 基礎教育訓練
 - ABAP 程式怎麼建立、怎麼執行（SE38 / Executable Program）
 - statement 以句點 `.` 結束，可自由跨行
 - 兩種註解：`*`（整行）與 `"`（行內）
-- 冒號 `:` 鏈式寫法
+- 冒號 `:` 鏈式寫法（Chain Statement）
 - 關鍵字不分大小寫與 Pretty Printer
 - `WRITE` 輸出與 `/` 換行
 
@@ -109,7 +109,7 @@ WRITE 'Hello'.        " 行內註解：解釋這一行
 
 ---
 
-## 4. 冒號鏈式寫法
+## 4. 冒號鏈式寫法（Chain Statement）
 
 開頭關鍵字相同的多個 statement，用 `:` 合併、`,` 分隔、`.` 收尾
 
@@ -178,10 +178,11 @@ WRITE / '這是第二行'.          " 加 / ：換行
 ```abap
 WRITE 'It''s ok'.     " 單引號：' 要寫兩次（Escape）
 WRITE `It's ok`.      " 反引號：內部 ' 不用處理
-WRITE |It's ok|.      " 字串模板（第 12 講）：一樣不用處理
 ```
 
 逃脫的對象永遠是**自己的分隔符號**
+
+> 補充：7.40 之後還有字串模板 `WRITE |It's ok|.`（分隔符號是 `|`，單引號同樣不用處理），講義 26 才教
 
 ---
 
@@ -191,8 +192,9 @@ WRITE |It's ok|.      " 字串模板（第 12 講）：一樣不用處理
 lv_s = 'Hello   '.   " strlen( lv_s ) = 5：尾端空白被丟掉
 lv_s = `Hello   `.   " strlen( lv_s ) = 8：尾端空白保留
 
-DATA(lv_1) = 'SAP' && ' ' && 'ABAP'.   " SAPABAP  （7 碼）
-DATA(lv_2) = `SAP` && ` ` && `ABAP`.   " SAP ABAP （8 碼）
+DATA: lv_1 TYPE string, lv_2 TYPE string.
+lv_1 = 'SAP' && ' ' && 'ABAP'.   " SAPABAP  （7 碼）
+lv_2 = `SAP` && ` ` && `ABAP`.   " SAP ABAP （8 碼）
 ```
 
 - 用 **`'...'`**：固定長度代碼（`'E'`、`'A'`）、
@@ -211,7 +213,7 @@ DATA(lv_2) = `SAP` && ` ` && `ABAP`.   " SAP ABAP （8 碼）
 | 錯誤指在某行，那行看起來沒問題 | **上一行忘了句點** |
 | `*` 註解報語法錯誤 | 星號不在行首 |
 | 改了程式，執行結果沒變 | 只存檔沒啟用（Activate） |
-| 鏈式寫法報錯 | 中間用了句點、或最後用了逗號 |
+| 鏈式寫法（Chain Statement）報錯 | 中間用了句點、或最後用了逗號 |
 | 字面文字裡想放單引號 | 連寫兩個：`'It''s ok'`（見第 7、8 節） |
 
 ---

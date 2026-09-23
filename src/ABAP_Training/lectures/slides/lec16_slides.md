@@ -111,7 +111,9 @@ LOOP AT gt_students INTO gs_student.
 ENDLOOP.
 
 * field-symbol 寫法：直接改表格那一列，沒有 MODIFY
-LOOP AT gt_students ASSIGNING FIELD-SYMBOL(<ls_student>).
+FIELD-SYMBOLS <ls_student> TYPE ty_student.   " 先宣告
+
+LOOP AT gt_students ASSIGNING <ls_student>.
   IF <ls_student>-score >= 80.
     <ls_student>-grade = 'A'.
   ELSEIF <ls_student>-score >= 60.
@@ -122,15 +124,18 @@ LOOP AT gt_students ASSIGNING FIELD-SYMBOL(<ls_student>).
 ENDLOOP.
 ```
 
-`FIELD-SYMBOL(<ls_student>)` 是 7.40 起的**行內宣告**
-新程式建議這樣寫；傳統「先宣告再 ASSIGNING」也要看得懂
+本講一律：**先 `FIELD-SYMBOLS` 宣告，再 `ASSIGNING <fs>`**
+7.40 之後有行內宣告 `ASSIGNING FIELD-SYMBOL(<fs>)`（宣告＋指派合一）
+講義 26 才教；讀到時知道它等於兩步合併即可
 
 ---
 
 ## READ TABLE ... ASSIGNING：單筆就地修改
 
 ```abap
-READ TABLE gt_students ASSIGNING FIELD-SYMBOL(<ls_hit>)
+FIELD-SYMBOLS <ls_hit> TYPE ty_student.
+
+READ TABLE gt_students ASSIGNING <ls_hit>
      WITH KEY id = 'S0004'.
 IF sy-subrc = 0.
   <ls_hit>-score = <ls_hit>-score + 30.   " 直接改表中那筆
@@ -143,25 +148,47 @@ ENDIF.
 
 ---
 
+<!-- _class: compact -->
+
 ## 4. ASSIGN COMPONENT：動態逐欄存取
 
-不想寫死欄位名時，用「第幾欄」動態取欄位
-（維護舊程式、寫萬用匯出工具常見）：
+不想寫死欄位名時，用「第幾欄」動態取欄位（維護舊程式常見）：
 
 ```abap
-READ TABLE gt_students INTO gs_student INDEX 1.
+FIELD-SYMBOLS <fs_comp> TYPE any.   " 每欄型別不同，只有 any 都能接
+
+READ TABLE gt_students INTO gs_student INDEX 1.   " S0001 王小明 85 A
 DO.
-  ASSIGN COMPONENT sy-index OF STRUCTURE gs_student
-         TO FIELD-SYMBOL(<fs_comp>).
+  ASSIGN COMPONENT sy-index OF STRUCTURE gs_student TO <fs_comp>.
   IF sy-subrc <> 0.        " sy-index 超過欄位數：欄位要完了
     EXIT.
   ENDIF.
   WRITE: / '欄位', sy-index, ':', <fs_comp>.
 ENDDO.
+* 輸出：欄位 1 : S0001／2 : 王小明／3 : 85／4 : A
+* 第 5 圈沒有第 5 欄，ASSIGN 失敗 → EXIT
 ```
 
 - `COMPONENT` 可接欄位**序號**（1 起算）或欄位**名**（字元變數）
 - `DO` + 要不到就 EXIT = 走訪未知結構的標準套路
+
+---
+
+<!-- _class: compact -->
+
+## 補充：行內宣告（Inline Declaration）新寫法
+
+7.40 之後可在「第一次使用處」直接宣告：`FIELD-SYMBOL(<名稱>)`
+
+| 用法 | 傳統寫法（本課程先用） | 行內宣告新寫法 |
+|---|---|---|
+| LOOP | `FIELD-SYMBOLS <ls> TYPE ty_student.`<br>`LOOP AT gt ASSIGNING <ls>.` | `LOOP AT gt ASSIGNING FIELD-SYMBOL(<ls>).` |
+| READ TABLE | `FIELD-SYMBOLS <ls_hit> TYPE ty_student.`<br>`READ TABLE gt ASSIGNING <ls_hit> ...` | `READ TABLE gt ASSIGNING FIELD-SYMBOL(<ls_hit>) ...` |
+| ASSIGN COMPONENT | `FIELD-SYMBOLS <fs> TYPE any.`<br>`ASSIGN COMPONENT ... TO <fs>.` | `ASSIGN COMPONENT ... TO FIELD-SYMBOL(<fs>).` |
+
+- 型別自動推導（`ASSIGN COMPONENT` 推導出 `any`）
+- 作用範圍是**整個程式單元**：同一個 FORM／方法內，同名不能行內宣告兩次
+- 效果完全相同，只是少寫一行；講義 26 系統性整理
 
 ---
 

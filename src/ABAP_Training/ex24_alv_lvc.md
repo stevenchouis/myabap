@@ -25,7 +25,7 @@
 3. 用 MACRO（ex09 技能）建 **LVC fieldcat**：`SEL`（checkbox＋edit）、`CARRID`、`CARRNAME`、`REMARK`（edit）、`STATUS`——注意 `CELLTAB` **不放**進 fieldcat
 4. layout（`lvc_s_layo`）：`zebra`、`cwidth_opt`、**`stylefname = 'CELLTAB'`**
 5. **`i_grid_settings`（`lvc_s_glay`）：`edt_cll_cb = 'X'`**——離開已編輯儲存格觸發 DATA_CHANGED 的開關
-6. **`it_events`**：`APPEND VALUE #( name = slis_ev_data_changed form = 'DATA_CHANGED' ) TO gt_events.`——告訴 wrapper 事件發生時回呼哪個 FORM（開關開了沒掛 FORM 一樣不會執行任何檢核邏輯）
+6. **`it_events`**：先宣告事件表的一列 `gs_event TYPE slis_alv_event`，填 `gs_event-name = slis_ev_data_changed`、`gs_event-form = 'DATA_CHANGED'`，再 `APPEND gs_event TO gt_events.`——告訴 wrapper 事件發生時回呼哪個 FORM（開關開了沒掛 FORM 一樣不會執行任何檢核邏輯）
 7. 呼叫 `REUSE_ALV_GRID_DISPLAY_LVC`，掛 `i_callback_pf_status_set`、`i_callback_user_command`、`i_grid_settings`、`it_events`
 8. `SET_PF_STATUS` 回呼：`SET PF-STATUS 'STANDARD'`（純設定 Status，跟 ex09 一樣單純）
 9. `DATA_CHANGED` 回呼——**FORM 介面固定**：`FORM data_changed USING pr_data_changed TYPE REF TO cl_alv_changed_data_protocol.`。檢查 `pr_data_changed->mt_good_cells`：**只有 `REMARK` 這欄的新值含 `!`** 才呼叫 `pr_data_changed->add_protocol_entry( ... )` 報錯；其他情況什麼都不做（讓修改正常生效）

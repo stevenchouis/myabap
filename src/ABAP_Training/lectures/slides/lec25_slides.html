@@ -126,7 +126,7 @@ footer { color: #999; }
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>Data Dictionary（SE11）：一張物件地圖，程式與畫面共用同一份定義</li>
-<li><strong>Global Type</strong>：引用 DDIC 型別，不要寫死長度</li>
+<li><strong>Global Type</strong> 回顧（觀念見講義 6）：重點在動手建自己的</li>
 <li>為什麼自建 Z 表：業務需求 + SM30 讓非工程師維護</li>
 <li>Check Table／外鍵／Search Help 總覽</li>
 <li><strong>DDIC Table Type</strong>：區域表格型別升級成全域</li>
@@ -284,17 +284,14 @@ blockquote {
 }
 footer { color: #999; }
 ;" data-marpit-pagination-total="16">
-<h2 id="2-global-type%E7%9C%9F%E5%AF%A6%E6%A1%88%E4%BE%8B">2. Global Type：真實案例</h2>
-<p>物料號碼 <code>MATNR</code>：舊版 18 碼 → S/4HANA <strong>40 碼</strong></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA lv_matnr TYPE mara-matnr.    &quot; 引用 Global Type
-* 升級後自動變 40 碼，程式一行不用改
-
-DATA lv_matnr TYPE c LENGTH 18.   &quot; 寫死長度
-* 升級後資料被截斷成 18 碼
+<h2 id="2-global-type-%E5%9B%9E%E9%A1%A7">2. Global Type 回顧</h2>
+<p>觀念（內建型別／Local Type／Global Type 三層、判斷準則）已在<strong>講義 6 第 1.1 節</strong>講過</p>
+<p>回顧最關鍵的一點：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA lv_matnr TYPE mara-matnr.    &quot; 升級後自動變 40 碼
+DATA lv_matnr TYPE c LENGTH 18.   &quot; 升級後默默截斷，不報錯
 </code></pre>
-<p>寫死長度的欄位<strong>不會報錯</strong>，只會默默截斷資料<br />
-→ 不當機、不噴訊息，可能幾個月後才發現</p>
-<p><strong>型別的定義權交給系統唯一來源，程式只負責「引用」</strong></p>
+<p><strong>型別的定義權交給系統唯一來源，程式只負責「引用」</strong><br />
+本講重點：決定「引用現成的」還是「自己建一個」</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -962,15 +959,16 @@ footer { color: #999; }
 <h2 id="65-%E7%A8%8B%E5%BC%8F%E8%AE%80%E5%8F%96%E5%8A%A0%E6%88%90%E7%87%9F%E6%94%B6%E8%A9%A6%E7%AE%97">6.5 程式讀取：加成營收試算</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gs_surchg TYPE ztr25_surchg.     &quot; Global Type 宣告
 DATA gv_carrid TYPE s_carr_id.
+DATA gt_rev TYPE STANDARD TABLE OF ty_rev.   &quot; ty_rev 結構同講義文字版
 
-SELECT f~carrid, c~carrname, f~connid, f~fldate,
-       f~seatsocc, f~price, s~active, s~surcharge_pct
-  INTO TABLE @DATA(gt_rev)
+SELECT f~carrid c~carrname f~connid f~fldate
+       f~seatsocc f~price s~active s~surcharge_pct
+  INTO CORRESPONDING FIELDS OF TABLE gt_rev
   FROM sflight AS f
   INNER JOIN scarr AS c ON c~carrid = f~carrid
   LEFT OUTER JOIN ztr25_surchg AS s ON s~carrid = f~carrid
   WHERE f~seatsocc &gt; 0
-  ORDER BY f~carrid, f~connid, f~fldate.
+  ORDER BY f~carrid f~connid f~fldate.
 </code></pre>
 <p><code>LEFT OUTER JOIN</code> 是關鍵：沒設定過的公司也要出現<br />
 <code>active</code>／<code>surcharge_pct</code> 是初始值 → 加成後營收自然等於原始營收<br />
@@ -1043,7 +1041,7 @@ footer { color: #999; }
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gt_surchg TYPE ztr25_tt_surchg.
 
 FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.
-  SELECT * FROM ztr25_surchg INTO TABLE @ct_surchg.
+  SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.
 ENDFORM.
 </code></pre>
 <p>只有本程式用 → 就地 <code>TYPES</code>；多支程式／FM 共用 → DDIC Table Type</p>

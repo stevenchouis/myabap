@@ -74,13 +74,12 @@ END-OF-PAGE.
 *&      Form  get_data
 *&---------------------------------------------------------------------*
 FORM get_data.
-  SELECT f~carrid, c~carrname, f~connid, f~fldate,
-         f~seatsocc, f~price, f~currency
-    INTO CORRESPONDING FIELDS OF TABLE @gt_rev
+  SELECT f~carrid f~connid f~fldate f~seatsocc f~price f~currency c~carrname
+    INTO CORRESPONDING FIELDS OF TABLE gt_rev
     FROM sflight AS f
     INNER JOIN scarr AS c ON f~carrid = c~carrid
-    WHERE f~carrid IN @s_carrid
-      AND f~fldate IN @s_fldate.
+    WHERE f~carrid IN s_carrid
+      AND f~fldate IN s_fldate.
 
   IF p_zero = 'X'.
     DELETE gt_rev WHERE seatsocc = 0.

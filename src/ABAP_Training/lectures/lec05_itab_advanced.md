@@ -221,17 +221,24 @@ TYPES: BEGIN OF ty_order,        " ← Deep Structure：ITEMS 欄位是一整張
          items    TYPE tt_item,
        END OF ty_order.
 
-DATA gs_order TYPE ty_order.
+DATA: gs_order TYPE ty_order,
+      gs_item  TYPE ty_item.            " 內層 LOOP 用的 work area
 
 gs_order-ordno    = 'SO0001'.
 gs_order-customer = 'ACME'.
-APPEND VALUE #( posnr = 10  matnr = 'MAT-A'  qty = 5 ) TO gs_order-items.
-APPEND VALUE #( posnr = 20  matnr = 'MAT-B'  qty = 3 ) TO gs_order-items.
+gs_item-posnr = 10. gs_item-matnr = 'MAT-A'. gs_item-qty = 5.
+APPEND gs_item TO gs_order-items.
+gs_item-posnr = 20. gs_item-matnr = 'MAT-B'. gs_item-qty = 3.
+APPEND gs_item TO gs_order-items.
 
-LOOP AT gs_order-items INTO DATA(gs_item).
+LOOP AT gs_order-items INTO gs_item.
   WRITE: / gs_order-ordno, gs_item-posnr, gs_item-matnr, gs_item-qty.
 ENDLOOP.
 ```
+
+> **補充：行內宣告（Inline Declaration）新寫法**：7.40 之後，`LOOP AT ... INTO` 的 work area 可以在使用處直接宣告，寫成 `LOOP AT gs_order-items INTO DATA(gs_item).`——省掉上面 `gs_item TYPE ty_item` 那一行，型別由內表的列自動推導，效果完全相同。本課程前半段一律用「先宣告再使用」的傳統寫法，行內宣告留到講義 26 系統性教；讀到 `INTO DATA(...)` 時，知道它等於「宣告＋LOOP」合在一起即可。
+
+> **補充：`VALUE #( ... )` 新寫法**：7.40 之後，塞資料進內表可以不用先填 work area，直接寫 `APPEND VALUE #( posnr = 10 matnr = 'MAT-A' qty = 5 ) TO gs_order-items.`——一句話同時「建出一列＋APPEND」，`#` 表示型別由目標（`gs_order-items` 的列）自動推導，效果與上面兩行（填欄位＋APPEND）完全相同。`VALUE` 的完整用法留到講義 26。
 
 **跟講義 3 巢狀結構的差別**：巢狀結構是「欄位裡包一個結構」（1 對 1）；Deep Structure 是「欄位裡包一整張表」（1 對多）——正好對應「訂單主檔對明細是 1 對多」的業務關係，不用拆成兩張表也能表達完整的階層關係。
 

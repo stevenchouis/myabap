@@ -99,7 +99,7 @@ IF sy-subrc <> 0.
   ROLLBACK WORK.                    " 整個 LUW 撤銷——連前面成功的 Header 也不見！
 ENDIF.
 
-SELECT SINGLE * FROM ztr23_ordh INTO @DATA(gs_check) WHERE ordno = 'ORD0002'.
+SELECT SINGLE * FROM ztr23_ordh INTO gs_check WHERE ordno = 'ORD0002'.
 " sy-subrc = 4：查無此訂單
 ```
 

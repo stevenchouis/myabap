@@ -23,10 +23,23 @@ TYPES: BEGIN OF ty_result,
          final_price  TYPE sflight-price,
        END OF ty_result.
 
-DATA: gt_result   TYPE STANDARD TABLE OF ty_result,
-      gs_result   TYPE ty_result,
-      gt_fieldcat TYPE slis_t_fieldcat_alv,
-      gs_fieldcat TYPE slis_fieldcat_alv.
+TYPES: BEGIN OF ty_sflight,
+         carrid   TYPE sflight-carrid,
+         connid   TYPE sflight-connid,
+         fldate   TYPE sflight-fldate,
+         price    TYPE sflight-price,
+         currency TYPE sflight-currency,
+       END OF ty_sflight.
+
+DATA: gt_result       TYPE STANDARD TABLE OF ty_result,
+      gs_result       TYPE ty_result,
+      gt_fieldcat     TYPE slis_t_fieldcat_alv,
+      gs_fieldcat     TYPE slis_fieldcat_alv,
+      lv_cityfrom     TYPE spfli-cityfrom,
+      lv_cityto       TYPE spfli-cityto,
+      lt_sflight      TYPE STANDARD TABLE OF ty_sflight,
+      ls_sflight      TYPE ty_sflight,
+      lv_discount_pct TYPE ztr28_cdisc-discount_pct.
 
 DEFINE mc_add_field.
   CLEAR gs_fieldcat.
@@ -51,11 +64,11 @@ AT SELECTION-SCREEN.
 
 START-OF-SELECTION.
 * ---- 1. 航線是否存在（SPFLI 主鍵 CARRID+CONNID）----
-  SELECT SINGLE cityfrom, cityto
+  SELECT SINGLE cityfrom cityto
+    INTO (lv_cityfrom, lv_cityto)
     FROM spfli
-    WHERE carrid = @p_carrid
-      AND connid = @p_connid
-    INTO (@DATA(lv_cityfrom), @DATA(lv_cityto)).
+    WHERE carrid = p_carrid
+      AND connid = p_connid.
 
   IF sy-subrc <> 0.
     WRITE: / '找不到航線', p_carrid, p_connid, '（SPFLI 沒有這筆資料）'.
@@ -63,12 +76,12 @@ START-OF-SELECTION.
   ENDIF.
 
 * ---- 2. 這條航線目前有哪些航班（SFLIGHT，可能好幾個航班日期）----
-  SELECT carrid, connid, fldate, price, currency
+  SELECT carrid connid fldate price currency
+    INTO CORRESPONDING FIELDS OF TABLE lt_sflight
     FROM sflight
-    WHERE carrid = @p_carrid
-      AND connid = @p_connid
-    ORDER BY fldate
-    INTO TABLE @DATA(lt_sflight).
+    WHERE carrid = p_carrid
+      AND connid = p_connid
+    ORDER BY fldate.
 
   IF sy-subrc <> 0.
     WRITE: / '航線', p_carrid, p_connid, '目前沒有任何航班資料（SFLIGHT）'.
@@ -78,9 +91,9 @@ START-OF-SELECTION.
 * ---- 3. 這家航空公司的折扣（ZTR28_CDISC，由 ZR_TR28_PARAM_MAINT 維護）----
 * 折扣是選配：沒有維護就當作 0（不打折），不擋報表執行。
   SELECT SINGLE discount_pct
+    INTO lv_discount_pct
     FROM ztr28_cdisc
-    WHERE carrid = @p_carrid
-    INTO @DATA(lv_discount_pct).
+    WHERE carrid = p_carrid.
 
   IF sy-subrc <> 0.
     lv_discount_pct = 0.
@@ -90,7 +103,7 @@ START-OF-SELECTION.
   ENDIF.
 
 * ---- 4. 逐航班套用折扣算最終票價 ----
-  LOOP AT lt_sflight INTO DATA(ls_sflight).
+  LOOP AT lt_sflight INTO ls_sflight.
     CLEAR gs_result.
     gs_result-carrid       = ls_sflight-carrid.
     gs_result-connid       = ls_sflight-connid.

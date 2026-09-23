@@ -1147,8 +1147,10 @@ footer { color: #999; }
 ;" data-marpit-pagination-total="19">
 <h2 id="9-%E7%B6%AD%E8%AD%B7%E7%9A%84%E5%8F%83%E6%95%B8%E4%B8%8D%E6%98%AF%E6%86%91%E7%A9%BA%E5%AD%98%E5%9C%A8">9. 維護的參數不是憑空存在</h2>
 <p><code>ZR_TR28_PRICE_CALC</code>：JOIN <code>SPFLI</code>／<code>SFLIGHT</code> 套用折扣算最終票價</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT SINGLE discount_pct FROM ztr28_cdisc
-  WHERE carrid = @p_carrid INTO @DATA(lv_discount_pct).
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT SINGLE discount_pct
+  INTO lv_discount_pct
+  FROM ztr28_cdisc
+  WHERE carrid = p_carrid.
 IF sy-subrc &lt;&gt; 0.
   lv_discount_pct = 0.        &quot; 折扣是選配，查不到不擋報表
 ENDIF.

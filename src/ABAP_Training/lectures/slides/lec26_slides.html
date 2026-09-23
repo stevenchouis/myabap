@@ -123,11 +123,12 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="17">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
+<li>行內宣告：<code>DATA(...)</code>／<code>FIELD-SYMBOL(...)</code>（先備觀念）</li>
 <li>字串模板：取代 <code>CONCATENATE</code>，附格式化選項</li>
-<li>New Open SQL：<code>@DATA(...)</code>、<code>@</code> 跳脫、<code>SELECT</code> 內的 <code>CASE</code></li>
+<li>New Open SQL：宿主變數（Host Variable）與 <code>@</code> 跳脫、<code>@DATA(...)</code>、<code>SELECT</code> 內的 <code>CASE</code></li>
 <li>Functional Operator 五件套：<code>COND</code>／<code>SWITCH</code>／<code>VALUE</code>／<code>REDUCE</code>／<code>FILTER</code></li>
 </ul>
 <blockquote>
@@ -135,7 +136,7 @@ footer { color: #999; }
 前 25 講刻意用傳統語法打底——<strong>兩種寫法都要看得懂</strong></p>
 </blockquote>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="3" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="3" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -162,7 +163,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="3" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="3" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -189,20 +190,42 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="1-%E5%AD%97%E4%B8%B2%E6%A8%A1%E6%9D%BF">1. 字串模板</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">WRITE: / |全名：{ gv_last }{ gv_first }|.
+;" data-marpit-pagination-total="17">
+<h2 id="0-%E5%85%88%E5%82%99%E8%A7%80%E5%BF%B5%E8%A1%8C%E5%85%A7%E5%AE%A3%E5%91%8Ainline-declaration">0. 先備觀念：行內宣告（Inline Declaration）</h2>
+<p>前 25 講：<strong>先宣告、再使用</strong>　→　7.40 起：<strong>第一次使用處直接宣告</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統：先宣告，再使用
+DATA gs_student TYPE ty_student.
+LOOP AT gt_students INTO gs_student.
+FIELD-SYMBOLS &lt;ls&gt; TYPE ty_student.
+LOOP AT gt_students ASSIGNING &lt;ls&gt;.
 
-WRITE: / |成績：{ gv_score WIDTH = 5 ALIGN = RIGHT PAD = '0' }|.
-* 00085
-
-WRITE: / |代碼：{ gv_code CASE = UPPER }|.
-* LH
+* 行內宣告：宣告與使用合在同一行
+DATA(gv_len) = strlen( 'ABAP' ).             &quot; 型別由右邊自動推導
+LOOP AT gt_students INTO DATA(gs_student).
+LOOP AT gt_students ASSIGNING FIELD-SYMBOL(&lt;ls&gt;).
 </code></pre>
-<ul>
-<li>語法 <code>|文字{ 運算式 }文字|</code></li>
-<li><code>{ }</code> 內放單一運算式，<strong>不能</strong>是多參數的 <code>EXPORTING</code>／<code>IMPORTING</code> 方法呼叫</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>形式</th>
+<th>用在哪</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DATA(名稱)</code></td>
+<td>賦值、<code>LOOP INTO</code>、<code>READ TABLE INTO</code>、方法接收端</td>
+</tr>
+<tr>
+<td><code>FIELD-SYMBOL(&lt;名稱&gt;)</code></td>
+<td><code>LOOP／READ TABLE ASSIGNING</code>、<code>ASSIGN ... TO</code></td>
+</tr>
+<tr>
+<td><code>@DATA(名稱)</code></td>
+<td><code>SELECT ... INTO</code>（第 2 節）</td>
+</tr>
+</tbody>
+</table>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -258,42 +281,16 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="11-%E5%AD%97%E4%B8%B2%E6%A8%A1%E6%9D%BF%E7%9A%84%E6%A0%BC%E5%BC%8F%E5%8C%96%E9%81%B8%E9%A0%85">1.1 字串模板的格式化選項</h2>
-<table>
-<thead>
-<tr>
-<th>選項</th>
-<th>作用</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>WIDTH = n</code></td>
-<td>輸出寬度</td>
-</tr>
-<tr>
-<td><code>ALIGN = LEFT／RIGHT／CENTER</code></td>
-<td>對齊方式</td>
-</tr>
-<tr>
-<td><code>PAD = 'x'</code></td>
-<td>補齊字元（預設補空白）</td>
-</tr>
-<tr>
-<td><code>CASE = UPPER／LOWER</code></td>
-<td>轉大小寫</td>
-</tr>
-<tr>
-<td><code>DECIMALS = n</code></td>
-<td>數值小數位數</td>
-</tr>
-</tbody>
-</table>
-<p>對照講義 18：<code>CONCATENATE</code> 要先想暫存變數<br />
-字串模板文字與變數交錯寫同一行，組訊息文字尤其好讀</p>
+;" data-marpit-pagination-total="17">
+<h2 id="01-%E8%A1%8C%E5%85%A7%E5%AE%A3%E5%91%8A%E7%9A%84%E5%9B%9B%E5%80%8B%E6%B3%A8%E6%84%8F%E9%BB%9E">0.1 行內宣告的四個注意點</h2>
+<ol>
+<li><strong>型別由右邊決定</strong>：<code>DATA(lv_n) = 0.</code> → <code>i</code>；<code>DATA(lv_s) = 'abc'.</code> → <strong><code>c LENGTH 3</code></strong>（之後塞長字串被截斷）；要 string 用反引號</li>
+<li><strong>作用範圍是整個程式單元</strong>：兩個 <code>LOOP</code> 都 <code>INTO DATA(gv_x)</code> → 編譯錯誤 <code>already declared</code></li>
+<li><strong>不是每個位置都行</strong>：<code>CALL FUNCTION ... IMPORTING x = DATA(y)</code> 不合法</li>
+<li><strong>只是少寫一行宣告</strong>，效果與傳統寫法完全相同</li>
+</ol>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -320,7 +317,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="5" style="--paginate:true;--class:compact;--theme:default;--style:section {
+" lang="en-US" data-marpit-pagination="5" style="--paginate:true;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -347,23 +344,19 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="2-new-open-sql">2. New Open SQL</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
-       CASE WHEN sflight~price &lt; 500  THEN 'LOW'
-            WHEN sflight~price &lt; 1500 THEN 'MID'
-            ELSE 'HIGH'
-       END AS price_level
-  FROM scarr
-  INNER JOIN sflight ON sflight~carrid = scarr~carrid
-  ORDER BY scarr~carrid, sflight~connid
-  INTO TABLE @DATA(gt_flight)
-  UP TO 10 ROWS.
+;" data-marpit-pagination-total="17">
+<h2 id="1-%E5%AD%97%E4%B8%B2%E6%A8%A1%E6%9D%BF">1. 字串模板</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">WRITE: / |全名：{ gv_last }{ gv_first }|.
+
+WRITE: / |成績：{ gv_score WIDTH = 5 ALIGN = RIGHT PAD = '0' }|.
+* 00085
+
+WRITE: / |代碼：{ gv_code CASE = UPPER }|.
+* LH
 </code></pre>
 <ul>
-<li><code>@DATA(gt_flight)</code>：不用先宣告，型別由 SELECT 清單推導</li>
-<li><code>CASE ... END AS alias</code>：在資料庫層算好分類</li>
-<li>位置：<code>ORDER BY</code> 在 <code>INTO</code> 之前、<code>UP TO n ROWS</code> 在 <code>INTO</code> 之後</li>
+<li>語法 <code>|文字{ 運算式 }文字|</code></li>
+<li><code>{ }</code> 內放單一運算式，<strong>不能</strong>是多參數的 <code>EXPORTING</code>／<code>IMPORTING</code> 方法呼叫</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-theme="default" data-style="section {
@@ -420,10 +413,238 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="21--%E8%B7%B3%E8%84%AB%E8%88%87%E8%81%9A%E5%90%88%E5%85%A7%E7%AE%97%E5%BC%8F">2.1 <code>@</code> 跳脫與聚合內算式</h2>
-<p><strong>欄位清單用逗號分隔 → 句中所有宿主變數都要加 <code>@</code></strong><br />
-（混用舊式 <code>INTO CORRESPONDING FIELDS OF TABLE</code> 也一樣）</p>
+;" data-marpit-pagination-total="17">
+<h2 id="11-%E5%AD%97%E4%B8%B2%E6%A8%A1%E6%9D%BF%E7%9A%84%E6%A0%BC%E5%BC%8F%E5%8C%96%E9%81%B8%E9%A0%85">1.1 字串模板的格式化選項</h2>
+<table>
+<thead>
+<tr>
+<th>選項</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WIDTH = n</code></td>
+<td>輸出寬度</td>
+</tr>
+<tr>
+<td><code>ALIGN = LEFT／RIGHT／CENTER</code></td>
+<td>對齊方式</td>
+</tr>
+<tr>
+<td><code>PAD = 'x'</code></td>
+<td>補齊字元（預設補空白）</td>
+</tr>
+<tr>
+<td><code>CASE = UPPER／LOWER</code></td>
+<td>轉大小寫</td>
+</tr>
+<tr>
+<td><code>DECIMALS = n</code></td>
+<td>數值小數位數</td>
+</tr>
+</tbody>
+</table>
+<p>對照講義 18：<code>CONCATENATE</code> 要先想暫存變數<br />
+字串模板文字與變數交錯寫同一行，組訊息文字尤其好讀</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="7" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
+<h2 id="2-%E5%AE%BF%E4%B8%BB%E8%AE%8A%E6%95%B8host-variable%E6%98%AF%E4%BB%80%E9%BA%BC">2. 宿主變數（Host Variable）是什麼</h2>
+<p>一句 SELECT 裡有兩種名稱：<strong>資料庫欄位</strong>（<code>carrid</code>）與 <strong>ABAP 變數</strong>（<code>gv_carrid</code>）<br />
+從 ABAP（宿主語言）傳進 SQL 的變數 → <strong>宿主變數（Host Variable）</strong></p>
+<p><strong>舊式 Open SQL 靠位置猜</strong>：<code>WHERE carrid = gv_carrid</code><br />
+位置單純，猜得準——但遇到這兩種情況猜不出來：</p>
+<ul>
+<li>算式／<code>CASE</code>／子查詢把資料庫欄位跟變數混在同一運算式</li>
+<li>行內宣告 <code>@DATA(gt_x)</code>：變數在陳述式當下才「憑空」誕生</li>
+</ul>
+<p><strong>新式解法：宿主變數一律加 <code>@</code> 前綴</strong><br />
+有 <code>@</code> = ABAP 變數；沒 <code>@</code> = 資料庫欄位，語意完全消歧義</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="8" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
+<h2 id="21-new-open-sql%E8%A1%8C%E5%85%A7%E5%AE%A3%E5%91%8A%E8%88%87-case-%E9%81%8B%E7%AE%97%E5%BC%8F">2.1 New Open SQL：行內宣告與 CASE 運算式</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
+       CASE WHEN sflight~price &lt; 500  THEN 'LOW'
+            WHEN sflight~price &lt; 1500 THEN 'MID'
+            ELSE 'HIGH'
+       END AS price_level
+  FROM scarr
+  INNER JOIN sflight ON sflight~carrid = scarr~carrid
+  ORDER BY scarr~carrid, sflight~connid
+  INTO TABLE @DATA(gt_flight)
+  UP TO 10 ROWS.
+</code></pre>
+<ul>
+<li><code>@DATA(gt_flight)</code>：不用先宣告，型別由 SELECT 清單推導；<code>@</code> 標記這是要行內宣告的宿主變數</li>
+<li><code>CASE ... END AS alias</code>：在資料庫層算好分類</li>
+<li>位置：<code>ORDER BY</code> 在 <code>INTO</code> 之前、<code>UP TO n ROWS</code> 在 <code>INTO</code> 之後</li>
+<li><strong>規則</strong>：欄位清單用逗號分隔 → 句中所有宿主變數都要加 <code>@</code>（混用舊式 <code>INTO CORRESPONDING FIELDS OF TABLE</code> 也一樣）</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="9" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
+<h2 id="22-%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B8%E5%85%A7%E6%94%BE%E7%AE%97%E5%BC%8F">2.2 聚合函數內放算式</h2>
 <p>聚合函數裡可以直接放算式（呼應講義 20a）：</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT carrid,
        SUM( price * seatsocc ) AS revenue
@@ -434,228 +655,6 @@ footer { color: #999; }
 </code></pre>
 <p>傳統寫法報「must be separated using commas」<br />
 新式寫法在資料庫內直接算出各公司營收</p>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" data-marpit-pagination="7" style="--paginate:true;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="3-cond%E4%BE%9D%E6%A2%9D%E4%BB%B6%E5%9B%9E%E5%82%B3%E4%B8%80%E5%80%8B%E5%80%BC">3. COND：依條件回傳一個值</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA(gv_level) = COND #( WHEN gv_score &gt;= 90 THEN 'A'
-                          WHEN gv_score &gt;= 80 THEN 'B'
-                          WHEN gv_score &gt;= 60 THEN 'C'
-                          ELSE 'D' ).
-</code></pre>
-<ul>
-<li>取代 <code>IF ... ELSEIF ... ENDIF</code> 賦值</li>
-<li><code>#</code> 由賦值目標推導型別，也可明寫 <code>COND string( ... )</code></li>
-<li>沒有 <code>WHEN</code> 命中又沒寫 <code>ELSE</code>：<strong>不報錯</strong>，結果是初始值</li>
-</ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" data-marpit-pagination="8" style="--paginate:true;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="4-switch%E4%BE%9D%E5%96%AE%E4%B8%80%E5%80%BC%E5%B0%8D%E6%87%89">4. SWITCH：依單一值對應</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA(gv_carrname) = SWITCH #( gv_carrid
-                       WHEN 'LH' THEN 'Lufthansa'
-                       WHEN 'AA' THEN 'American Airlines'
-                       WHEN 'UA' THEN 'United Airlines'
-                       ELSE 'Unknown' ).
-</code></pre>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>COND</code></td>
-<td>每個分支各自寫條件（範圍、多欄位、AND／OR）</td>
-</tr>
-<tr>
-<td><code>SWITCH</code></td>
-<td>針對<strong>同一個值</strong>比對多個候選值</td>
-</tr>
-</tbody>
-</table>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="9" style="--paginate:true;--class:compact;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="5-value%E5%BB%BA%E6%A7%8B%E7%B5%90%E6%A7%8B%EF%BC%8F%E5%85%A7%E8%A1%A8">5. VALUE：建構結構／內表</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TYPES: BEGIN OF ty_item,
-         matnr TYPE c LENGTH 10,
-         qty   TYPE i,
-       END OF ty_item,
-       tt_item TYPE SORTED TABLE OF ty_item
-                WITH UNIQUE KEY matnr
-                WITH NON-UNIQUE SORTED KEY by_qty COMPONENTS qty.
-
-DATA(gt_item) = VALUE tt_item( ( matnr = 'M001' qty = 10 )
-                                ( matnr = 'M002' qty = 25 )
-                                ( matnr = 'M003' qty = 5 ) ).
-</code></pre>
-<ul>
-<li>取代逐筆 <code>APPEND VALUE #( ... ) TO gt_item.</code></li>
-<li><code>by_qty</code> 是<strong>次要索引</strong>，給第 7 節 <code>FILTER</code> 用</li>
-<li><code>SORTED TABLE</code>：給的資料順序要符合主鍵排序，否則執行期出錯</li>
-</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -711,19 +710,18 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="6-reduce%E8%BF%B4%E5%9C%88%E7%B4%AF%E5%8A%A0%E6%88%90%E5%96%AE%E4%B8%80%E9%81%8B%E7%AE%97%E5%BC%8F">6. REDUCE：迴圈累加成單一運算式</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA(gv_total_qty) = REDUCE i( INIT sum = 0
-                                 FOR wa IN gt_item
-                                 NEXT sum = sum + wa-qty ).
+;" data-marpit-pagination-total="17">
+<h2 id="3-cond%E4%BE%9D%E6%A2%9D%E4%BB%B6%E5%9B%9E%E5%82%B3%E4%B8%80%E5%80%8B%E5%80%BC">3. COND：依條件回傳一個值</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA(gv_level) = COND #( WHEN gv_score &gt;= 90 THEN 'A'
+                          WHEN gv_score &gt;= 80 THEN 'B'
+                          WHEN gv_score &gt;= 60 THEN 'C'
+                          ELSE 'D' ).
 </code></pre>
 <ul>
-<li>取代 <code>LOOP</code> + 累加變數</li>
-<li><code>INIT</code> 初始值、<code>FOR ... IN itab</code> 相當 <code>LOOP AT</code>、<code>NEXT</code> 每輪更新</li>
-<li>適用：累加、串接字串、找最大值</li>
+<li>取代 <code>IF ... ELSEIF ... ENDIF</code> 賦值</li>
+<li><code>#</code> 由賦值目標推導型別，也可明寫 <code>COND string( ... )</code></li>
+<li>沒有 <code>WHEN</code> 命中又沒寫 <code>ELSE</code>：<strong>不報錯</strong>，結果是初始值</li>
 </ul>
-<p>邏輯複雜（要中途 <code>EXIT</code>、多層判斷）時，傳統 <code>LOOP</code> 更好讀<br />
-<strong>不要為了用而用</strong></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -779,18 +777,32 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="7-filter%E7%AF%A9%E9%81%B8%E5%AD%90%E9%9B%86%E5%90%88">7. FILTER：篩選子集合</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA(gt_item_big) =
-  FILTER #( gt_item USING KEY by_qty WHERE qty &gt;= 10 ).
+;" data-marpit-pagination-total="17">
+<h2 id="4-switch%E4%BE%9D%E5%96%AE%E4%B8%80%E5%80%BC%E5%B0%8D%E6%87%89">4. SWITCH：依單一值對應</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA(gv_carrname) = SWITCH #( gv_carrid
+                       WHEN 'LH' THEN 'Lufthansa'
+                       WHEN 'AA' THEN 'American Airlines'
+                       WHEN 'UA' THEN 'United Airlines'
+                       ELSE 'Unknown' ).
 </code></pre>
-<ul>
-<li>取代 <code>LOOP ... WHERE</code> + <code>APPEND</code></li>
-<li><strong>關鍵限制</strong>：<code>WHERE</code> 條件欄位必須是<strong>表格鍵值</strong>的一部分<br />
-（主鍵或 <code>USING KEY</code> 指定的次要鍵）</li>
-<li><code>qty</code> 不是主鍵 <code>matnr</code> → 第 5 節才多宣告 <code>by_qty</code></li>
-</ul>
-<p>忘記這條規則，編譯階段報錯——這個運算子最容易踩的坑</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COND</code></td>
+<td>每個分支各自寫條件（範圍、多欄位、AND／OR）</td>
+</tr>
+<tr>
+<td><code>SWITCH</code></td>
+<td>針對<strong>同一個值</strong>比對多個候選值</td>
+</tr>
+</tbody>
+</table>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -846,7 +858,216 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="17">
+<h2 id="5-value%E5%BB%BA%E6%A7%8B%E7%B5%90%E6%A7%8B%EF%BC%8F%E5%85%A7%E8%A1%A8">5. VALUE：建構結構／內表</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TYPES: BEGIN OF ty_item,
+         matnr TYPE c LENGTH 10,
+         qty   TYPE i,
+       END OF ty_item,
+       tt_item TYPE SORTED TABLE OF ty_item
+                WITH UNIQUE KEY matnr
+                WITH NON-UNIQUE SORTED KEY by_qty COMPONENTS qty.
+
+DATA(gt_item) = VALUE tt_item( ( matnr = 'M001' qty = 10 )
+                                ( matnr = 'M002' qty = 25 )
+                                ( matnr = 'M003' qty = 5 ) ).
+</code></pre>
+<ul>
+<li>取代逐筆 <code>APPEND VALUE #( ... ) TO gt_item.</code></li>
+<li><code>by_qty</code> 是<strong>次要索引</strong>，給第 7 節 <code>FILTER</code> 用</li>
+<li><code>SORTED TABLE</code>：給的資料順序要符合主鍵排序，否則執行期出錯</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="13" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
+<h2 id="6-reduce%E8%BF%B4%E5%9C%88%E7%B4%AF%E5%8A%A0%E6%88%90%E5%96%AE%E4%B8%80%E9%81%8B%E7%AE%97%E5%BC%8F">6. REDUCE：迴圈累加成單一運算式</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA(gv_total_qty) = REDUCE i( INIT sum = 0
+                                 FOR wa IN gt_item
+                                 NEXT sum = sum + wa-qty ).
+</code></pre>
+<ul>
+<li>取代 <code>LOOP</code> + 累加變數</li>
+<li><code>INIT</code> 初始值、<code>FOR ... IN itab</code> 相當 <code>LOOP AT</code>、<code>NEXT</code> 每輪更新</li>
+<li>適用：累加、串接字串、找最大值</li>
+</ul>
+<p>邏輯複雜（要中途 <code>EXIT</code>、多層判斷）時，傳統 <code>LOOP</code> 更好讀<br />
+<strong>不要為了用而用</strong></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="14" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
+<h2 id="7-filter%E7%AF%A9%E9%81%B8%E5%AD%90%E9%9B%86%E5%90%88">7. FILTER：篩選子集合</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA(gt_item_big) =
+  FILTER #( gt_item USING KEY by_qty WHERE qty &gt;= 10 ).
+</code></pre>
+<ul>
+<li>取代 <code>LOOP ... WHERE</code> + <code>APPEND</code></li>
+<li><strong>關鍵限制</strong>：<code>WHERE</code> 條件欄位必須是<strong>表格鍵值</strong>的一部分<br />
+（主鍵或 <code>USING KEY</code> 指定的次要鍵）</li>
+<li><code>qty</code> 不是主鍵 <code>matnr</code> → 第 5 節才多宣告 <code>by_qty</code></li>
+</ul>
+<p>忘記這條規則，編譯階段報錯——這個運算子最容易踩的坑</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="15" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
 <h2 id="8-%E8%88%8A%E5%AF%AB%E6%B3%95-vs-%E6%96%B0%E5%AF%AB%E6%B3%95">8. 舊寫法 vs 新寫法</h2>
 <table>
 <thead>
@@ -895,7 +1116,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -922,7 +1143,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="13" style="--paginate:true;--class:compact;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="16" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -949,7 +1170,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="17">
 <h2 id="9-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">9. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -986,7 +1207,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1013,7 +1234,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="14" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="17" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1040,7 +1261,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="17">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex26</strong>：</p>
 <p>把講義 18 字串、11 JOIN、17 等第判斷、20 累加，<br />

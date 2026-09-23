@@ -48,7 +48,7 @@ ABAP 基礎教育訓練（授課順序：接在講義 15 之後、講義 21 之�
 ## 本講重點
 
 - Data Dictionary（SE11）：一張物件地圖，程式與畫面共用同一份定義
-- **Global Type**：引用 DDIC 型別，不要寫死長度
+- **Global Type** 回顧（觀念見講義 6）：重點在動手建自己的
 - 為什麼自建 Z 表：業務需求 + SM30 讓非工程師維護
 - Check Table／外鍵／Search Help 總覽
 - **DDIC Table Type**：區域表格型別升級成全域
@@ -74,22 +74,19 @@ ABAP 基礎教育訓練（授課順序：接在講義 15 之後、講義 21 之�
 
 ---
 
-## 2. Global Type：真實案例
+## 2. Global Type 回顧
 
-物料號碼 `MATNR`：舊版 18 碼 → S/4HANA **40 碼**
+觀念（內建型別／Local Type／Global Type 三層、判斷準則）已在**講義 6 第 1.1 節**講過
+
+回顧最關鍵的一點：
 
 ```abap
-DATA lv_matnr TYPE mara-matnr.    " 引用 Global Type
-* 升級後自動變 40 碼，程式一行不用改
-
-DATA lv_matnr TYPE c LENGTH 18.   " 寫死長度
-* 升級後資料被截斷成 18 碼
+DATA lv_matnr TYPE mara-matnr.    " 升級後自動變 40 碼
+DATA lv_matnr TYPE c LENGTH 18.   " 升級後默默截斷，不報錯
 ```
 
-寫死長度的欄位**不會報錯**，只會默默截斷資料
-→ 不當機、不噴訊息，可能幾個月後才發現
-
 **型別的定義權交給系統唯一來源，程式只負責「引用」**
+本講重點：決定「引用現成的」還是「自己建一個」
 
 ---
 
@@ -224,15 +221,16 @@ key carrid : s_carr_id not null
 ```abap
 DATA gs_surchg TYPE ztr25_surchg.     " Global Type 宣告
 DATA gv_carrid TYPE s_carr_id.
+DATA gt_rev TYPE STANDARD TABLE OF ty_rev.   " ty_rev 結構同講義文字版
 
-SELECT f~carrid, c~carrname, f~connid, f~fldate,
-       f~seatsocc, f~price, s~active, s~surcharge_pct
-  INTO TABLE @DATA(gt_rev)
+SELECT f~carrid c~carrname f~connid f~fldate
+       f~seatsocc f~price s~active s~surcharge_pct
+  INTO CORRESPONDING FIELDS OF TABLE gt_rev
   FROM sflight AS f
   INNER JOIN scarr AS c ON c~carrid = f~carrid
   LEFT OUTER JOIN ztr25_surchg AS s ON s~carrid = f~carrid
   WHERE f~seatsocc > 0
-  ORDER BY f~carrid, f~connid, f~fldate.
+  ORDER BY f~carrid f~connid f~fldate.
 ```
 
 `LEFT OUTER JOIN` 是關鍵：沒設定過的公司也要出現
@@ -258,7 +256,7 @@ SE11 建 `ZTR25_TT_SURCHG`：
 DATA gt_surchg TYPE ztr25_tt_surchg.
 
 FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.
-  SELECT * FROM ztr25_surchg INTO TABLE @ct_surchg.
+  SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.
 ENDFORM.
 ```
 

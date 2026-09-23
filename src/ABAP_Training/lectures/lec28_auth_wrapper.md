@@ -257,16 +257,21 @@ DEQUEUE_EZTR28_CARR                 ← 解鎖
 PARAMETERS: p_carrid TYPE spfli-carrid DEFAULT 'LH' OBLIGATORY,
             p_connid TYPE spfli-connid DEFAULT '0400' OBLIGATORY.
 ...
-SELECT SINGLE cityfrom, cityto FROM spfli
-  WHERE carrid = @p_carrid AND connid = @p_connid
-  INTO (@DATA(lv_cityfrom), @DATA(lv_cityto)).
+SELECT SINGLE cityfrom cityto
+  INTO (lv_cityfrom, lv_cityto)
+  FROM spfli
+  WHERE carrid = p_carrid AND connid = p_connid.
 ...
-SELECT carrid, connid, fldate, price, currency FROM sflight
-  WHERE carrid = @p_carrid AND connid = @p_connid
-  ORDER BY fldate INTO TABLE @DATA(lt_sflight).
+SELECT carrid connid fldate price currency
+  INTO CORRESPONDING FIELDS OF TABLE lt_sflight
+  FROM sflight
+  WHERE carrid = p_carrid AND connid = p_connid
+  ORDER BY fldate.
 ...
-SELECT SINGLE discount_pct FROM ztr28_cdisc
-  WHERE carrid = @p_carrid INTO @DATA(lv_discount_pct).
+SELECT SINGLE discount_pct
+  INTO lv_discount_pct
+  FROM ztr28_cdisc
+  WHERE carrid = p_carrid.
 IF sy-subrc <> 0.
   lv_discount_pct = 0.   " 折扣是選配，查不到不擋報表執行
 ENDIF.

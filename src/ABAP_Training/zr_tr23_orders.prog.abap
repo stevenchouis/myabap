@@ -5,8 +5,22 @@
 *&---------------------------------------------------------------------*
 REPORT zr_tr23_orders.
 
+TYPES: BEGIN OF ty_join,
+         ordno    TYPE ztr23_ordh-ordno,
+         customer TYPE ztr23_ordh-customer,
+         orddate  TYPE ztr23_ordh-orddate,
+         status   TYPE ztr23_ordh-status,
+         itemno   TYPE ztr23_ordi-itemno,
+         product  TYPE ztr23_ordi-product,
+         qty      TYPE ztr23_ordi-qty,
+         price    TYPE ztr23_ordi-price,
+       END OF ty_join.
+
 DATA: gs_ordh TYPE ztr23_ordh,
-      gs_ordi TYPE ztr23_ordi.
+      gs_ordi TYPE ztr23_ordi,
+      gs_check TYPE ztr23_ordh,
+      gt_join  TYPE STANDARD TABLE OF ty_join,
+      gs_join  TYPE ty_join.
 
 START-OF-SELECTION.
 *----------------------------------------------------------------------*
@@ -92,7 +106,7 @@ START-OF-SELECTION.
     WRITE / '  → 偵測到 sy-subrc <> 0，執行 ROLLBACK WORK：整個 LUW（含之前的 Header INSERT）全部撤銷。'.
   ENDIF.
 
-  SELECT SINGLE * FROM ztr23_ordh INTO @DATA(gs_check) WHERE ordno = 'ORD0002'.
+  SELECT SINGLE * FROM ztr23_ordh INTO gs_check WHERE ordno = 'ORD0002'.
   WRITE: / '查詢 Header ORD0002（ROLLBACK 之後）：sy-subrc =', sy-subrc.
   IF sy-subrc <> 0.
     WRITE / '  → 查無此訂單！雖然 Header 當時 INSERT 是成功的（sy-subrc = 0），'.
@@ -129,16 +143,16 @@ START-OF-SELECTION.
   WRITE / ' '.
   WRITE / '=== JOIN 查詢：ORD0001 完整內容（訂單／客戶／日期／狀態／序號／產品／數量／單價） ==='.
 
-  SELECT h~ordno, h~customer, h~orddate, h~status,
-         i~itemno, i~product, i~qty, i~price
+  SELECT h~ordno h~customer h~orddate h~status
+         i~itemno i~product i~qty i~price
+    INTO CORRESPONDING FIELDS OF TABLE gt_join
     FROM ztr23_ordh AS h
     INNER JOIN ztr23_ordi AS i
       ON i~ordno = h~ordno
     WHERE h~ordno = 'ORD0001'
-    ORDER BY i~itemno
-    INTO TABLE @DATA(gt_join).
+    ORDER BY i~itemno.
 
-  LOOP AT gt_join INTO DATA(gs_join).
+  LOOP AT gt_join INTO gs_join.
     WRITE: / gs_join-ordno, gs_join-customer, gs_join-orddate, gs_join-status,
              gs_join-itemno, gs_join-product, gs_join-qty, gs_join-price.
   ENDLOOP.

@@ -4,10 +4,55 @@
 
 ## 本講重點
 
+- 行內宣告（Inline Declaration）：`DATA(...)`／`FIELD-SYMBOL(...)`——後面每一種新式寫法都會用到
 - 字串模板 `|...|`：取代 `CONCATENATE`，並附格式化選項（`WIDTH`／`ALIGN`／`PAD`／`CASE`）
-- New Open SQL：`@DATA(...)` 行內宣告、宿主變數 `@` 跳脫規則、`SELECT` 清單裡的 `CASE` 運算式
+- New Open SQL：宿主變數（Host Variable）與 `@` 跳脫規則、`@DATA(...)` 行內宣告、`SELECT` 清單裡的 `CASE` 運算式
 - Functional Operator 五件套：`COND`／`SWITCH`／`VALUE`／`REDUCE`／`FILTER`
 - 定位：這些都是 7.40 之後（S/4HANA 常態寫法）的語法，前面 25 講刻意用傳統語法打底、只在少數地方順帶提一句「新語法對照」（講義 18 第 1 節）；這一講回頭把新舊寫法系統性整理起來——**兩種寫法都要看得懂**，新專案/S4 常見新式寫法，維護舊程式仍要認得傳統寫法。
+
+## 0. 先備觀念：行內宣告（Inline Declaration）
+
+前面 25 講的變數、work area、field-symbol 都是「**先宣告、再使用**」。7.40 起，ABAP 允許在**第一次使用的地方**直接宣告，這叫**行內宣告（Inline Declaration）**——本講後面的每一種新式寫法幾乎都會用到，所以先把它講清楚。
+
+| 形式 | 用在哪裡 | 型別怎麼來 |
+|---|---|---|
+| `DATA(名稱)` | 賦值左邊、`LOOP AT ... INTO`、`READ TABLE ... INTO`、方法呼叫的接收端 | 由右邊的值／來源自動推導 |
+| `FIELD-SYMBOL(<名稱>)` | `LOOP AT ... ASSIGNING`、`READ TABLE ... ASSIGNING`、`ASSIGN ... TO` | 內表的列型別（`ASSIGN COMPONENT` 為 `any`） |
+| `@DATA(名稱)` | `SELECT ... INTO`（第 2 節） | 由 `SELECT` 清單推導 |
+
+```abap
+* 傳統寫法：先宣告，再使用
+DATA gv_len TYPE i.
+gv_len = strlen( 'ABAP' ).
+
+DATA gs_student TYPE ty_student.
+LOOP AT gt_students INTO gs_student.
+  ...
+ENDLOOP.
+
+FIELD-SYMBOLS <ls_student> TYPE ty_student.
+LOOP AT gt_students ASSIGNING <ls_student>.
+  ...
+ENDLOOP.
+
+* 行內宣告：宣告與使用合在同一行
+DATA(gv_len) = strlen( 'ABAP' ).
+
+LOOP AT gt_students INTO DATA(gs_student).
+  ...
+ENDLOOP.
+
+LOOP AT gt_students ASSIGNING FIELD-SYMBOL(<ls_student>).
+  ...
+ENDLOOP.
+```
+
+**四個要注意的地方**（都已在 SAP 系統實測）：
+
+1. **型別由右邊決定，字面值容易誤判**：`DATA(lv_n) = 0.` 是 `i`，之後 `lv_n = 7 / 2.` 得 `4`（整數四捨五入）；`DATA(lv_s) = 'abc'.` 推導出的是 **`c LENGTH 3`**，之後 `lv_s = 'abcdefgh'.` 只剩 `abc`（被截斷，講義 1 提過的固定長度文字）；要 `string` 就得用反引號 `` DATA(lv_s) = `abc`. ``。
+2. **作用範圍是整個程式單元**（程式主體／FORM／方法），不是只有 `LOOP` 裡面：兩個 `LOOP` 都寫 `INTO DATA(gv_x)`，第二個會編譯錯誤 `"GV_X" was already declared`——換不同名稱，或第二個 `LOOP` 直接 `INTO gv_x`。
+3. **不是每個位置都能行內宣告**：`CALL FUNCTION ... IMPORTING x = DATA(y)` 不合法（Function Module 的參數一律要事先宣告好的變數），只有方法呼叫等少數位置支援。
+4. **只是少寫一行宣告，效果與傳統寫法完全相同**，不影響執行結果與效能——所以本課程前 25 講一律用傳統寫法教語法本身，行內宣告集中在這一講；讀新專案／S/4HANA 程式碼時兩種都要看得懂。
 
 ## 1. 字串模板（String Template）
 
@@ -42,6 +87,17 @@ WRITE: / |代碼轉大寫：{ gv_code CASE = UPPER }|.
 
 ## 2. New Open SQL：行內宣告與 SELECT 內的 CASE 運算式
 
+### 2.1 宿主變數（Host Variable）：是什麼、為什麼需要 `@`
+
+一句 `SELECT` 裡同時會出現兩種名稱：**資料庫欄位**（如 `carrid`，定義在 SE11）跟 **ABAP 程式裡的變數**（如 `gv_carrid`）。從 ABAP 這個「宿主語言」（Host Language）傳進 SQL 陳述式裡使用的變數，統稱**宿主變數（Host Variable）**——因為 Open SQL 本質上是內嵌（embedded）在 ABAP 裡的另一套語法，宿主變數就是從 ABAP 那邊「借」進來給 SQL 用的資料。
+
+講義 6～25 一路用的舊式 Open SQL，並沒有強制標記宿主變數，編譯器靠**位置**猜：`WHERE carrid = gv_carrid` 裡，等號左邊照慣例是資料庫欄位、右邊是程式變數，位置關係單純，猜得準。但只靠位置猜，遇到下面兩種情況就會出問題：
+
+- **欄位清單裡放算式、`CASE WHEN`、子查詢**：資料庫欄位跟程式變數可能混在同一個運算式裡（例如 `SUM( price * @lv_rate )`），編譯器無法只靠位置分辨誰是誰。
+- **行內宣告 `@DATA(gt_x)`**：這個變數在陳述式當下才「憑空」誕生，編譯器更需要明確標記才知道「這是要宣告的宿主變數」，不是資料庫物件。
+
+**新式 Open SQL 的解法：宿主變數一律要加 `@` 前綴**（`@gv_carrid`、`@p_carrid`、`@DATA(gt_x)`）。`@` 讓編譯器不用再猜——看到 `@` 就知道「這是 ABAP 那邊來的」，沒有 `@` 的識別字就是資料庫欄位，語意完全消歧義，也才撐得起算式、`CASE`、子查詢、行內宣告這些更複雜的語法。這是一次性的規則轉換：只要 `SELECT` 欄位清單用逗號分隔的新式寫法，句子裡**所有**宿主變數（含 `WHERE`／`INTO` 用到的）都要加 `@`，混用舊式 `INTO CORRESPONDING FIELDS OF TABLE itab`（不帶 `@`）也一樣要遵守——這是 `.claude/rules/sap-adt-mcp.md` 第 13 節記錄過的實測踩坑點。
+
 ```abap
 SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
        CASE WHEN sflight~price < 500  THEN 'LOW'
@@ -55,10 +111,10 @@ SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
   UP TO 10 ROWS.
 ```
 
-- `@DATA(gt_flight)`：不用先 `TYPES`/`DATA` 宣告內表，型別由 `SELECT` 清單自動推導——對照講義 11 的 JOIN 寫法，少了一段結構宣告。
-- **`@` 是宿主變數跳脫符號**：只要 `SELECT` 欄位清單用逗號分隔的新式寫法（`scarr~carrid, sflight~connid, ...`），句子裡**所有**宿主變數（包含 `WHERE`/`INTO` 用到的變數）都要加 `@`，混用舊式 `INTO CORRESPONDING FIELDS OF TABLE itab`（不帶 `@`）也一樣要遵守，這是 `.claude/rules/sap-adt-mcp.md` 第 13 節記錄過的實測踩坑點。
+- `@DATA(gt_flight)`：不用先 `TYPES`/`DATA` 宣告內表，型別由 `SELECT` 清單自動推導——對照講義 11 的 JOIN 寫法，少了一段結構宣告；`@` 標記這是「要行內宣告的宿主變數」。
 - `CASE WHEN ... THEN ... END AS alias`：在資料庫層就把分類算好，比撈回 ABAP 再用 `LOOP` + `IF` 判斷少一次資料搬移；`END AS` 給的別名會成為推導出結構的欄位名（`PRICE_LEVEL`）。
 - 位置規則複習（講義 11／25 已練過，這裡再次出現）：`ORDER BY` 要在 `INTO` 之前；`UP TO n ROWS` 要接在 `INTO` 之後。
+- **`INTO` 放在整句最後，本身就是新式寫法的標誌**：傳統寫法的 `INTO` 只能放在「`SELECT` 欄位清單之後」或「`FROM`／`JOIN` 之後、`WHERE` 之前」；一旦像上面範例把 `INTO TABLE @DATA(...)` 放到 `ORDER BY` 後面，編譯器就進入新式模式，強制要求欄位清單用逗號分隔、宿主變數加 `@`（實測：傳統空格分隔的欄位清單搭配句尾 `INTO`，會報 `The elements in the "SELECT LIST" list must be separated using commas`）。所以講義 6～25 的傳統寫法，`INTO` 一律寫在 `FROM` 前面或緊接 `FROM` 之後。
 - **聚合函數裡可以直接放算式（呼應講義 20a 第 7 節）**：講義 20a 用傳統寫法時，`SUM( price * seatsocc )` 會報「must be separated using commas」，因為算式屬於新式語法；改成新式寫法就能在資料庫內直接算出講義 20 的各公司營收，不必撈明細再 `LOOP` 累加：
 
   ```abap

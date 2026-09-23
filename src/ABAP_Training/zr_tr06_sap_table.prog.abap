@@ -23,7 +23,7 @@ START-OF-SELECTION.
 * UP TO n ROWS：最多讀 n 筆（練習時避免撈全表的好習慣）
 *----------------------------------------------------------------------*
   SELECT * FROM scarr
-    INTO TABLE @gt_carriers
+    INTO TABLE gt_carriers
     UP TO 10 ROWS.
 
   IF sy-subrc <> 0.
@@ -43,7 +43,7 @@ START-OF-SELECTION.
 * SELECT SINGLE：只讀一筆、指定欄位
 * 跟 READ TABLE 一樣，讀完要檢查 sy-subrc
 *----------------------------------------------------------------------*
-  SELECT SINGLE carrid FROM scarr INTO @gv_carrid WHERE carrid = 'AA'.
+  SELECT SINGLE carrid FROM scarr INTO gv_carrid WHERE carrid = 'AA'.
   IF sy-subrc = 0.
     WRITE: / 'SELECT SINGLE 找到航空公司：', gv_carrid.
   ELSE.

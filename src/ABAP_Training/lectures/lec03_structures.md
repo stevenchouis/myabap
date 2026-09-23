@@ -40,7 +40,7 @@ TYPES: BEGIN OF ty_student,
 
 - `BEGIN OF 名稱` 開始、`END OF 名稱` 結束，中間每行是一個欄位（component），格式同 DATA 的型別描述。
 - 慣例：結構型別取名 `ty_` 開頭；之後的表格型別取 `tt_` 開頭。
-- 定義在程式開頭（宣告區），這種只在本程式看得到的型別叫 **Local Type**。多支程式要共用時，型別改定義在資料字典（SE11 的 Structure / Table Type），本課程先用 Local Type。
+- 定義在程式開頭（宣告區），這種只在本程式看得到的型別叫 **Local Type**。多支程式要共用時，型別改定義在資料字典（SE11 的 Structure / Table Type），那叫 **Global Type**（講義 6 第 1.1 節詳解）；本講先用 Local Type 學結構語法。另外，結構裡代表業務資料的欄位，實務上同樣是引用資料字典的欄位型別（如 `carrid TYPE scarr-carrid`），本講範例為了不依賴資料表才寫成內建型別。
 
 ## 3. TYPES vs DATA：模具與產品
 

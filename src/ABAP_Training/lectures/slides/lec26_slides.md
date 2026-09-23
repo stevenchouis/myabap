@@ -49,12 +49,49 @@ ABAP 基礎教育訓練（進階選修，全課程最後一講，接在講義 23
 
 ## 本講重點
 
+- 行內宣告：`DATA(...)`／`FIELD-SYMBOL(...)`（先備觀念）
 - 字串模板：取代 `CONCATENATE`，附格式化選項
-- New Open SQL：`@DATA(...)`、`@` 跳脫、`SELECT` 內的 `CASE`
+- New Open SQL：宿主變數（Host Variable）與 `@` 跳脫、`@DATA(...)`、`SELECT` 內的 `CASE`
 - Functional Operator 五件套：`COND`／`SWITCH`／`VALUE`／`REDUCE`／`FILTER`
 
 > 這些是 7.40 之後（S/4HANA 常態）的寫法
 > 前 25 講刻意用傳統語法打底——**兩種寫法都要看得懂**
+
+---
+
+<!-- _class: compact -->
+
+## 0. 先備觀念：行內宣告（Inline Declaration）
+
+前 25 講：**先宣告、再使用**　→　7.40 起：**第一次使用處直接宣告**
+
+```abap
+* 傳統：先宣告，再使用
+DATA gs_student TYPE ty_student.
+LOOP AT gt_students INTO gs_student.
+FIELD-SYMBOLS <ls> TYPE ty_student.
+LOOP AT gt_students ASSIGNING <ls>.
+
+* 行內宣告：宣告與使用合在同一行
+DATA(gv_len) = strlen( 'ABAP' ).             " 型別由右邊自動推導
+LOOP AT gt_students INTO DATA(gs_student).
+LOOP AT gt_students ASSIGNING FIELD-SYMBOL(<ls>).
+```
+
+| 形式 | 用在哪 |
+|---|---|
+| `DATA(名稱)` | 賦值、`LOOP INTO`、`READ TABLE INTO`、方法接收端 |
+| `FIELD-SYMBOL(<名稱>)` | `LOOP／READ TABLE ASSIGNING`、`ASSIGN ... TO` |
+| `@DATA(名稱)` | `SELECT ... INTO`（第 2 節） |
+
+---
+
+## 0.1 行內宣告的四個注意點
+
+1. **型別由右邊決定**：`DATA(lv_n) = 0.` → `i`；`DATA(lv_s) = 'abc'.` → **`c LENGTH 3`**（之後塞長字串被截斷）；要 string 用反引號
+2. **作用範圍是整個程式單元**：兩個 `LOOP` 都 `INTO DATA(gv_x)` → 編譯錯誤 `already declared`
+3. **不是每個位置都行**：`CALL FUNCTION ... IMPORTING x = DATA(y)` 不合法
+4. **只是少寫一行宣告**，效果與傳統寫法完全相同
 
 ---
 
@@ -92,7 +129,25 @@ WRITE: / |代碼：{ gv_code CASE = UPPER }|.
 
 <!-- _class: compact -->
 
-## 2. New Open SQL
+## 2. 宿主變數（Host Variable）是什麼
+
+一句 SELECT 裡有兩種名稱：**資料庫欄位**（`carrid`）與 **ABAP 變數**（`gv_carrid`）
+從 ABAP（宿主語言）傳進 SQL 的變數 → **宿主變數（Host Variable）**
+
+**舊式 Open SQL 靠位置猜**：`WHERE carrid = gv_carrid`
+位置單純，猜得準——但遇到這兩種情況猜不出來：
+
+- 算式／`CASE`／子查詢把資料庫欄位跟變數混在同一運算式
+- 行內宣告 `@DATA(gt_x)`：變數在陳述式當下才「憑空」誕生
+
+**新式解法：宿主變數一律加 `@` 前綴**
+有 `@` = ABAP 變數；沒 `@` = 資料庫欄位，語意完全消歧義
+
+---
+
+<!-- _class: compact -->
+
+## 2.1 New Open SQL：行內宣告與 CASE 運算式
 
 ```abap
 SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
@@ -107,16 +162,14 @@ SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
   UP TO 10 ROWS.
 ```
 
-- `@DATA(gt_flight)`：不用先宣告，型別由 SELECT 清單推導
+- `@DATA(gt_flight)`：不用先宣告，型別由 SELECT 清單推導；`@` 標記這是要行內宣告的宿主變數
 - `CASE ... END AS alias`：在資料庫層算好分類
 - 位置：`ORDER BY` 在 `INTO` 之前、`UP TO n ROWS` 在 `INTO` 之後
+- **規則**：欄位清單用逗號分隔 → 句中所有宿主變數都要加 `@`（混用舊式 `INTO CORRESPONDING FIELDS OF TABLE` 也一樣）
 
 ---
 
-## 2.1 `@` 跳脫與聚合內算式
-
-**欄位清單用逗號分隔 → 句中所有宿主變數都要加 `@`**
-（混用舊式 `INTO CORRESPONDING FIELDS OF TABLE` 也一樣）
+## 2.2 聚合函數內放算式
 
 聚合函數裡可以直接放算式（呼應講義 20a）：
 
