@@ -20,7 +20,8 @@
 | 10 | [lec06](lec06_sap_table.md) | 讀 SAP Table：航班模型與 SELECT | [ex06](../ex06_sap_table.md) |
 | 11 | [lec07](lec07_selscreen.md) | 選擇畫面：PARAMETERS / SELECT-OPTIONS / IN | [ex07](../ex07_selscreen.md) |
 | 12 | [lec08](lec08_modularize.md) | 模組化：FORM / USING / CHANGING（補充：Subroutine Pool 與跨程式 PERFORM） | [ex08](../ex08_modularize.md) |
-| 13 | [lec09](lec09_alv.md) | Functional ALV 與 MACRO；進階篇（第 8 節起）：REUSE_ALV_GRID_DISPLAY_LVC 可編輯 ALV、STYLEFNAME 反灰、EDT_CLL_CB/DATA_CHANGED | [ex09](../ex09_alv.md)、[ex24](../ex24_alv_lvc.md) |
+| 12a | [lec08a](lec08a_package_transport.md) | Package 與傳輸請求：SE80 建 Package、SE10 Request/Task 與釋放順序、TR 與版本、釋放後再修改掛新 TR、STMS 匯入佇列 | [ex08a](../ex08a_package_transport.md) |
+| 13 | [lec15](lec15_function_module.md) | Function Module：SE37 與 CALL FUNCTION | [ex15](../ex15_function_module.md) |
 | 14 | [lec10](lec10_events.md) | Report Event：事件流程與互動清單 | [ex10](../ex10_events.md) |
 | 15 | [lec22](lec22_texts_messages.md) | Message Class 與多語言文字元素：SE91 / Text Symbol | [ex22](../ex22_texts_messages.md) |
 | 16 | [lec11](lec11_join.md) | 多表 JOIN 與 CORRESPONDING FIELDS | [ex11](../ex11_join.md) |
@@ -28,16 +29,23 @@
 | 17a | [lec20a](lec20a_sql_aggregate.md) | SQL 聚合與子查詢：GROUP BY / HAVING / DISTINCT / 子查詢（傳統寫法） | [ex20a](../ex20a_sql_aggregate.md) |
 | 18 | [lec12](lec12_print_layout.md) | 列印排版與頁面規劃 | [ex12](../ex12_print_layout.md) |
 | 19 | [lec14](lec14_include_split.md) | INCLUDE 拆檔：TOP / F01 慣例 | [ex14](../ex14_include_split.md) |
-| 20 | [lec15](lec15_function_module.md) | Function Module：SE37 與 CALL FUNCTION | [ex15](../ex15_function_module.md) |
-| 21 | [lec25](lec25_ddic_overview.md) | Data Dictionary 總覽與 Global Type：重用標準型別、Check Table 指向標準表 | [ex25](../ex25_ddic_overview.md) |
-| 22 | [lec21](lec21_ztable.md) | 建立 Z 資料表與 Open SQL 寫入：SE11 / SM30 | [ex21](../ex21_ztable.md) |
-| 23 | [lec27](lec27_lock_object.md) | 並行控制與 Lock Object：SE11 建自訂 Lock Object、ENQUEUE/DEQUEUE FM、SM12 | [ex27](../ex27_lock_object.md) |
-| 24 | [lec28](lec28_auth_wrapper.md) | 進階選修：客製 Table Maintenance 的權限防護與並行控制——SU21 自訂權限物件、Lock Object 鎖定範圍粗於主鍵、VIEW_MAINTENANCE_CALL、SE93 T-code、App bar 按鈕 CALL TRANSACTION | [ex28](../ex28_auth_wrapper.md) |
-| 25 | [lec13](lec13_capstone.md) | 期末總整理：完整報表架構與實作攻略 | [ex13](../ex13_capstone.md) |
-| 26 | [lec23](lec23_orders.md) | 期末整合練習二：訂單 Header/Detail、外鍵/Search Help/LUW 綜合運用 | [ex23](../ex23_orders.md) |
+| 20 | [lec13](lec13_capstone.md) | 第一階段總整理（傳統報表收尾）：完整報表架構與實作攻略 | [ex13](../ex13_capstone.md) |
+| 21 | [lec09](lec09_alv.md) | Functional ALV 與 MACRO；進階篇（第 8 節起）：REUSE_ALV_GRID_DISPLAY_LVC 可編輯 ALV、STYLEFNAME 反灰、EDT_CLL_CB/DATA_CHANGED | [ex09](../ex09_alv.md)、[ex24](../ex24_alv_lvc.md) |
+| 22 | [lec25](lec25_ddic_overview.md) | Data Dictionary 總覽與 Global Type：重用標準型別、Check Table 指向標準表 | [ex25](../ex25_ddic_overview.md) |
+| 23 | [lec21](lec21_ztable.md) | 建立 Z 資料表與 Open SQL 寫入：SE11 / SM30 | [ex21](../ex21_ztable.md) |
+| 24 | [lec27](lec27_lock_object.md) | 並行控制與 Lock Object：SE11 建自訂 Lock Object、ENQUEUE/DEQUEUE FM、SM12 | [ex27](../ex27_lock_object.md) |
+| 25 | [lec28](lec28_auth_wrapper.md) | 進階選修：客製 Table Maintenance 的權限防護與並行控制——SU21 自訂權限物件、Lock Object 鎖定範圍粗於主鍵、VIEW_MAINTENANCE_CALL、SE93 T-code、App bar 按鈕 CALL TRANSACTION | [ex28](../ex28_auth_wrapper.md) |
+| 26 | [lec23](lec23_orders.md) | 期末整合練習：訂單 Header/Detail、外鍵/Search Help/LUW 綜合運用 | [ex23](../ex23_orders.md) |
 | 27 | [lec26](lec26_modern_syntax.md) | 進階選修：新式語法總覽——字串模板／New Open SQL Inline Declaration／COND／SWITCH／VALUE／REDUCE／FILTER | [ex26](../ex26_modern_syntax.md) |
 
-> 講義編號跟練習題號一致（lec16 對 ex16），所以授課順序不等於編號順序：流程控制/字串（lec17/18）緊接變數之後、除錯（lec19）在 internal table 之後、Field-Symbol（lec16）接在除錯之後、訊息與文字元素（lec22）緊接事件講次收攏 MESSAGE 與 Selection Texts、群組小計（lec20）在 JOIN 與列印排版之間、Data Dictionary 總覽（lec25）在 FM 之後先建立 Global Type／Check Table／Search Help 的概念地圖，Z 資料表（lec21）接著做完整的自建深入動手，並行控制（lec27）緊接 Z 資料表之後、用同一張表把「寫資料」與「保護資料」兩個主題串起來，權限防護 Wrapper（lec28）是 lec21＋lec27 的進階整合選修、班級時間有限可跳過，期末總整理（lec13）在此之後，訂單 Header/Detail（lec23）需要 lec21 的外鍵/Search Help 觀念，是全課程真正的最後一講；新式語法總覽（lec26）是全課程收尾後的進階選修，回頭把前面刻意用傳統寫法教的內容（字串、JOIN、IF/CASE、累加）改寫成 7.40 之後常見的新式寫法，需要學員已經熟悉對應的傳統寫法才有意義。
+> 講義編號跟練習題號一致（lec16 對 ex16），所以授課順序不等於編號順序。課程分五段：
+> 1. **基本功**（lec01～lec07）：流程控制/字串（lec17/18）緊接變數之後、除錯（lec19）在 internal table 之後、Field-Symbol（lec16）接在除錯之後。
+> 2. **模組化**（lec08 → lec08a → lec15）：FORM 之後直接接 Function Module，兩種模組化手段連著學；FM 的全域變數共用（Function Group TOP include）也在這裡交代。中間的 lec08a 教 Package／TR／版本／STMS——ABAPer 必備的傳輸觀念，放在 Function Group（第一個容器型物件）之前。
+> 3. **傳統報表**（lec10 → lec12，收在 lec14 → lec13）：訊息與文字元素（lec22）緊接事件講次收攏 MESSAGE 與 Selection Texts、群組小計（lec20／20a）在 JOIN 與列印排版之間；INCLUDE 拆檔（lec14）**不是模組化**，只是整理原始碼檔案，放在程式真正變大、要做總整理（lec13）之前才有感。lec13 是第一階段總整理。
+> 4. **ALV**（lec09，進階篇 ex24）：`REUSE_ALV_GRID_DISPLAY` 本身就是 FM，放在 lec15 之後，學員能完整讀懂這段呼叫；也可以直接拿 ex13 的報表改成 ALV 輸出。
+> 5. **DDIC 與資料維護**（lec25 → lec21 → lec27 → lec28，收在 lec23）：Data Dictionary 總覽（lec25）先建立 Global Type／Check Table／Search Help 的概念地圖，Z 資料表（lec21）接著做完整的自建深入動手，並行控制（lec27）用同一張表把「寫資料」與「保護資料」串起來，權限防護 Wrapper（lec28）是進階整合選修、班級時間有限可跳過；訂單 Header/Detail（lec23）需要 lec21 的外鍵/Search Help 觀念，是全課程最後一講。
+>
+> 新式語法總覽（lec26）是全課程收尾後的進階選修，回頭把前面刻意用傳統寫法教的內容（字串、JOIN、IF/CASE、累加）改寫成 7.40 之後常見的新式寫法，需要學員已經熟悉對應的傳統寫法才有意義。
 
 ## 使用方式
 

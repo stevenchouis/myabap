@@ -39,7 +39,7 @@ style: |
 # 講義 10
 # Report Event——事件流程與互動清單
 
-ABAP 基礎教育訓練
+ABAP 基礎教育訓練（授課順序：接在講義 15 之後）
 
 對應練習 ex10｜答案程式 `ZR_TR10_EVENTS`
 

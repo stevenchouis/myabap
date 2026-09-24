@@ -1,4 +1,4 @@
-# 講義 25：Data Dictionary 總覽與 Global Type（授課順序：接在講義 15 之後、講義 21 之前）
+# 講義 25：Data Dictionary 總覽與 Global Type（授課順序：接在講義 9（ALV）之後、講義 21 之前）
 
 > 對應練習：[ex25](../ex25_ddic_overview.md)｜答案物件：Domain/DE `ZTR25_SURPCT`、DE `ZTR25_ACTIVE`（重用標準 Domain `XFELD`）、表 `ZTR25_SURCHG`（SM30）、Table Type `ZTR25_TT_SURCHG`＋程式 `ZR_TR25_DDIC`
 

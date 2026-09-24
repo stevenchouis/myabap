@@ -1,5 +1,7 @@
 # 練習 15：Function Module——建立、測試、呼叫
 
+> 授課順序：接在練習 8（FORM）之後。講義見 [lec15](lectures/lec15_function_module.md)。
+
 ## 學習目標
 
 - 理解 FM 的定位：**跨程式共用**的邏輯單位（FORM 只能在同一支程式內用）
@@ -89,10 +91,12 @@ AA  0017 1,200.00    30 =>  36,000.00 USD
 | 單獨測試 | 不行 | SE37 直接測 | ABAP Unit |
 | 典型用途 | 程式內部拆邏輯 | 共用工具、RFC、BAPI | 新開發的商業邏輯 |
 
+> **選修（接續 ex08a）**：把 Function Group 建在自己的 Package、掛一張新 TR，到 SE10 展開 Task，觀察整組在 TR 裡記錄成哪一筆物件。
+
 ## 思考題
 
 1. `EXCEPTIONS invalid_input = 1` 的 `1` 是什麼意思？呼叫端不寫 EXCEPTIONS 區塊、FM 又 RAISE 了會發生什麼事？（會 dump——動手試一次，認識 RAISE_EXCEPTION 這個 dump）
-2. ex09 呼叫的 `REUSE_ALV_GRID_DISPLAY` 也是 FM——回頭看它的呼叫，現在能完整讀懂每一段了嗎？
+2. 在 SE37 打開一支 SAP 標準 FM（例如 `CONVERSION_EXIT_ALPHA_INPUT`，數字補前導零），只看介面頁籤：哪些是 IMPORTING、哪些是 EXPORTING？不看原始碼，你能寫出呼叫它的 `CALL FUNCTION` 嗎？
 3. FM 的 IMPORTING 參數為什麼慣用 `VALUE(...)`（傳值）？跟 FORM USING 預設傳參考的差異是什麼？
 4. Part 4 的 `CT_FLIGHTS` 型別為什麼不能直接用函式群組 Top Include 裡宣告的本地 `TYPES`，一定要走 DDIC Table Type？（提示：FM 介面型別要能被**呼叫端獨立語法檢查**，不依賴這支 FM 所屬 Function Group 有沒有被載入）
 5. （Part 5）把 `GET_TOTAL` 建到**另一個** Function Group，還讀得到 `ADD_REVENUE` 累加的值嗎？為什麼？（提示：全域變數只在同一個 group 內共用）

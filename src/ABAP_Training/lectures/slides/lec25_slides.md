@@ -39,7 +39,7 @@ style: |
 # 講義 25
 # Data Dictionary 總覽與 Global Type
 
-ABAP 基礎教育訓練（授課順序：接在講義 15 之後、講義 21 之前）
+ABAP 基礎教育訓練（授課順序：接在講義 9（ALV）之後、講義 21 之前）
 
 對應練習 ex25｜答案物件 `ZTR25_SURPCT`／`ZTR25_ACTIVE`／`ZTR25_SURCHG`／`ZTR25_TT_SURCHG`／`ZR_TR25_DDIC`
 

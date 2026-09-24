@@ -39,7 +39,7 @@ style: |
 # 講義 9
 # Functional ALV 與 MACRO
 
-ABAP 基礎教育訓練
+ABAP 基礎教育訓練（授課順序：接在講義 13 之後）
 
 對應練習 ex09｜答案程式 `ZR_TR09_ALV`
 
@@ -149,8 +149,8 @@ IF sy-subrc <> 0.
 ENDIF.
 ```
 
-CALL FUNCTION 完整語法與 EXCEPTIONS → 講義 15
-此處先照樣板使用並檢查 sy-subrc
+就是一支標準 FM：講義 15 的 `CALL FUNCTION`／`EXCEPTIONS` 全部適用
+`TABLES` 是舊式參數（講義 15 第 3.1 節），呼叫後檢查 sy-subrc
 
 ---
 

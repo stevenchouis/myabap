@@ -39,7 +39,7 @@ style: |
 # 講義 21
 # 建立 Z 資料表與 Open SQL 寫入
 
-ABAP 基礎教育訓練（授課順序：接在講義 15 之後）
+ABAP 基礎教育訓練（授課順序：接在講義 25 之後）
 
 對應練習 ex21｜答案：表 `ZTR21_STUD` + `ZTR21_CLASS`＋程式 `ZR_TR21_ZTABLE`
 

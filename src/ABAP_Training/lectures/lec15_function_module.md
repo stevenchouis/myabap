@@ -1,4 +1,4 @@
-# 講義 15：Function Module——SE37 與 CALL FUNCTION
+# 講義 15：Function Module——SE37 與 CALL FUNCTION（授課順序：接在講義 8 之後）
 
 > 對應練習：[ex15](../ex15_function_module.md)｜答案物件：`ZFG_TR15` / `Z_TR15_CALC_REVENUE` / `ZR_TR15_CALL_FM`
 
@@ -14,7 +14,7 @@
 
 ## 1. FM 是什麼、跟 FORM 差在哪
 
-FORM 只能在同一支程式（含 INCLUDE）裡呼叫；FM 是**全系統共用**的邏輯單位——任何程式都能 `CALL FUNCTION` 呼叫，還能在 SE37 **單獨測試**（不用寫測試程式）。你每天呼叫的 `REUSE_ALV_GRID_DISPLAY` 就是 SAP 提供的標準 FM。
+FORM 只能在同一支程式（含 INCLUDE）裡呼叫；FM 是**全系統共用**的邏輯單位——任何程式都能 `CALL FUNCTION` 呼叫，還能在 SE37 **單獨測試**（不用寫測試程式）。講義 8 的 FORM 是「同一支程式內」的模組化，FM 則把同樣的想法擴大到「全系統」。SAP 本身就提供大量標準 FM，之後講義 9 的 ALV（`REUSE_ALV_GRID_DISPLAY`）就是其中一支——學完本講，你呼叫它時就能讀懂每一段參數。
 
 | | FORM | Function Module |
 |---|---|---|
@@ -30,7 +30,7 @@ FM 不能單獨存在，必須掛在 **Function Group**（SE37 → Goto → Func
 
 ### 2.1 一個 Function Group 可以放多個 FM
 
-Function Group 本質上是**一支特殊的程式**（`ZFG_TR15` 對應程式 `SAPLZFG_TR15`），底下用一組 include 組織起來，SE80 展開 Function Group 就看得到：
+Function Group 本質上是**一支特殊的程式**（`ZFG_TR15` 對應程式 `SAPLZFG_TR15`），底下用一組 include 組織起來，SE80 展開 Function Group 就看得到。include 是「被主程式原地展開的程式碼片段」，本身不能執行、也沒有自己的變數空間，可以先把它想成「同一支程式被拆成好幾個檔案」；自己的報表怎麼這樣拆，講義 14 會細講。
 
 | Include | 內容 |
 |---|---|
@@ -42,6 +42,7 @@ Function Group 本質上是**一支特殊的程式**（`ZFG_TR15` 對應程式 `
 - **一個 FM 只屬於一個 Function Group，一個 group 可以有很多 FM**：在 SE37 對同一個 group 一支一支新增即可，Part 1 的 `Z_TR15_CALC_REVENUE`、Part 4 的 `Z_TR15_CALC_REVENUE_TAB` 就已經同屬 `ZFG_TR15`。
 - **分組原則**：要共用同一份資料、同一批共用 FORM 的 FM 放同一個 group；彼此沒有任何共用的 FM 不必硬塞在一起——group 越大，第一次呼叫時要載入的程式越大。
 - 呼叫端**不需要**知道 FM 在哪個 group：`CALL FUNCTION 'Z_TR15_...'` 只認 FM 名稱。
+- **跟 TR 的關係（講義 8a）**：Function Group 建在正式 Package 時，整組在 TR 裡記錄成一筆 `R3TR FUGR <group 名稱>`（課堂實例 `ZB_FG01`、`ZS_FG01`），裡面的 TOP、UXX、每支 FM 的 include 會跟著一起傳輸——所以同一個 group 的 FM 是綁在一起走的，這也是「彼此無關的 FM 不要硬塞同一個 group」的另一個理由。
 
 ### 2.2 TOP include 的全域變數：同一個 group 的 FM 共用同一份
 

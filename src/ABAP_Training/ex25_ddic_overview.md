@@ -1,6 +1,6 @@
 # 練習 25：Data Dictionary 總覽與 Global Type
 
-> 授課順序：接在練習 15（Function Module）之後、練習 21（Z 資料表）之前。講義見 [lec25](lectures/lec25_ddic_overview.md)。
+> 授課順序：接在練習 9／24（ALV）之後、練習 21（Z 資料表）之前，是「DDIC 與資料維護」階段的第一題。講義見 [lec25](lectures/lec25_ddic_overview.md)。
 
 ## 學習目標
 

@@ -1,6 +1,6 @@
 # 練習 21：建立 Z 資料表與 Open SQL 寫入
 
-> 授課順序：接在練習 15（Function Module）之後、期末實作之前。講義見 [lec21](lectures/lec21_ztable.md)。
+> 授課順序：接在練習 25（Data Dictionary 總覽）之後。講義見 [lec21](lectures/lec21_ztable.md)。
 
 ## 學習目標
 

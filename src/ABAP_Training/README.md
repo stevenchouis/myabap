@@ -28,11 +28,12 @@
 | 6 | 橋接 SAP Table（SCARR 航班模型、SELECT） | [ex06](ex06_sap_table.md) | `ZR_TR06_SAP_TABLE` | 完成 |
 | 7 | 選擇畫面（PARAMETERS/SELECT-OPTIONS/IN） | [ex07](ex07_selscreen.md) | `ZR_TR07_SELSCREEN` | 完成 |
 | 8 | 模組化（FORM/USING/CHANGING；選修：Subroutine Pool 與跨程式 `PERFORM ... IN PROGRAM`） | [ex08](ex08_modularize.md) | `ZR_TR08_MODULARIZE`（選修：`ZR_TR08_POOL`＋`ZR_TR08_CALLER`） | 完成（選修部分 2026-09-24 新增；Pool 需在 SE38 手動設 Type＝Subroutine Pool） |
+| 8a | Package 與傳輸請求（SE80 建 Package、SE10 Request/Task 與釋放順序、版本、釋放後再修改掛新 TR、STMS 匯入佇列 Filter/匯入/確認） | [ex08a](ex08a_package_transport.md) | （無答案程式，以 SE10 傳輸記錄＋STMS 匯入狀態驗收；課堂實例 `ZMM1`/`ZMM2`） | 完成（2026-09-24 補講義，課堂已上） |
 | 9 | Functional ALV 與 MACRO（REUSE_ALV_GRID_DISPLAY/fieldcat/DEFINE） | [ex09](ex09_alv.md) | `ZR_TR09_ALV` | 完成 |
 | 10 | Report Event（INITIALIZATION～AT LINE-SELECTION/HIDE） | [ex10](ex10_events.md) | `ZR_TR10_EVENTS` | 完成 |
 | 11 | 多表 JOIN（INNER/LEFT OUTER、CORRESPONDING FIELDS） | [ex11](ex11_join.md) | `ZR_TR11_JOIN` | 完成 |
 | 12 | 列印排版與頁面規劃（LINE-SIZE/LINE-COUNT/END-OF-PAGE、點矩陣選型） | [ex12](ex12_print_layout.md) | `ZR_TR12_PRINT_LAYOUT` | 完成 |
-| 13 | 期末綜合實作：航班營收報表（含總頁數回填），結業對照 Z_INVENTORY_COST_REPORT | [ex13](ex13_capstone.md) | `ZR_TR13_CAPSTONE` | 完成 |
+| 13 | 第一階段總整理（傳統報表收尾）：航班營收報表（含總頁數回填），結業對照 Z_INVENTORY_COST_REPORT | [ex13](ex13_capstone.md) | `ZR_TR13_CAPSTONE` | 完成 |
 | 14 | INCLUDE 拆檔（TOP/F01 慣例、context 啟用） | [ex14](ex14_include_split.md) | `ZR_TR14_CAPSTONE` + `_TOP`/`_F01` | 完成 |
 | 15 | Function Module（SE37 建立/單測、CALL FUNCTION 與例外、CHANGING+Table Type 取代 TABLES） | [ex15](ex15_function_module.md) | `ZFG_TR15` / `Z_TR15_CALC_REVENUE` / `Z_TR15_CALC_REVENUE_TAB` / `ZR_TR15_CALL_FM` / `ZTR15_FLIGHT_REV` / `ZTR15_TT_FLIGHT_REV` | 完成 |
 | 16 | Field-Symbol（ASSIGN/LOOP ASSIGNING/ASSIGN COMPONENT） | [ex16](ex16_field_symbols.md) | `ZR_TR16_FIELD_SYMBOLS` | 完成 |
@@ -67,8 +68,16 @@
 
 ## 建議授課順序（題號 ≠ 順序）
 
-**ex01 → ex02 → ex17（流程控制）→ ex18（字串日期）→ ex03 → ex04 → ex05 → ex19（除錯）→ ex16（Field-Symbol）→ ex06 → ex07 → ex08 → ex09 → ex24（可編輯 ALV，進階選修）→ ex10 → ex22（訊息與文字元素）→ ex11 → ex20（群組小計）→ ex20a（SQL 聚合與子查詢，選修）→ ex12 → ex14（INCLUDE 拆檔）→ ex15（Function Module）→ ex25（Data Dictionary 總覽/Global Type）→ ex21（Z 資料表）→ ex27（並行控制與 Lock Object）→ ex28（權限防護與並行控制整合，進階選修）→ ex13（期末綜合實作一）→ ex23（期末整合練習二，全課程最後一題）→ ex26（新式語法總覽，進階選修）**
+**ex01 → ex02 → ex17（流程控制）→ ex18（字串日期）→ ex03 → ex04 → ex05 → ex19（除錯）→ ex16（Field-Symbol）→ ex06 → ex07 → ex08（FORM）→ ex08a（Package 與傳輸請求）→ ex15（Function Module）→ ex10 → ex22（訊息與文字元素）→ ex11 → ex20（群組小計）→ ex20a（SQL 聚合與子查詢，選修）→ ex12 → ex14（INCLUDE 拆檔）→ ex13（第一階段總整理）→ ex09（ALV）→ ex24（可編輯 ALV，進階選修）→ ex25（Data Dictionary 總覽/Global Type）→ ex21（Z 資料表）→ ex27（並行控制與 Lock Object）→ ex28（權限防護與並行控制整合，進階選修）→ ex23（期末整合練習，全課程最後一題）→ ex26（新式語法總覽，進階選修）**
 
-題號在 13 之後的主題都是後來補的，依主題插進對應位置授課，不重編題號（SAP 端答案程式依原題號命名）：ex17/ex18 是基本功，緊接變數宣告之後；ex19 除錯放在 internal table 之後（有足夠複雜度可供追蹤）；ex24 是 ex09 的進階篇（lec09 第 8 節起），緊接 ex09、可視班級程度列為選修；ex22 收攏 ex07 的 Selection Texts 伏筆與 ex10 首次登場的 MESSAGE；ex20 需要 JOIN 的資料、且是 ex12 列印排版的前置；ex20a 是 ex20 思考題 3（`SELECT SUM ... GROUP BY`）的展開：學員剛用 Control Break 在內表上做完小計，馬上對照「讓資料庫算」的做法，並補上 lec06／lec11 沒教到的聚合函數、`HAVING`、`DISTINCT`、子查詢；題號用字母後綴（沿用 lec00a 的先例）表示插在 ex20 之後、不重編題號，全程傳統寫法（聚合裡放算式會強迫進入新式語法，留給 ex26 對照）；ex25 是 DDIC 的總覽先修課，接在 ex15（FM，SM30 需要 function group 觀念）之後、ex21（DDIC 深入動手建）之前；ex21 承接 ex25 的三層件觀念做完整的自建 Header/Detail 練習；ex27 緊接 ex21 之後，用同一張 `ZTR21_STUD` 表把「寫入資料」跟「保護資料不被同時改壞」兩個主題串起來；ex28 是 ex21＋ex27 的進階整合選修，把「Z 表＋SM30」跟「Lock Object」串成企業級的權限防護 Wrapper 模式，並額外接一支計算報表示範「維護出來的參數會被下游拿去算錢」，牽涉到 SU21／PFCG／SE93（T-code＋Parameter Transaction）等新的 GUI-only 工具，班級時間有限可以跳過或當延伸閱讀；期末實作 ex13 用到 ex14/ex15 技能；ex23 需要 ex21 的外鍵/Search Help 觀念才有意義，是全課程真正的最後一題，用「訂單 Header/Detail」把外鍵、Search Help、LUW 三條線收在一起；ex26 是全課程收尾後的「新舊語法對照總複習」，需要學員已經看懂前面所有傳統寫法（尤其 ex11 的 JOIN、ex18 的字串/CONCATENATE、ex17 的 IF/CASE、ex20 的累加）才能體會新式寫法省了什麼，可視班級程度列為選修。
+題號在 13 之後的主題都是後來補的，依主題插進對應位置授課，不重編題號（SAP 端答案程式依原題號命名）。2026-09-24 依「模組化連貫」重排，課程分五段：
+
+1. **基本功**（ex01～ex07）：ex17/ex18 是基本功，緊接變數宣告之後；ex19 除錯放在 internal table 之後（有足夠複雜度可供追蹤）；ex16 接在除錯之後。
+2. **模組化**（ex08 → ex08a → ex15）：FORM 之後直接接 Function Module，兩種模組化手段連著學（ex15 Part 5 的 Function Group 全域變數共用也在這裡）。中間插 ex08a（Package／TR／版本／STMS）：學員這時已寫過好幾支程式，能體會「$TMP 不會被傳輸、正式 Package 一定要 TR」；而 ex15 的 Function Group 是第一個一次產生一整組物件的「容器型」物件，先學 TR 才看得懂 SE10 裡多出哪些物件。題號用字母後綴表示插在 ex08 之後。
+3. **傳統報表**（ex10 → ex12，收在 ex14 → ex13）：ex22 收攏 ex07 的 Selection Texts 伏筆與 ex10 首次登場的 MESSAGE；ex20 需要 JOIN 的資料、且是 ex12 列印排版的前置；ex20a 是 ex20 思考題 3（`SELECT SUM ... GROUP BY`）的展開，題號用字母後綴表示插在 ex20 之後、全程傳統寫法。**ex14 INCLUDE 拆檔不是模組化**（原地展開、沒有自己的變數範圍與介面），只是整理原始碼檔案，價值在程式變大、要讀懂既有程式（ZDQM 系列、Function Group）時才顯現，所以放在第一階段總整理 ex13 之前。ex13 整合 ex01～ex12＋ex14／ex15 的技能。
+4. **ALV**（ex09，進階篇 ex24）：`REUSE_ALV_GRID_DISPLAY` 本身就是 FM，放在 ex15 之後學員能完整讀懂這段呼叫；ex09 的延伸題直接把 ex13 的明細改成 ALV 輸出。lec10～lec12、lec20、lec22 都不依賴 ALV，後移不影響其他題目。
+5. **DDIC 與資料維護**（ex25 → ex21 → ex27 → ex28，收在 ex23）：ex25 是 DDIC 的總覽先修課（SM30 需要 function group 觀念，ex15 已學過）；ex21 承接 ex25 的三層件觀念做完整的自建 Header/Detail 練習；ex27 緊接 ex21 之後，用同一張 `ZTR21_STUD` 表把「寫入資料」跟「保護資料不被同時改壞」兩個主題串起來；ex28 是 ex21＋ex27 的進階整合選修，把「Z 表＋SM30」跟「Lock Object」串成企業級的權限防護 Wrapper 模式，並額外接一支計算報表示範「維護出來的參數會被下游拿去算錢」，牽涉到 SU21／PFCG／SE93（T-code＋Parameter Transaction）等新的 GUI-only 工具，班級時間有限可以跳過或當延伸閱讀；ex23 需要 ex21 的外鍵/Search Help 觀念才有意義，是全課程真正的最後一題，用「訂單 Header/Detail」把外鍵、Search Help、LUW 三條線收在一起。
+
+ex26 是全課程收尾後的「新舊語法對照總複習」，需要學員已經看懂前面所有傳統寫法（尤其 ex11 的 JOIN、ex18 的字串/CONCATENATE、ex17 的 IF/CASE、ex20 的累加）才能體會新式寫法省了什麼，可視班級程度列為選修。
 
 **寫法原則**（2026-09-24 定案）：講義 26 之前的所有講義、練習、答案程式一律用**傳統寫法**——先宣告再使用、不用 `@` 宿主變數、不用行內宣告（`DATA(...)`／`FIELD-SYMBOL(...)`）、不用 `VALUE #`／`COND`／字串模板、`INTO` 寫在 `FROM` 之前或緊接 `FROM` 之後；新式語法集中在講義 26 教（含「0. 先備觀念：行內宣告」與「2.1 宿主變數」）。前面講義若需提到新寫法，一律用「補充」方式附註對照（如講義 5、9、16）。`APPEND VALUE #( ... )` 與字串模板 `|...|` 同樣已改回傳統寫法（逐欄填 work area 再 `APPEND`、`CONCATENATE`），新寫法在講義 1、5、9 以「補充」附註。

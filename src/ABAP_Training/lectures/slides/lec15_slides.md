@@ -39,7 +39,7 @@ style: |
 # 講義 15
 # Function Module——SE37 與 CALL FUNCTION
 
-ABAP 基礎教育訓練
+ABAP 基礎教育訓練（授課順序：接在講義 8 之後）
 
 對應練習 ex15｜答案：`ZFG_TR15` / `Z_TR15_CALC_REVENUE` / `ZR_TR15_CALL_FM`
 
@@ -60,7 +60,8 @@ ABAP 基礎教育訓練
 ## 1. FM 是什麼、跟 FORM 差在哪
 
 FORM 只能在同一支程式裡呼叫；FM 是**全系統共用**
-你每天呼叫的 `REUSE_ALV_GRID_DISPLAY` 就是標準 FM
+講義 8 是「程式內」模組化，FM 擴大到「全系統」
+之後講義 9 的 ALV（`REUSE_ALV_GRID_DISPLAY`）也是標準 FM
 
 | | FORM | Function Module |
 |---|---|---|
@@ -79,7 +80,8 @@ FORM 只能在同一支程式裡呼叫；FM 是**全系統共用**
 
 ## Function Group：一個 group 放多個 FM
 
-Function Group = 一支特殊程式（`SAPLZFG_TR15`）＋一組 include：
+Function Group = 一支特殊程式（`SAPLZFG_TR15`）＋一組 include
+（include：被原地展開的程式碼片段，講義 14 細講）：
 
 | Include | 內容 |
 |---|---|

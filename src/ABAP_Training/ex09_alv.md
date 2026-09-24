@@ -1,5 +1,7 @@
 # 練習 9：Functional ALV 與 MACRO
 
+> 授課順序：接在練習 13（第一階段總整理）之後，是 ALV 階段的第一題；進階篇見 ex24。講義見 [lec09](lectures/lec09_alv.md)。
+
 ## 學習目標
 
 - 會用 Function Module `REUSE_ALV_GRID_DISPLAY` 把 internal table 顯示成 ALV 表格
@@ -46,6 +48,11 @@
 
 1. fieldcat 少寫一個欄位（例如拿掉 URL），ALV 會怎樣？多寫一個 internal table 沒有的欄位名呢？（動手試）
 2. 把 MACRO 改寫成 FORM `add_field`，比較兩種寫法——哪個能下中斷點？
+3. `REUSE_ALV_GRID_DISPLAY` 也是 FM——用 ex15 學到的觀念回頭看這段呼叫：哪些是 `EXPORTING`、哪個是舊式 `TABLES` 參數、`EXCEPTIONS` 對應什麼？在 SE37 打開它的介面對照看看。
+
+## 延伸挑戰
+
+把 ex13（第一階段總整理）的明細輸出改成 Functional ALV 版本（`ZR_TR13_CAPSTONE` 複製一份再改，不要動原答案），比較兩種輸出的取捨：ALV 內建排序／篩選／匯出，但頁首頁尾、分頁、總頁數回填這些 ex12／ex13 辛苦做的排版，在 ALV 裡要怎麼對應？哪種情境還是適合 WRITE 清單？
 
 ## 答案
 

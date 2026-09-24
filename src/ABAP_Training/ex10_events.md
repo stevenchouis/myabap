@@ -1,5 +1,7 @@
 # 練習 10：Report Event 事件流程
 
+> 授課順序：接在練習 15（Function Module）之後，是「傳統報表」階段的第一題。講義見 [lec10](lectures/lec10_events.md)。
+
 ## 學習目標
 
 - 理解 Report 是**事件驅動**：系統在不同時機觸發各事件區塊，跟程式碼寫的位置無關

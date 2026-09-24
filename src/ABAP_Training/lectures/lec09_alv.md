@@ -1,4 +1,4 @@
-# 講義 9：Functional ALV 與 MACRO
+# 講義 9：Functional ALV 與 MACRO（授課順序：接在講義 13 之後）
 
 > 對應練習：[ex09](../ex09_alv.md)｜答案程式：`ZR_TR09_ALV`
 
@@ -93,7 +93,7 @@ ENDIF.
 ```
 
 - `i_callback_program` 給 `sy-repid`（目前程式名），ALV 事件回呼（如自訂頁首、雙擊）都靠它找回你的程式。
-- CALL FUNCTION 的完整語法與 EXCEPTIONS 機制，講義 15 詳解；此處先照樣板使用並檢查 sy-subrc。
+- `REUSE_ALV_GRID_DISPLAY` 就是一支標準 FM：`EXPORTING` 傳入設定與欄位目錄、`TABLES` 傳入資料表（舊式參數，講義 15 第 3.1 節說明過為何新 FM 不再這樣設計）、`EXCEPTIONS` 對應錯誤——講義 15 學過的呼叫語法全部適用，呼叫後一樣要檢查 `sy-subrc`。
 
 ### 4.1 layout：整體版面
 
