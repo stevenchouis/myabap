@@ -27,6 +27,28 @@ S0002 李小美         88         95       91.5
 S0003 陳大文         60         72       66.0
 ```
 
+## 選修：Subroutine Pool 與跨程式呼叫 FORM
+
+（維護舊程式會遇到，講義 8 第 8 節「補充」；時間有限可以跳過。）
+
+1. **建立 Subroutine Pool**：SE38 → 程式名 `ZR_TR08_POOL_<你的姓名縮寫>` → Create → **Type 選 `Subroutine Pool`**（GUI-only，ADT 無法設定），套件 `$TMP`。第一行寫 `PROGRAM 程式名.`（不是 REPORT），只放一個 `FORM calc_grade USING iv_score TYPE i CHANGING cv_grade TYPE c`（>=80 A、>=60 B、其餘 C）。啟用後試著按 F8——它不能直接執行
+2. **建立呼叫端** `ZR_TR08_CALLER_<你的姓名縮寫>`（一般報表）：用 `PERFORM calc_grade IN PROGRAM <你的 Pool 名稱> USING ... CHANGING ...` 算 85、45 分的等第
+3. **`IF FOUND`**：呼叫一個 Pool 裡不存在的 FORM，加上 `IF FOUND`，確認什麼事都沒發生、`CHANGING` 變數維持原值
+4. **動態指定**：把 FORM 名與程式名放進變數（`c LENGTH 30`，內容大寫），用 `PERFORM (變數) IN PROGRAM (變數) IF FOUND` 算 72 分
+5. 實驗（看完註解掉）：拿掉 `IF FOUND`、FORM 名稱故意寫錯——執行期 dump（`CX_SY_DYN_CALL_ILLEGAL_FORM`）。注意：**語法檢查照樣通過**，這就是跨程式 FORM 被列為過時的原因
+
+選修部分的預期輸出：
+
+```
+=== 1) PERFORM ... IN PROGRAM（靜態指定）===
+85 分 → A
+45 分 → C
+=== 2) IF FOUND：FORM 不存在時跳過 ===
+呼叫不存在的 FORM 後 gv_grade 仍是 C
+=== 3) 動態指定 PERFORM (變數) IN PROGRAM (變數) ===
+72 分 → B
+```
+
 ## 團隊實務備註
 
 - 舊程式（如本專案 ZDQM 系列）大量使用 FORM，**看懂 FORM 是維護的基本功**，本課先把它學紮實
@@ -40,4 +62,4 @@ S0003 陳大文         60         72       66.0
 
 ## 答案
 
-見 `zr_tr08_modularize.prog.abap`（SAP 端程式 `ZR_TR08_MODULARIZE`）。
+見 `zr_tr08_modularize.prog.abap`（SAP 端程式 `ZR_TR08_MODULARIZE`）；選修部分見 `zr_tr08_pool.prog.abap`（`ZR_TR08_POOL`，Subroutine Pool）與 `zr_tr08_caller.prog.abap`（`ZR_TR08_CALLER`）。

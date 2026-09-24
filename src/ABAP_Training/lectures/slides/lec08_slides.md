@@ -52,6 +52,7 @@ ABAP 基礎教育訓練
 - `USING`（輸入）與 `CHANGING`（輸入兼輸出）的分工
 - 參數要加型別（TYPE）；區域變數 vs 全域變數
 - 傳統報表的標準骨架
+- 補充（選修）：跨程式呼叫 FORM 與 Subroutine Pool
 
 ---
 
@@ -184,6 +185,45 @@ REPORT zr_xxx.
 | USING 參數被改，呼叫端也變 | USING 預設傳參考——紀律：要改放 CHANGING |
 | FORM 裡讀到莫名的值 | 誤用同名全域變數；區域記得 `l` 前綴 |
 | FORM 後面的事件不執行 | FORM 區塊吃掉後面程式——FORM 一律放檔尾 |
+
+---
+
+<!-- _class: compact -->
+
+## 7. 補充：跨程式呼叫 FORM 與 Subroutine Pool（選修）
+
+```abap
+PERFORM calc_grade IN PROGRAM zr_tr08_pool
+  USING gv_score CHANGING gv_grade.
+
+* Subroutine Pool：程式類型 S，開頭 PROGRAM，只放 FORM
+PROGRAM zr_tr08_pool.
+FORM calc_grade USING iv_score TYPE i CHANGING cv_grade TYPE c.
+  ...
+ENDFORM.
+```
+
+- 不能 F8 直接執行；被呼叫時才載入（觸發 `LOAD-OF-PROGRAM`）
+- **建立是 GUI-only**：SE38 → Type 選 Subroutine Pool（ADT 無法設定）
+- `IF FOUND`：找不到 FORM／程式就安靜跳過
+- 動態：`PERFORM (gv_form) IN PROGRAM (gv_prog) IF FOUND`（名稱必須大寫）
+- 沒加 `IF FOUND` 找不到 → 執行期例外 `CX_SY_DYN_CALL_ILLEGAL_FORM`／`CX_SY_PROGRAM_NOT_FOUND`
+
+---
+
+<!-- _class: compact -->
+
+## 7.1 為什麼新程式不建議這樣寫
+
+- **編譯時完全不檢查**：程式名、FORM 名、參數個數／順序／型別，都要到執行期才爆
+- **難以追蹤**：被呼叫程式載入呼叫端的同一個執行環境
+- **動態名稱有安全風險**：外部輸入的名稱要先檢查（`CL_ABAP_DYN_PRG`）
+
+| 跨程式共用邏輯 | 介面編譯時檢查 | 現況 |
+|---|---|---|
+| FORM＋Subroutine Pool | 否 | 舊程式常見，新程式不用 |
+| Function Module（講義 15） | 是 | 傳統報表標準做法 |
+| Class Method（OOP 課程） | 是 | 新世代首選 |
 
 ---
 

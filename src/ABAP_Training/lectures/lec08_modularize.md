@@ -6,6 +6,7 @@
 
 - 為什麼要模組化：主流程一眼看懂、邏輯可重複使用
 - `FORM ... ENDFORM` 定義副程式、`PERFORM` 呼叫
+- 補充（選修）：跨程式呼叫 FORM（`PERFORM ... IN PROGRAM`）與 Subroutine Pool
 - `USING`（輸入）與 `CHANGING`（輸入兼輸出）的分工
 - 參數要加型別（TYPE）；區域變數 vs 全域變數
 - 傳統報表的標準骨架
@@ -116,6 +117,70 @@ REPORT zr_xxx.
 | FORM 裡讀到莫名其妙的值 | 誤用了同名全域變數；區域變數記得 `l` 前綴 |
 | FORM 定義寫在事件中間，後面的事件不執行 | FORM 區塊會「吃掉」後面的程式——FORM 一律放檔尾 |
 
-## 8. 課堂練習
+## 8. 補充：跨程式呼叫 FORM 與 Subroutine Pool（選修，維護舊程式會遇到）
+
+前面的 FORM 都是「同一支程式自己呼叫自己」。但語法也允許 **呼叫另一支程式裡的 FORM**——舊程式裡不少共用邏輯就是這樣寫的，所以要看得懂。
+
+**語法：`PERFORM ... IN PROGRAM`**
+
+```abap
+PERFORM calc_grade IN PROGRAM zr_tr08_pool
+  USING    gv_score
+  CHANGING gv_grade.
+```
+
+**Subroutine Pool（副程式池）**：專門拿來放「給別人呼叫的 FORM」的程式，程式類型是 **Subroutine Pool**（SE38 建立時 Type 選這個，屬性代碼 `S`）：
+
+```abap
+PROGRAM zr_tr08_pool.          " 開頭是 PROGRAM，不是 REPORT
+
+FORM calc_grade USING    iv_score TYPE i
+                CHANGING cv_grade TYPE c.
+  IF iv_score >= 80.
+    cv_grade = 'A'.
+  ELSEIF iv_score >= 60.
+    cv_grade = 'B'.
+  ELSE.
+    cv_grade = 'C'.
+  ENDIF.
+ENDFORM.
+```
+
+- 只放 FORM：沒有選擇畫面、沒有事件、**不能 F8 直接執行**，只能被別的程式呼叫。
+- 被呼叫時才載入記憶體（載入當下會觸發 `LOAD-OF-PROGRAM` 事件）。
+- 技術上，可執行程式、Module Pool、Function Pool 裡的 FORM 也能被外部呼叫；Subroutine Pool 只是「最乾淨、專門為此設計」的容器。Include 裡的 FORM 不能用 Include 名稱直接呼叫。
+- **建立方式是 GUI-only**：ADT 無法設定程式類型，要在 SE38 建立時選 Subroutine Pool（已建好的程式可用 Goto → Attributes 改 Type）。
+
+**`IF FOUND` 與動態指定**：
+
+```abap
+* IF FOUND：找不到 FORM 或程式時安靜地跳過，不出錯
+PERFORM no_such_form IN PROGRAM zr_tr08_pool IF FOUND
+  USING gv_score CHANGING gv_grade.
+
+* 動態指定：FORM 名與程式名放在變數裡，內容必須是大寫
+DATA: gv_form TYPE c LENGTH 30 VALUE 'CALC_GRADE',
+      gv_prog TYPE c LENGTH 30 VALUE 'ZR_TR08_POOL'.
+PERFORM (gv_form) IN PROGRAM (gv_prog) IF FOUND
+  USING gv_score CHANGING gv_grade.
+```
+
+沒加 `IF FOUND` 又找不到時，是**執行期例外**（已實測）：FORM 不存在是 `CX_SY_DYN_CALL_ILLEGAL_FORM`、程式不存在是 `CX_SY_PROGRAM_NOT_FOUND`——沒有攔截就 dump。
+
+**為什麼新程式不建議這樣寫**（ABAP 官方文件的說法是外部呼叫「幾乎完全過時」）：
+
+- **編譯時完全不檢查**：程式名、FORM 名是否存在、參數個數／順序／型別對不對，語法檢查都不管，全部要到執行期才爆；跟講義 8 前面強調的「參數加 `TYPE` 讓語法檢查幫你抓錯」正好相反。
+- **難以追蹤**：被呼叫的程式會被載入呼叫端的同一個執行環境，影響範圍難以靜態判斷。
+- **動態名稱有安全風險**：名稱若來自外部輸入，必須先檢查（系統類別 `CL_ABAP_DYN_PRG` 可用），否則等於讓外部決定要執行哪段程式。
+
+| 跨程式共用邏輯的做法 | 介面在編譯時檢查 | 現況 |
+|---|---|---|
+| FORM ＋ Subroutine Pool | 否 | 舊程式常見，新程式不用 |
+| Function Module（講義 15） | 是 | 傳統報表的標準做法 |
+| Class Method（OOP 課程） | 是 | 新世代開發的首選 |
+
+練習見 ex08 的選修 Part（`ZR_TR08_POOL`＋`ZR_TR08_CALLER`）。
+
+## 9. 課堂練習
 
 完成 [ex08](../ex08_modularize.md)：把前幾講的學生報表重構成 get_data / process_data / display_data 三個 FORM，練習 USING 與 CHANGING。
