@@ -5,7 +5,8 @@
 ## 本講重點
 
 - Function Module（FM）的定位：**跨程式共用**的邏輯單位
-- Function Group：FM 的容器
+- Function Group：FM 的容器——**一個 group 可以放多個 FM**
+- **TOP include 的全域變數：同一個 group 的 FM 共用同一份資料**（呼叫順序、生命週期、陷阱）
 - 介面四區：IMPORTING / EXPORTING / CHANGING / TABLES ＋ EXCEPTIONS
 - SE37 建立與單獨測試
 - `CALL FUNCTION` 呼叫：方向對應與例外處理
@@ -26,6 +27,75 @@ FORM 只能在同一支程式（含 INCLUDE）裡呼叫；FM 是**全系統共�
 ## 2. Function Group：FM 的容器
 
 FM 不能單獨存在，必須掛在 **Function Group**（SE37 → Goto → Function Groups → Create，或 SE80）底下。命名 `ZFG_xxx`，同一個 group 的 FM 共用全域資料與 subroutine——把同主題的 FM 收在同一個 group（如 `ZFG_TR15` 放訓練用計算類 FM）。
+
+### 2.1 一個 Function Group 可以放多個 FM
+
+Function Group 本質上是**一支特殊的程式**（`ZFG_TR15` 對應程式 `SAPLZFG_TR15`），底下用一組 include 組織起來，SE80 展開 Function Group 就看得到：
+
+| Include | 內容 |
+|---|---|
+| `LZFG_TR15TOP` | **TOP include：全域宣告**（`FUNCTION-POOL` 陳述式、全域 `DATA`／`TYPES`），本節重點 |
+| `LZFG_TR15UXX` | 系統自動維護，列出這個 group 的所有 FM include |
+| `LZFG_TR15U01`、`U02`…… | **每個 FM 各一個 include**，放 `FUNCTION ... ENDFUNCTION` 本體 |
+| `LZFG_TR15F01`（選用） | 同一個 group 內 FM 共用的 FORM |
+
+- **一個 FM 只屬於一個 Function Group，一個 group 可以有很多 FM**：在 SE37 對同一個 group 一支一支新增即可，Part 1 的 `Z_TR15_CALC_REVENUE`、Part 4 的 `Z_TR15_CALC_REVENUE_TAB` 就已經同屬 `ZFG_TR15`。
+- **分組原則**：要共用同一份資料、同一批共用 FORM 的 FM 放同一個 group；彼此沒有任何共用的 FM 不必硬塞在一起——group 越大，第一次呼叫時要載入的程式越大。
+- 呼叫端**不需要**知道 FM 在哪個 group：`CALL FUNCTION 'Z_TR15_...'` 只認 FM 名稱。
+
+### 2.2 TOP include 的全域變數：同一個 group 的 FM 共用同一份
+
+寫在 TOP include 的 `DATA`，是**整個 Function Group 共用的全域變數**——group 裡每一支 FM 看到、改到的都是同一份。範例（練習 15 Part 5）：
+
+```abap
+* LZFG_TR15TOP（TOP include）
+FUNCTION-POOL zfg_tr15.
+
+DATA: gv_total_revenue TYPE s_price,        " 累計營收
+      gv_call_count    TYPE i.              " 累加了幾次
+```
+
+```abap
+FUNCTION z_tr15_add_revenue                  " FM 1：累加
+  IMPORTING VALUE(iv_revenue) TYPE s_price.
+  gv_total_revenue = gv_total_revenue + iv_revenue.
+  gv_call_count    = gv_call_count + 1.
+ENDFUNCTION.
+
+FUNCTION z_tr15_get_total                    " FM 2：讀取（自己沒有累加）
+  EXPORTING VALUE(ev_total) TYPE s_price
+            VALUE(ev_count) TYPE i.
+  ev_total = gv_total_revenue.
+  ev_count = gv_call_count.
+ENDFUNCTION.
+
+FUNCTION z_tr15_reset_total.                 " FM 3：歸零
+  CLEAR: gv_total_revenue, gv_call_count.
+ENDFUNCTION.
+```
+
+呼叫端：
+
+```abap
+CALL FUNCTION 'Z_TR15_ADD_REVENUE' EXPORTING iv_revenue = '50000.00'.
+CALL FUNCTION 'Z_TR15_ADD_REVENUE' EXPORTING iv_revenue = '40000.00'.
+CALL FUNCTION 'Z_TR15_ADD_REVENUE' EXPORTING iv_revenue = '36000.00'.
+
+CALL FUNCTION 'Z_TR15_GET_TOTAL'
+  IMPORTING ev_total = gv_total ev_count = gv_count.
+WRITE: / gv_total, gv_count.                 " 126,000.00  3
+```
+
+重點：三次 `ADD_REVENUE` 只傳「這一筆」，**沒有任何變數帶回呼叫端**；換另一支 `GET_TOTAL` 卻讀得到累加結果——因為兩支 FM 同屬 `ZFG_TR15`，操作的是同一份 `gv_total_revenue`。（實測輸出：第一次呼叫前 `0.00／0`；累加三筆後 `126,000.00／3`；`RESET_TOTAL` 之後又回到 `0.00／0`。）
+
+### 2.3 生命週期與注意事項
+
+- **載入時機**：Function Group 在**第一次呼叫其中任何一支 FM 時**整個載入記憶體（連同 TOP include 的全域變數，從初始值開始）；之後同一個 session 內一直保留，所以 FM「有記憶」。
+- **範圍是「這次 session 的這個 group」**：程式結束、session 結束就消失；不同使用者、不同 session 各自一份，互不影響；**不同 Function Group 的 FM 看不到彼此的全域變數**（要傳資料就用參數）。
+- **呼叫順序變成隱藏的前提**：先 `GET_TOTAL` 再 `ADD_REVENUE`，跟先 `ADD_REVENUE` 再 `GET_TOTAL`，結果不同——FM 的介面看不出這個依賴，維護時最容易踩。用前先 `RESET` 是良好習慣。
+- **難測、難追蹤**：FM 的行為不只取決於參數，還取決於「之前發生過什麼」；ABAP Unit 測試、除錯都比較麻煩。
+- **TOP include 的宣告能用在 FM「本體」裡，但不能用在 FM「介面」型別上**：FM 內可以自由讀寫 `gv_...`、使用 TOP 宣告的本地 `TYPES` 來宣告區域變數；但 IMPORTING／EXPORTING／CHANGING 參數的型別必須是 DDIC 型別（見 3.1 與 Part 4）。
+- **定位**：這是傳統 FM 的能力，舊程式常見（把中間結果暫存在 group 裡，配合「先設定、後讀取」的呼叫順序）；新世代開發用 Class 的 instance 屬性——狀態明確、可以建立多份互不干擾，OOP 課程會再比較。
 
 ## 3. 定義介面（SE37 分頁）
 
@@ -130,7 +200,10 @@ ENDIF.
 | sy-subrc = 2 查不出原因 | 落進 OTHERS——把具名例外逐一列出對應數字好定位 |
 | FM 名對了卻說不存在 | 呼叫字串沒大寫、或 FM 沒啟用 |
 | SE37 測試正常、程式呼叫結果不同 | 呼叫端參數對應錯（依名稱對應，檢查每個等號左邊） |
+| 兩支 FM 讀不到對方設的全域變數 | 它們不在同一個 Function Group（全域變數只在 group 內共用），或是不同 session |
+| 同一支程式重複呼叫累加類 FM，結果越來越大 | 全域變數在 session 內一直保留，沒有先 RESET |
+| 改了 FM 呼叫順序，結果就不一樣 | FM 依賴 group 全域變數的狀態，順序成了隱藏前提——文件要寫清楚，或改用參數傳遞 |
 
 ## 8. 課堂練習
 
-完成 [ex15](../ex15_function_module.md)：建 `ZFG_TR15` 與營收計算 FM（含防呆例外）、SE37 單測通過，再寫報表呼叫並驗證正常/例外兩條路。
+完成 [ex15](../ex15_function_module.md)：建 `ZFG_TR15` 與營收計算 FM（含防呆例外）、SE37 單測通過，再寫報表呼叫並驗證正常/例外兩條路；Part 5 在同一個 Function Group 加三支 FM，透過 TOP include 的全域變數累加與讀取。

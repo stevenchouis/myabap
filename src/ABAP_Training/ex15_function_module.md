@@ -9,6 +9,7 @@
 - 會 `CALL FUNCTION` 呼叫並處理例外（`EXCEPTIONS ... = 1` 與 `sy-subrc`）
 - 搞清楚**方向反轉**：FM 的 IMPORTING（它收的）＝呼叫端的 EXPORTING（我送的）
 - 會用 `CHANGING` + DDIC Table Type 傳遞一整張表——理解為什麼這是**取代舊式 `TABLES` 參數**的現代寫法
+- 理解**一個 Function Group 可以放多個 FM**，並會用 TOP include 的全域變數讓同 group 的 FM 共用、傳遞資料
 
 ## 事前準備
 
@@ -48,6 +49,27 @@ SE37 → Test/Execute（F8）→ 輸入 1500 / 200 → 確認 EV_REVENUE = 30000
 3. 建第二支 FM `Z_TR15_<縮寫>_CALC_REVENUE_TAB`：`CHANGING CT_FLIGHTS TYPE <剛建的 Table Type>`，內部 `LOOP AT ct_flights ASSIGNING <fs>` 逐列把 `REVENUE = PRICE * SEATSOCC` 算出來、直接寫回原表（不用另外接 EXPORTING）
 4. 呼叫端：組一個至少 3 筆航班的表（`REVENUE` 先留空），呼叫這支 FM，確認呼叫後表格的 `REVENUE` 欄位都被填上了
 
+**Part 5：同一個 Function Group 多個 FM，共用全域變數**
+
+1. 在 Function Group（如 `ZFG_TR15_<縮寫>`）的 **TOP include**（`LZFG_TR15_<縮寫>TOP`）加全域變數：`gv_total_revenue TYPE s_price`、`gv_call_count TYPE i`（SE80 展開 Function Group → Includes → 雙擊 TOP include）
+2. 在**同一個 group** 再建三支 FM：
+   - `Z_TR15_<縮寫>_ADD_REVENUE`：`IMPORTING iv_revenue TYPE s_price`，把它累加進 `gv_total_revenue`、`gv_call_count` 加 1
+   - `Z_TR15_<縮寫>_GET_TOTAL`：`EXPORTING ev_total TYPE s_price`、`ev_count TYPE i`，只把兩個全域變數讀出來（**這支不做任何累加**）
+   - `Z_TR15_<縮寫>_RESET_TOTAL`：無參數，`CLEAR` 兩個全域變數
+3. 呼叫端：先 `GET_TOTAL`（印出初始值）→ `ADD_REVENUE` 三次（50000／40000／36000）→ 再 `GET_TOTAL` 印出累計 → `RESET_TOTAL` → 再 `GET_TOTAL`
+4. 觀察：三次 `ADD_REVENUE` 都沒有把結果傳回呼叫端，`GET_TOTAL` 卻讀得到——因為同 group 共用同一份全域變數
+
+Part 5 預期輸出：
+
+```
+=== 1) 尚未累加就先讀 ===
+累計營收       0.00  ／ 累加次數  0
+=== 2) 累加三筆後，由另一支 FM 讀出 ===
+累計營收 126,000.00  ／ 累加次數  3
+=== 3) RESET 之後 ===
+累計營收       0.00  ／ 累加次數  0
+```
+
 ## 預期輸出（呼叫程式）
 
 ```
@@ -73,7 +95,9 @@ AA  0017 1,200.00    30 =>  36,000.00 USD
 2. ex09 呼叫的 `REUSE_ALV_GRID_DISPLAY` 也是 FM——回頭看它的呼叫，現在能完整讀懂每一段了嗎？
 3. FM 的 IMPORTING 參數為什麼慣用 `VALUE(...)`（傳值）？跟 FORM USING 預設傳參考的差異是什麼？
 4. Part 4 的 `CT_FLIGHTS` 型別為什麼不能直接用函式群組 Top Include 裡宣告的本地 `TYPES`，一定要走 DDIC Table Type？（提示：FM 介面型別要能被**呼叫端獨立語法檢查**，不依賴這支 FM 所屬 Function Group 有沒有被載入）
+5. （Part 5）把 `GET_TOTAL` 建到**另一個** Function Group，還讀得到 `ADD_REVENUE` 累加的值嗎？為什麼？（提示：全域變數只在同一個 group 內共用）
+6. （Part 5）呼叫端在同一支程式裡先累加三筆、**沒有 RESET** 就再累加同樣三筆，`GET_TOTAL` 會回傳多少？這說明了 Function Group 全域變數的什麼特性？
 
 ## 答案
 
-見 `z_tr15_calc_revenue.func.abap`／`z_tr15_calc_revenue_tab.func.abap`（兩支 FM 原始碼，SAP 端 `Z_TR15_CALC_REVENUE`／`Z_TR15_CALC_REVENUE_TAB`，皆掛在 Function Group `ZFG_TR15`）與 `zr_tr15_call_fm.prog.abap`（呼叫端，SAP 端 `ZR_TR15_CALL_FM`）。Part 4 用到的 DDIC 結構 `ZTR15_FLIGHT_REV`／Table Type `ZTR15_TT_FLIGHT_REV` 快照見 `ztr15_flight_rev.stru.abap`。
+見 `z_tr15_calc_revenue.func.abap`／`z_tr15_calc_revenue_tab.func.abap`（兩支 FM 原始碼，SAP 端 `Z_TR15_CALC_REVENUE`／`Z_TR15_CALC_REVENUE_TAB`，皆掛在 Function Group `ZFG_TR15`）與 `zr_tr15_call_fm.prog.abap`（呼叫端，SAP 端 `ZR_TR15_CALL_FM`）。Part 5（同 group 多個 FM 共用全域變數）見 `z_tr15_add_revenue.func.abap`／`z_tr15_get_total.func.abap`／`z_tr15_reset_total.func.abap`、TOP include 快照 `lzfg_tr15top.prog.abap`，以及呼叫端 `zr_tr15_fg_shared.prog.abap`（SAP 端 `ZR_TR15_FG_SHARED`）。Part 4 用到的 DDIC 結構 `ZTR15_FLIGHT_REV`／Table Type `ZTR15_TT_FLIGHT_REV` 快照見 `ztr15_flight_rev.stru.abap`。

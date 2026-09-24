@@ -48,7 +48,8 @@ ABAP 基礎教育訓練
 ## 本講重點
 
 - Function Module（FM）的定位：**跨程式共用**的邏輯單位
-- Function Group：FM 的容器
+- Function Group：FM 的容器——一個 group 可放多個 FM
+- TOP include 全域變數：同 group 的 FM 共用同一份資料
 - 介面四區：IMPORTING / EXPORTING / CHANGING / TABLES ＋ EXCEPTIONS
 - SE37 建立與單獨測試
 - `CALL FUNCTION` 呼叫：方向對應與例外處理
@@ -74,6 +75,64 @@ FORM 只能在同一支程式裡呼叫；FM 是**全系統共用**
 
 ---
 
+<!-- _class: compact -->
+
+## Function Group：一個 group 放多個 FM
+
+Function Group = 一支特殊程式（`SAPLZFG_TR15`）＋一組 include：
+
+| Include | 內容 |
+|---|---|
+| `LZFG_TR15TOP` | **TOP：全域宣告**（`DATA`／`TYPES`） |
+| `LZFG_TR15UXX` | 系統維護，列出所有 FM include |
+| `LZFG_TR15U01`、`U02`… | **每個 FM 各一個 include** |
+| `LZFG_TR15F01`（選用） | group 內共用的 FORM |
+
+- **一個 FM 只屬一個 group；一個 group 可放很多 FM**
+- 同主題、要共用資料的 FM 放同一個 group；沒共用就不必硬塞
+- 呼叫端只認 FM 名稱，不需要知道它在哪個 group
+
+---
+
+<!-- _class: compact -->
+
+## TOP include 全域變數：同 group 的 FM 共用同一份
+
+```abap
+* TOP include
+DATA: gv_total_revenue TYPE s_price,
+      gv_call_count    TYPE i.
+
+FUNCTION z_tr15_add_revenue.          " 累加
+  gv_total_revenue = gv_total_revenue + iv_revenue.
+  gv_call_count    = gv_call_count + 1.
+ENDFUNCTION.
+
+FUNCTION z_tr15_get_total.            " 讀取（自己沒累加）
+  ev_total = gv_total_revenue.  ev_count = gv_call_count.
+ENDFUNCTION.
+```
+
+呼叫 `ADD_REVENUE` 三次（50000／40000／36000），只傳單筆、沒有變數帶回
+→ 另一支 `GET_TOTAL` 讀到 **126,000.00／3**（同一份全域變數）
+
+---
+
+<!-- _class: compact -->
+
+## 生命週期與注意事項
+
+- **載入**：group 內任何一支 FM 第一次被呼叫時整個載入，全域變數從初始值開始
+- **範圍**：這次 session 的這個 group；不同 session 各自一份，**不同 group 看不到彼此**
+- **隱藏前提**：呼叫順序影響結果，介面看不出來 → 用前先 `RESET`
+- **難測難追蹤**：行為取決於「之前發生過什麼」
+- TOP 宣告能用在 FM **本體**，但**不能**用在 FM **介面**型別（要 DDIC 型別）
+- 定位：傳統 FM 能力，舊程式常見；新世代用 Class 的 instance 屬性（狀態明確、可建多份）
+
+---
+
+<!-- _class: compact -->
+
 ## 2. 定義介面（`Z_TR15_CALC_REVENUE`）
 
 ```abap
@@ -94,6 +153,10 @@ FUNCTION z_tr15_calc_revenue
 
 ENDFUNCTION.
 ```
+
+---
+
+## 2.1 介面區的方向與前綴
 
 | 區 | 方向 | 前綴 |
 |---|---|---|
