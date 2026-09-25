@@ -16,40 +16,42 @@
 - 答案程式：`zr_trNN_主題.prog.abap`（abapGit 命名，對應 SAP 中的 `ZR_TRNN_*` 程式）
 - 答案程式建立於 SAP 後，快照同步到本目錄（與 `src/` 其他檔案相同的單向快照原則）
 
-## 題目清單
+## 題目清單（依授課順序排列）
 
-| # | 主題 | 題目 | 答案程式 | 狀態 |
-|---|---|---|---|---|
-| 1 | 語法基礎（statement/句點/註解/鏈式） | [ex01](ex01_syntax_basics.md) | `ZR_TR01_SYNTAX_BASICS` | 完成 |
-| 2 | 變數與 TYPE/LIKE/CONSTANTS | [ex02](ex02_type_like.md) | `ZR_TR02_TYPE_LIKE` | 完成 |
-| 3 | Local Type 與 Structure | [ex03](ex03_structures.md) | `ZR_TR03_STRUCTURES` | 完成 |
-| 4 | Internal Table 基礎（APPEND/LOOP/READ TABLE） | [ex04](ex04_itab_basics.md) | `ZR_TR04_ITAB_BASICS` | 完成 |
-| 5 | Internal Table 進階（SORT/MODIFY/DELETE／Deep Structure） | [ex05](ex05_itab_advanced.md) | `ZR_TR05_ITAB_ADVANCED` | 完成 |
-| 6 | 橋接 SAP Table（SCARR 航班模型、SELECT） | [ex06](ex06_sap_table.md) | `ZR_TR06_SAP_TABLE` | 完成 |
-| 7 | 選擇畫面（PARAMETERS/SELECT-OPTIONS/IN） | [ex07](ex07_selscreen.md) | `ZR_TR07_SELSCREEN` | 完成 |
-| 8 | 模組化（FORM/USING/CHANGING；選修：Subroutine Pool 與跨程式 `PERFORM ... IN PROGRAM`） | [ex08](ex08_modularize.md) | `ZR_TR08_MODULARIZE`（選修：`ZR_TR08_POOL`＋`ZR_TR08_CALLER`） | 完成（選修部分 2026-09-24 新增；Pool 需在 SE38 手動設 Type＝Subroutine Pool） |
-| 8a | Package 與傳輸請求（SE80 建 Package、SE10 Request/Task 與釋放順序、版本、釋放後再修改掛新 TR、STMS 匯入佇列 Filter/匯入/確認） | [ex08a](ex08a_package_transport.md) | （無答案程式，以 SE10 傳輸記錄＋STMS 匯入狀態驗收；課堂實例 `ZMM1`/`ZMM2`） | 完成（2026-09-24 補講義，課堂已上） |
-| 9 | Functional ALV 與 MACRO（REUSE_ALV_GRID_DISPLAY/fieldcat/DEFINE） | [ex09](ex09_alv.md) | `ZR_TR09_ALV` | 完成 |
-| 10 | Report Event（INITIALIZATION～AT LINE-SELECTION/HIDE） | [ex10](ex10_events.md) | `ZR_TR10_EVENTS` | 完成 |
-| 11 | 多表 JOIN（INNER/LEFT OUTER、CORRESPONDING FIELDS） | [ex11](ex11_join.md) | `ZR_TR11_JOIN` | 完成 |
-| 12 | 列印排版與頁面規劃（LINE-SIZE/LINE-COUNT/END-OF-PAGE、點矩陣選型） | [ex12](ex12_print_layout.md) | `ZR_TR12_PRINT_LAYOUT` | 完成 |
-| 13 | 第一階段總整理（傳統報表收尾）：航班營收報表（含總頁數回填），結業對照 Z_INVENTORY_COST_REPORT | [ex13](ex13_capstone.md) | `ZR_TR13_CAPSTONE` | 完成 |
-| 14 | INCLUDE 拆檔（TOP/F01 慣例、context 啟用） | [ex14](ex14_include_split.md) | `ZR_TR14_CAPSTONE` + `_TOP`/`_F01` | 完成 |
-| 15 | Function Module（SE37 建立/單測、CALL FUNCTION 與例外、CHANGING+Table Type 取代 TABLES） | [ex15](ex15_function_module.md) | `ZFG_TR15` / `Z_TR15_CALC_REVENUE` / `Z_TR15_CALC_REVENUE_TAB` / `ZR_TR15_CALL_FM` / `ZTR15_FLIGHT_REV` / `ZTR15_TT_FLIGHT_REV` | 完成 |
-| 16 | Field-Symbol（ASSIGN/LOOP ASSIGNING/ASSIGN COMPONENT） | [ex16](ex16_field_symbols.md) | `ZR_TR16_FIELD_SYMBOLS` | 完成 |
-| 17 | 運算與流程控制（IF/CASE/DO/WHILE/EXIT/CHECK） | [ex17](ex17_control_flow.md) | `ZR_TR17_CONTROL_FLOW` | 完成 |
-| 18 | 字串與日期處理（CONCATENATE/SPLIT/位移/月初月末） | [ex18](ex18_string_date.md) | `ZR_TR18_STRING_DATE` | 完成 |
-| 19 | Debugger 除錯（中斷點/單步/Watchpoint/ST22，附埋 bug 程式） | [ex19](ex19_debugging.md) | `ZR_TR19_DEBUGGING` | 完成 |
-| 20 | Control Break 群組小計（AT NEW/AT END OF/SUM） | [ex20](ex20_control_break.md) | `ZR_TR20_CONTROL_BREAK` | 完成 |
-| 20a | SQL 聚合與子查詢（GROUP BY/HAVING/DISTINCT/IN·EXISTS 子查詢，傳統寫法） | [ex20a](ex20a_sql_aggregate.md) | `ZR_TR20A_SQL_AGG` | 完成（2026-09-21，已於 SAP 驗證） |
-| 21 | Z 資料表與 Open SQL 寫入（SE11/SM30/INSERT/UPDATE/MODIFY/DELETE、外鍵/Check Table、Search Help） | [ex21](ex21_ztable.md) | `ZTR21_STUD` + `ZTR21_CLASS` + `ZR_TR21_ZTABLE` | 完成 |
-| 22 | Message Class 與多語言文字元素（SE91/Text Symbol/Selection Texts） | [ex22](ex22_texts_messages.md) | `ZTR22` + `ZR_TR22_TEXTS` | 完成 |
-| 23 | 期末整合練習：訂單 Header/Detail（外鍵/Search Help 綜合運用、LUW all-or-nothing 實地驗證） | [ex23](ex23_orders.md) | `ZTR23_ORDH` + `ZTR23_ORDI` + `ZR_TR23_ORDERS` | 完成 |
-| 24 | 可編輯 ALV（REUSE_ALV_GRID_DISPLAY_LVC：STYLEFNAME 反灰、EDT_CLL_CB+IT_EVENTS 觸發 DATA_CHANGED 即時檢核） | [ex24](ex24_alv_lvc.md) | `ZR_TR24_ALV_LVC`（＋GUI Status `STANDARD`） | 完成 |
-| 25 | Data Dictionary 總覽與 Global Type（重用標準 Data Element／Check Table 指向標準表／重用標準 Domain 補標籤／免建 Search Help／DDIC Table Type） | [ex25](ex25_ddic_overview.md) | `ZTR25_SURPCT` + `ZTR25_ACTIVE` + `ZTR25_SURCHG` + `ZTR25_TT_SURCHG` + `ZR_TR25_DDIC` | 完成 |
-| 26 | 進階選修：新式語法總覽（字串模板／New Open SQL Inline Declaration／COND／SWITCH／VALUE／REDUCE／FILTER） | [ex26](ex26_modern_syntax.md) | `ZR_TR26_MODERN_SYNTAX` | 完成 |
-| 27 | 並行控制與 Lock Object（SE11 建自訂 Lock Object／查生成的 ENQUEUE-DEQUEUE FM／FOREIGN_LOCK 例外處理／SM12） | [ex27](ex27_lock_object.md) | `EZTR21_STUD`（Lock Object）+ `ZR_TR27_LOCK_OBJECT` | 完成 |
-| 28 | 客製 Table Maintenance 的權限防護與並行控制＋接軌實務計算（SU21 自訂權限物件／Lock Object／VIEW_MAINTENANCE_CALL／SE93 T-code＋Parameter Transaction／SELECTION-SCREEN FUNCTION KEY／ALV／JOIN 標準表算最終票價） | [ex28](ex28_auth_wrapper.md) | `ZTR28_CDISC`＋`ZTR28_CARR`（權限物件）＋`EZTR28_CARR`（Lock Object）+ `ZR_TR28_PARAM_MAINT` + `ZR_TR28_PRICE_CALC` + `ZR_TR28_SEED_DEMO`（`ZR_TR28_PARAM_LIST` 已棄用） | 完成 |
+「順序」與 [lectures/README.md](lectures/README.md) 的講義順序一致；「題號」是 SAP 答案物件命名用的編號，不等於上課順序。
+
+| 順序 | 題號 | 主題 | 題目 | 答案程式 | 狀態 |
+|---|---|---|---|---|---|
+| 1 | 1 | 語法基礎（statement/句點/註解/鏈式） | [ex01](ex01_syntax_basics.md) | `ZR_TR01_SYNTAX_BASICS` | 完成 |
+| 2 | 2 | 變數與 TYPE/LIKE/CONSTANTS | [ex02](ex02_type_like.md) | `ZR_TR02_TYPE_LIKE` | 完成 |
+| 3 | 17 | 運算與流程控制（IF/CASE/DO/WHILE/EXIT/CHECK） | [ex17](ex17_control_flow.md) | `ZR_TR17_CONTROL_FLOW` | 完成 |
+| 4 | 18 | 字串與日期處理（CONCATENATE/SPLIT/位移/月初月末） | [ex18](ex18_string_date.md) | `ZR_TR18_STRING_DATE` | 完成 |
+| 5 | 3 | Local Type 與 Structure | [ex03](ex03_structures.md) | `ZR_TR03_STRUCTURES` | 完成 |
+| 6 | 4 | Internal Table 基礎（APPEND/LOOP/READ TABLE） | [ex04](ex04_itab_basics.md) | `ZR_TR04_ITAB_BASICS` | 完成 |
+| 7 | 5 | Internal Table 進階（SORT/MODIFY/DELETE／Deep Structure） | [ex05](ex05_itab_advanced.md) | `ZR_TR05_ITAB_ADVANCED` | 完成 |
+| 8 | 19 | Debugger 除錯（中斷點/單步/Watchpoint/ST22，附埋 bug 程式） | [ex19](ex19_debugging.md) | `ZR_TR19_DEBUGGING` | 完成 |
+| 9 | 16 | Field-Symbol（ASSIGN/LOOP ASSIGNING/ASSIGN COMPONENT） | [ex16](ex16_field_symbols.md) | `ZR_TR16_FIELD_SYMBOLS` | 完成 |
+| 10 | 6 | 橋接 SAP Table（SCARR 航班模型、SELECT） | [ex06](ex06_sap_table.md) | `ZR_TR06_SAP_TABLE` | 完成 |
+| 11 | 7 | 選擇畫面（PARAMETERS/SELECT-OPTIONS/IN） | [ex07](ex07_selscreen.md) | `ZR_TR07_SELSCREEN` | 完成 |
+| 12 | 25 | Data Dictionary 總覽與 Global Type（重用標準 Data Element／Check Table 指向標準表／重用標準 Domain 補標籤／免建 Search Help／DDIC Table Type） | [ex25](ex25_ddic_overview.md) | `ZTR25_SURPCT` + `ZTR25_ACTIVE` + `ZTR25_SURCHG` + `ZTR25_TT_SURCHG` + `ZR_TR25_DDIC` | 完成 |
+| 13 | 8a | Package 與傳輸請求（SE80 建 Package、SE10 Request/Task 與釋放順序、版本、釋放後再修改掛新 TR、STMS 匯入佇列 Filter/匯入/確認） | [ex08a](ex08a_package_transport.md) | （無答案程式，以 SE10 傳輸記錄＋STMS 匯入狀態驗收；課堂實例 `ZMM1`/`ZMM2`） | 完成（2026-09-24 補講義，課堂已上） |
+| 14 | 8 | 模組化（FORM/USING/CHANGING；選修：Subroutine Pool 與跨程式 `PERFORM ... IN PROGRAM`） | [ex08](ex08_modularize.md) | `ZR_TR08_MODULARIZE`（選修：`ZR_TR08_POOL`＋`ZR_TR08_CALLER`） | 完成（選修部分 2026-09-24 新增；Pool 需在 SE38 手動設 Type＝Subroutine Pool） |
+| 15 | 15 | Function Module（SE37 建立/單測、CALL FUNCTION 與例外、CHANGING+Table Type 取代 TABLES） | [ex15](ex15_function_module.md) | `ZFG_TR15` / `Z_TR15_CALC_REVENUE` / `Z_TR15_CALC_REVENUE_TAB` / `ZR_TR15_CALL_FM` / `ZTR15_FLIGHT_REV` / `ZTR15_TT_FLIGHT_REV` | 完成 |
+| 16 | 10 | Report Event（INITIALIZATION～AT LINE-SELECTION/HIDE） | [ex10](ex10_events.md) | `ZR_TR10_EVENTS` | 完成 |
+| 17 | 22 | Message Class 與多語言文字元素（SE91/Text Symbol/Selection Texts） | [ex22](ex22_texts_messages.md) | `ZTR22` + `ZR_TR22_TEXTS` | 完成 |
+| 18 | 11 | 多表 JOIN（INNER/LEFT OUTER、CORRESPONDING FIELDS） | [ex11](ex11_join.md) | `ZR_TR11_JOIN` | 完成 |
+| 19 | 20 | Control Break 群組小計（AT NEW/AT END OF/SUM） | [ex20](ex20_control_break.md) | `ZR_TR20_CONTROL_BREAK` | 完成 |
+| 19a | 20a | SQL 聚合與子查詢（GROUP BY/HAVING/DISTINCT/IN·EXISTS 子查詢，傳統寫法） | [ex20a](ex20a_sql_aggregate.md) | `ZR_TR20A_SQL_AGG` | 完成（2026-09-21，已於 SAP 驗證） |
+| 20 | 12 | 列印排版與頁面規劃（LINE-SIZE/LINE-COUNT/END-OF-PAGE、點矩陣選型） | [ex12](ex12_print_layout.md) | `ZR_TR12_PRINT_LAYOUT` | 完成 |
+| 21 | 14 | INCLUDE 拆檔（TOP/F01 慣例、context 啟用） | [ex14](ex14_include_split.md) | `ZR_TR14_CAPSTONE` + `_TOP`/`_F01` | 完成 |
+| 22 | 13 | 第一階段總整理（傳統報表收尾）：航班營收報表（含總頁數回填），結業對照 Z_INVENTORY_COST_REPORT | [ex13](ex13_capstone.md) | `ZR_TR13_CAPSTONE` | 完成 |
+| 23 | 9 | Functional ALV 與 MACRO（REUSE_ALV_GRID_DISPLAY/fieldcat/DEFINE） | [ex09](ex09_alv.md) | `ZR_TR09_ALV` | 完成 |
+| 23（選修） | 24 | 可編輯 ALV（REUSE_ALV_GRID_DISPLAY_LVC：STYLEFNAME 反灰、EDT_CLL_CB+IT_EVENTS 觸發 DATA_CHANGED 即時檢核） | [ex24](ex24_alv_lvc.md) | `ZR_TR24_ALV_LVC`（＋GUI Status `STANDARD`） | 完成 |
+| 24 | 21 | Z 資料表與 Open SQL 寫入（SE11/SM30/INSERT/UPDATE/MODIFY/DELETE、外鍵/Check Table、Search Help） | [ex21](ex21_ztable.md) | `ZTR21_STUD` + `ZTR21_CLASS` + `ZR_TR21_ZTABLE` | 完成 |
+| 25 | 27 | 並行控制與 Lock Object（SE11 建自訂 Lock Object／查生成的 ENQUEUE-DEQUEUE FM／FOREIGN_LOCK 例外處理／SM12） | [ex27](ex27_lock_object.md) | `EZTR21_STUD`（Lock Object）+ `ZR_TR27_LOCK_OBJECT` | 完成 |
+| 26 | 28 | 客製 Table Maintenance 的權限防護與並行控制＋接軌實務計算（SU21 自訂權限物件／Lock Object／VIEW_MAINTENANCE_CALL／SE93 T-code＋Parameter Transaction／SELECTION-SCREEN FUNCTION KEY／ALV／JOIN 標準表算最終票價） | [ex28](ex28_auth_wrapper.md) | `ZTR28_CDISC`＋`ZTR28_CARR`（權限物件）＋`EZTR28_CARR`（Lock Object）+ `ZR_TR28_PARAM_MAINT` + `ZR_TR28_PRICE_CALC` + `ZR_TR28_SEED_DEMO`（`ZR_TR28_PARAM_LIST` 已棄用） | 完成 |
+| 27 | 23 | 期末整合練習：訂單 Header/Detail（外鍵/Search Help 綜合運用、LUW all-or-nothing 實地驗證） | [ex23](ex23_orders.md) | `ZTR23_ORDH` + `ZTR23_ORDI` + `ZR_TR23_ORDERS` | 完成 |
+| 28 | 26 | 進階選修：新式語法總覽（字串模板／New Open SQL Inline Declaration／COND／SWITCH／VALUE／REDUCE／FILTER） | [ex26](ex26_modern_syntax.md) | `ZR_TR26_MODERN_SYNTAX` | 完成 |
 
 > - 本階段不含 OOP（Local Class / Method / cl_salv_table 等），留待 SAP OOP 課程。
 > - 課程目標：完課後能獨立寫出並看懂 `Z_INVENTORY_COST_REPORT` 等級的傳統報表。
