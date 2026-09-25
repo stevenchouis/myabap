@@ -45,7 +45,7 @@ AT LINE-SELECTION.
     WRITE: / 'HIDE 寫在 WRITE 之前，取回：', gv_before.
     ULINE.
     IF gv_after IS NOT INITIAL.
-      WRITE / '測試 2：雙擊這一行 → SUBMIT 另一支報表'.
+      WRITE /(60) '測試 2：雙擊這一行 → SUBMIT 另一支報表'.   " (60)：指定輸出寬度，中文字一個佔兩格，不指定會被截掉
       gv_submit = 'X'.
       HIDE: gv_submit, gv_after.
       CLEAR gv_submit.
