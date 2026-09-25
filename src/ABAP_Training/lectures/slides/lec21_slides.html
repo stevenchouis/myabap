@@ -65,7 +65,7 @@ footer { color: #999; }
 ;">
 <h1 id="%E8%AC%9B%E7%BE%A9-21">講義 21</h1>
 <h1 id="%E5%BB%BA%E7%AB%8B-z-%E8%B3%87%E6%96%99%E8%A1%A8%E8%88%87-open-sql-%E5%AF%AB%E5%85%A5">建立 Z 資料表與 Open SQL 寫入</h1>
-<p>ABAP 基礎教育訓練（授課順序：接在講義 25 之後）</p>
+<p>ABAP 基礎教育訓練（授課順序：接在講義 9（ALV）之後；Global Type 觀念回顧講義 25）</p>
 <p>對應練習 ex21｜答案：表 <code>ZTR21_STUD</code> + <code>ZTR21_CLASS</code>＋程式 <code>ZR_TR21_ZTABLE</code></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-theme="default" data-style="section {
@@ -352,6 +352,7 @@ footer { color: #999; }
 <h2 id="3-sm30-%E7%B6%AD%E8%AD%B7%E7%95%AB%E9%9D%A2">3. SM30 維護畫面</h2>
 <p>讓使用者不寫程式就能維護表內容：</p>
 <ol>
+<li><strong>先在 SE80 建 Function Group <code>ZFG_TR21</code></strong>（TMG 只能放進已存在的 FG）</li>
 <li>SE11 該表 → Utilities → <strong>Table Maintenance Generator</strong></li>
 <li>Authorization Group 練習用 <code>&amp;NC&amp;</code>（不檢核）<br />
 Function Group <code>ZFG_TR21</code>（畫面程式的容器）<br />

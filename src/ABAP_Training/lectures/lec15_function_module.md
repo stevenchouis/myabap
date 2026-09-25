@@ -8,6 +8,7 @@
 - Function Group：FM 的容器——**一個 group 可以放多個 FM**
 - **TOP include 的全域變數：同一個 group 的 FM 共用同一份資料**（呼叫順序、生命週期、陷阱）
 - 介面四區：IMPORTING / EXPORTING / CHANGING / TABLES ＋ EXCEPTIONS
+- **傳整張表：用 `CHANGING` + DDIC Table Type 取代舊式 `TABLES`**（介面參數一定要用 DDIC 型別）
 - SE37 建立與單獨測試
 - `CALL FUNCTION` 呼叫：方向對應與例外處理
 - FM vs FORM 的選擇
@@ -131,7 +132,7 @@ ENDFUNCTION.
 | TABLES | 內表（**官方標記 obsolete**，維護舊 FM 會遇到；新介面用 CHANGING 或 IMPORTING/EXPORTING 傳表格型別，原因見下方 3.1 節） | `t_` |
 | EXCEPTIONS | 具名的錯誤情況，用 `RAISE 名稱.` 觸發 | 小寫底線命名 |
 
-參數型別建議參考 DDIC（如 `s_price`），跨程式介面才有一致的語意。
+參數型別**一定要用 DDIC 型別**（如 `s_price`、講義 25 建的 Table Type），不能用程式裡自己宣告的 `TYPES`——FM 是跨程式介面，型別要全系統看得到，語意也才一致。
 
 ### 3.1 為什麼 `TABLES` 是「舊式」：官方文件的棄用理由
 
@@ -147,6 +148,81 @@ ENDFUNCTION.
 **新 FM 的建議寫法**：把 `TABLES it_xxx` 換成 `CHANGING it_xxx TYPE <table_type>`；如果表格資料其實是單向的（只進不出、或只出不進），用 `IMPORTING`／`EXPORTING` 搭配表格型別更精確，比一律用 `CHANGING` 更清楚表達方向。
 
 **⚠️ 例外**：Remote-enabled FM（RFC／BAPI）如果 RFC log 沒設成 basXML，`TABLES` 傳輸實際上比 `CHANGING` **明顯更快**——這是官方文件列出的唯一還留著 `TABLES` 的實務理由，也是為什麼很多老 BAPI（如 `BAPI_*`）至今介面上還看得到 `TABLES`，不是設計不良，是效能考量下刻意保留。
+
+### 3.2 新寫法：`CHANGING` + DDIC Table Type 取代 `TABLES`
+
+以練習 15 Part 4 的 `Z_TR15_CALC_REVENUE_TAB` 為例：傳進一整張航班表，FM 逐列算出營收、直接寫回原表。
+
+**先在 SE11 準備型別**（建法見講義 25 第 6.6 節）：
+
+| 物件 | 名稱 | 內容 |
+|---|---|---|
+| Structure（每一列的長相） | `ZTR15_FLIGHT_REV` | `CARRID`／`CONNID`／`PRICE`／`SEATSOCC`／`REVENUE`／`CURRENCY`，欄位都引用標準 Data Element（如 `S_CARR_ID`、`S_PRICE`） |
+| Table Type | `ZTR15_TT_FLIGHT_REV` | Line Type = `ZTR15_FLIGHT_REV`，Standard Table |
+
+> `PRICE`、`REVENUE` 是金額欄位，Structure 裡要有 `CURRENCY` 欄位當參考幣別，否則啟用報「specify reference table AND reference field」。
+
+**新寫法（本課程的答案，已在 SAP 驗證）**：
+
+```abap
+FUNCTION z_tr15_calc_revenue_tab
+  CHANGING
+    VALUE(ct_flights) TYPE ztr15_tt_flight_rev.       " DDIC Table Type
+
+  FIELD-SYMBOLS <fs_flight> TYPE ztr15_flight_rev.    " 指向一列（講義 16）
+
+  LOOP AT ct_flights ASSIGNING <fs_flight>.
+    <fs_flight>-revenue = <fs_flight>-price * <fs_flight>-seatsocc.
+  ENDLOOP.
+
+ENDFUNCTION.
+```
+
+**呼叫端**：
+
+```abap
+DATA: gt_flights TYPE ztr15_tt_flight_rev,             " 同一個 Table Type
+      gs_flight  TYPE ztr15_flight_rev.
+
+CLEAR gs_flight.
+gs_flight-carrid   = 'LH'.
+gs_flight-connid   = '0400'.
+gs_flight-price    = '500.00'.
+gs_flight-seatsocc = 100.
+gs_flight-currency = 'EUR'.
+APPEND gs_flight TO gt_flights.
+* ……再 APPEND 幾筆，REVENUE 先留空
+
+CALL FUNCTION 'Z_TR15_CALC_REVENUE_TAB'
+  CHANGING
+    ct_flights = gt_flights.                           " 呼叫後 REVENUE 已被填上
+```
+
+**對照舊式 `TABLES` 寫法**（維護舊 FM 會遇到，看得懂即可）：
+
+```abap
+FUNCTION z_old_calc_revenue
+  TABLES
+    t_flights STRUCTURE ztr15_flight_rev.              " 帶 Header Line 的內表
+
+  LOOP AT t_flights.                                   " 沒有 INTO：用 Header Line
+    t_flights-revenue = t_flights-price * t_flights-seatsocc.
+    MODIFY t_flights.                                  " 改的是 Header Line，要 MODIFY 寫回
+  ENDLOOP.
+
+ENDFUNCTION.
+```
+
+| | 舊式 `TABLES` | 新式 `CHANGING` + Table Type |
+|---|---|---|
+| 參數型別 | `STRUCTURE 結構`，自動帶 Header Line | DDIC Table Type，沒有 Header Line |
+| `t_flights` 指的是 | 整張表還是那一列？要看語境（雙義） | 永遠是整張表，一列用 work area 或 Field-Symbol |
+| 傳遞方式 | 只能傳址 | 可以傳值（`VALUE(...)`）或傳址 |
+| Method（OOP）能不能用 | 不能 | 能——同一套寫法直接沿用到 Class |
+
+**為什麼型別一定要是 DDIC Table Type**：FM 的介面要讓**任何呼叫端**都能獨立做語法檢查，不能依賴 Function Group 裡自己宣告的 `TYPES`（第 2.3 節提過，那只能用在 FM 本體）。所以要傳表格，就得先在 SE11 建好 Table Type——這也是講義 25 排在本講之前的原因。
+
+**方向要選對**：資料有進有出（本例：傳進航班、補上營收再傳回）用 `CHANGING`；只進不出用 `IMPORTING`、只出不進用 `EXPORTING`，一樣搭配 Table Type，介面比一律用 `CHANGING` 更清楚。
 
 ## 4. SE37 單獨測試
 

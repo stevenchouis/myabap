@@ -1,6 +1,6 @@
 # 練習 8a：Package 與傳輸請求——從建立到匯入
 
-> 授課順序：接在練習 8（FORM）之後、練習 15（Function Module）之前。講義見 [lec08a](lectures/lec08a_package_transport.md)。
+> 授課順序：接在練習 25（DDIC 總覽）之後、練習 8（FORM）之前；練習 15 建 Function Group 時就會用到本題的 TR 觀念。講義見 [lec08a](lectures/lec08a_package_transport.md)。
 
 ## 學習目標
 
@@ -22,7 +22,7 @@
 
 1. SE80 建立 Package `Z<指定名稱>`：Software Component `HOME`、Transport Layer `ZS4H`
 2. 存檔時系統要求 TR → **Create Request**，Short Description 寫清楚（例如「ex08a 練習：<縮寫> 第一版」）
-3. SE38 在這個 Package 建一支簡單程式 `ZR_TR08A_<縮寫>`（內容可以直接抄 ex08 的報表，或只寫幾行 `WRITE`），存檔時選**剛才那張 TR**，啟用並執行
+3. SE38 在這個 Package 建一支簡單程式 `ZR_TR08A_<縮寫>`（內容可以直接抄前面任何一支練習報表，或只寫幾行 `WRITE`），存檔時選**剛才那張 TR**，啟用並執行
 
 **Part 2：看懂 TR 並釋放**
 

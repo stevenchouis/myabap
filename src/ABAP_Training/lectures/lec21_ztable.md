@@ -1,4 +1,4 @@
-# 講義 21：建立 Z 資料表與 Open SQL 寫入（授課順序：接在講義 25 之後）
+# 講義 21：建立 Z 資料表與 Open SQL 寫入（授課順序：接在講義 9（ALV）之後；Global Type 觀念回顧講義 25）
 
 > 對應練習：[ex21](../ex21_ztable.md)｜答案物件：資料表 `ZTR21_STUD` + `ZTR21_CLASS`＋程式 `ZR_TR21_ZTABLE`
 
@@ -51,9 +51,10 @@
 
 讓使用者（或顧問）不寫程式就能維護表內容：
 
-1. SE11 該表 → Utilities → **Table Maintenance Generator**
-2. Authorization Group 練習用 `&NC&`（不檢核）；Function Group 給 `ZFG_TR21`（畫面程式的容器，講義 15 學過）；Maintenance type 選 one step（單畫面）
-3. 產生後，SM30 輸入表名 → Maintain，就有現成的新增/修改/刪除畫面
+1. **先建 Function Group**：SE80 → 下拉選 Function Group → 輸入 `ZFG_TR21` → Yes → 填 Short Text → 存檔（Function Group 是產生出來的維護畫面程式的容器，講義 15 學過；Table Maintenance Generator 只能放進**已經存在**的 Function Group）
+2. SE11 該表 → Utilities → **Table Maintenance Generator**
+3. Authorization Group 練習用 `&NC&`（不檢核）；Function Group 填 `ZFG_TR21`；Maintenance type 選 one step（單畫面）
+4. 產生後，SM30 輸入表名 → Maintain，就有現成的新增/修改/刪除畫面
 
 實務上參數表、對照表幾乎都配 SM30；正式環境的維護權限與是否產 TR 由 Delivery Class 與權限控制。
 

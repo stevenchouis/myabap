@@ -65,7 +65,7 @@ footer { color: #999; }
 ;">
 <h1 id="%E8%AC%9B%E7%BE%A9-8">講義 8</h1>
 <h1 id="%E6%A8%A1%E7%B5%84%E5%8C%96form--using--changing">模組化——FORM / USING / CHANGING</h1>
-<p>ABAP 基礎教育訓練</p>
+<p>ABAP 基礎教育訓練（授課順序：接在講義 8a 之後）</p>
 <p>對應練習 ex08｜答案程式 <code>ZR_TR08_MODULARIZE</code></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-theme="default" data-style="section {
@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
+;" data-marpit-pagination-total="13">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>為什麼要模組化：主流程一眼看懂、邏輯可重複使用</li>
@@ -187,7 +187,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
+;" data-marpit-pagination-total="13">
 <h2 id="1-%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E6%A8%A1%E7%B5%84%E5%8C%96">1. 為什麼要模組化</h2>
 <p>所有邏輯塞在 START-OF-SELECTION → 兩百行後沒人讀得懂</p>
 <p>主流程剩三行，<strong>讀程式像讀目錄</strong>：</p>
@@ -254,7 +254,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
+;" data-marpit-pagination-total="13">
 <h2 id="2-form-%E8%88%87-perform">2. FORM 與 PERFORM</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 呼叫（事件區）
 START-OF-SELECTION.
@@ -325,7 +325,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
+;" data-marpit-pagination-total="13">
 <h2 id="3-%E5%8F%83%E6%95%B8using-%E8%88%87-changing">3. 參數：USING 與 CHANGING</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 呼叫端
 PERFORM calc_grade USING    gs_student-score
@@ -419,7 +419,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
+;" data-marpit-pagination-total="13">
 <h2 id="using-%E7%9A%84%E7%B4%80%E5%BE%8B%E8%88%87%E5%85%A7%E8%A1%A8%E5%8F%83%E6%95%B8">USING 的紀律與內表參數</h2>
 <ul>
 <li>技術上 USING 預設<strong>傳參考</strong>，改它其實改得到呼叫端</li>
@@ -490,21 +490,34 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
-<h2 id="4-%E5%8D%80%E5%9F%9F%E8%AE%8A%E6%95%B8-vs-%E5%85%A8%E5%9F%9F%E8%AE%8A%E6%95%B8">4. 區域變數 vs 全域變數</h2>
-<ul>
-<li>FORM 裡 <code>DATA</code> = <strong>區域變數</strong>（<code>lv_</code>/<code>ls_</code>/<code>lt_</code>）<br />
-只在該 FORM 內存在，每次呼叫重新初始化</li>
-<li>程式開頭 = <strong>全域變數</strong>（<code>gv_</code>/<code>gs_</code>/<code>gt_</code>）<br />
-所有事件與 FORM 都摸得到</li>
-</ul>
-<blockquote>
-<p>原則：<strong>能區域就區域</strong><br />
-全域誰都能改，程式一大就追不到是誰改的<br />
-FORM 需要的資料盡量從參數進來，不要伸手拿全域</p>
-</blockquote>
-<p>舊式 <code>TABLES</code> 參數（<code>FORM f TABLES t_x ...</code>）：<br />
-維護舊程式要認得，<strong>新程式不要用</strong></p>
+;" data-marpit-pagination-total="13">
+<h2 id="31-%E5%8F%83%E6%95%B8%E5%9E%8B%E5%88%A5%E7%94%A8-ddic-table-type">3.1 參數型別用 DDIC Table Type</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gt_surchg TYPE ztr25_tt_surchg.        &quot; 講義 25 在 SE11 建的
+
+PERFORM load_surchg_config CHANGING gt_surchg.
+
+FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.
+  SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.
+ENDFORM.
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>型別來源</th>
+<th>誰看得到</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TYPES tt_xxx</code>（講義 4）</td>
+<td>只有這支程式</td>
+</tr>
+<tr>
+<td>DDIC Table Type（講義 25）</td>
+<td>全系統；<strong>講義 15 FM 介面一定要用</strong></td>
+</tr>
+</tbody>
+</table>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -560,21 +573,21 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
-<h2 id="5-%E5%82%B3%E7%B5%B1%E5%A0%B1%E8%A1%A8%E6%A8%99%E6%BA%96%E9%AA%A8%E6%9E%B6">5. 傳統報表標準骨架</h2>
-<p>從本講開始，練習程式都照這個結構寫：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">REPORT zr_xxx.
-
-* 1) 宣告區：TYPES / DATA / CONSTANTS
-
-* 2) 選擇畫面：PARAMETERS / SELECT-OPTIONS
-
-* 3) 事件區：INITIALIZATION / START-OF-SELECTION ...
-*    事件裡只放 PERFORM，不放邏輯
-
-* 4) FORM 區：所有副程式，集中在檔尾
-</code></pre>
-<p>這也是期末實作與正式程式的長相</p>
+;" data-marpit-pagination-total="13">
+<h2 id="4-%E5%8D%80%E5%9F%9F%E8%AE%8A%E6%95%B8-vs-%E5%85%A8%E5%9F%9F%E8%AE%8A%E6%95%B8">4. 區域變數 vs 全域變數</h2>
+<ul>
+<li>FORM 裡 <code>DATA</code> = <strong>區域變數</strong>（<code>lv_</code>/<code>ls_</code>/<code>lt_</code>）<br />
+只在該 FORM 內存在，每次呼叫重新初始化</li>
+<li>程式開頭 = <strong>全域變數</strong>（<code>gv_</code>/<code>gs_</code>/<code>gt_</code>）<br />
+所有事件與 FORM 都摸得到</li>
+</ul>
+<blockquote>
+<p>原則：<strong>能區域就區域</strong><br />
+全域誰都能改，程式一大就追不到是誰改的<br />
+FORM 需要的資料盡量從參數進來，不要伸手拿全域</p>
+</blockquote>
+<p>舊式 <code>TABLES</code> 參數（<code>FORM f TABLES t_x ...</code>）：<br />
+維護舊程式要認得，<strong>新程式不要用</strong></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -630,7 +643,77 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
+;" data-marpit-pagination-total="13">
+<h2 id="5-%E5%82%B3%E7%B5%B1%E5%A0%B1%E8%A1%A8%E6%A8%99%E6%BA%96%E9%AA%A8%E6%9E%B6">5. 傳統報表標準骨架</h2>
+<p>從本講開始，練習程式都照這個結構寫：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">REPORT zr_xxx.
+
+* 1) 宣告區：TYPES / DATA / CONSTANTS
+
+* 2) 選擇畫面：PARAMETERS / SELECT-OPTIONS
+
+* 3) 事件區：INITIALIZATION / START-OF-SELECTION ...
+*    事件裡只放 PERFORM，不放邏輯
+
+* 4) FORM 區：所有副程式，集中在檔尾
+</code></pre>
+<p>這也是期末實作與正式程式的長相</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="10" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="13">
 <h2 id="6-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">6. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -662,79 +745,6 @@ footer { color: #999; }
 </tr>
 </tbody>
 </table>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="10" style="--paginate:true;--class:compact;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="12">
-<h2 id="7-%E8%A3%9C%E5%85%85%E8%B7%A8%E7%A8%8B%E5%BC%8F%E5%91%BC%E5%8F%AB-form-%E8%88%87-subroutine-pool%E9%81%B8%E4%BF%AE">7. 補充：跨程式呼叫 FORM 與 Subroutine Pool（選修）</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">PERFORM calc_grade IN PROGRAM zr_tr08_pool
-  USING gv_score CHANGING gv_grade.
-
-* Subroutine Pool：程式類型 S，開頭 PROGRAM，只放 FORM
-PROGRAM zr_tr08_pool.
-FORM calc_grade USING iv_score TYPE i CHANGING cv_grade TYPE c.
-  ...
-ENDFORM.
-</code></pre>
-<ul>
-<li>不能 F8 直接執行；被呼叫時才載入（觸發 <code>LOAD-OF-PROGRAM</code>）</li>
-<li><strong>建立是 GUI-only</strong>：SE38 → Type 選 Subroutine Pool（ADT 無法設定）</li>
-<li><code>IF FOUND</code>：找不到 FORM／程式就安靜跳過</li>
-<li>動態：<code>PERFORM (gv_form) IN PROGRAM (gv_prog) IF FOUND</code>（名稱必須大寫）</li>
-<li>沒加 <code>IF FOUND</code> 找不到 → 執行期例外 <code>CX_SY_DYN_CALL_ILLEGAL_FORM</code>／<code>CX_SY_PROGRAM_NOT_FOUND</code></li>
-</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -790,7 +800,80 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
+;" data-marpit-pagination-total="13">
+<h2 id="7-%E8%A3%9C%E5%85%85%E8%B7%A8%E7%A8%8B%E5%BC%8F%E5%91%BC%E5%8F%AB-form-%E8%88%87-subroutine-pool%E9%81%B8%E4%BF%AE">7. 補充：跨程式呼叫 FORM 與 Subroutine Pool（選修）</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">PERFORM calc_grade IN PROGRAM zr_tr08_pool
+  USING gv_score CHANGING gv_grade.
+
+* Subroutine Pool：程式類型 S，開頭 PROGRAM，只放 FORM
+PROGRAM zr_tr08_pool.
+FORM calc_grade USING iv_score TYPE i CHANGING cv_grade TYPE c.
+  ...
+ENDFORM.
+</code></pre>
+<ul>
+<li>不能 F8 直接執行；被呼叫時才載入（觸發 <code>LOAD-OF-PROGRAM</code>）</li>
+<li><strong>建立是 GUI-only</strong>：SE38 → Type 選 Subroutine Pool（ADT 無法設定）</li>
+<li><code>IF FOUND</code>：找不到 FORM／程式就安靜跳過</li>
+<li>動態：<code>PERFORM (gv_form) IN PROGRAM (gv_prog) IF FOUND</code>（名稱必須大寫）</li>
+<li>沒加 <code>IF FOUND</code> 找不到 → 執行期例外 <code>CX_SY_DYN_CALL_ILLEGAL_FORM</code>／<code>CX_SY_PROGRAM_NOT_FOUND</code></li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="12" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="13">
 <h2 id="71-%E7%82%BA%E4%BB%80%E9%BA%BC%E6%96%B0%E7%A8%8B%E5%BC%8F%E4%B8%8D%E5%BB%BA%E8%AD%B0%E9%80%99%E6%A8%A3%E5%AF%AB">7.1 為什麼新程式不建議這樣寫</h2>
 <ul>
 <li><strong>編譯時完全不檢查</strong>：程式名、FORM 名、參數個數／順序／型別，都要到執行期才爆</li>
@@ -824,7 +907,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -851,7 +934,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="12" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="13" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -878,7 +961,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="12">
+;" data-marpit-pagination-total="13">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex08</strong>：</p>
 <p>把學生報表重構成<br />

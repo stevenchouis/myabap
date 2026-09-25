@@ -1,4 +1,4 @@
-# 講義 25：Data Dictionary 總覽與 Global Type（授課順序：接在講義 9（ALV）之後、講義 21 之前）
+# 講義 25：Data Dictionary 總覽與 Global Type（授課順序：接在講義 7 之後、講義 8a 之前）
 
 > 對應練習：[ex25](../ex25_ddic_overview.md)｜答案物件：Domain/DE `ZTR25_SURPCT`、DE `ZTR25_ACTIVE`（重用標準 Domain `XFELD`）、表 `ZTR25_SURCHG`（SM30）、Table Type `ZTR25_TT_SURCHG`＋程式 `ZR_TR25_DDIC`
 
@@ -135,6 +135,7 @@ key carrid : s_carr_id not null
 
 ### 6.4 建 SM30 維護畫面、驗證「免費拿到」的東西
 
+- **先建 Function Group**：SE80 → 下拉選 **Function Group** → 輸入 `ZFG_TR25` → Enter → Yes → 填 Short Text → 套件 `$TMP`。Table Maintenance Generator 產生的維護畫面程式要放進一個**已經存在**的 Function Group，所以要先建好（Function Group 是 FM 的容器，講義 15 會細講）
 - Utilities → Table Maintenance Generator：Authorization Group `&NC&`、Function Group `ZFG_TR25`、one step → 產生
 - SM30 → `ZTR25_SURCHG` → 新增兩筆：`AA`／啟用／`15.00`、`LH`／啟用／`10.00`
 - **驗證重用標準型別的三個免費好處**：
@@ -146,49 +147,60 @@ key carrid : s_carr_id not null
 
 ### 6.5 程式讀取：Global Type 宣告 + 加成營收試算
 
+本講排在 FORM（講義 8）與 JOIN（講義 11）之前，所以程式全部寫在 `START-OF-SELECTION`，用前面學過的「三張表各自讀進內表、再用 `READ TABLE` 對照」完成：
+
 ```abap
-DATA gs_surchg TYPE ztr25_surchg.        " 整列：Global Type 宣告
-DATA gv_carrid TYPE s_carr_id.           " 直接引用標準 Data Element
+DATA: gt_surchg TYPE ztr25_tt_surchg,             " DDIC Table Type（見 6.6）
+      gs_surchg TYPE ztr25_surchg,                " 整列：Global Type
+      gt_flight TYPE STANDARD TABLE OF sflight,
+      gs_flight TYPE sflight,
+      gt_scarr  TYPE STANDARD TABLE OF scarr,
+      gs_scarr  TYPE scarr,
+      gt_rev    TYPE STANDARD TABLE OF ty_rev,     " ty_rev：航班欄位＋active／surcharge_pct／revenue／revenue_adj
+      gs_rev    TYPE ty_rev.
 
-TYPES: BEGIN OF ty_rev,
-         carrid        TYPE s_carr_id,
-         carrname      TYPE scarr-carrname,
-         connid        TYPE sflight-connid,
-         fldate        TYPE sflight-fldate,
-         seatsocc      TYPE sflight-seatsocc,
-         price         TYPE sflight-price,
-         active        TYPE ztr25_surchg-active,
-         surcharge_pct TYPE ztr25_surchg-surcharge_pct,
-         revenue       TYPE p LENGTH 12 DECIMALS 2,
-         revenue_adj   TYPE p LENGTH 12 DECIMALS 2,
-       END OF ty_rev.
-DATA gt_rev TYPE STANDARD TABLE OF ty_rev.
-FIELD-SYMBOLS <ls_rev> TYPE ty_rev.      " 指向內表的一列（講義 16）
+SELECT * FROM sflight INTO TABLE gt_flight
+  WHERE seatsocc > 0
+  ORDER BY carrid connid fldate.
+SELECT * FROM scarr INTO TABLE gt_scarr.
+SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.
 
-SELECT f~carrid c~carrname f~connid f~fldate f~seatsocc f~price
-       s~active s~surcharge_pct
-  INTO CORRESPONDING FIELDS OF TABLE gt_rev
-  FROM sflight AS f
-  INNER JOIN scarr AS c ON c~carrid = f~carrid
-  LEFT OUTER JOIN ztr25_surchg AS s ON s~carrid = f~carrid   " 沒設定過的公司也要出現，用 LEFT OUTER
-  WHERE f~seatsocc > 0
-  ORDER BY f~carrid f~connid f~fldate.
+LOOP AT gt_flight INTO gs_flight.
+  CLEAR gs_rev.
+  gs_rev-carrid   = gs_flight-carrid.
+  gs_rev-connid   = gs_flight-connid.
+  gs_rev-fldate   = gs_flight-fldate.
+  gs_rev-seatsocc = gs_flight-seatsocc.
+  gs_rev-price    = gs_flight-price.
 
-LOOP AT gt_rev ASSIGNING <ls_rev>.
-  <ls_rev>-revenue = <ls_rev>-price * <ls_rev>-seatsocc.
-  IF <ls_rev>-active = 'X'.
-    <ls_rev>-revenue_adj = <ls_rev>-revenue * ( 1 + <ls_rev>-surcharge_pct / 100 ).
-  ELSE.
-    <ls_rev>-revenue_adj = <ls_rev>-revenue.
+  READ TABLE gt_scarr INTO gs_scarr WITH KEY carrid = gs_flight-carrid.
+  IF sy-subrc = 0.
+    gs_rev-carrname = gs_scarr-carrname.
   ENDIF.
+
+  READ TABLE gt_surchg INTO gs_surchg WITH KEY carrid = gs_flight-carrid.
+  IF sy-subrc = 0.
+    gs_rev-active        = gs_surchg-active.
+    gs_rev-surcharge_pct = gs_surchg-surcharge_pct.
+  ENDIF.                                           " 找不到＝沒設定，維持初始值
+
+  gs_rev-revenue = gs_rev-price * gs_rev-seatsocc.
+  IF gs_rev-active = 'X'.
+    gs_rev-revenue_adj = gs_rev-revenue * ( 1 + gs_rev-surcharge_pct / 100 ).
+  ELSE.
+    gs_rev-revenue_adj = gs_rev-revenue.
+  ENDIF.
+  APPEND gs_rev TO gt_rev.
 ENDLOOP.
 ```
 
-`LEFT OUTER JOIN` 是關鍵（講義 11 學過）：沒被財務設定過的航空公司，`active`／`surcharge_pct` 是初始值，`revenue_adj` 自然等於原始營收——不用另外寫 IF 判斷「有沒有設定」。
+關鍵在第二個 `READ TABLE`：沒被財務設定過的航空公司找不到（`sy-subrc <> 0`），`active`／`surcharge_pct` 維持初始值，`revenue_adj` 自然等於原始營收，這筆航班照樣出現在報表上。
+
+> 講義 11 會學到 JOIN：這種「對照另一張表、找不到也要保留」的讀法，可以用一句 `LEFT OUTER JOIN` 完成。到時候回頭對照這段，就知道 JOIN 省了什麼。
 
 ### 6.6 把「表格型別」也升級成 Global Type：建立 DDIC Table Type
 
-講義 4 教過 `TYPES tt_student TYPE STANDARD TABLE OF ty_student`——但那是 **Local Type**，只有寫在那支程式裡看得到。講義 8 提過表格型別可以拿來宣告 FORM／FM 的參數（`FORM show_list USING it_students TYPE tt_student.`），但如果**兩支不同程式都要用同一種表格當參數**，各自宣告一份 Local Type 只是把同一件事寫兩遍——改一個欄位，兩邊都要記得改，正是 Global Type 一開始要解決的問題（第 2 節），只是這次問題發生在「表格」這個層級，不是單一欄位。
+講義 4 教過 `TYPES tt_student TYPE STANDARD TABLE OF ty_student`——但那是 **Local Type**，只有寫在那支程式裡看得到。如果**兩支不同程式都要用同一種表格**，各自宣告一份 Local Type 只是把同一件事寫兩遍——改一個欄位，兩邊都要記得改，正是 Global Type 一開始要解決的問題（第 2 節），只是這次問題發生在「表格」這個層級，不是單一欄位。
 
 解法是 SE11 建一個**全域的 Table Type**（DDIC 物件型別 `TTYP`），跟 Domain／Data Element 一樣只寫一次、全系統共用：
 
@@ -200,14 +212,14 @@ ENDLOOP.
 用起來跟本地表格型別語法一模一樣，只是型別名稱換成 DDIC 物件：
 
 ```abap
-DATA gt_surchg TYPE ztr25_tt_surchg.        " 引用全域 Table Type，跟 TYPE STANDARD TABLE OF 效果相同
+DATA gt_surchg TYPE ztr25_tt_surchg.        " 引用全域 Table Type，跟 TYPE STANDARD TABLE OF ztr25_surchg 效果相同
 
-FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.
-  SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.
-ENDFORM.
+SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.
 ```
 
-`load_surchg_config` 這個 FORM 的簽名現在可以被**任何程式**照抄使用（甚至改寫成 FM 的 TABLES／EXPORTING 參數，講義 15 學過），因為型別定義在 DDIC，不是鎖死在某支程式裡——這就是「表格級別」的 Global Type。
+任何程式都能宣告 `TYPE ztr25_tt_surchg`，拿到的是同一份定義——這就是「表格級別」的 Global Type。
+
+**它真正發揮作用的地方，是當「參數型別」**：接下來講義 8 的 FORM 可以用它當 `CHANGING` 參數；講義 15 的 Function Module 更是**一定要**用 DDIC 型別定義介面參數（FM 介面不能用程式裡自己宣告的 `TYPES`），用 `CHANGING` 搭配 Table Type 傳一整張表，正是取代舊式 `TABLES` 參數的寫法。所以本講先學會建 Table Type，後面兩講直接用得上。
 
 判斷原則跟前面幾種模式一致：**只有本程式用**就地 `TYPES` 宣告（講義 4）就好，不用每個表都跑一次 SE11；**多支程式／FM／方法要共用同一種表格參數**，才值得升級成 DDIC Table Type。
 
@@ -219,7 +231,8 @@ ENDFORM.
 | 自建 Data Element 卻發現標準早就有一個一模一樣的 | 建之前沒有先搜尋標準——語意重複的型別會讓維護更亂 |
 | 外鍵 Check Table 選了自建 Z 表，其實應該指標準表 | 沒想清楚「合法值清單本來就已經存在」（如本例的 SCARR） |
 | F4 選單自己手動建了一個 Search Help，其實不用 | 沒發現重用的 Data Element 早就掛好標準 Search Help |
-| LEFT OUTER JOIN 忘記用，沒設定的資料整筆消失 | 誤用 INNER JOIN——回顧講義 11 |
+| 沒設定的航空公司整筆消失 | 找不到設定時直接 `CONTINUE` 跳過了——`READ TABLE` 找不到要保留、維持初始值（學完講義 11 後，對應的是誤把 `LEFT OUTER JOIN` 寫成 `INNER JOIN`） |
+| Table Maintenance Generator 報 Function Group 不存在 | 要先在 SE80 建好 Function Group（見 6.4） |
 | SM30 資料改了以為要走傳輸請求 | 表**結構**才需要 TR；表**資料**維護不需要（除非 Delivery Class 特別設定） |
 | SM30 欄位標題顯示通用符號 `+`、也沒有 F4 選單 | 欄位直接用內建型別（如 `CHAR 1`），沒有掛任何 Data Element——通用旗標欄位改用「重用標準 Domain（如 `XFELD`）＋自建 Data Element 補標籤」（見 6.2） |
 | 每支程式都各自宣告一份幾乎一樣的 `TYPES tt_xxx TYPE STANDARD TABLE OF ...` | 這種表格型別其實多支程式在共用，該升級成 DDIC Table Type（見 6.6），而不是各自維護一份 Local Type |

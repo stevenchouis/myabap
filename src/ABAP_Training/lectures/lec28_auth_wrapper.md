@@ -30,9 +30,10 @@
 
 ## 2. SM30 Table Maintenance Generator（跟講義 21 相同手法，欄位換成本題的表）
 
-1. SE11 → 表 `ZTR28_CDISC` → Utilities → **Table Maintenance Generator**
-2. Authorization Group `&NC&`（練習用，不檢核）；Function Group 填 `ZFG_TR28B`；Maintenance type 選 **One Step**
-3. 產生後可以先直接用 **SM30** 手動測試維護畫面本身（輸入 View 名稱 `ZTR28_CDISC` → Maintain），確認能新增/修改一筆資料——這一步只是確認 View 本身能動，還沒有套用後面的權限/鎖定 Wrapper，兩者是獨立的
+1. 先在 SE80 建 Function Group `ZFG_TR28B`（Table Maintenance Generator 只能放進已存在的 Function Group）
+2. SE11 → 表 `ZTR28_CDISC` → Utilities → **Table Maintenance Generator**
+3. Authorization Group `&NC&`（練習用，不檢核）；Function Group 填 `ZFG_TR28B`；Maintenance type 選 **One Step**
+4. 產生後可以先直接用 **SM30** 手動測試維護畫面本身（輸入 View 名稱 `ZTR28_CDISC` → Maintain），確認能新增/修改一筆資料——這一步只是確認 View 本身能動，還沒有套用後面的權限/鎖定 Wrapper，兩者是獨立的
 
 ## 3. 自訂權限物件：SU21
 

@@ -122,13 +122,14 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="15">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>Function Module（FM）的定位：<strong>跨程式共用</strong>的邏輯單位</li>
 <li>Function Group：FM 的容器——一個 group 可放多個 FM</li>
 <li>TOP include 全域變數：同 group 的 FM 共用同一份資料</li>
 <li>介面四區：IMPORTING / EXPORTING / CHANGING / TABLES ＋ EXCEPTIONS</li>
+<li>傳整張表：<code>CHANGING</code> + DDIC Table Type 取代 <code>TABLES</code></li>
 <li>SE37 建立與單獨測試</li>
 <li><code>CALL FUNCTION</code> 呼叫：方向對應與例外處理</li>
 <li>FM vs FORM 的選擇</li>
@@ -188,7 +189,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="15">
 <h2 id="1-fm-%E6%98%AF%E4%BB%80%E9%BA%BC%E8%B7%9F-form-%E5%B7%AE%E5%9C%A8%E5%93%AA">1. FM 是什麼、跟 FORM 差在哪</h2>
 <p>FORM 只能在同一支程式裡呼叫；FM 是<strong>全系統共用</strong><br />
 講義 8 是「程式內」模組化，FM 擴大到「全系統」<br />
@@ -286,7 +287,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="15">
 <h2 id="function-group%E4%B8%80%E5%80%8B-group-%E6%94%BE%E5%A4%9A%E5%80%8B-fm">Function Group：一個 group 放多個 FM</h2>
 <p>Function Group = 一支特殊程式（<code>SAPLZFG_TR15</code>）＋一組 include<br />
 （include：被原地展開的程式碼片段，講義 14 細講）：</p>
@@ -376,7 +377,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="15">
 <h2 id="top-include-%E5%85%A8%E5%9F%9F%E8%AE%8A%E6%95%B8%E5%90%8C-group-%E7%9A%84-fm-%E5%85%B1%E7%94%A8%E5%90%8C%E4%B8%80%E4%BB%BD">TOP include 全域變數：同 group 的 FM 共用同一份</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* TOP include
 DATA: gv_total_revenue TYPE s_price,
@@ -448,7 +449,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="15">
 <h2 id="%E7%94%9F%E5%91%BD%E9%80%B1%E6%9C%9F%E8%88%87%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A0%85">生命週期與注意事項</h2>
 <ul>
 <li><strong>載入</strong>：group 內任何一支 FM 第一次被呼叫時整個載入，全域變數從初始值開始</li>
@@ -513,7 +514,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="15">
 <h2 id="2-%E5%AE%9A%E7%BE%A9%E4%BB%8B%E9%9D%A2z_tr15_calc_revenue">2. 定義介面（<code>Z_TR15_CALC_REVENUE</code>）</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">FUNCTION z_tr15_calc_revenue
   IMPORTING
@@ -587,7 +588,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="15">
 <h2 id="21-%E4%BB%8B%E9%9D%A2%E5%8D%80%E7%9A%84%E6%96%B9%E5%90%91%E8%88%87%E5%89%8D%E7%B6%B4">2.1 介面區的方向與前綴</h2>
 <table>
 <thead>
@@ -620,8 +621,9 @@ footer { color: #999; }
 </tr>
 </tbody>
 </table>
+<p>介面參數型別<strong>一定要用 DDIC 型別</strong>（講義 25），不能用程式裡的 <code>TYPES</code></p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -648,7 +650,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="9" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="9" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -675,15 +677,48 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="3-se37-%E5%96%AE%E7%8D%A8%E6%B8%AC%E8%A9%A6">3. SE37 單獨測試</h2>
-<p>SE37 → 輸入 FM 名 → Test（F8）<br />
-→ 填 IMPORTING 值 → 執行 → 直接看 EXPORTING 結果與例外</p>
-<blockquote>
-<p><strong>先在 SE37 測通，再寫呼叫端</strong><br />
-問題切成兩半，好查十倍</p>
-</blockquote>
-<p>測試案例可存起來重複使用（Test Data Directory）</p>
+;" data-marpit-pagination-total="15">
+<h2 id="22-changing--table-type-%E5%8F%96%E4%BB%A3-tables">2.2 <code>CHANGING</code> + Table Type 取代 <code>TABLES</code></h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">FUNCTION z_tr15_calc_revenue_tab
+  CHANGING
+    VALUE(ct_flights) TYPE ztr15_tt_flight_rev.       &quot; SE11 建的 Table Type
+  FIELD-SYMBOLS &lt;fs_flight&gt; TYPE ztr15_flight_rev.
+  LOOP AT ct_flights ASSIGNING &lt;fs_flight&gt;.
+    &lt;fs_flight&gt;-revenue = &lt;fs_flight&gt;-price * &lt;fs_flight&gt;-seatsocc.
+  ENDLOOP.
+ENDFUNCTION.
+
+* 呼叫端：gt_flights TYPE ztr15_tt_flight_rev
+CALL FUNCTION 'Z_TR15_CALC_REVENUE_TAB'
+  CHANGING
+    ct_flights = gt_flights.          &quot; 呼叫後 REVENUE 已填上
+</code></pre>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>舊式 <code>TABLES</code></th>
+<th><code>CHANGING</code> + Table Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Header Line</td>
+<td>自動帶（雙義）</td>
+<td>沒有</td>
+</tr>
+<tr>
+<td>傳值</td>
+<td>不行，只能傳址</td>
+<td>可以 <code>VALUE(...)</code></td>
+</tr>
+<tr>
+<td>Method 能用</td>
+<td>不能</td>
+<td>能</td>
+</tr>
+</tbody>
+</table>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -739,26 +774,15 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="4-call-function%E5%91%BC%E5%8F%AB%E7%AB%AF">4. CALL FUNCTION：呼叫端</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gv_revenue TYPE s_price.
-
-CALL FUNCTION 'Z_TR15_CALC_REVENUE'
-  EXPORTING
-    iv_price      = '1500.00'
-    iv_seatsocc   = 200
-  IMPORTING
-    ev_revenue    = gv_revenue
-  EXCEPTIONS
-    invalid_input = 1
-    OTHERS        = 2.
-IF sy-subrc = 0.
-  WRITE: / '營收 =', gv_revenue.
-ELSE.
-  WRITE: / '呼叫失敗，sy-subrc =', sy-subrc.
-ENDIF.
-</code></pre>
-<p>FM 名是<strong>字串</strong>（大寫、加引號）；參數名不加引號</p>
+;" data-marpit-pagination-total="15">
+<h2 id="3-se37-%E5%96%AE%E7%8D%A8%E6%B8%AC%E8%A9%A6">3. SE37 單獨測試</h2>
+<p>SE37 → 輸入 FM 名 → Test（F8）<br />
+→ 填 IMPORTING 值 → 執行 → 直接看 EXPORTING 結果與例外</p>
+<blockquote>
+<p><strong>先在 SE37 測通，再寫呼叫端</strong><br />
+問題切成兩半，好查十倍</p>
+</blockquote>
+<p>測試案例可存起來重複使用（Test Data Directory）</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -814,20 +838,26 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="%E5%85%A9%E5%80%8B%E6%9C%80%E5%AE%B9%E6%98%93%E6%90%9E%E6%B7%B7%E7%9A%84%E9%BB%9E">兩個最容易搞混的點</h2>
-<p><strong>方向反轉</strong>——區段名稱站在「自己」的立場：</p>
-<ul>
-<li>FM 的 IMPORTING（它要<strong>收</strong>）→ 呼叫端寫在 <strong>EXPORTING</strong>（我要<strong>送</strong>）</li>
-<li>FM 的 EXPORTING（它要<strong>給</strong>）→ 呼叫端寫在 <strong>IMPORTING</strong>（我要<strong>收</strong>）</li>
-</ul>
-<p><strong>EXCEPTIONS 的數字</strong>——「發生該例外時 sy-subrc 變成幾」：</p>
-<ul>
-<li>FM <code>RAISE invalid_input.</code> → 呼叫端 sy-subrc = 1</li>
-<li><code>OTHERS = 2</code> 接住沒列名的例外</li>
-<li><strong>沒列 EXCEPTIONS 又沒 OTHERS → 例外直接 dump</strong></li>
-<li>CALL FUNCTION 後檢查 sy-subrc 是鐵律</li>
-</ul>
+;" data-marpit-pagination-total="15">
+<h2 id="4-call-function%E5%91%BC%E5%8F%AB%E7%AB%AF">4. CALL FUNCTION：呼叫端</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gv_revenue TYPE s_price.
+
+CALL FUNCTION 'Z_TR15_CALC_REVENUE'
+  EXPORTING
+    iv_price      = '1500.00'
+    iv_seatsocc   = 200
+  IMPORTING
+    ev_revenue    = gv_revenue
+  EXCEPTIONS
+    invalid_input = 1
+    OTHERS        = 2.
+IF sy-subrc = 0.
+  WRITE: / '營收 =', gv_revenue.
+ELSE.
+  WRITE: / '呼叫失敗，sy-subrc =', sy-subrc.
+ENDIF.
+</code></pre>
+<p>FM 名是<strong>字串</strong>（大寫、加引號）；參數名不加引號</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -883,14 +913,19 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
-<h2 id="5-%E4%BB%80%E9%BA%BC%E6%99%82%E5%80%99%E7%94%A8-fm">5. 什麼時候用 FM</h2>
+;" data-marpit-pagination-total="15">
+<h2 id="%E5%85%A9%E5%80%8B%E6%9C%80%E5%AE%B9%E6%98%93%E6%90%9E%E6%B7%B7%E7%9A%84%E9%BB%9E">兩個最容易搞混的點</h2>
+<p><strong>方向反轉</strong>——區段名稱站在「自己」的立場：</p>
 <ul>
-<li>邏輯給<strong>多支程式</strong>共用 → FM（OOP 課程後：Class Method）</li>
-<li>只是本程式內拆段 → FORM 就好，不必為拆而拆</li>
-<li>FM 是 RFC（跨系統）與 BAPI 的技術基礎</li>
-<li><strong>開發前先搜尋</strong>：標準 FM 幾千支<br />
-日期換算、單位轉換、彈窗多半已有現成的</li>
+<li>FM 的 IMPORTING（它要<strong>收</strong>）→ 呼叫端寫在 <strong>EXPORTING</strong>（我要<strong>送</strong>）</li>
+<li>FM 的 EXPORTING（它要<strong>給</strong>）→ 呼叫端寫在 <strong>IMPORTING</strong>（我要<strong>收</strong>）</li>
+</ul>
+<p><strong>EXCEPTIONS 的數字</strong>——「發生該例外時 sy-subrc 變成幾」：</p>
+<ul>
+<li>FM <code>RAISE invalid_input.</code> → 呼叫端 sy-subrc = 1</li>
+<li><code>OTHERS = 2</code> 接住沒列名的例外</li>
+<li><strong>沒列 EXCEPTIONS 又沒 OTHERS → 例外直接 dump</strong></li>
+<li>CALL FUNCTION 後檢查 sy-subrc 是鐵律</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section {
@@ -947,7 +982,71 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="15">
+<h2 id="5-%E4%BB%80%E9%BA%BC%E6%99%82%E5%80%99%E7%94%A8-fm">5. 什麼時候用 FM</h2>
+<ul>
+<li>邏輯給<strong>多支程式</strong>共用 → FM（OOP 課程後：Class Method）</li>
+<li>只是本程式內拆段 → FORM 就好，不必為拆而拆</li>
+<li>FM 是 RFC（跨系統）與 BAPI 的技術基礎</li>
+<li><strong>開發前先搜尋</strong>：標準 FM 幾千支<br />
+日期換算、單位轉換、彈窗多半已有現成的</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="14" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="15">
 <h2 id="6-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">6. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -980,7 +1079,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1007,7 +1106,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="14" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="15" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1034,7 +1133,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="14">
+;" data-marpit-pagination-total="15">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex15</strong>：</p>
 <p>建 <code>ZFG_TR15</code> 與營收計算 FM（含防呆例外）<br />

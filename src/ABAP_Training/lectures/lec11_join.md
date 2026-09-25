@@ -64,6 +64,8 @@ SELECT c~carrid c~carrname f~connid f~fldate
 
 選擇原則：「沒對到的要不要出現在報表上？」要 → LEFT OUTER；不要 → INNER。例如「各公司營收統計，沒航班的公司也要列出 0」就是 LEFT OUTER 的場景。
 
+> 回顧講義 25：當時還沒學 JOIN，旺季加成報表是「三張表各自讀進內表，再用 `READ TABLE` 對照，找不到加成設定就維持初始值」。那段 `LOOP` 加兩個 `READ TABLE`，用一句 `LEFT OUTER JOIN ztr25_surchg` 就能取代——沒設定的航空公司，加成欄位是初始值，照樣出現在結果裡。
+
 限制：LEFT OUTER JOIN 的 WHERE 對**右表**欄位下條件會把 NULL 列過濾掉，效果變回 INNER——右表條件盡量放在 ON。
 
 ## 4. INTO 的兩種對應方式

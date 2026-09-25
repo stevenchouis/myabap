@@ -51,7 +51,8 @@ ABAP 基礎教育訓練（授課順序：接在講義 15 之後）
 - 事件時序：INITIALIZATION → AT SELECTION-SCREEN
   → START-OF-SELECTION → END-OF-SELECTION
 - 清單事件：TOP-OF-PAGE / END-OF-PAGE
-- 互動清單：AT LINE-SELECTION 與 HIDE 機制、`sy-lsind`
+- **清單緩衝區（List Buffer）**：WRITE 先寫進記憶體
+- 互動清單：AT LINE-SELECTION 與 **HIDE**（隱藏區、寫回時機、使用規則）
 - `MESSAGE` 訊息類型
 
 ---
@@ -146,40 +147,155 @@ END-OF-SELECTION.
 
 ---
 
-## 4. 互動清單：HIDE 機制
+<!-- _class: compact -->
 
-需求：雙擊某行看明細——程式怎麼知道那行是哪筆？
+## 3.5 清單緩衝區（List Buffer）
+
+`WRITE`／`ULINE`／`SKIP` 先寫進記憶體的**清單緩衝區**，不是即時上螢幕
+
+| 清單 | 寫進緩衝區 | 顯示到畫面 |
+|---|---|---|
+| 基本清單（`sy-lsind` 0） | START-／END-OF-SELECTION、TOP-OF-PAGE | 這些事件**全部跑完**後 |
+| 明細清單（1、2…） | AT LINE-SELECTION | 事件**跑完**後 |
+
+裡面有：每一行的**文字**、**分頁資訊**、**隱藏區**（HIDE 的值）
+每一層清單各一份；F3 退回上一層直接從緩衝區重顯，不重跑程式
+
+| 能回頭處理已寫好的行 | 在哪一講 |
+|---|---|
+| `HIDE`：雙擊時寫回變數 | 本講第 4 節 |
+| `READ LINE`：讀回 `sy-lisel`（也寫回 HIDE 值） | 講義 13 |
+| `MODIFY LINE`：改完寫回（總頁數回填） | 講義 13 |
+
+---
+
+## 4. 為什麼需要 HIDE
+
+`WRITE` 到畫面後，清單只是**文字**，跟 internal table 沒關係了
+
+- 雙擊第 3 行：系統只知道「第 3 行被點」，不知道是哪位學生
+- 此時 `gs_student` 放的是迴圈最後一筆，不是被點的那筆
+
+→ 輸出時要替每一行**另外記下鍵值**：這就是 `HIDE`
 
 ```abap
-* 輸出時：把這一行的鍵值「藏」進該行
-LOOP AT gt_students INTO gs_student.
-  WRITE: / gs_student-id, gs_student-name, gs_student-score1.
-  HIDE gs_student-id.               " 這行清單暗中記住學號
-ENDLOOP.
-CLEAR gs_student-id.                " 防呆：雙擊非資料行時不撈殘留值
+HIDE 變數.
+HIDE: 變數1, 變數2.        " 可同時記多個
+```
 
-* 雙擊時：系統把該行 HIDE 的值還原回同名變數
+把「變數**當下**的值」綁到「**目前這一行**」，存進這層清單的**隱藏區（Hide Area）**
+
+---
+
+<!-- _class: compact -->
+
+## 4.1 隱藏區（Hide Area）是什麼
+
+緩衝區（3.5）裡跟 HIDE 有關的兩部分：
+
+| 清單緩衝區的兩部分 | 內容 | 看得到嗎 |
+|---|---|---|
+| 清單內容 | 每一行 `WRITE` 的文字 | 看得到 |
+| **隱藏區** | 每一行 `HIDE` 的「變數＋當時的值」 | **看不到** |
+
+兩者依**行號**對應——想成**每一行背面貼一張便利貼**：
+
+- `WRITE`：寫在正面給使用者看
+- `HIDE gs_student-id`：背面貼「`gs_student-id = S0002`」
+- 雙擊 → 翻到背面，把 `'S0002'` 寫回變數 → 執行 `AT LINE-SELECTION`
+- 頁首、分隔線沒便利貼 → 什麼都不寫回
+
+**每一層清單各有一份**：明細層再 HIDE 不會蓋掉基本清單；返回上一層，便利貼還在
+
+---
+
+<!-- _class: compact -->
+
+## 4.2 隱藏區長什麼樣、何時寫回
+
+| 清單行（看得到） | 隱藏區（看不到） |
+|---|---|
+| `S0001 王小明  78  91` | `gs_student-id = 'S0001'` |
+| `S0002 李小美  88  95` | `gs_student-id = 'S0002'` |
+| `S0003 陳大文  60  72` | `gs_student-id = 'S0003'` |
+| 頁首、`ULINE`、合計行 | （沒有 HIDE，什麼都沒存） |
+
+雙擊 `S0002` 那行 →
+1. 系統先把 `'S0002'` **寫回** `gs_student-id`
+2. 再觸發 `AT LINE-SELECTION`
+3. 程式用 `gs_student-id` 去 `READ TABLE` 找明細
+4. 明細 `WRITE` 到**新的一層清單**（`sy-lsind` = 1），F3 返回
+
+---
+
+<!-- _class: compact -->
+
+## 4.3 完整範例
+
+```abap
+LOOP AT gt_students INTO gs_student WHERE score1 IN s_score.
+  WRITE: / gs_student-id, gs_student-name, gs_student-score1.
+  HIDE gs_student-id.               " 緊接在 WRITE 之後
+ENDLOOP.
+CLEAR gs_student-id.                " 清掉迴圈留下的最後一筆
+
 AT LINE-SELECTION.
-  IF gs_student-id IS INITIAL.
+  IF gs_student-id IS INITIAL.      " 點到沒 HIDE 的行
     WRITE / '請雙擊資料行'.
   ELSE.
-    READ TABLE gt_students INTO gs_detail
-         WITH KEY id = gs_student-id.
-    WRITE: / '=== 明細（第', sy-lsind, '層清單）==='.
+    READ TABLE gt_students INTO gs_detail WITH KEY id = gs_student-id.
+    IF sy-subrc = 0.
+      WRITE: / '=== 學生明細（第', sy-lsind, '層清單）===',
+             / '學號：', gs_detail-id,
+             / '姓名：', gs_detail-name.
+    ENDIF.
   ENDIF.
 ```
 
 ---
 
-## HIDE 機制整理
+<!-- _class: compact -->
 
-1. `HIDE 變數.`：輸出目前行時，記下「這一行 ↔ 變數當時的值」
-2. 雙擊某行 → 系統把該行 HIDE 的值**塞回同名變數**
-   → 觸發 AT LINE-SELECTION
-3. `sy-lsind`：清單層級（基本清單 0，明細 1，最多 20 層）
-   事件裡的 WRITE 輸出到**新的一層**，返回鍵一層層退
-4. 雙擊「沒 HIDE 過的行」不會還原任何值
-   → 輸出完要 CLEAR ＋ 事件裡檢查 IS INITIAL
+## 4.4 HIDE 使用規則
+
+1. **緊接在 `WRITE` 之後**：綁的是游標所在行；寫在前面會綁到上一行
+2. **只能 HIDE 全域變數**：FORM 的區域變數 → dump `HIDE_NO_LOCAL`
+3. **只能 HIDE 平面型別**：欄位或全欄位結構；不能 internal table、`string`
+   實務只 HIDE **鍵值**，明細在事件裡再查
+4. **只有 HIDE 過的變數會寫回**：點到沒 HIDE 的行，變數仍是最後一筆
+   → 輸出完 `CLEAR`，事件裡檢查 `IS INITIAL`
+5. **鍵值要能唯一識別**：航班要 HIDE `carrid`、`connid`、`fldate`
+
+> 實測：HIDE 寫在 WRITE 前，雙擊 S0001 取回 S0002（下一筆）；
+> 沒 HIDE 的行，變數保留**上一次雙擊**的值
+
+| 系統欄位 | 意義 |
+|---|---|
+| `sy-lsind` | 清單層級（基本 0、明細 1…最多 20） |
+| `sy-lilli` | 被雙擊的是第幾行 |
+| `sy-lisel` | 被雙擊那行的畫面文字（不要拿來切字串取鍵值） |
+
+---
+
+## 4.5 多層清單、串到另一支報表
+
+- 在 `AT LINE-SELECTION` 輸出明細時**再 HIDE**，就能在明細上再雙擊往下鑽
+  每一層清單有自己的隱藏區
+- 明細已有現成報表 → 用 HIDE 取回的鍵值呼叫它：
+
+```abap
+AT LINE-SELECTION.
+  IF gs_student-id IS NOT INITIAL.
+    SUBMIT zr_student_detail          " 另一支報表
+      WITH p_id = gs_student-id       " 對方的 PARAMETERS p_id
+      AND RETURN.                     " 看完回到本清單
+  ENDIF.
+```
+
+- 沒加 `VIA SELECTION-SCREEN` → 對方選擇畫面**跳過**，直接顯示清單
+- `AND RETURN` → F3 回到本清單（已實測）
+
+**關鍵都一樣：靠 HIDE 知道使用者點的是哪一筆**
 
 ---
 
@@ -190,6 +306,8 @@ AT LINE-SELECTION.
 | INITIALIZATION 預設值沒出現 | 事件名拼錯（被歸入 START-OF-SELECTION） |
 | 驗證訊息跳完程式照跑 | TYPE 用了 `I`/`S`——擋人要用 `E` |
 | 雙擊任何行都顯示同一筆 | 忘了 HIDE，變數殘留最後一筆 |
+| 顯示的是上一行的資料 | `HIDE` 寫在 `WRITE` 之前 |
+| dump `HIDE_NO_LOCAL` | HIDE 了 FORM 的區域變數 |
 | 雙擊空白行出現殘留資料 | 沒 CLEAR + 沒檢查 IS INITIAL |
 | TOP-OF-PAGE 沒執行 | 該頁沒有任何 WRITE |
 | 程式碼寫在事件關鍵字之前 | 隱含屬於 START-OF-SELECTION |

@@ -39,7 +39,7 @@ style: |
 # 講義 8
 # 模組化——FORM / USING / CHANGING
 
-ABAP 基礎教育訓練
+ABAP 基礎教育訓練（授課順序：接在講義 8a 之後）
 
 對應練習 ex08｜答案程式 `ZR_TR08_MODULARIZE`
 
@@ -136,6 +136,25 @@ ENDFORM.
 ```
 
 表格型別（`tt_student`）的另一個好處：能拿來宣告參數
+
+---
+
+## 3.1 參數型別用 DDIC Table Type
+
+```abap
+DATA gt_surchg TYPE ztr25_tt_surchg.        " 講義 25 在 SE11 建的
+
+PERFORM load_surchg_config CHANGING gt_surchg.
+
+FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.
+  SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.
+ENDFORM.
+```
+
+| 型別來源 | 誰看得到 |
+|---|---|
+| `TYPES tt_xxx`（講義 4） | 只有這支程式 |
+| DDIC Table Type（講義 25） | 全系統；**講義 15 FM 介面一定要用** |
 
 ---
 

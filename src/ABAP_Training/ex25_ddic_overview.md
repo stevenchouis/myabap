@@ -1,6 +1,6 @@
 # 練習 25：Data Dictionary 總覽與 Global Type
 
-> 授課順序：接在練習 9／24（ALV）之後、練習 21（Z 資料表）之前，是「DDIC 與資料維護」階段的第一題。講義見 [lec25](lectures/lec25_ddic_overview.md)。
+> 授課順序：接在練習 7（選擇畫面）之後、練習 8a（Package／TR）之前——先學會建 DDIC 型別，後面的 FORM（ex08）與 FM（ex15）參數才能直接引用。本題還沒學 FORM 與 JOIN，程式全部寫在 `START-OF-SELECTION`。講義見 [lec25](lectures/lec25_ddic_overview.md)。
 
 ## 學習目標
 
@@ -36,7 +36,9 @@
    - Delivery Class `A`；Technical Settings：Data Class `APPL0`、Size Category `0`
    - 存檔啟用
 5. **Table Type** `ZTR25_TT_SURCHG`：SE11 → Data Type → Create → 選 **Table Type**；Line Type 填 `ZTR25_SURCHG`（直接拿表格本身當 Line Type，不用重新定義欄位）；Access Mode 選 `Standard Table`，Key 用預設（Default Key）→ 啟用。這是把「表格型別」也升級成可跨程式共用的 DDIC 物件（對照講義 4 的 Local Type）。
-6. **維護畫面**：Utilities → Table Maintenance Generator：Authorization Group `&NC&`、Function Group `ZFG_TR25`、one step → 產生
+6. **維護畫面**：
+   - 先在 SE80 建 Function Group `ZFG_TR25`（下拉選 Function Group → 輸入名稱 → Yes → 填 Short Text → `$TMP`）——Table Maintenance Generator 要放進**已經存在**的 Function Group
+   - SE11 回到表 → Utilities → Table Maintenance Generator：Authorization Group `&NC&`、Function Group `ZFG_TR25`、one step → 產生
 7. SM30 → `ZTR25_SURCHG` → 新增兩筆：`AA` / 啟用打勾 / `15.00`、`LH` / 啟用打勾 / `10.00`
 8. **驗證重用標準型別的三個免費好處**（不用你多做任何事）：
    - `CARRID` 欄位按 F4：應該直接出現航空公司選單
@@ -50,8 +52,8 @@
 依序完成：
 
 1. 宣告示範用的 Global Type 變數：`gv_carrid_global TYPE s_carr_id`（直接引用標準 Data Element）與 `gv_carrid_hard TYPE c LENGTH 3`（反面教材：寫死長度）；各自填入 `'LH'` 後 WRITE 輸出，並用註解說明兩者的差異（見講義 25 第 2.1 節）
-2. 寫一個 `FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.`——用第一部分建的 **DDIC Table Type** 當 CHANGING 參數型別，`SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.`；呼叫後 WRITE 輸出讀到的筆數
-3. `SELECT` SFLIGHT INNER JOIN SCARR、**LEFT OUTER JOIN** `ZTR25_SURCHG`（依 CARRID），撈出：航空公司代碼/名稱、航線、日期、已售座位、票價、`ACTIVE`、`SURCHARGE_PCT`；`WHERE seatsocc > 0`
+2. 用第一部分建的 **DDIC Table Type** 宣告內表：`DATA gt_surchg TYPE ztr25_tt_surchg.`，`SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.`，再 `DESCRIBE TABLE ... LINES` 輸出讀到的筆數
+3. SFLIGHT（`WHERE seatsocc > 0`）與 SCARR 各自 `SELECT ... INTO TABLE` 讀進內表；`LOOP` 航班，每筆用 `READ TABLE ... WITH KEY carrid = ...` 找航空公司名稱與加成設定——**找不到加成設定時不要跳過**，`ACTIVE`／`SURCHARGE_PCT` 維持初始值，照樣放進結果表
 4. 逐筆計算：`revenue = price * seatsocc`；`active = 'X'` 時 `revenue_adj = revenue * (1 + surcharge_pct / 100)`，否則 `revenue_adj = revenue`
 5. 輸出清單：航空公司、航線、日期、原始營收、加成後營收，並標明是否套用加成
 6. **驗證外鍵只擋畫面、不擋 Open SQL（這次 Check Table 是標準表）**：
@@ -65,9 +67,9 @@
 
 ```
 === Global Type 示範 ===
-lv_carrid_global（TYPE s_carr_id）：LH
+gv_carrid_global（TYPE s_carr_id）：LH
   → 型別／長度／標籤／F4 全部繼承自標準 Data Element，SAP 升級調整它，這裡自動跟著變
-lv_carrid_hard（TYPE c LENGTH 3）：LH
+gv_carrid_hard（TYPE c LENGTH 3）：LH
   → 看起來結果一樣，但長度是寫死的——S_CARR_ID 若改長，這裡不會自動變寬，是條隱藏地雷
 
 讀到旺季加成設定：          2 筆（DDIC Table Type ZTR25_TT_SURCHG）
@@ -87,11 +89,11 @@ INSERT CARRID=ZZ（SCARR 沒有這家航空公司）：sy-subrc = 0
 
 1. 需求 1 的 `gv_carrid_hard` 現在跟 `gv_carrid_global` 內容一樣、行為看起來也一樣——這種「暫時沒問題」的寫法為什麼危險？什麼情況下差異才會浮現？
 2. 如果本題的 `CARRID` 一開始就自建一個新的 Data Element（而不是重用 `S_CARR_ID`），第一部分事前準備第 6 步的「F4 直接出現選單」還會成立嗎？為什麼？
-3. `LEFT OUTER JOIN ZTR25_SURCHG` 如果改成 `INNER JOIN`，需求 2 的報表會漏掉哪些資料？
+3. 需求 3 如果在「找不到加成設定」時寫 `CONTINUE` 跳過，報表會漏掉哪些資料？（學完講義 11 後再想一次：這對應 `LEFT OUTER JOIN` 誤寫成 `INNER JOIN`）
 4. 對照講義 21 的 `ZTR21_STUD-KLASSE`（Check Table 是自建的 `ZTR21_CLASS`）：兩種情境下，Search Help 的建置工作量差在哪裡？什麼時候你會遇到「Check Table 是標準表」、什麼時候會遇到「Check Table 也要自建」？
 5. `ZTR25_ACTIVE` 跟 `ZTR25_SURPCT`／`S_CARR_ID` 都不一樣：它既不是整個重用標準 Data Element，也不是完全自建 Domain。這種「重用標準 Domain、自建標籤」的做法，跟直接自建一個全新的 Domain（如 `ZTR25_SURPCT` 那樣）相比，省下了什麼工作？
 6. `ZTR25_TT_SURCHG` 的 Line Type 直接填 `ZTR25_SURCHG`（表格本身），而不是重新定義一份一模一樣的欄位——如果之後 `ZTR25_SURCHG` 多加一個欄位，`ZTR25_TT_SURCHG` 要跟著改嗎？這跟第 5 節「三種引用寫法」裡哪一種效果最像？
-7. 如果 `load_surchg_config` 這個 FORM 只有你的程式在用，值得為它多跑一次 SE11 建 Table Type 嗎？什麼條件成立時才划算？
+7. 如果這種表格只有你的程式在用，值得為它多跑一次 SE11 建 Table Type 嗎？什麼條件成立時才划算？（提示：講義 15 的 FM 參數）
 
 ## 答案
 

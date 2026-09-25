@@ -1,5 +1,7 @@
 # 練習 8：模組化——FORM 副程式
 
+> 授課順序：接在練習 8a（Package 與傳輸請求）之後、練習 15（Function Module）之前——FORM 與 FM 兩種模組化手段連著學。講義見 [lec08](lectures/lec08_modularize.md)。
+
 ## 學習目標
 
 - 理解模組化的目的：主流程只描述「做什麼」，細節放副程式

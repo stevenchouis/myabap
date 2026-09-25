@@ -68,9 +68,10 @@
 
 ## 第四部分：SM30 Table Maintenance Generator（需使用者手動建立，同練習 21 手法）
 
-1. SE11 → 表 `ZTR28_CDISC` → Utilities → Table Maintenance Generator
-2. Authorization Group `&NC&`；Function Group 填 `ZFG_TR28B`（**新的 Function Group，不要跟舊表 `ZTR28_WPARM` 共用的 `ZFG_TR28`**）；Maintenance type 選 **One Step**
-3. 產生後可以直接用 SM30 手動測試維護畫面本身（先不管權限/鎖定 Wrapper，純粹確認 View 本身能動）
+1. 先在 SE80 建 Function Group `ZFG_TR28B`（Table Maintenance Generator 只能放進已存在的 Function Group）
+2. SE11 → 表 `ZTR28_CDISC` → Utilities → Table Maintenance Generator
+3. Authorization Group `&NC&`；Function Group 填 `ZFG_TR28B`（**新的 Function Group，不要跟舊表 `ZTR28_WPARM` 共用的 `ZFG_TR28`**）；Maintenance type 選 **One Step**
+4. 產生後可以直接用 SM30 手動測試維護畫面本身（先不管權限/鎖定 Wrapper，純粹確認 View 本身能動）
 
 ## 第五部分：SE93 T-code（沿用既有 `ZTR28_MAINT`，不用重建）
 

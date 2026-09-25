@@ -80,9 +80,10 @@ SM30 原生用 `S_TABU_DIS`／`S_TABU_NAM` 控管
 
 ## 2. SM30 Table Maintenance Generator
 
-1. SE11 → 表 `ZTR28_CDISC` → Utilities → Table Maintenance Generator
-2. Authorization Group `&NC&`、Function Group `ZFG_TR28B`、**One Step**
-3. 先用 SM30 直接測試，確認 View 本身能新增／修改
+1. 先在 SE80 建 Function Group `ZFG_TR28B`
+2. SE11 → 表 `ZTR28_CDISC` → Utilities → Table Maintenance Generator
+3. Authorization Group `&NC&`、Function Group `ZFG_TR28B`、**One Step**
+4. 先用 SM30 直接測試，確認 View 本身能新增／修改
 
 這一步只確認 View 能動，還沒有套用 Wrapper 的權限／鎖定
 

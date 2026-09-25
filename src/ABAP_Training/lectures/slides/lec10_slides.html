@@ -122,14 +122,15 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="16">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>Report 程式的真相：<strong>不是從上跑到下，而是事件驅動</strong></li>
 <li>事件時序：INITIALIZATION → AT SELECTION-SCREEN<br />
 → START-OF-SELECTION → END-OF-SELECTION</li>
 <li>清單事件：TOP-OF-PAGE / END-OF-PAGE</li>
-<li>互動清單：AT LINE-SELECTION 與 HIDE 機制、<code>sy-lsind</code></li>
+<li><strong>清單緩衝區（List Buffer）</strong>：WRITE 先寫進記憶體</li>
+<li>互動清單：AT LINE-SELECTION 與 <strong>HIDE</strong>（隱藏區、寫回時機、使用規則）</li>
 <li><code>MESSAGE</code> 訊息類型</li>
 </ul>
 </section>
@@ -187,7 +188,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="16">
 <h2 id="1-%E4%BA%8B%E4%BB%B6%E9%A9%85%E5%8B%95%E4%BD%8D%E7%BD%AE%E7%84%A1%E9%97%9C%E6%99%82%E6%A9%9F%E6%B1%BA%E5%AE%9A">1. 事件驅動：位置無關，時機決定</h2>
 <p>程式由「事件區塊」組成：事件關鍵字到下一個事件關鍵字之間的程式碼屬於該事件，<strong>由系統在對應時機呼叫</strong></p>
 <ul>
@@ -254,7 +255,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="16">
 <h2 id="2-%E4%BA%8B%E4%BB%B6%E6%99%82%E5%BA%8F%E7%B8%BD%E8%A1%A8">2. 事件時序總表</h2>
 <table>
 <thead>
@@ -377,7 +378,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="16">
 <h2 id="3-initialization-%E8%88%87%E8%BC%B8%E5%85%A5%E9%A9%97%E8%AD%89">3. INITIALIZATION 與輸入驗證</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">INITIALIZATION.
   t_b1 = '查詢條件'.                 &quot; BLOCK 框標題
@@ -450,7 +451,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="16">
 <h2 id="message-%E8%A8%8A%E6%81%AF%E9%A1%9E%E5%9E%8B%E9%80%9F%E8%A6%BD">MESSAGE 訊息類型速覽</h2>
 <table>
 <thead>
@@ -542,7 +543,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="16">
 <h2 id="top-of-page%E6%AF%8F%E9%A0%81%E8%A1%A8%E9%A0%AD">TOP-OF-PAGE：每頁表頭</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TOP-OF-PAGE.
   WRITE: / '學生成績清單（雙擊任一行看明細）'.
@@ -562,7 +563,7 @@ END-OF-SELECTION.
 （分頁與 END-OF-PAGE 細節 → 講義 12）</p>
 </blockquote>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -589,7 +590,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="8" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="8" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -616,26 +617,54 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="4-%E4%BA%92%E5%8B%95%E6%B8%85%E5%96%AEhide-%E6%A9%9F%E5%88%B6">4. 互動清單：HIDE 機制</h2>
-<p>需求：雙擊某行看明細——程式怎麼知道那行是哪筆？</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 輸出時：把這一行的鍵值「藏」進該行
-LOOP AT gt_students INTO gs_student.
-  WRITE: / gs_student-id, gs_student-name, gs_student-score1.
-  HIDE gs_student-id.               &quot; 這行清單暗中記住學號
-ENDLOOP.
-CLEAR gs_student-id.                &quot; 防呆：雙擊非資料行時不撈殘留值
-
-* 雙擊時：系統把該行 HIDE 的值還原回同名變數
-AT LINE-SELECTION.
-  IF gs_student-id IS INITIAL.
-    WRITE / '請雙擊資料行'.
-  ELSE.
-    READ TABLE gt_students INTO gs_detail
-         WITH KEY id = gs_student-id.
-    WRITE: / '=== 明細（第', sy-lsind, '層清單）==='.
-  ENDIF.
-</code></pre>
+;" data-marpit-pagination-total="16">
+<h2 id="35-%E6%B8%85%E5%96%AE%E7%B7%A9%E8%A1%9D%E5%8D%80list-buffer">3.5 清單緩衝區（List Buffer）</h2>
+<p><code>WRITE</code>／<code>ULINE</code>／<code>SKIP</code> 先寫進記憶體的<strong>清單緩衝區</strong>，不是即時上螢幕</p>
+<table>
+<thead>
+<tr>
+<th>清單</th>
+<th>寫進緩衝區</th>
+<th>顯示到畫面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基本清單（<code>sy-lsind</code> 0）</td>
+<td>START-／END-OF-SELECTION、TOP-OF-PAGE</td>
+<td>這些事件<strong>全部跑完</strong>後</td>
+</tr>
+<tr>
+<td>明細清單（1、2…）</td>
+<td>AT LINE-SELECTION</td>
+<td>事件<strong>跑完</strong>後</td>
+</tr>
+</tbody>
+</table>
+<p>裡面有：每一行的<strong>文字</strong>、<strong>分頁資訊</strong>、<strong>隱藏區</strong>（HIDE 的值）<br />
+每一層清單各一份；F3 退回上一層直接從緩衝區重顯，不重跑程式</p>
+<table>
+<thead>
+<tr>
+<th>能回頭處理已寫好的行</th>
+<th>在哪一講</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HIDE</code>：雙擊時寫回變數</td>
+<td>本講第 4 節</td>
+</tr>
+<tr>
+<td><code>READ LINE</code>：讀回 <code>sy-lisel</code>（也寫回 HIDE 值）</td>
+<td>講義 13</td>
+</tr>
+<tr>
+<td><code>MODIFY LINE</code>：改完寫回（總頁數回填）</td>
+<td>講義 13</td>
+</tr>
+</tbody>
+</table>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -691,19 +720,197 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="hide-%E6%A9%9F%E5%88%B6%E6%95%B4%E7%90%86">HIDE 機制整理</h2>
+;" data-marpit-pagination-total="16">
+<h2 id="4-%E7%82%BA%E4%BB%80%E9%BA%BC%E9%9C%80%E8%A6%81-hide">4. 為什麼需要 HIDE</h2>
+<p><code>WRITE</code> 到畫面後，清單只是<strong>文字</strong>，跟 internal table 沒關係了</p>
+<ul>
+<li>雙擊第 3 行：系統只知道「第 3 行被點」，不知道是哪位學生</li>
+<li>此時 <code>gs_student</code> 放的是迴圈最後一筆，不是被點的那筆</li>
+</ul>
+<p>→ 輸出時要替每一行<strong>另外記下鍵值</strong>：這就是 <code>HIDE</code></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">HIDE 變數.
+HIDE: 變數1, 變數2.        &quot; 可同時記多個
+</code></pre>
+<p>把「變數<strong>當下</strong>的值」綁到「<strong>目前這一行</strong>」，存進這層清單的<strong>隱藏區（Hide Area）</strong></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="10" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="16">
+<h2 id="41-%E9%9A%B1%E8%97%8F%E5%8D%80hide-area%E6%98%AF%E4%BB%80%E9%BA%BC">4.1 隱藏區（Hide Area）是什麼</h2>
+<p>緩衝區（3.5）裡跟 HIDE 有關的兩部分：</p>
+<table>
+<thead>
+<tr>
+<th>清單緩衝區的兩部分</th>
+<th>內容</th>
+<th>看得到嗎</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>清單內容</td>
+<td>每一行 <code>WRITE</code> 的文字</td>
+<td>看得到</td>
+</tr>
+<tr>
+<td><strong>隱藏區</strong></td>
+<td>每一行 <code>HIDE</code> 的「變數＋當時的值」</td>
+<td><strong>看不到</strong></td>
+</tr>
+</tbody>
+</table>
+<p>兩者依<strong>行號</strong>對應——想成<strong>每一行背面貼一張便利貼</strong>：</p>
+<ul>
+<li><code>WRITE</code>：寫在正面給使用者看</li>
+<li><code>HIDE gs_student-id</code>：背面貼「<code>gs_student-id = S0002</code>」</li>
+<li>雙擊 → 翻到背面，把 <code>'S0002'</code> 寫回變數 → 執行 <code>AT LINE-SELECTION</code></li>
+<li>頁首、分隔線沒便利貼 → 什麼都不寫回</li>
+</ul>
+<p><strong>每一層清單各有一份</strong>：明細層再 HIDE 不會蓋掉基本清單；返回上一層，便利貼還在</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="11" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="16">
+<h2 id="42-%E9%9A%B1%E8%97%8F%E5%8D%80%E9%95%B7%E4%BB%80%E9%BA%BC%E6%A8%A3%E4%BD%95%E6%99%82%E5%AF%AB%E5%9B%9E">4.2 隱藏區長什麼樣、何時寫回</h2>
+<table>
+<thead>
+<tr>
+<th>清單行（看得到）</th>
+<th>隱藏區（看不到）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>S0001 王小明  78  91</code></td>
+<td><code>gs_student-id = 'S0001'</code></td>
+</tr>
+<tr>
+<td><code>S0002 李小美  88  95</code></td>
+<td><code>gs_student-id = 'S0002'</code></td>
+</tr>
+<tr>
+<td><code>S0003 陳大文  60  72</code></td>
+<td><code>gs_student-id = 'S0003'</code></td>
+</tr>
+<tr>
+<td>頁首、<code>ULINE</code>、合計行</td>
+<td>（沒有 HIDE，什麼都沒存）</td>
+</tr>
+</tbody>
+</table>
+<p>雙擊 <code>S0002</code> 那行 →</p>
 <ol>
-<li><code>HIDE 變數.</code>：輸出目前行時，記下「這一行 ↔ 變數當時的值」</li>
-<li>雙擊某行 → 系統把該行 HIDE 的值<strong>塞回同名變數</strong><br />
-→ 觸發 AT LINE-SELECTION</li>
-<li><code>sy-lsind</code>：清單層級（基本清單 0，明細 1，最多 20 層）<br />
-事件裡的 WRITE 輸出到<strong>新的一層</strong>，返回鍵一層層退</li>
-<li>雙擊「沒 HIDE 過的行」不會還原任何值<br />
-→ 輸出完要 CLEAR ＋ 事件裡檢查 IS INITIAL</li>
+<li>系統先把 <code>'S0002'</code> <strong>寫回</strong> <code>gs_student-id</code></li>
+<li>再觸發 <code>AT LINE-SELECTION</code></li>
+<li>程式用 <code>gs_student-id</code> 去 <code>READ TABLE</code> 找明細</li>
+<li>明細 <code>WRITE</code> 到<strong>新的一層清單</strong>（<code>sy-lsind</code> = 1），F3 返回</li>
 </ol>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -730,7 +937,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="10" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="12" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -757,7 +964,248 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="16">
+<h2 id="43-%E5%AE%8C%E6%95%B4%E7%AF%84%E4%BE%8B">4.3 完整範例</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">LOOP AT gt_students INTO gs_student WHERE score1 IN s_score.
+  WRITE: / gs_student-id, gs_student-name, gs_student-score1.
+  HIDE gs_student-id.               &quot; 緊接在 WRITE 之後
+ENDLOOP.
+CLEAR gs_student-id.                &quot; 清掉迴圈留下的最後一筆
+
+AT LINE-SELECTION.
+  IF gs_student-id IS INITIAL.      &quot; 點到沒 HIDE 的行
+    WRITE / '請雙擊資料行'.
+  ELSE.
+    READ TABLE gt_students INTO gs_detail WITH KEY id = gs_student-id.
+    IF sy-subrc = 0.
+      WRITE: / '=== 學生明細（第', sy-lsind, '層清單）===',
+             / '學號：', gs_detail-id,
+             / '姓名：', gs_detail-name.
+    ENDIF.
+  ENDIF.
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="13" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="16">
+<h2 id="44-hide-%E4%BD%BF%E7%94%A8%E8%A6%8F%E5%89%87">4.4 HIDE 使用規則</h2>
+<ol>
+<li><strong>緊接在 <code>WRITE</code> 之後</strong>：綁的是游標所在行；寫在前面會綁到上一行</li>
+<li><strong>只能 HIDE 全域變數</strong>：FORM 的區域變數 → dump <code>HIDE_NO_LOCAL</code></li>
+<li><strong>只能 HIDE 平面型別</strong>：欄位或全欄位結構；不能 internal table、<code>string</code><br />
+實務只 HIDE <strong>鍵值</strong>，明細在事件裡再查</li>
+<li><strong>只有 HIDE 過的變數會寫回</strong>：點到沒 HIDE 的行，變數仍是最後一筆<br />
+→ 輸出完 <code>CLEAR</code>，事件裡檢查 <code>IS INITIAL</code></li>
+<li><strong>鍵值要能唯一識別</strong>：航班要 HIDE <code>carrid</code>、<code>connid</code>、<code>fldate</code></li>
+</ol>
+<blockquote>
+<p>實測：HIDE 寫在 WRITE 前，雙擊 S0001 取回 S0002（下一筆）；<br />
+沒 HIDE 的行，變數保留<strong>上一次雙擊</strong>的值</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>系統欄位</th>
+<th>意義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sy-lsind</code></td>
+<td>清單層級（基本 0、明細 1…最多 20）</td>
+</tr>
+<tr>
+<td><code>sy-lilli</code></td>
+<td>被雙擊的是第幾行</td>
+</tr>
+<tr>
+<td><code>sy-lisel</code></td>
+<td>被雙擊那行的畫面文字（不要拿來切字串取鍵值）</td>
+</tr>
+</tbody>
+</table>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="14" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="16">
+<h2 id="45-%E5%A4%9A%E5%B1%A4%E6%B8%85%E5%96%AE%E4%B8%B2%E5%88%B0%E5%8F%A6%E4%B8%80%E6%94%AF%E5%A0%B1%E8%A1%A8">4.5 多層清單、串到另一支報表</h2>
+<ul>
+<li>在 <code>AT LINE-SELECTION</code> 輸出明細時<strong>再 HIDE</strong>，就能在明細上再雙擊往下鑽<br />
+每一層清單有自己的隱藏區</li>
+<li>明細已有現成報表 → 用 HIDE 取回的鍵值呼叫它：</li>
+</ul>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">AT LINE-SELECTION.
+  IF gs_student-id IS NOT INITIAL.
+    SUBMIT zr_student_detail          &quot; 另一支報表
+      WITH p_id = gs_student-id       &quot; 對方的 PARAMETERS p_id
+      AND RETURN.                     &quot; 看完回到本清單
+  ENDIF.
+</code></pre>
+<ul>
+<li>沒加 <code>VIA SELECTION-SCREEN</code> → 對方選擇畫面<strong>跳過</strong>，直接顯示清單</li>
+<li><code>AND RETURN</code> → F3 回到本清單（已實測）</li>
+</ul>
+<p><strong>關鍵都一樣：靠 HIDE 知道使用者點的是哪一筆</strong></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="15" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="16">
 <h2 id="5-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">5. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -780,6 +1228,14 @@ footer { color: #999; }
 <td>忘了 HIDE，變數殘留最後一筆</td>
 </tr>
 <tr>
+<td>顯示的是上一行的資料</td>
+<td><code>HIDE</code> 寫在 <code>WRITE</code> 之前</td>
+</tr>
+<tr>
+<td>dump <code>HIDE_NO_LOCAL</code></td>
+<td>HIDE 了 FORM 的區域變數</td>
+</tr>
+<tr>
 <td>雙擊空白行出現殘留資料</td>
 <td>沒 CLEAR + 沒檢查 IS INITIAL</td>
 </tr>
@@ -794,7 +1250,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -821,7 +1277,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="11" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="16" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -848,7 +1304,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="16">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex10</strong>：</p>
 <p>完整走一遍六個事件——<br />

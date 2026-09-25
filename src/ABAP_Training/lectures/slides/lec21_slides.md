@@ -39,7 +39,7 @@ style: |
 # 講義 21
 # 建立 Z 資料表與 Open SQL 寫入
 
-ABAP 基礎教育訓練（授課順序：接在講義 25 之後）
+ABAP 基礎教育訓練（授課順序：接在講義 9（ALV）之後；Global Type 觀念回顧講義 25）
 
 對應練習 ex21｜答案：表 `ZTR21_STUD` + `ZTR21_CLASS`＋程式 `ZR_TR21_ZTABLE`
 
@@ -95,11 +95,12 @@ ABAP 基礎教育訓練（授課順序：接在講義 25 之後）
 
 讓使用者不寫程式就能維護表內容：
 
-1. SE11 該表 → Utilities → **Table Maintenance Generator**
-2. Authorization Group 練習用 `&NC&`（不檢核）
+1. **先在 SE80 建 Function Group `ZFG_TR21`**（TMG 只能放進已存在的 FG）
+2. SE11 該表 → Utilities → **Table Maintenance Generator**
+3. Authorization Group 練習用 `&NC&`（不檢核）
    Function Group `ZFG_TR21`（畫面程式的容器）
    Maintenance type：one step（單畫面）
-3. 產生後 → SM30 輸入表名 → Maintain
+4. 產生後 → SM30 輸入表名 → Maintain
    → 現成的新增/修改/刪除畫面
 
 實務上參數表、對照表幾乎都配 SM30

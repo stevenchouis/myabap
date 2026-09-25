@@ -46,6 +46,8 @@ SE37 → Test/Execute（F8）→ 輸入 1500 / 200 → 確認 EV_REVENUE = 30000
 
 `TABLES` 參數是官方標記的過時語法（原因見講義 15 第 3.1 節），新 FM 該用 `CHANGING` 搭配一個正常的 Table Type：
 
+> SE11 建 Structure／Table Type 的步驟見講義 25 第 6.6 節；新舊寫法對照見講義 15 第 3.2 節。
+
 1. 建一個 DDIC 結構（如 `Z_TR15_<縮寫>_FLIGHT_REV`）：`CARRID`／`CONNID`／`PRICE`／`SEATSOCC`／`REVENUE`／`CURRENCY`（`PRICE`／`REVENUE` 是金額欄位，記得帶 `CURRENCY` 當參考幣別欄位，不然啟用會報「specify reference table AND reference field」）
 2. 建一個 DDIC Table Type（如 `Z_TR15_<縮寫>_TT_FLIGHT_REV`），Line Type 指向上面那個結構
 3. 建第二支 FM `Z_TR15_<縮寫>_CALC_REVENUE_TAB`：`CHANGING CT_FLIGHTS TYPE <剛建的 Table Type>`，內部 `LOOP AT ct_flights ASSIGNING <fs>` 逐列把 `REVENUE = PRICE * SEATSOCC` 算出來、直接寫回原表（不用另外接 EXPORTING）

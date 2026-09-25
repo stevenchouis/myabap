@@ -1,6 +1,6 @@
 # 練習 21：建立 Z 資料表與 Open SQL 寫入
 
-> 授課順序：接在練習 25（Data Dictionary 總覽）之後。講義見 [lec21](lectures/lec21_ztable.md)。
+> 授課順序：接在練習 9／24（ALV）之後，是「DDIC 與資料維護」階段的第一題（DDIC 觀念已在練習 25 打底）。講義見 [lec21](lectures/lec21_ztable.md)。
 
 ## 學習目標
 
@@ -35,7 +35,7 @@
 
    - Technical Settings：Data Class `APPL0`、Size Category `0`
    - 啟用後用 SE16N 確認表存在（0 筆）
-4. **維護畫面**：Utilities → Table Maintenance Generator：Authorization Group `&NC&`、Function Group `ZFG_TR21`、one step → 產生；到 SM30 手動新增一筆 `S9001 測試員 50`，再回 SE16N 確認
+4. **維護畫面**：先在 SE80 建 Function Group `ZFG_TR21`；再回 SE11 → Utilities → Table Maintenance Generator：Authorization Group `&NC&`、Function Group `ZFG_TR21`、one step → 產生；到 SM30 手動新增一筆 `S9001 測試員 50`，再回 SE16N 確認
 5. 觀察三層件的效果：SE16N 裡 SCORE 欄位標籤顯示「學生成績」；SM30 輸入 1000 會被 Domain 值域擋下
 
 ## 第二部分：Header/Detail 關聯——外鍵與 Search Help

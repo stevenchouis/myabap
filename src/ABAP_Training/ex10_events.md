@@ -56,3 +56,5 @@
 ## 答案
 
 見 `zr_tr10_events.prog.abap`（SAP 端程式 `ZR_TR10_EVENTS`）。
+
+思考題 2（HIDE 寫在 WRITE 之前）與講義 4.6 節的 SUBMIT，可以直接執行驗證程式 `ZR_TR10_HIDE_TEST`（呼叫 `ZR_TR10_HIDE_DETAIL`）親手看結果，原始碼見 `zr_tr10_hide_test.prog.abap`／`zr_tr10_hide_detail.prog.abap`。

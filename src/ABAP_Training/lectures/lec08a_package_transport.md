@@ -1,4 +1,4 @@
-# 講義 8a：Package 與傳輸請求——SE80／SE10／STMS（授課順序：接在講義 8 之後、講義 15 之前）
+# 講義 8a：Package 與傳輸請求——SE80／SE10／STMS（授課順序：接在講義 25 之後、講義 8 之前）
 
 > 對應練習：[ex08a](../ex08a_package_transport.md)｜本講沒有答案程式，驗收方式是 SE10 的傳輸記錄與 STMS 的匯入狀態
 

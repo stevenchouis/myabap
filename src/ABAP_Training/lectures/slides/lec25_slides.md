@@ -39,7 +39,7 @@ style: |
 # 講義 25
 # Data Dictionary 總覽與 Global Type
 
-ABAP 基礎教育訓練（授課順序：接在講義 9（ALV）之後、講義 21 之前）
+ABAP 基礎教育訓練（授課順序：接在講義 7 之後、講義 8a 之前）
 
 對應練習 ex25｜答案物件 `ZTR25_SURPCT`／`ZTR25_ACTIVE`／`ZTR25_SURCHG`／`ZTR25_TT_SURCHG`／`ZR_TR25_DDIC`
 
@@ -202,7 +202,8 @@ key carrid : s_carr_id not null
 
 ## 6.4 SM30 驗證：免費拿到三樣東西
 
-建 Table Maintenance Generator（`&NC&`、Function Group `ZFG_TR25`）
+**先在 SE80 建 Function Group `ZFG_TR25`**（TMG 要放進已存在的 FG）
+再建 Table Maintenance Generator（`&NC&`、Function Group `ZFG_TR25`）
 新增 `AA`／啟用／15.00、`LH`／啟用／10.00
 
 1. `CARRID` 按 **F4**：航空公司清單直接出現（`S_CARR_ID` 早就掛好 Search Help）
@@ -218,24 +219,28 @@ key carrid : s_carr_id not null
 
 ## 6.5 程式讀取：加成營收試算
 
-```abap
-DATA gs_surchg TYPE ztr25_surchg.     " Global Type 宣告
-DATA gv_carrid TYPE s_carr_id.
-DATA gt_rev TYPE STANDARD TABLE OF ty_rev.   " ty_rev 結構同講義文字版
+還沒學 FORM／JOIN → 三張表各自讀進內表，再 `READ TABLE` 對照
 
-SELECT f~carrid c~carrname f~connid f~fldate
-       f~seatsocc f~price s~active s~surcharge_pct
-  INTO CORRESPONDING FIELDS OF TABLE gt_rev
-  FROM sflight AS f
-  INNER JOIN scarr AS c ON c~carrid = f~carrid
-  LEFT OUTER JOIN ztr25_surchg AS s ON s~carrid = f~carrid
-  WHERE f~seatsocc > 0
-  ORDER BY f~carrid f~connid f~fldate.
+```abap
+SELECT * FROM sflight INTO TABLE gt_flight WHERE seatsocc > 0.
+SELECT * FROM scarr   INTO TABLE gt_scarr.
+SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.   " TYPE ztr25_tt_surchg
+
+LOOP AT gt_flight INTO gs_flight.
+  CLEAR gs_rev.
+  gs_rev-carrid = gs_flight-carrid.   " …其他航班欄位
+  READ TABLE gt_scarr INTO gs_scarr WITH KEY carrid = gs_flight-carrid.
+  IF sy-subrc = 0. gs_rev-carrname = gs_scarr-carrname. ENDIF.
+  READ TABLE gt_surchg INTO gs_surchg WITH KEY carrid = gs_flight-carrid.
+  IF sy-subrc = 0.                    " 找不到＝沒設定，維持初始值
+    gs_rev-active = gs_surchg-active.
+    gs_rev-surcharge_pct = gs_surchg-surcharge_pct.
+  ENDIF.
+  " 計算 revenue／revenue_adj 後 APPEND gs_rev TO gt_rev
+ENDLOOP.
 ```
 
-`LEFT OUTER JOIN` 是關鍵：沒設定過的公司也要出現
-`active`／`surcharge_pct` 是初始值 → 加成後營收自然等於原始營收
-不用另外寫 IF 判斷「有沒有設定」
+沒設定的公司照樣出現 → 講義 11 用一句 `LEFT OUTER JOIN` 就能完成
 
 ---
 
@@ -254,11 +259,11 @@ SE11 建 `ZTR25_TT_SURCHG`：
 
 ```abap
 DATA gt_surchg TYPE ztr25_tt_surchg.
-
-FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.
-  SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.
-ENDFORM.
+SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.
 ```
+
+真正的用途是當**參數型別**：講義 8 的 FORM `CHANGING`、
+講義 15 的 FM 介面（**一定要** DDIC 型別，取代舊式 `TABLES`）
 
 只有本程式用 → 就地 `TYPES`；多支程式／FM 共用 → DDIC Table Type
 
@@ -274,7 +279,7 @@ ENDFORM.
 | 自建 DE 才發現標準早有 | 建之前沒先搜尋標準 |
 | Check Table 選了自建 Z 表，其實該指標準表 | 沒想清楚合法值清單早就存在 |
 | 手動建了 Search Help，其實不用 | 重用的 DE 早就掛好 |
-| 沒設定的資料整筆消失 | 誤用 INNER JOIN，該用 LEFT OUTER |
+| 沒設定的資料整筆消失 | 找不到設定就跳過；該保留、維持初始值 |
 | SM30 改資料以為要走 TR | 表**結構**才需要 TR，**資料**不用 |
 | SM30 標題是 `+`、沒有 F4 | 欄位用內建型別；改「重用標準 Domain＋自建 DE 補標籤」 |
 | 每支程式各宣告一份 `tt_xxx` | 該升級成 DDIC Table Type |

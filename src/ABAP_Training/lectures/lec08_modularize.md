@@ -1,4 +1,4 @@
-# 講義 8：模組化——FORM / USING / CHANGING
+# 講義 8：模組化——FORM / USING / CHANGING（授課順序：接在講義 8a 之後）
 
 > 對應練習：[ex08](../ex08_modularize.md)｜答案程式：`ZR_TR08_MODULARIZE`
 
@@ -82,6 +82,27 @@ ENDFORM.
 
 （`tt_student` 是講義 4 用 TYPES 定義的表格型別——這就是表格型別的另一個好處：能拿來宣告參數。）
 
+參數型別也可以直接用講義 25 在 SE11 建的 **DDIC Table Type**。例如讀取旺季加成設定的 FORM：
+
+```abap
+DATA gt_surchg TYPE ztr25_tt_surchg.
+
+PERFORM load_surchg_config CHANGING gt_surchg.
+
+FORM load_surchg_config CHANGING ct_surchg TYPE ztr25_tt_surchg.
+  SELECT * FROM ztr25_surchg INTO TABLE ct_surchg.
+ENDFORM.
+```
+
+兩種表格型別怎麼選：
+
+| 型別來源 | 誰看得到 | 適合 |
+|---|---|---|
+| `TYPES tt_xxx`（Local Type，講義 4） | 只有這支程式 | 只在本程式內傳來傳去的表格 |
+| DDIC Table Type（講義 25） | 全系統 | 多支程式要用同一種表格；**講義 15 的 FM 介面參數一定要用這種** |
+
+FORM 的參數型別兩種都可以；到了講義 15 的 Function Module 就沒得選——FM 介面參數只能用 DDIC 型別，用 `CHANGING` 搭配 DDIC Table Type 傳整張表，正是取代舊式 `TABLES` 參數的寫法（下一節）。
+
 ## 4. 區域變數 vs 全域變數
 
 - FORM 裡 `DATA` 宣告的是**區域變數**（`lv_`/`ls_`/`lt_`）：只在該 FORM 內存在，每次呼叫重新初始化。
@@ -91,7 +112,7 @@ ENDFORM.
 
 ## 5. 舊式 TABLES 參數（看得懂即可）
 
-舊程式常見 `PERFORM f USING ... TABLES gt_x.` 或 `FORM f TABLES t_x STRUCTURE ...`——這是內表的舊式傳遞方式，**新程式不要用**（用 USING/CHANGING + 表格型別），但維護 ZDQM 等既有程式時要認得。
+舊程式常見 `PERFORM f USING ... TABLES gt_x.` 或 `FORM f TABLES t_x STRUCTURE ...`——這是內表的舊式傳遞方式，**新程式不要用**（用 USING/CHANGING + 表格型別），但維護 ZDQM 等既有程式時要認得。Function Module 也有同樣的舊式 `TABLES` 參數，官方已標記為過時，講義 15 第 3.1、3.2 節會說明原因與替代寫法。
 
 ## 6. 傳統報表標準骨架
 

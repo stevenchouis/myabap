@@ -51,6 +51,7 @@ ABAP 基礎教育訓練（授課順序：接在講義 8 之後）
 - Function Group：FM 的容器——一個 group 可放多個 FM
 - TOP include 全域變數：同 group 的 FM 共用同一份資料
 - 介面四區：IMPORTING / EXPORTING / CHANGING / TABLES ＋ EXCEPTIONS
+- 傳整張表：`CHANGING` + DDIC Table Type 取代 `TABLES`
 - SE37 建立與單獨測試
 - `CALL FUNCTION` 呼叫：方向對應與例外處理
 - FM vs FORM 的選擇
@@ -166,6 +167,36 @@ ENDFUNCTION.
 | EXPORTING | FM → 呼叫端 | `ev_` |
 | CHANGING | 雙向 | `cv_` |
 | TABLES | 內表（舊式） | `t_` |
+
+介面參數型別**一定要用 DDIC 型別**（講義 25），不能用程式裡的 `TYPES`
+
+---
+
+<!-- _class: compact -->
+
+## 2.2 `CHANGING` + Table Type 取代 `TABLES`
+
+```abap
+FUNCTION z_tr15_calc_revenue_tab
+  CHANGING
+    VALUE(ct_flights) TYPE ztr15_tt_flight_rev.       " SE11 建的 Table Type
+  FIELD-SYMBOLS <fs_flight> TYPE ztr15_flight_rev.
+  LOOP AT ct_flights ASSIGNING <fs_flight>.
+    <fs_flight>-revenue = <fs_flight>-price * <fs_flight>-seatsocc.
+  ENDLOOP.
+ENDFUNCTION.
+
+* 呼叫端：gt_flights TYPE ztr15_tt_flight_rev
+CALL FUNCTION 'Z_TR15_CALC_REVENUE_TAB'
+  CHANGING
+    ct_flights = gt_flights.          " 呼叫後 REVENUE 已填上
+```
+
+| | 舊式 `TABLES` | `CHANGING` + Table Type |
+|---|---|---|
+| Header Line | 自動帶（雙義） | 沒有 |
+| 傳值 | 不行，只能傳址 | 可以 `VALUE(...)` |
+| Method 能用 | 不能 | 能 |
 
 ---
 
