@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="15">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>DDIC 三層件：Domain → Data Element → 表格欄位</li>
@@ -188,7 +188,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="15">
 <h2 id="1-ddic-%E4%B8%89%E5%B1%A4%E4%BB%B6">1. DDIC 三層件</h2>
 <table>
 <thead>
@@ -276,7 +276,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="15">
 <h2 id="2-se11-%E5%BB%BA%E7%AB%8B%E9%80%8F%E6%98%8E%E8%A1%A8">2. SE11 建立透明表</h2>
 <ol>
 <li>SE11 → Database table → <code>ZTR21_STUD</code> → Create</li>
@@ -348,7 +348,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="15">
 <h2 id="3-sm30-%E7%B6%AD%E8%AD%B7%E7%95%AB%E9%9D%A2">3. SM30 維護畫面</h2>
 <p>讓使用者不寫程式就能維護表內容：</p>
 <ol>
@@ -362,7 +362,7 @@ Maintenance type：one step（單畫面）</li>
 </ol>
 <p>實務上參數表、對照表幾乎都配 SM30</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -389,7 +389,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="6" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="6" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -416,7 +416,73 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="15">
+<h2 id="31-maintenance-viewsm30-%E4%B8%80%E6%AC%A1%E7%B6%AD%E8%AD%B7%E5%A4%9A%E5%BC%B5%E8%A1%A8">3.1 Maintenance View：SM30 一次維護多張表</h2>
+<p>典型：主檔＋文字表。標準範例 <code>V_TCURC</code> = 幣別 <code>TCURC</code> ＋ 說明 <code>TCURT</code><br />
+→ SM30 同一列填代碼與說明，存檔自動寫進兩張表；文字表自動取登入語言</p>
+<ul>
+<li>表之間<strong>必須有外鍵</strong>，連接條件沿用外鍵</li>
+<li>附屬表對主表<strong>多對一</strong>（主表一筆最多對一筆）</li>
+<li>INNER JOIN；<strong>程式不能 SELECT</strong>，只能當 <code>TYPE</code></li>
+</ul>
+<p>建立：SE11 → View → <strong>Maintenance view</strong> → Table/Join Conditions（主表＋<strong>Relationships</strong> 勾附屬表）<br />
+→ View Fields（主表 Key 全部要有）→ Maint. Status → 啟用 → <strong>Table Maintenance Generator</strong> → SM30</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="7" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="15">
 <h2 id="4-header%EF%BC%8Fdetail-%E9%97%9C%E8%81%AF%E5%A4%96%E9%8D%B5%E8%88%87-check-table">4. Header／Detail 關聯：外鍵與 Check Table</h2>
 <p>訂單－客戶、明細－產品……本質都是 <strong>Header（1）／Detail（多）</strong> 關聯<br />
 本課示範：班級（Header）－學生（Detail），跟講義 6 的 SCARR－SPFLI 同一種關係</p>
@@ -431,7 +497,7 @@ footer { color: #999; }
 </code></pre>
 <p><code>[0..*,1]</code>：多筆學生（外鍵表）對應 1 筆班級（檢查表）</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -458,7 +524,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="7" style="--paginate:true;--class:compact;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="8" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -485,7 +551,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="15">
 <h2 id="%E5%A4%96%E9%8D%B5%E5%8F%AA%E6%93%8B%E7%95%AB%E9%9D%A2%E4%B8%8D%E6%93%8B%E7%A8%8B%E5%BC%8F">外鍵只擋畫面，不擋程式！</h2>
 <p><code>@AbapCatalog.foreignKey.screenCheck : true</code> <strong>只影響 Dynpro 畫面</strong>（SM30、Module Pool）</p>
 <blockquote>
@@ -495,77 +561,6 @@ footer { color: #999; }
 <p>跟一般資料庫的 Foreign Key Constraint 不一樣：<br />
 那是資料庫引擎強制擋寫入；SAP DDIC 外鍵是<strong>應用層／畫面層</strong>機制</p>
 <p>要在程式擋，得自己 <code>SELECT SINGLE</code> 檢查 Check Table</p>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" data-marpit-pagination="8" style="--paginate:true;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="13">
-<h2 id="search-helpf4-%E9%81%B8%E5%96%AE%E5%93%AA%E8%A3%A1%E4%BE%86%E7%9A%84">Search Help：F4 選單哪裡來的</h2>
-<p>跟外鍵是兩件事：外鍵「擋不合法的值」、Search Help「幫你選合法的值」</p>
-<ul>
-<li>只設外鍵沒設 Search Help：會擋錯，但沒 F4，要背代碼</li>
-<li>只設 Search Help 沒設外鍵：F4 能選，但手動打錯的畫面不會擋</li>
-</ul>
-<p>建立（SE11 → Search Help → Elementary Search Help）：</p>
-<ul>
-<li><strong>Selection Method</strong>：資料來源表（<code>ZTR21_CLASS</code>）</li>
-<li><strong>Parameters</strong>：<code>KLASSE</code>（Import+Export+SH field）、<code>KLNAME</code>（純顯示，僅 Export）</li>
-<li>建好要<strong>掛到 Data Element</strong>（<code>ZTR21_KLASSE</code> → Search Help 欄位）才會全面生效</li>
-</ul>
-<blockquote>
-<p><strong>Parameter 欄位必須有 Data Element</strong>！<code>KLNAME</code> 若只用內建型別會 Activate 失敗</p>
-</blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -621,23 +616,22 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
-<h2 id="5-open-sql-%E5%AF%AB%E5%85%A5%E5%9B%9B%E6%8C%87%E4%BB%A4">5. Open SQL 寫入四指令</h2>
-<p>全部<strong>用 sy-subrc 回報結果</strong>；<code>sy-dbcnt</code> 是影響筆數：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gs_stud TYPE ztr21_stud.    &quot; 表名直接當結構型別
-
-* INSERT：新增；主鍵已存在 → sy-subrc = 4，不會蓋掉
-INSERT ztr21_stud FROM gs_stud.
-
-* UPDATE：改既有資料；找不到 → sy-subrc = 4
-UPDATE ztr21_stud SET score = 90 WHERE id = 'S0001'.
-
-* MODIFY：有就改、沒有就新增（upsert）——參數表最愛
-MODIFY ztr21_stud FROM gs_stud.
-
-* DELETE：刪除
-DELETE FROM ztr21_stud WHERE id = 'S0001'.
-</code></pre>
+;" data-marpit-pagination-total="15">
+<h2 id="search-helpf4-%E9%81%B8%E5%96%AE%E5%93%AA%E8%A3%A1%E4%BE%86%E7%9A%84">Search Help：F4 選單哪裡來的</h2>
+<p>跟外鍵是兩件事：外鍵「擋不合法的值」、Search Help「幫你選合法的值」</p>
+<ul>
+<li>只設外鍵沒設 Search Help：會擋錯，但沒 F4，要背代碼</li>
+<li>只設 Search Help 沒設外鍵：F4 能選，但手動打錯的畫面不會擋</li>
+</ul>
+<p>建立（SE11 → Search Help → Elementary Search Help）：</p>
+<ul>
+<li><strong>Selection Method</strong>：資料來源表（<code>ZTR21_CLASS</code>）</li>
+<li><strong>Parameters</strong>：<code>KLASSE</code>（Import+Export+SH field）、<code>KLNAME</code>（純顯示，僅 Export）</li>
+<li>建好要<strong>掛到 Data Element</strong>（<code>ZTR21_KLASSE</code> → Search Help 欄位）才會全面生效</li>
+</ul>
+<blockquote>
+<p><strong>Parameter 欄位必須有 Data Element</strong>！<code>KLNAME</code> 若只用內建型別會 Activate 失敗</p>
+</blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -693,18 +687,38 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
-<h2 id="%E6%89%B9%E6%AC%A1%E5%AF%AB%E5%85%A5%E8%88%87%E5%85%A9%E5%80%8B%E7%BF%92%E6%85%A3">批次寫入與兩個習慣</h2>
-<p>多筆版本：<code>INSERT ztr21_stud FROM TABLE gt_stud.</code></p>
-<blockquote>
-<p><strong>INSERT FROM TABLE 遇任一筆主鍵重複就整批 dump</strong><br />
-除非加 <code>ACCEPTING DUPLICATE KEYS</code>（重複跳過、subrc = 4）</p>
-</blockquote>
-<p>兩個習慣：</p>
+;" data-marpit-pagination-total="15">
+<h2 id="44-help-viewsearch-help-%E9%9C%80%E8%A6%81%E5%A4%9A%E5%BC%B5%E8%A1%A8%E6%99%82">4.4 Help View：Search Help 需要多張表時</h2>
+<p>Selection Method 可以是：一張表／Database View／<strong>Help View</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Database View</th>
+<th>Help View</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JOIN</td>
+<td>INNER：附屬表沒資料 → 整筆消失</td>
+<td><strong>OUTER</strong>：主表全出現，附屬欄位留空</td>
+</tr>
+<tr>
+<td>連接條件</td>
+<td>自己定</td>
+<td>沿用外鍵</td>
+</tr>
+<tr>
+<td>程式 SELECT</td>
+<td>可以</td>
+<td>不行</td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li>MANDT 一樣<strong>不要</strong>自己塞——系統自動帶當前 client</li>
-<li>寫入帶齊<strong>稽核欄</strong>（<code>sy-uname</code> 異動者、<code>sy-datum</code> 異動日）<br />
-查問題時會感謝自己</li>
+<li>只是加「文字表」說明 → 不需要 Help View，Selection Method 直接填主表</li>
+<li>標準範例 <code>H_T005</code> = 國家 <code>T005</code> ＋ 名稱 <code>T005T</code></li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
@@ -761,23 +775,23 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
-<h2 id="6-luw-%E8%88%87-commit-work">6. LUW 與 COMMIT WORK</h2>
-<p>變更以 <strong>LUW</strong>（Logical Unit of Work）為單位，確認才落地：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">INSERT ztr21_stud FROM gs_stud.
-IF sy-subrc &lt;&gt; 0.
-  ROLLBACK WORK.       &quot; 整包撤銷：LUW 內所有寫入取消
-  MESSAGE '寫入失敗，已回復' TYPE 'E'.
-ENDIF.
-COMMIT WORK.           &quot; 整包確認：全部永久生效
+;" data-marpit-pagination-total="15">
+<h2 id="5-open-sql-%E5%AF%AB%E5%85%A5%E5%9B%9B%E6%8C%87%E4%BB%A4">5. Open SQL 寫入四指令</h2>
+<p>全部<strong>用 sy-subrc 回報結果</strong>；<code>sy-dbcnt</code> 是影響筆數：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gs_stud TYPE ztr21_stud.    &quot; 表名直接當結構型別
+
+* INSERT：新增；主鍵已存在 → sy-subrc = 4，不會蓋掉
+INSERT ztr21_stud FROM gs_stud.
+
+* UPDATE：改既有資料；找不到 → sy-subrc = 4
+UPDATE ztr21_stud SET score = 90 WHERE id = 'S0001'.
+
+* MODIFY：有就改、沒有就新增（upsert）——參數表最愛
+MODIFY ztr21_stud FROM gs_stud.
+
+* DELETE：刪除
+DELETE FROM ztr21_stud WHERE id = 'S0001'.
 </code></pre>
-<ul>
-<li>表頭＋明細必須「<strong>全成功或全失敗</strong>」——LUW 的意義</li>
-<li>程式跑完系統會隱含 commit（練習沒寫也多半進去了）<br />
-但<strong>正式程式的寫入要明確 COMMIT／ROLLBACK</strong></li>
-<li>多人同改一筆 → <strong>Lock Object</strong>（ENQUEUE/DEQUEUE）<br />
-先認識名詞，屬進階課題</li>
-</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -833,7 +847,147 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="15">
+<h2 id="%E6%89%B9%E6%AC%A1%E5%AF%AB%E5%85%A5%E8%88%87%E5%85%A9%E5%80%8B%E7%BF%92%E6%85%A3">批次寫入與兩個習慣</h2>
+<p>多筆版本：<code>INSERT ztr21_stud FROM TABLE gt_stud.</code></p>
+<blockquote>
+<p><strong>INSERT FROM TABLE 遇任一筆主鍵重複就整批 dump</strong><br />
+除非加 <code>ACCEPTING DUPLICATE KEYS</code>（重複跳過、subrc = 4）</p>
+</blockquote>
+<p>兩個習慣：</p>
+<ul>
+<li>MANDT 一樣<strong>不要</strong>自己塞——系統自動帶當前 client</li>
+<li>寫入帶齊<strong>稽核欄</strong>（<code>sy-uname</code> 異動者、<code>sy-datum</code> 異動日）<br />
+查問題時會感謝自己</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="13" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="15">
+<h2 id="6-luw-%E8%88%87-commit-work">6. LUW 與 COMMIT WORK</h2>
+<p>變更以 <strong>LUW</strong>（Logical Unit of Work）為單位，確認才落地：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">INSERT ztr21_stud FROM gs_stud.
+IF sy-subrc &lt;&gt; 0.
+  ROLLBACK WORK.       &quot; 整包撤銷：LUW 內所有寫入取消
+  MESSAGE '寫入失敗，已回復' TYPE 'E'.
+ENDIF.
+COMMIT WORK.           &quot; 整包確認：全部永久生效
+</code></pre>
+<ul>
+<li>表頭＋明細必須「<strong>全成功或全失敗</strong>」——LUW 的意義</li>
+<li>程式跑完系統會隱含 commit（練習沒寫也多半進去了）<br />
+但<strong>正式程式的寫入要明確 COMMIT／ROLLBACK</strong></li>
+<li>多人同改一筆 → <strong>Lock Object</strong>（ENQUEUE/DEQUEUE）<br />
+先認識名詞，屬進階課題</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="14" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="15">
 <h2 id="7-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">7. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -878,7 +1032,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -905,7 +1059,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="13" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="15" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -932,7 +1086,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="15">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex21</strong>：</p>
 <p>建 Domain＋Data Element＋透明表 <code>ZTR21_STUD</code>＋班級主檔 <code>ZTR21_CLASS</code><br />

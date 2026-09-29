@@ -96,6 +96,30 @@ SELECT f~carrid f~connid f~fldate c~carrname
 
 ---
 
+<!-- _class: compact -->
+
+## 2.1 Database View：把 JOIN 定義在 DDIC
+
+`SFLIGHTS` = `SCARR` ＋ `SPFLI` ＋ `SFLIGHT`（INNER JOIN，系統標準）
+
+```abap
+DATA gt_flights TYPE STANDARD TABLE OF sflights.   " View 本身就是結構型別
+
+SELECT carrid carrname connid cityfrom cityto fldate seatsmax seatsocc
+  FROM sflights
+  INTO CORRESPONDING FIELDS OF TABLE gt_flights
+  WHERE carrid = 'LH'.                             " 不用寫 JOIN
+```
+
+| | 程式裡 JOIN | Database View |
+|---|---|---|
+| 定義在哪 | 每支程式自己寫 | DDIC，大家共用 |
+| JOIN 種類 | INNER、LEFT OUTER | **只有 INNER** |
+
+一支程式用 → 直接 JOIN；很多程式共用 → 建 View；新開發 → **CDS View**
+
+---
+
 ## 3. LEFT OUTER JOIN
 
 「左表全留，右表對不上就給初始值」：
@@ -130,6 +154,9 @@ JOIN 的結果結構欄位東拼西湊
 - 順序自由、可讀性高
 - 代價：欄位名要跟 SELECT 清單一致
 - 別名欄位：`SELECT f~price AS ticket_price ...`
+
+`APPENDING TABLE`：**不清空**內表，結果接在後面
+（ZRFI0004：`saknr AS hkont` 把欄位名對上內表，多張表讀進同一種內表）
 
 ---
 

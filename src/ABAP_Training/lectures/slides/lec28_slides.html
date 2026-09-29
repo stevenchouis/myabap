@@ -123,7 +123,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>SM30 原生權限不夠用：業務維度要自己包一層</li>
@@ -193,7 +193,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="1-%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E5%8C%85%E4%B8%80%E5%B1%A4-authorization-wrapper">1. 為什麼要包一層 Authorization Wrapper</h2>
 <p>SM30 原生用 <code>S_TABU_DIS</code>／<code>S_TABU_NAM</code> 控管<br />
 → 只回答「能不能維護<strong>這張表</strong>」（表格層級）</p>
@@ -260,7 +260,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="2-sm30-table-maintenance-generator">2. SM30 Table Maintenance Generator</h2>
 <ol>
 <li>先在 SE80 建 Function Group <code>ZFG_TR28B</code></li>
@@ -324,7 +324,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="3-%E8%87%AA%E8%A8%82%E6%AC%8A%E9%99%90%E7%89%A9%E4%BB%B6su21">3. 自訂權限物件：SU21</h2>
 <ol>
 <li>SU21 → 選 Object Class（本例 <strong><code>BC_A</code></strong>；<code>BC</code> 本身不存在，是分類字首）→ 右鍵 Create</li>
@@ -396,7 +396,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="31-authority-check">3.1 AUTHORITY-CHECK</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">AUTHORITY-CHECK OBJECT 'ZTR28_CARR'
   ID 'ACTVT'  FIELD lv_actvt
@@ -481,7 +481,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="32-pfcg%E6%8A%8A%E6%AC%8A%E9%99%90%E7%9C%9F%E6%AD%A3%E6%8C%87%E6%B4%BE%E7%B5%A6%E4%BD%BF%E7%94%A8%E8%80%85">3.2 PFCG：把權限真正指派給使用者</h2>
 <ol>
 <li><strong>PFCG</strong> → Role <code>ZTR28_MAINT_ROLE</code> → <strong>Single Role</strong> → Description 存檔</li>
@@ -554,7 +554,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="4-lock-object-%E9%8E%96%E5%AE%9A%E7%AF%84%E5%9C%8D">4. Lock Object 鎖定範圍</h2>
 <p><code>ZTR28_CDISC</code> 主鍵是 <code>MANDT</code>＋<code>CARRID</code><br />
 Lock Object <code>EZTR28_CARR</code> 的 Lock Parameters 剛好是這兩個欄位</p>
@@ -619,7 +619,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="5-view_maintenance_call">5. VIEW_MAINTENANCE_CALL</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">CALL FUNCTION 'VIEW_MAINTENANCE_CALL'
   EXPORTING
@@ -690,7 +690,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="51-dba_sellist%E5%8F%AA%E9%A1%AF%E7%A4%BA%E8%A2%AB%E6%8E%88%E6%AC%8A%E7%9A%84%E9%82%A3%E5%AE%B6">5.1 dba_sellist：只顯示被授權的那家</h2>
 <p>只做 <code>AUTHORITY-CHECK</code> 不夠：進了畫面仍看得到、改得到別家</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">ls_sellist-viewfield = 'CARRID'.    &quot; 篩選欄位（大寫）
@@ -763,7 +763,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="6-t-code-%E6%8C%87%E7%B5%A6-wrapper">6. T-code 指給 Wrapper</h2>
 <p>SE93 → <code>ZTR28_MAINT</code> → Create</p>
 <ol>
@@ -830,7 +830,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="7-%E9%81%B8%E5%8F%96%E7%95%AB%E9%9D%A2%E6%8C%89%E9%88%95function-key">7. 選取畫面按鈕：FUNCTION KEY</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TABLES: sscrfields.
 
@@ -905,23 +905,23 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
-<h2 id="71-parameter-transaction-ztr28_sm30">7.1 Parameter Transaction <code>ZTR28_SM30</code></h2>
-<p>SE93 → <code>ZTR28_SM30</code> → Create</p>
-<ol>
-<li>型態：<strong>Transaction with parameters</strong></li>
-<li><strong>Default values for → Transaction</strong>：<code>SM30</code></li>
-<li>勾 <strong>Skip initial screen</strong></li>
-<li><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/26a0.svg" data-marp-twemoji=""/> 不是上方 SPA/GPA 表格，而是畫面下方獨立的 <strong>Default Values</strong>：
-<ul>
-<li><code>VIEWNAME</code> = <code>ZTR28_CDISC</code></li>
-<li><code>UPDATE</code> = <code>X</code></li>
-</ul>
-</li>
-<li>存檔</li>
-</ol>
-<p><code>VIEWNAME</code>／<code>UPDATE</code> 是 SM30 初始畫面的<strong>實際技術欄位名</strong><br />
-直接指定畫面欄位值，跟 SPA/GPA 是兩種不同機制</p>
+;" data-marpit-pagination-total="20">
+<h2 id="71-sap-%E5%9C%96%E7%A4%BAicon%E7%9A%84%E4%BD%BF%E7%94%A8">7.1 SAP 圖示（Icon）的使用</h2>
+<p>圖示＝4 字元代碼 <code>@xx@</code>（表 <code>ICON</code>，本系統 1,230 個），程式用常數 <code>icon_xxx</code><br />
+找圖示：交易碼 <strong><code>ICON</code></strong> 或報表 <code>SHOWICON</code>；7.02 後不必寫 <code>TYPE-POOLS icon</code></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">gs_functxt-icon_id   = icon_tools.       &quot; 1. 工具列按鈕：SMP_DYNTXT
+gs_functxt-icon_text = '工具'.
+gs_functxt-quickinfo = '開啟維護工具'.
+sscrfields-functxt_01 = gs_functxt.
+CLEAR gs_functxt.                        &quot;    下一顆前先清空
+
+CALL FUNCTION 'ICON_CREATE'              &quot; 2. 畫面按鈕：圖示＋文字＋提示
+  EXPORTING name = icon_execute_object text = '執行檢查' info = '依等級顯示結果'
+  IMPORTING result = b_run ...           &quot;    結果：@xx@\Q提示@文字
+
+WRITE / icon_green_light AS ICON.        &quot; 3. 清單：AS ICON（紅綠燈佔 4 格）
+</code></pre>
+<p>ALV：欄位放圖示代碼，Field Catalog 設 <code>icon = 'X'</code>｜示範：<code>ZR_TR28_ICON_DEMO</code></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -977,7 +977,79 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
+<h2 id="71-parameter-transaction-ztr28_sm30">7.1 Parameter Transaction <code>ZTR28_SM30</code></h2>
+<p>SE93 → <code>ZTR28_SM30</code> → Create</p>
+<ol>
+<li>型態：<strong>Transaction with parameters</strong></li>
+<li><strong>Default values for → Transaction</strong>：<code>SM30</code></li>
+<li>勾 <strong>Skip initial screen</strong></li>
+<li><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/26a0.svg" data-marp-twemoji=""/> 不是上方 SPA/GPA 表格，而是畫面下方獨立的 <strong>Default Values</strong>：
+<ul>
+<li><code>VIEWNAME</code> = <code>ZTR28_CDISC</code></li>
+<li><code>UPDATE</code> = <code>X</code></li>
+</ul>
+</li>
+<li>存檔</li>
+</ol>
+<p><code>VIEWNAME</code>／<code>UPDATE</code> 是 SM30 初始畫面的<strong>實際技術欄位名</strong><br />
+直接指定畫面欄位值，跟 SPA/GPA 是兩種不同機制</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="15" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="20">
 <h2 id="72-%E6%95%85%E6%84%8F%E7%A4%BA%E7%AF%84%E6%B2%92%E6%9C%89%E4%BF%9D%E8%AD%B7%E7%9A%84%E6%8C%89%E9%88%95">7.2 故意示範「沒有保護」的按鈕</h2>
 <table>
 <thead>
@@ -1019,7 +1091,7 @@ footer { color: #999; }
 <strong>有沒有包 Wrapper，資安上天壤之別</strong><br />
 按鈕存在本身就是提醒：「這樣寫是不對的」</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1046,7 +1118,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="15" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" data-marpit-pagination="16" style="--paginate:true;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1073,7 +1145,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="8-%E6%95%B4%E9%AB%94%E6%B5%81%E7%A8%8B">8. 整體流程</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code>使用者按「維護主檔(SM30)」或直接執行 ZTR28_MAINT
       ▼
@@ -1091,7 +1163,7 @@ DEQUEUE_EZTR28_CARR
 </code></pre>
 <p>四層防護疊在一起，缺任一層都可能被繞過</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1118,7 +1190,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="16" style="--paginate:true;--class:compact;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="17" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1145,7 +1217,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h2 id="9-%E7%B6%AD%E8%AD%B7%E7%9A%84%E5%8F%83%E6%95%B8%E4%B8%8D%E6%98%AF%E6%86%91%E7%A9%BA%E5%AD%98%E5%9C%A8">9. 維護的參數不是憑空存在</h2>
 <p><code>ZR_TR28_PRICE_CALC</code>：JOIN <code>SPFLI</code>／<code>SFLIGHT</code> 套用折扣算最終票價</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT SINGLE discount_pct
@@ -1162,83 +1234,6 @@ gs_result-final_price = ls_sflight-price * ( 1 - lv_discount_pct / 100 ).
 <li>折扣查不到要有<strong>合理預設</strong>（0%），不能讓報表掛掉</li>
 <li>驗證利器：在 Wrapper 改折扣 → 立刻跑報表看 <code>final_price</code> 變不變</li>
 </ol>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-paginate="true" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" data-marpit-pagination="17" style="--paginate:true;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="19">
-<h2 id="91-reuse_alv_grid_display-%E5%9C%A8%E7%84%A1%E9%A0%AD%E7%92%B0%E5%A2%83">9.1 REUSE_ALV_GRID_DISPLAY 在無頭環境</h2>
-<table>
-<thead>
-<tr>
-<th>ALV 寫法</th>
-<th><code>programrun</code> 無頭執行</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>REUSE_ALV_GRID_DISPLAY</code>（Functional）</td>
-<td>自動退化成<strong>文字清單</strong>，可直接驗證資料</td>
-</tr>
-<tr>
-<td><code>cl_salv_table</code>（OO）</td>
-<td><strong>卡住斷線</strong>（<code>RFC_CLOSED</code>）</td>
-</tr>
-</tbody>
-</table>
-<p><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/26a0.svg" data-marp-twemoji=""/> 不是絕對可靠：某個特定物件 <code>programrun</code> 卡過一次，之後不管怎麼改都持續卡住<br />
-→ 用全新物件重現，若新物件正常 → 請使用者到 SAP GUI 測</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -1294,7 +1289,84 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
+<h2 id="91-reuse_alv_grid_display-%E5%9C%A8%E7%84%A1%E9%A0%AD%E7%92%B0%E5%A2%83">9.1 REUSE_ALV_GRID_DISPLAY 在無頭環境</h2>
+<table>
+<thead>
+<tr>
+<th>ALV 寫法</th>
+<th><code>programrun</code> 無頭執行</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REUSE_ALV_GRID_DISPLAY</code>（Functional）</td>
+<td>自動退化成<strong>文字清單</strong>，可直接驗證資料</td>
+</tr>
+<tr>
+<td><code>cl_salv_table</code>（OO）</td>
+<td><strong>卡住斷線</strong>（<code>RFC_CLOSED</code>）</td>
+</tr>
+</tbody>
+</table>
+<p><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/26a0.svg" data-marp-twemoji=""/> 不是絕對可靠：某個特定物件 <code>programrun</code> 卡過一次，之後不管怎麼改都持續卡住<br />
+→ 用全新物件重現，若新物件正常 → 請使用者到 SAP GUI 測</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="19" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="20">
 <h2 id="10-selection-texts">10. Selection Texts</h2>
 <p>選取畫面預設顯示技術名稱（<code>P_CARRID</code>、<code>P_CONNID</code>、<code>P_DISP</code>）</p>
 <p>SE38 → 程式 → <strong>Goto → Text Elements → Selection Texts</strong><br />
@@ -1304,7 +1376,7 @@ footer { color: #999; }
 <li>純粹改善操作體驗，不影響權限／鎖定／篩選邏輯</li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1331,7 +1403,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="19" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="20" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1358,7 +1430,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="19">
+;" data-marpit-pagination-total="20">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex28</strong>：</p>
 <p>SU21 權限物件、PFCG 角色、Lock Object、<br />

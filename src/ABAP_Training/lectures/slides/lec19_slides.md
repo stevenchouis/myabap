@@ -102,14 +102,33 @@ F8 衝到懷疑區域 → F6 逐行走主流程
 
 「`gv_total` 不知道被誰改壞了」——逐行追太慢：
 
-1. Debugger 內按「Create Watchpoint」
-2. 填變數名（可加條件，如 `gv_total > 1000`）
+1. 先進 Debugger → 工具列 **Watchpoint**
+   （或選單 Breakpoints → Create Watchpoint）
+2. **Variable** 填變數名；**Free Condition Entry** 可填條件
+   如 `gv_total > 1000`（不填＝值一變就停）
 3. F8
 
 **該變數一被改動（或條件成立）程式立刻停下**
-停的位置就是兇手那一行
+黃色箭頭停在改完的**下一行**：往上看一行就是改掉它的程式碼
 
-→ 抓「全域變數被莫名改掉」的殺手鐧
+> 區域變數要等程式停在該 FORM 裡面才建得了
+
+---
+
+## 4. Watchpoint：查看與修改
+
+**查看**：Debugger 上方 **Break./Watchpoints** 分頁 → **Watchpoints** 子分頁
+→ 列出這次建立的所有 Watchpoint（變數、程式、條件）
+
+| 按鈕 | 用途 |
+|---|---|
+| **Change**（鉛筆） | 改條件／改變數，例：`> 1000` → `> 5000` |
+| **Activate / Deactivate** | 暫停但不刪，之後可再啟用 |
+| **Delete**（垃圾桶） | 刪除 |
+
+- 條件太寬、每圈都停 → **Change 收窄**，不用刪掉重建
+- 只在**這次除錯**有效，Debugger 關掉就消失
+- 監看越多執行越慢，用完就刪；內表也能設（查「在哪被清空」）
 
 ---
 

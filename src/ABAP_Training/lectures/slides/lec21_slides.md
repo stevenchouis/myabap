@@ -107,6 +107,22 @@ ABAP 基礎教育訓練（授課順序：接在講義 9（ALV）之後；Global 
 
 ---
 
+<!-- _class: compact -->
+
+## 3.1 Maintenance View：SM30 一次維護多張表
+
+典型：主檔＋文字表。標準範例 `V_TCURC` = 幣別 `TCURC` ＋ 說明 `TCURT`
+→ SM30 同一列填代碼與說明，存檔自動寫進兩張表；文字表自動取登入語言
+
+- 表之間**必須有外鍵**，連接條件沿用外鍵
+- 附屬表對主表**多對一**（主表一筆最多對一筆）
+- INNER JOIN；**程式不能 SELECT**，只能當 `TYPE`
+
+建立：SE11 → View → **Maintenance view** → Table/Join Conditions（主表＋**Relationships** 勾附屬表）
+→ View Fields（主表 Key 全部要有）→ Maint. Status → 啟用 → **Table Maintenance Generator** → SM30
+
+---
+
 ## 4. Header／Detail 關聯：外鍵與 Check Table
 
 訂單－客戶、明細－產品……本質都是 **Header（1）／Detail（多）** 關聯
@@ -155,6 +171,21 @@ klasse : ztr21_klasse
 - 建好要**掛到 Data Element**（`ZTR21_KLASSE` → Search Help 欄位）才會全面生效
 
 > **Parameter 欄位必須有 Data Element**！`KLNAME` 若只用內建型別會 Activate 失敗
+
+---
+
+## 4.4 Help View：Search Help 需要多張表時
+
+Selection Method 可以是：一張表／Database View／**Help View**
+
+| | Database View | Help View |
+|---|---|---|
+| JOIN | INNER：附屬表沒資料 → 整筆消失 | **OUTER**：主表全出現，附屬欄位留空 |
+| 連接條件 | 自己定 | 沿用外鍵 |
+| 程式 SELECT | 可以 | 不行 |
+
+- 只是加「文字表」說明 → 不需要 Help View，Selection Method 直接填主表
+- 標準範例 `H_T005` = 國家 `T005` ＋ 名稱 `T005T`
 
 ---
 

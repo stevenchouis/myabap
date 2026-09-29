@@ -55,6 +55,32 @@ SELECT-OPTIONS s_score FOR gv_score.
 
 `FOR` 後面必須是**已宣告的資料物件**（變數或 `TABLES` 表工作區的欄位），不能直接寫型別。
 
+### 3.0 舊程式常見的 `TABLES`：跟表同名的工作區
+
+```abap
+TABLES sflight.                          " 宣告一個叫 sflight 的結構變數
+SELECT-OPTIONS s_carr FOR sflight-carrid.
+```
+
+`TABLES dbtab.` 會宣告一個**跟 DDIC 表（或結構、View）同名、同結構的資料物件**，稱為「表工作區」（table work area），效果大約等於 `DATA sflight TYPE sflight.`。它就是一個跟表同名的結構變數，不是表本身，也不會去讀資料庫。
+
+舊程式常用它的原因，是 `SELECT-OPTIONS ... FOR` 後面要一個「已存在的資料物件」，寫一行 `TABLES` 之後，表裡每個欄位都能直接拿來當參考（`FOR sflight-carrid`、`FOR sflight-fldate`……），選擇畫面也會帶出該欄位的說明與 F4。不用 `TABLES` 的等效寫法：
+
+```abap
+DATA gv_carrid TYPE sflight-carrid.      " 參考 DDIC 欄位的型別
+SELECT-OPTIONS s_carr FOR gv_carrid.     " F4、欄位說明一樣會有
+```
+
+| | `TABLES sflight.` | `DATA gv_carrid TYPE sflight-carrid.` |
+|---|---|---|
+| 宣告出來的東西 | 整個結構，名稱跟表一樣 | 單一欄位變數，名稱自訂 |
+| 名稱會不會跟表搞混 | 會：程式裡的 `sflight` 有時指表、有時指這個變數 | 不會 |
+| 官方定位（`TABLES` 官方文件） | 只建議用在跟傳統畫面（dynpro）交換資料，例如講義 28 的 `TABLES sscrfields.`；Class 裡不能用 | 一般宣告的標準寫法 |
+
+維護舊程式時還會看到一個相關寫法：`SELECT SINGLE * FROM usr21 WHERE bname = ...`，**沒有寫 `INTO`**。這是因為程式前面有 `TABLES usr21.`，讀到的資料會自動放進同名的表工作區，之後直接用 `usr21-persnumber` 取值（講義 13 的 ZRFI0004 就是這樣寫）。這也是舊式寫法，自己寫時一律明確寫出 `INTO`。
+
+**課程的慣例**：選擇畫面可以用 `TABLES` 當 `FOR` 的參考（講義 13 的範例就是），但除此之外不要拿表工作區來存資料，資料一律放在自己宣告的 `gs_`／`gt_` 變數。
+
 ### 3.1 背後是一張 range 內表
 
 `s_score` 其實是一張內表，每列四個欄位——理解這個結構，就理解了 SELECT-OPTIONS 的一切：
@@ -78,6 +104,22 @@ INITIALIZATION.
   gs_score-high   = 100.
   APPEND gs_score TO s_score.
 ```
+
+### 3.2 另外兩個常見附加項：NO-DISPLAY 與 MATCHCODE OBJECT
+
+舊程式常看到這兩個附加項（講義 13 的實戰案例 ZRFI0004 都有用到）：
+
+```abap
+SELECT-OPTIONS: s_usnam FOR bkpf-usnam MATCHCODE OBJECT user_addr,  " 欄位掛 Search Help
+                s_bstat FOR bkpf-bstat NO-DISPLAY.                   " 不顯示在畫面上
+```
+
+| 附加項 | 效果 | 典型用途 |
+|---|---|---|
+| `MATCHCODE OBJECT sh` | 欄位的 F4 改用指定的 Search Help（`user_addr` 是依姓名找 SAP 帳號的標準 Search Help） | 欄位本身沒有合適的 F4，或想換成更好用的查詢畫面（Search Help 本身在講義 23 教） |
+| `NO-DISPLAY` | 欄位照樣存在、照樣能用 `IN`，但使用者看不到也不能填 | 程式內部自己組條件（如 ZRFI0004 把三個勾選框轉成文件狀態的 range 表 `s_bstat`），或讓別的程式用 `SUBMIT ... WITH` 傳值進來 |
+
+ZRFI0004 的做法值得學：畫面上給使用者三個好懂的勾選框（過帳文件／暫存文件／被刪除的暫存文件），程式在 START-OF-SELECTION 依勾選結果把對應的狀態碼一列列 `APPEND` 進 `NO-DISPLAY` 的 `s_bstat`，最後 SELECT 只要寫一句 `AND bstat IN s_bstat`，不用自己組一堆 `OR`。
 
 ## 4. IN：套用 range 條件
 

@@ -251,6 +251,31 @@ AT SELECTION-SCREEN.
 
 <!-- _class: compact -->
 
+## 7.1 SAP 圖示（Icon）的使用
+
+圖示＝4 字元代碼 `@xx@`（表 `ICON`，本系統 1,230 個），程式用常數 `icon_xxx`
+找圖示：交易碼 **`ICON`** 或報表 `SHOWICON`；7.02 後不必寫 `TYPE-POOLS icon`
+
+```abap
+gs_functxt-icon_id   = icon_tools.       " 1. 工具列按鈕：SMP_DYNTXT
+gs_functxt-icon_text = '工具'.
+gs_functxt-quickinfo = '開啟維護工具'.
+sscrfields-functxt_01 = gs_functxt.
+CLEAR gs_functxt.                        "    下一顆前先清空
+
+CALL FUNCTION 'ICON_CREATE'              " 2. 畫面按鈕：圖示＋文字＋提示
+  EXPORTING name = icon_execute_object text = '執行檢查' info = '依等級顯示結果'
+  IMPORTING result = b_run ...           "    結果：@xx@\Q提示@文字
+
+WRITE / icon_green_light AS ICON.        " 3. 清單：AS ICON（紅綠燈佔 4 格）
+```
+
+ALV：欄位放圖示代碼，Field Catalog 設 `icon = 'X'`｜示範：`ZR_TR28_ICON_DEMO`
+
+---
+
+<!-- _class: compact -->
+
 ## 7.1 Parameter Transaction `ZTR28_SM30`
 
 SE93 → `ZTR28_SM30` → Create

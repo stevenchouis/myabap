@@ -6,9 +6,9 @@
 
 - DDIC 三層件：Domain → Data Element → 表格欄位，各管什麼
 - SE11 建立透明表：鍵欄位、Delivery Class、Technical Settings
-- SM30 維護畫面（Table Maintenance Generator）
+- SM30 維護畫面（Table Maintenance Generator），以及一次維護多張表的 **Maintenance View**
 - **Header／Detail 兩表關聯**：外鍵（Foreign Key）與檢查表（Check Table）
-- **Search Help**：F4 值清單怎麼來的，跟外鍵的差別
+- **Search Help**：F4 值清單怎麼來的，跟外鍵的差別；需要多張表時的 **Help View**
 - Open SQL 寫入：`INSERT` / `UPDATE` / `MODIFY` / `DELETE`
 - LUW 與 `COMMIT WORK` / `ROLLBACK WORK` 觀念
 
@@ -58,6 +58,38 @@
 
 實務上參數表、對照表幾乎都配 SM30；正式環境的維護權限與是否產 TR 由 Delivery Class 與權限控制。
 
+### 3.1 Maintenance View：SM30 一次維護多張相關的表
+
+上面的做法是對**一張表**產生維護畫面。實務上很常遇到「一筆資料分在兩張表」：例如幣別代碼放在 `TCURC`，幣別的中英文說明放在文字表 `TCURT`（每種語言一筆）。如果分開維護，使用者要進兩次 SM30，新增一個幣別還得記得去另一張表補說明。
+
+**Maintenance View** 把這兩張表組成一個維護畫面。系統標準的 `V_TCURC` 就是這樣（2026-09-29 查系統定義）：
+
+| 項目 | `V_TCURC` 的內容 |
+|---|---|
+| 主表（Primary Table） | `TCURC`（幣別代碼） |
+| 附屬表（Secondary Table） | `TCURT`（幣別說明，文字表） |
+| 欄位 | `WAERS`、`ISOCD`、`ALTWR`（來自 TCURC）、`LTEXT`（來自 TCURT） |
+
+SM30 輸入 `V_TCURC` → Display 就能看到：同一個畫面上，代碼和說明在同一列，新增幣別時說明一起填，存檔時系統自動寫進兩張表。附屬表是**文字表**時，系統會自動只取「登入語言」那一筆說明。
+
+規則（官方文件 `ABENDDIC_MAINTENANCE_VIEWS`）：
+
+- 表與表之間**必須有外鍵**，連接條件直接沿用外鍵，不能自己寫（跟 Database View 不同）。
+- 附屬表對主表必須是**多對一**，也就是主表每一筆最多對到附屬表一筆，存檔時才寫得回去。所以最典型的用法就是「主檔＋文字表」。
+- 是 INNER JOIN；**程式不能 SELECT Maintenance View**，只能當 `TYPE` 用。程式要讀資料，還是直接讀那兩張表（或用 JOIN）。
+- 各欄位可以設維護屬性，例如「唯讀」、「隱藏」。
+
+建立步驟（SE11，GUI 操作）：
+
+1. SE11 → **View** → 輸入名稱（如 `ZV_TR21_XXX`）→ Create → 類型選 **Maintenance view**
+2. **Table/Join Conditions** 頁籤：填主表 → 按 **Relationships**，勾要加入的附屬表（系統依外鍵帶出連接條件）
+3. **View Fields** 頁籤：按 **Table fields** 選要出現的欄位；主表的 Key 欄位必須全部包含
+4. **Maint. Status** 頁籤：Access 選 `Read, change, delete and insert`
+5. 啟用 → Utilities → **Table Maintenance Generator**，跟上面一張表的做法一樣產生維護畫面
+6. SM30 輸入 View 名稱測試
+
+> 以上 SE11 畫面的按鈕與頁籤名稱依一般 SAP GUI 版本整理，如果你看到的畫面不一樣，請回報，講義會再修正。
+
 ## 4. Header／Detail 關聯：外鍵（Foreign Key）與檢查表（Check Table）
 
 實務上很少有表是孤立的：訂單表要串客戶主檔、明細表要串產品主檔——本質都是「**Header（主檔，1 那一邊）／Detail（明細，多那一邊）**」的關聯。本課用「班級（Header）－學生（Detail）」示範，跟講義 6 的 SCARR（航空公司）－SPFLI（航線）是同一種關係，只是這次自己動手建。
@@ -104,6 +136,24 @@ Search Help（搜尋輔助）解決的是另一個問題：**使用者不用背�
 - 建好後要**掛到 Data Element**（`ZTR21_KLASSE` 的 Further Characteristics 頁籤填 Search Help 名稱）才會在所有用到這個 DE 的欄位自動生效——這也是三層件「改一處全生效」精神的延伸
 
 > **實測踩過的坑**：Selection Method 表（`ZTR21_CLASS`）裡每個要當 Search Help Parameter 的欄位，都必須引用一個 **Data Element**——`KLNAME` 一開始貪方便直接用內建型別 `CHAR(40)`，結果 Search Help **Activate 失敗**。Search Help 靠 Data Element 才能解析欄位的語意（標籤、型別），純內建型別的欄位沒有這層資訊可以掛。這也是三層件「共用 Data Element」精神的另一個實際理由：不是只有標籤好看，Search Help 這種進階功能還真的依賴它。
+
+### 4.4 Help View：Search Help 需要多張表的資料時
+
+Search Help 的 **Selection Method**（資料來源）可以是三種東西：一張表、一個 Database View（講義 11 §2.1），或一個 **Help View**。
+
+- **一張表**：資料都在同一張表時用。如果只是要加上這張表的「文字表」說明，**不需要 Help View**，Selection Method 直接填主表，文字表的欄位也能當 Search Help 的參數（官方文件的建議）。
+- **Help View**：需要從其他相關表帶出補充資訊時用。它跟 Database View 最大的差別是 **OUTER JOIN**：主表每一筆都一定會出現，附屬表找不到對應資料時，那些欄位就留空，不會把整筆資料排除掉。系統標準範例 `H_T005` 就是國家 `T005` 加國家名稱 `T005T`。
+
+| | Database View 當來源 | Help View 當來源 |
+|---|---|---|
+| JOIN 種類 | INNER：附屬表沒資料，整筆消失 | OUTER：主表全部出現，附屬欄位留空 |
+| 連接條件 | 自己定 | 必須沿用外鍵 |
+| 程式能不能 SELECT | 可以 | 不行，只給 Search Help 用 |
+| 適合 | 常用附屬表的欄位來篩選 | 附屬表只是補充說明 |
+
+以「F4 選國家要順便看到國家名稱」為例：用 INNER JOIN 的話，還沒維護名稱的國家就不會出現在選單裡，使用者以為沒有這個國家；用 Help View 的 OUTER JOIN，國家照樣出現，只是名稱空白。
+
+建立方式：SE11 → View → 類型選 **Help view**，後面的 Table/Join Conditions、View Fields 步驟跟 3.1 的 Maintenance View 一樣（連接條件同樣要沿用外鍵）；建好後在 Search Help 的 Selection Method 填這個 View 名稱。
 
 ## 5. Open SQL 寫入
 

@@ -89,6 +89,64 @@ REPORT zr_tr12_print_layout NO STANDARD PAGE HEADING
 
 ---
 
+<!-- _class: compact -->
+
+## 1.1 超過 132 欄：LINE-SIZE 要對得上列印格式
+
+實務上看到的寫法：`LINE-SIZE 203` ＋ `LINE-COUNT 65(0)`
+
+- **203 不是標準印表機寬度**：更寬的報表靠壓縮字（約 17 CPI）或雷射橫印
+- 列印時要選**寬度 ≥ LINE-SIZE** 的格式（本系統實有）：
+
+| 格式 | 行 × 字 | 用途 |
+|---|---|---|
+| `X_65_80` | 65 × 80 | 窄機 |
+| `X_65_132` | 65 × 132 | **點矩陣寬機標準** |
+| `X_65_200` | 65 × 200 | 壓縮字／雷射橫印 |
+| `X_65_255` | 65 × 255 | 傳統清單最大寬度 |
+
+- 203 > 200 → 要用 `X_65_255`；**寬報表直接取 200 或 255**
+- `65(0)`：保留 0 行 → END-OF-PAGE 永不觸發
+
+---
+
+<!-- _class: compact -->
+
+## 1.2 要印到某台印表機：先查它支援的 Format
+
+工廠大型機：寬機點矩陣／行式印表機 → 通常 `X_65_132` 或 `X_65_255`
+（標籤機 Zebra 是另一套：Smartform／ZPL）
+
+**查法**：列印 → Output Device 選該印表機 → **Format 按 F4**
+（或 SPAD：Output Device → Device Type → Formats）
+
+**參數照格式名 `X_行數_寬度` 寫**：
+
+| 格式 | REPORT 參數 |
+|---|---|
+| `X_65_132` | `LINE-SIZE 132  LINE-COUNT 65(m)` |
+| `X_65_255` | `LINE-SIZE 255  LINE-COUNT 65(m)` |
+| `X_90_120` | `LINE-SIZE 120  LINE-COUNT 90(m)` |
+
+- **優先用 132**（正常字最好讀），放不下才用 255
+- LINE-SIZE 可比格式窄，不能比它寬
+- 固定印某台：`GET_PRINT_PARAMETERS` 的 `LAYOUT` 寫死格式
+
+---
+
+## 1.3 正常字距還是壓縮字？由 Format 決定
+
+**ABAP 沒有「切換壓縮字」的指令**，清單只管幾字×幾行
+
+1. LINE-SIZE → 列印時系統**帶出預設 Format**（可改選）
+2. SPAD 裡每個 Device Type × Format 有**印表機初始化控制碼**
+   → `X_65_255` 送出 17 CPI 壓縮字、`X_65_132` 維持 10 CPI
+3. Windows 驅動印表機：SAP 依格式寬度**自動縮字**
+
+> 程式只是**間接**影響；字距不對 → 請 Basis 查 SPAD，改程式沒用
+
+---
+
 ## 2. WRITE 精確排版
 
 格式：`WRITE /位置(寬度) 資料 [對齊/格式選項].`
@@ -155,6 +213,28 @@ WRITE /(60) '測試 2：雙擊這一行 → SUBMIT 另一支報表'.
 
 <!-- _class: compact -->
 
+## 位置／寬度用變數、SKIP TO LINE、算實際格數
+
+```abap
+WRITE AT /gv_pos(gv_wid) gs_item-name.      " 變數當位置寬度要加 AT
+WRITE: AT /01(t_optfm-hkont) t_docit-hkont,  " 欄寬集中在一個結構
+       AT    (t_optfm-kostl) t_docit-kostl.
+SKIP TO LINE 55.                             " 游標跳到本頁第 55 行
+
+gv_disp = cl_abap_list_utilities=>dynamic_output_length( gv_text ).
+gv_pos  = ( sy-linsz - gv_disp ) / 2.        " 中文標題置中
+WRITE AT /gv_pos gv_text.
+```
+
+- `t_optfm` 結構 = 欄位座標表的程式版：改一個 VALUE，所有列一起變
+- `SKIP TO LINE n`：n 超過頁長會變成普通 SKIP
+- 實測「東捷資訊ABC」：`strlen` = 7、`dynamic_output_length` = **11**
+- 以上都出自講義 13 的實戰案例 ZRFI0004
+
+---
+
+<!-- _class: compact -->
+
 ## 3. 頁首與頁尾（標準版型）
 
 ```abap
@@ -184,6 +264,23 @@ END-OF-PAGE.
 
 ---
 
+## 3.1 65(3) 怎麼算？最後一頁為何沒頁尾？
+
+**65 = 整頁總行數**：頁首標題、空行、明細、頁尾**全部算在內**
+`(3)` = 從 65 行裡劃出最後 3 行給頁尾
+
+> 上頁版型：頁首 5 行 ＋ 頁尾 3 行 → 明細最多 **57** 行
+
+⚠️ END-OF-PAGE **只在寫到保留區時觸發**（`NEW-PAGE` 不觸發）
+→ 最後一頁沒寫滿 → **沒有頁尾**；一頁的短報表完全沒頁尾
+
+實務常見改法：
+- `LINE-COUNT 65(0)`：不保留，65 行全給頁首＋明細
+- 明細 FORM 結尾自己印頁尾，先 `RESERVE n LINES.` 避免頁尾被拆兩頁
+- 代價：頁尾只在報表最後，不是每頁都有
+
+---
+
 ## 4. 驗證方式
 
 - 課堂上直接看螢幕清單（清單就是「虛擬的紙」）
@@ -199,6 +296,7 @@ END-OF-PAGE.
 | 症狀 | 原因 |
 |---|---|
 | END-OF-PAGE 完全不執行 | LINE-COUNT 沒寫保留行數 `(m)` |
+| 最後一頁沒頁尾 | 沒寫滿到保留區不觸發（3.1） |
 | 直欄歪掉對不齊 | 起始位置/寬度不一致——先畫座標表 |
 | 金額小數位錯 | 忘了 `CURRENCY`（JPY 是 0 位小數） |
 | 每頁上方多一行程式名 | 忘了 `NO STANDARD PAGE HEADING` |

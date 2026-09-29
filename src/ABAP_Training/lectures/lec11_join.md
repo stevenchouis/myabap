@@ -49,6 +49,36 @@ SELECT f~carrid f~connid f~fldate c~carrname
 - `ON` 是**串表條件**（兩表怎麼對上），`WHERE` 是**過濾條件**——語意不同，別混在一起。ON 可以多條件：`ON f~carrid = c~carrid AND f~connid = c~connid`。
 - INNER JOIN 的語意：**兩邊都對得上才輸出**。SFLIGHT 有但 SCARR 沒有的公司代碼，那些航班整筆消失。
 
+### 2.1 另一種寫法：Database View（把 JOIN 定義在 DDIC）
+
+同一組 JOIN 如果很多支程式都要用，可以在 SE11 建一個 **Database View**，把「哪幾張表、怎麼連、要哪些欄位」定義一次，程式就像讀一張表一樣讀它。系統標準的 `SFLIGHTS` 就是這種 View（2026-09-29 查系統定義表 `DD26S`／`DD28S`）：
+
+| 項目 | `SFLIGHTS` 的內容 |
+|---|---|
+| 基礎表 | `SCARR`、`SPFLI`、`SFLIGHT` |
+| JOIN 條件 | `SCARR-CARRID = SPFLI-CARRID`、`SPFLI-CARRID = SFLIGHT-CARRID`、`SPFLI-CONNID = SFLIGHT-CONNID`（再加各表 `MANDT` 相等） |
+| 欄位 | `CARRID`、`CARRNAME`、`CONNID`、`COUNTRYFR`、`CITYFROM`、`AIRPFROM`、`COUNTRYTO`、`CITYTO`、`AIRPTO`、`FLDATE`、`SEATSMAX`、`SEATSOCC` |
+
+程式讀它，不用寫 JOIN：
+
+```abap
+DATA gt_flights TYPE STANDARD TABLE OF sflights.     " View 本身就是一個結構型別
+
+SELECT carrid carrname connid cityfrom cityto fldate seatsmax seatsocc
+  FROM sflights
+  INTO CORRESPONDING FIELDS OF TABLE gt_flights
+  WHERE carrid = 'LH'.
+```
+
+| | Open SQL JOIN（本節上面） | Database View |
+|---|---|---|
+| JOIN 定義在哪 | 每支程式自己寫 | DDIC，寫一次大家共用 |
+| JOIN 種類 | INNER、LEFT OUTER 都可以 | **只有 INNER JOIN** |
+| 可以做什麼 | 讀取 | 讀取；SE16 也能直接看資料；只有一張基礎表時還能寫入 |
+| 建立方式 | 寫在程式裡 | SE11 → View → Database view：Table/Join Conditions 填表與條件（有外鍵時可按 Relationships 帶出）→ View Fields 選欄位 → 啟用 |
+
+選擇的原則：**只有一支程式用，直接在程式裡 JOIN；很多程式都要同一組 JOIN，才建 View**。S/4HANA 之後新開發改用 **CDS View**（CDS 課程），它能做 OUTER JOIN、計算欄位、關聯等 Database View 做不到的事；傳統 Database View 主要在維護舊程式時會遇到。
+
 ## 3. LEFT OUTER JOIN
 
 「左表全留，右表對不上就給初始值」：
@@ -77,6 +107,18 @@ SELECT c~carrid c~carrname f~connid f~fldate
 
 JOIN 的結果結構是自訂的、欄位東拼西湊，**建議一律用 CORRESPONDING FIELDS**：順序自由、可讀性高；代價是欄位名必須跟 SELECT 清單一致（別名欄位可用 `AS`：`SELECT f~price AS ticket_price ...`）。
 
+**`INTO` 與 `APPENDING`**：`INTO TABLE` 會先清空內表再放結果；`APPENDING TABLE`（或 `APPENDING CORRESPONDING FIELDS OF TABLE`）則是**接在內表現有資料後面**，原本的資料保留。講義 13 的實戰案例 ZRFI0004 就用它把幾張結構相近的表讀進同一種內表：
+
+```abap
+SELECT bukrs belnr gjahr buzei ... saknr AS hkont ...   " 這張表的科目欄叫 SAKNR，用 AS 改名對上內表的 HKONT
+  APPENDING CORRESPONDING FIELDS OF TABLE t_docps
+  FROM vbsegs
+  FOR ALL ENTRIES IN t_dochd
+  WHERE ausbk EQ t_dochd-bukrs AND belnr EQ t_dochd-belnr AND gjahr EQ t_dochd-gjahr.
+```
+
+`AS` 在這裡的用途跟 JOIN 一樣：來源欄位名跟內表欄位名不同時，用別名讓 `CORRESPONDING FIELDS` 對得上。
+
 ## 5. FOR ALL ENTRIES（先認識，維護會遇到）
 
 JOIN 之外的另一種跨表手法：先撈第一張表進內表，再用內表內容當第二張表的條件：
@@ -92,7 +134,7 @@ ENDIF.
 
 兩個必知：
 
-- **空表陷阱**：`gt_flights` 是空的時，FOR ALL ENTRIES 的 WHERE 整個失效＝**全表撈回**。前面那個 `IF ... IS NOT INITIAL` 不是可選的。
+- **空表陷阱**：`gt_flights` 是空的時，FOR ALL ENTRIES 的 WHERE 整個失效＝**全表撈回**。前面那個 `IF ... IS NOT INITIAL` 不是可選的。（ZRFI0004 沒有在 FOR ALL ENTRIES 前面寫 IF，是因為更早讀表頭時，查無資料就已經 `STOP` 了，驅動內表保證不會是空的。防呆一定要有，只是可以放在更前面。）
 - 結果會自動去除完全重複的列。
 
 新程式優先 JOIN；FOR ALL ENTRIES 用在 JOIN 不方便的場景（如來源是加工過的內表），舊程式裡極常見。

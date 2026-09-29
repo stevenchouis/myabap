@@ -125,6 +125,23 @@ AT SELECTION-SCREEN.
 
 ---
 
+## 查無資料提早結束：STOP
+
+```abap
+START-OF-SELECTION.
+  SELECT ... INTO TABLE t_dochd ...
+  IF t_dochd[] IS INITIAL.
+    MESSAGE i001(fot_b2a).     " 彈窗告知查無資料
+    STOP.
+  ENDIF.
+```
+
+- `STOP` 離開 START-OF-SELECTION（或 AT SELECTION-SCREEN）
+- ⚠️ 之後**照樣觸發 END-OF-SELECTION**（官方文件 `STOP`）
+  → END-OF-SELECTION 的輸出要能承受「內表是空的」
+
+---
+
 ## TOP-OF-PAGE：每頁表頭
 
 ```abap

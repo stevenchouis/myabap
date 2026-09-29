@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>Data Dictionary（SE11）：一張物件地圖，程式與畫面共用同一份定義</li>
@@ -187,7 +187,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
 <h2 id="1-data-dictionary%E4%B8%80%E5%BC%B5%E7%B3%BB%E7%B5%B1%E5%9C%B0%E5%9C%96">1. Data Dictionary：一張系統地圖</h2>
 <table>
 <thead>
@@ -229,7 +229,7 @@ footer { color: #999; }
 </table>
 <p>定義只寫<strong>一次</strong>，程式（<code>TYPE</code>）與畫面（Dynpro／SM30）<strong>共用同一份</strong></p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -256,7 +256,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="4" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="4" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -283,15 +283,56 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="2-global-type-%E5%9B%9E%E9%A1%A7">2. Global Type 回顧</h2>
-<p>觀念（內建型別／Local Type／Global Type 三層、判斷準則）已在<strong>講義 6 第 1.1 節</strong>講過</p>
-<p>回顧最關鍵的一點：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA lv_matnr TYPE mara-matnr.    &quot; 升級後自動變 40 碼
-DATA lv_matnr TYPE c LENGTH 18.   &quot; 升級後默默截斷，不報錯
-</code></pre>
-<p><strong>型別的定義權交給系統唯一來源，程式只負責「引用」</strong><br />
-本講重點：決定「引用現成的」還是「自己建一個」</p>
+;" data-marpit-pagination-total="17">
+<h2 id="11-view-%E7%9A%84%E5%9B%9B%E7%A8%AE%E9%A1%9E%E5%9E%8Bse11-%E2%86%92-view">1.1 View 的四種類型（SE11 → View）</h2>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>做什麼</th>
+<th>JOIN</th>
+<th>程式 SELECT</th>
+<th>標準範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Database View</strong></td>
+<td>多表 JOIN 成一個物件</td>
+<td>INNER，條件自定</td>
+<td><img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/2705.svg" data-marp-twemoji=""/></td>
+<td><code>SFLIGHTS</code></td>
+</tr>
+<tr>
+<td><strong>Projection View</strong></td>
+<td>一張表的部分欄位</td>
+<td>單表</td>
+<td><img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/2705.svg" data-marp-twemoji=""/></td>
+<td><code>DEMO_SPFLI</code></td>
+</tr>
+<tr>
+<td><strong>Maintenance View</strong></td>
+<td>SM30 一次維護多張表</td>
+<td>INNER，沿用外鍵</td>
+<td><img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/274c.svg" data-marp-twemoji=""/></td>
+<td><code>V_TCURC</code></td>
+</tr>
+<tr>
+<td><strong>Help View</strong></td>
+<td>Search Help 的資料來源</td>
+<td><strong>OUTER</strong>，沿用外鍵</td>
+<td><img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/274c.svg" data-marp-twemoji=""/></td>
+<td><code>H_T005</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>四種都能當 <code>TYPE</code>；SELECT Maintenance／Help View 啟用直接報錯：<br />
+<code>&quot;V_TCURC&quot; is not declared as a table, projection view, or database view</code></li>
+<li>新開發讀多表 → <strong>CDS View</strong>；Maintenance／Help View 仍常用</li>
+<li>本系統傳統 View 只能用 <strong>SE11</strong> 建立（ADT 讀不到）</li>
+<li>詳見：講義 11 §2.1（Database）、講義 21 §3.1（Maintenance）、§4.4（Help）</li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -347,29 +388,15 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="22-%E9%87%8D%E7%94%A8%E6%A8%99%E6%BA%96%E5%9E%8B%E5%88%A5-vs-%E8%87%AA%E5%BB%BA">2.2 重用標準型別 vs 自建</h2>
-<table>
-<thead>
-<tr>
-<th>情境</th>
-<th>做法</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>語意跟標準欄位完全一樣（航空公司代碼、物料號碼…）</td>
-<td><strong>重用標準 Data Element</strong></td>
-</tr>
-<tr>
-<td>公司獨有的業務概念（自訂加成比例、審核狀態…）</td>
-<td><strong>自建 Domain／Data Element</strong></td>
-</tr>
-</tbody>
-</table>
-<p>判斷原則：</p>
-<p><strong>先搜尋標準有沒有語意相符的 Data Element</strong><br />
-有就重用，沒有才自建</p>
+;" data-marpit-pagination-total="17">
+<h2 id="2-global-type-%E5%9B%9E%E9%A1%A7">2. Global Type 回顧</h2>
+<p>觀念（內建型別／Local Type／Global Type 三層、判斷準則）已在<strong>講義 6 第 1.1 節</strong>講過</p>
+<p>回顧最關鍵的一點：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA lv_matnr TYPE mara-matnr.    &quot; 升級後自動變 40 碼
+DATA lv_matnr TYPE c LENGTH 18.   &quot; 升級後默默截斷，不報錯
+</code></pre>
+<p><strong>型別的定義權交給系統唯一來源，程式只負責「引用」</strong><br />
+本講重點：決定「引用現成的」還是「自己建一個」</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -425,15 +452,29 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="3-%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E8%87%AA%E5%BB%BA-z-%E8%A1%A8">3. 為什麼要自建 Z 表</h2>
-<p>標準系統管不到的東西：客製參數、控制開關、公司自己的對照表</p>
-<ul>
-<li><strong>SM30 讓不會寫程式的人也能維護資料</strong></li>
-<li>業務人員自己改參數、加設定，不用工程師介入</li>
-<li><strong>資料</strong>維護不需要傳輸請求，只有<strong>表結構</strong>變更才需要</li>
-</ul>
-<p>分工：講義 21 教「怎麼建」，本講講「為什麼建、重用 vs 自建」</p>
+;" data-marpit-pagination-total="17">
+<h2 id="22-%E9%87%8D%E7%94%A8%E6%A8%99%E6%BA%96%E5%9E%8B%E5%88%A5-vs-%E8%87%AA%E5%BB%BA">2.2 重用標準型別 vs 自建</h2>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>語意跟標準欄位完全一樣（航空公司代碼、物料號碼…）</td>
+<td><strong>重用標準 Data Element</strong></td>
+</tr>
+<tr>
+<td>公司獨有的業務概念（自訂加成比例、審核狀態…）</td>
+<td><strong>自建 Domain／Data Element</strong></td>
+</tr>
+</tbody>
+</table>
+<p>判斷原則：</p>
+<p><strong>先搜尋標準有沒有語意相符的 Data Element</strong><br />
+有就重用，沒有才自建</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -489,33 +530,15 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="4-check-table%EF%BC%8F%E5%A4%96%E9%8D%B5%EF%BC%8Fsearch-help">4. Check Table／外鍵／Search Help</h2>
-<table>
-<thead>
-<tr>
-<th>名詞</th>
-<th>解決什麼問題</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Check Table</td>
-<td>誰是「合法值清單」，可以是<strong>標準表</strong>（如 SCARR）</td>
-</tr>
-<tr>
-<td>Foreign Key</td>
-<td>畫面輸入時擋掉不合法的值（<strong>只管畫面，不管 Open SQL</strong>）</td>
-</tr>
-<tr>
-<td>Search Help</td>
-<td>F4 選單；欄位重用已掛好 Search Help 的標準 DE，<strong>不用自己建</strong></td>
-</tr>
-</tbody>
-</table>
-<p>本講案例：Check Table 直接指向標準表 <code>SCARR</code><br />
-欄位重用標準 Data Element <code>S_CARR_ID</code><br />
-→ Search Help 一個都不用建</p>
+;" data-marpit-pagination-total="17">
+<h2 id="3-%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E8%87%AA%E5%BB%BA-z-%E8%A1%A8">3. 為什麼要自建 Z 表</h2>
+<p>標準系統管不到的東西：客製參數、控制開關、公司自己的對照表</p>
+<ul>
+<li><strong>SM30 讓不會寫程式的人也能維護資料</strong></li>
+<li>業務人員自己改參數、加設定，不用工程師介入</li>
+<li><strong>資料</strong>維護不需要傳輸請求，只有<strong>表結構</strong>變更才需要</li>
+</ul>
+<p>分工：講義 21 教「怎麼建」，本講講「為什麼建、重用 vs 自建」</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -571,19 +594,33 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="5-%E7%A8%8B%E5%BC%8F%E5%BC%95%E7%94%A8-ddic-%E7%89%A9%E4%BB%B6%E7%9A%84%E5%AF%AB%E6%B3%95">5. 程式引用 DDIC 物件的寫法</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gs_row  TYPE ztable.                    &quot; 整列（work area）
-DATA gv_val  TYPE ztable-field.              &quot; 單一欄位
-DATA gt_rows TYPE STANDARD TABLE OF ztable.  &quot; 整張表
-
-DATA gv_carrid TYPE s_carr_id.       &quot; 直接引用 Data Element
-DATA gv_carrid TYPE scarr-carrid.    &quot; 透過表格路徑（型別相同）
-</code></pre>
-<ul>
-<li>變數意義跟某張表綁得緊 → <code>TYPE 表-欄位</code></li>
-<li>通用的標準概念 → 直接 <code>TYPE s_carr_id</code></li>
-</ul>
+;" data-marpit-pagination-total="17">
+<h2 id="4-check-table%EF%BC%8F%E5%A4%96%E9%8D%B5%EF%BC%8Fsearch-help">4. Check Table／外鍵／Search Help</h2>
+<table>
+<thead>
+<tr>
+<th>名詞</th>
+<th>解決什麼問題</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Check Table</td>
+<td>誰是「合法值清單」，可以是<strong>標準表</strong>（如 SCARR）</td>
+</tr>
+<tr>
+<td>Foreign Key</td>
+<td>畫面輸入時擋掉不合法的值（<strong>只管畫面，不管 Open SQL</strong>）</td>
+</tr>
+<tr>
+<td>Search Help</td>
+<td>F4 選單；欄位重用已掛好 Search Help 的標準 DE，<strong>不用自己建</strong></td>
+</tr>
+</tbody>
+</table>
+<p>本講案例：Check Table 直接指向標準表 <code>SCARR</code><br />
+欄位重用標準 Data Element <code>S_CARR_ID</code><br />
+→ Search Help 一個都不用建</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -639,7 +676,75 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
+<h2 id="5-%E7%A8%8B%E5%BC%8F%E5%BC%95%E7%94%A8-ddic-%E7%89%A9%E4%BB%B6%E7%9A%84%E5%AF%AB%E6%B3%95">5. 程式引用 DDIC 物件的寫法</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gs_row  TYPE ztable.                    &quot; 整列（work area）
+DATA gv_val  TYPE ztable-field.              &quot; 單一欄位
+DATA gt_rows TYPE STANDARD TABLE OF ztable.  &quot; 整張表
+
+DATA gv_carrid TYPE s_carr_id.       &quot; 直接引用 Data Element
+DATA gv_carrid TYPE scarr-carrid.    &quot; 透過表格路徑（型別相同）
+</code></pre>
+<ul>
+<li>變數意義跟某張表綁得緊 → <code>TYPE 表-欄位</code></li>
+<li>通用的標準概念 → 直接 <code>TYPE s_carr_id</code></li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="10" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
 <h2 id="6-%E6%A1%88%E4%BE%8B%E6%97%BA%E5%AD%A3%E5%8A%A0%E6%88%90%E8%A8%AD%E5%AE%9A%E8%A1%A8">6. 案例：旺季加成設定表</h2>
 <p>情境：財務想針對特定航空公司設定「旺季加成百分比」<br />
 自己在 SM30 維護，報表讀這張表算營收試算</p>
@@ -648,93 +753,6 @@ footer { color: #999; }
 <li>Domain <code>ZTR25_SURPCT</code>（DEC，兩位小數，值域 0～100）</li>
 <li>Data Element <code>ZTR25_SURPCT</code>，標籤「旺季加成百分比」</li>
 </ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="10" style="--paginate:true;--class:compact;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="62-%E7%AC%AC%E4%B8%89%E7%A8%AE-global-type-%E6%A8%A1%E5%BC%8F">6.2 第三種 Global Type 模式</h2>
-<p><code>ACTIVE</code> 欄位若直接用 <code>CHAR 1</code>：SM30 標題顯示 <code>+</code>、沒有 F4 選單</p>
-<p>標準已有通用是／否 <strong>Domain <code>XFELD</code></strong>（<code>X</code> 是、空白 否）<br />
-標準 Data Element <code>XFELD</code> 故意不帶標籤 → 我們自建 DE <strong>重用 Domain、補標籤</strong></p>
-<table>
-<thead>
-<tr>
-<th>模式</th>
-<th>例子</th>
-<th>自建什麼</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>整個 DE 重用</td>
-<td><code>CARRID</code> 用 <code>S_CARR_ID</code></td>
-<td>什麼都不用建</td>
-</tr>
-<tr>
-<td>完全自建</td>
-<td><code>SURCHARGE_PCT</code> 用 <code>ZTR25_SURPCT</code></td>
-<td>Domain＋DE 都自建</td>
-</tr>
-<tr>
-<td><strong>重用 Domain、自建標籤</strong></td>
-<td><code>ACTIVE</code> 用 <code>ZTR25_ACTIVE</code></td>
-<td>只補標籤</td>
-</tr>
-</tbody>
-</table>
-<p>遇到「是／否」旗標：先找 <code>XFELD</code> 這類通用 Domain</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -790,7 +808,94 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
+<h2 id="62-%E7%AC%AC%E4%B8%89%E7%A8%AE-global-type-%E6%A8%A1%E5%BC%8F">6.2 第三種 Global Type 模式</h2>
+<p><code>ACTIVE</code> 欄位若直接用 <code>CHAR 1</code>：SM30 標題顯示 <code>+</code>、沒有 F4 選單</p>
+<p>標準已有通用是／否 <strong>Domain <code>XFELD</code></strong>（<code>X</code> 是、空白 否）<br />
+標準 Data Element <code>XFELD</code> 故意不帶標籤 → 我們自建 DE <strong>重用 Domain、補標籤</strong></p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>例子</th>
+<th>自建什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>整個 DE 重用</td>
+<td><code>CARRID</code> 用 <code>S_CARR_ID</code></td>
+<td>什麼都不用建</td>
+</tr>
+<tr>
+<td>完全自建</td>
+<td><code>SURCHARGE_PCT</code> 用 <code>ZTR25_SURPCT</code></td>
+<td>Domain＋DE 都自建</td>
+</tr>
+<tr>
+<td><strong>重用 Domain、自建標籤</strong></td>
+<td><code>ACTIVE</code> 用 <code>ZTR25_ACTIVE</code></td>
+<td>只補標籤</td>
+</tr>
+</tbody>
+</table>
+<p>遇到「是／否」旗標：先找 <code>XFELD</code> 這類通用 Domain</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="12" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
 <h2 id="63-%E5%BB%BA%E7%AB%8B%E8%A1%A8-ztr25_surchg">6.3 建立表 <code>ZTR25_SURCHG</code></h2>
 <table>
 <thead>
@@ -835,7 +940,7 @@ footer { color: #999; }
       and carrid = ztr25_surchg.carrid;
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -862,7 +967,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="12" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" data-marpit-pagination="13" style="--paginate:true;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -889,7 +994,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
 <h2 id="64-sm30-%E9%A9%97%E8%AD%89%E5%85%8D%E8%B2%BB%E6%8B%BF%E5%88%B0%E4%B8%89%E6%A8%A3%E6%9D%B1%E8%A5%BF">6.4 SM30 驗證：免費拿到三樣東西</h2>
 <p><strong>先在 SE80 建 Function Group <code>ZFG_TR25</code></strong>（TMG 要放進已存在的 FG）<br />
 再建 Table Maintenance Generator（<code>&amp;NC&amp;</code>、Function Group <code>ZFG_TR25</code>）<br />
@@ -901,82 +1006,6 @@ footer { color: #999; }
 </ol>
 <p>對照講義 21：自建概念的 Search Help 要手工建<br />
 這裡重用標準 DE → <strong>完全不用建</strong></p>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="13" style="--paginate:true;--class:compact;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="65-%E7%A8%8B%E5%BC%8F%E8%AE%80%E5%8F%96%E5%8A%A0%E6%88%90%E7%87%9F%E6%94%B6%E8%A9%A6%E7%AE%97">6.5 程式讀取：加成營收試算</h2>
-<p>還沒學 FORM／JOIN → 三張表各自讀進內表，再 <code>READ TABLE</code> 對照</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT * FROM sflight INTO TABLE gt_flight WHERE seatsocc &gt; 0.
-SELECT * FROM scarr   INTO TABLE gt_scarr.
-SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.   &quot; TYPE ztr25_tt_surchg
-
-LOOP AT gt_flight INTO gs_flight.
-  CLEAR gs_rev.
-  gs_rev-carrid = gs_flight-carrid.   &quot; …其他航班欄位
-  READ TABLE gt_scarr INTO gs_scarr WITH KEY carrid = gs_flight-carrid.
-  IF sy-subrc = 0. gs_rev-carrname = gs_scarr-carrname. ENDIF.
-  READ TABLE gt_surchg INTO gs_surchg WITH KEY carrid = gs_flight-carrid.
-  IF sy-subrc = 0.                    &quot; 找不到＝沒設定，維持初始值
-    gs_rev-active = gs_surchg-active.
-    gs_rev-surcharge_pct = gs_surchg-surcharge_pct.
-  ENDIF.
-  &quot; 計算 revenue／revenue_adj 後 APPEND gs_rev TO gt_rev
-ENDLOOP.
-</code></pre>
-<p>沒設定的公司照樣出現 → 講義 11 用一句 <code>LEFT OUTER JOIN</code> 就能完成</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -1032,22 +1061,27 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="66-ddic-table-type%E8%A1%A8%E6%A0%BC%E7%B4%9A%E7%9A%84-global-type">6.6 DDIC Table Type：表格級的 Global Type</h2>
-<p>講義 4 的 <code>TYPES tt_xxx</code> 是 <strong>Local Type</strong>，只有那支程式看得到<br />
-多支程式共用同一種表格參數 → 各寫一份，改欄位要改好幾處</p>
-<p>SE11 建 <code>ZTR25_TT_SURCHG</code>：</p>
-<ol>
-<li>Data Type → Table Type</li>
-<li><strong>Line Type</strong> 直接填 <code>ZTR25_SURCHG</code>（表格本身可當 Line Type）</li>
-<li>Access Mode：<code>Standard Table</code></li>
-</ol>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gt_surchg TYPE ztr25_tt_surchg.
-SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.
+;" data-marpit-pagination-total="17">
+<h2 id="65-%E7%A8%8B%E5%BC%8F%E8%AE%80%E5%8F%96%E5%8A%A0%E6%88%90%E7%87%9F%E6%94%B6%E8%A9%A6%E7%AE%97">6.5 程式讀取：加成營收試算</h2>
+<p>還沒學 FORM／JOIN → 三張表各自讀進內表，再 <code>READ TABLE</code> 對照</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT * FROM sflight INTO TABLE gt_flight WHERE seatsocc &gt; 0.
+SELECT * FROM scarr   INTO TABLE gt_scarr.
+SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.   &quot; TYPE ztr25_tt_surchg
+
+LOOP AT gt_flight INTO gs_flight.
+  CLEAR gs_rev.
+  gs_rev-carrid = gs_flight-carrid.   &quot; …其他航班欄位
+  READ TABLE gt_scarr INTO gs_scarr WITH KEY carrid = gs_flight-carrid.
+  IF sy-subrc = 0. gs_rev-carrname = gs_scarr-carrname. ENDIF.
+  READ TABLE gt_surchg INTO gs_surchg WITH KEY carrid = gs_flight-carrid.
+  IF sy-subrc = 0.                    &quot; 找不到＝沒設定，維持初始值
+    gs_rev-active = gs_surchg-active.
+    gs_rev-surcharge_pct = gs_surchg-surcharge_pct.
+  ENDIF.
+  &quot; 計算 revenue／revenue_adj 後 APPEND gs_rev TO gt_rev
+ENDLOOP.
 </code></pre>
-<p>真正的用途是當<strong>參數型別</strong>：講義 8 的 FORM <code>CHANGING</code>、<br />
-講義 15 的 FM 介面（<strong>一定要</strong> DDIC 型別，取代舊式 <code>TABLES</code>）</p>
-<p>只有本程式用 → 就地 <code>TYPES</code>；多支程式／FM 共用 → DDIC Table Type</p>
+<p>沒設定的公司照樣出現 → 講義 11 用一句 <code>LEFT OUTER JOIN</code> 就能完成</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -1103,7 +1137,78 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
+<h2 id="66-ddic-table-type%E8%A1%A8%E6%A0%BC%E7%B4%9A%E7%9A%84-global-type">6.6 DDIC Table Type：表格級的 Global Type</h2>
+<p>講義 4 的 <code>TYPES tt_xxx</code> 是 <strong>Local Type</strong>，只有那支程式看得到<br />
+多支程式共用同一種表格參數 → 各寫一份，改欄位要改好幾處</p>
+<p>SE11 建 <code>ZTR25_TT_SURCHG</code>：</p>
+<ol>
+<li>Data Type → Table Type</li>
+<li><strong>Line Type</strong> 直接填 <code>ZTR25_SURCHG</code>（表格本身可當 Line Type）</li>
+<li>Access Mode：<code>Standard Table</code></li>
+</ol>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gt_surchg TYPE ztr25_tt_surchg.
+SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.
+</code></pre>
+<p>真正的用途是當<strong>參數型別</strong>：講義 8 的 FORM <code>CHANGING</code>、<br />
+講義 15 的 FM 介面（<strong>一定要</strong> DDIC 型別，取代舊式 <code>TABLES</code>）</p>
+<p>只有本程式用 → 就地 <code>TYPES</code>；多支程式／FM 共用 → DDIC Table Type</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="16" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
 <h2 id="7-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">7. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -1148,7 +1253,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1175,7 +1280,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="16" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="17" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1202,7 +1307,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex25</strong>：</p>
 <p>自建 Domain／DE（加成百分比）＋ 表（Key 重用標準 DE、<br />

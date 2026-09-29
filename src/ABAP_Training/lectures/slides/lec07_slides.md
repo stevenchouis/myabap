@@ -139,6 +139,42 @@ INITIALIZATION.
 
 ---
 
+## 舊程式常見的 TABLES：跟表同名的工作區
+
+```abap
+TABLES sflight.                        " ≈ DATA sflight TYPE sflight.
+SELECT-OPTIONS s_carr FOR sflight-carrid.
+
+DATA gv_carrid TYPE sflight-carrid.    " 等效寫法（建議）
+SELECT-OPTIONS s_carr2 FOR gv_carrid.
+```
+
+- 宣告一個**跟表同名、同結構的變數**，不是表本身、不讀資料庫
+- 舊程式愛用：一行 `TABLES`，每個欄位都能當 `FOR` 的參考
+- 官方：只建議用在跟畫面交換資料（如講義 28 `TABLES sscrfields.`）
+- 看到 `SELECT SINGLE * FROM usr21 WHERE ...` **沒寫 INTO**？
+  → 資料放進了同名的表工作區 `usr21`（舊式，自己寫一律加 INTO）
+
+---
+
+## 另外兩個常見附加項
+
+```abap
+SELECT-OPTIONS: s_usnam FOR bkpf-usnam MATCHCODE OBJECT user_addr,
+                s_bstat FOR bkpf-bstat NO-DISPLAY.
+```
+
+| 附加項 | 效果 |
+|---|---|
+| `MATCHCODE OBJECT sh` | F4 改用指定的 Search Help（講義 23） |
+| `NO-DISPLAY` | 欄位存在、能用 `IN`，但畫面看不到 |
+
+實戰（講義 13 的 ZRFI0004）：畫面給三個好懂的勾選框
+→ 程式把勾選結果轉成狀態碼，APPEND 進 `NO-DISPLAY` 的 `s_bstat`
+→ SELECT 只寫一句 `AND bstat IN s_bstat`
+
+---
+
 ## 4. IN：套用 range 條件
 
 三個場景通用：

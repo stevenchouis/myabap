@@ -224,6 +224,122 @@ AT SELECTION-SCREEN.
 
 **這正是本題最重要的教學重點**：同樣是「從另一支程式跳進主檔維護」，寫法上的差別（有沒有包一層 Wrapper）決定了資安上是天壤之別。實務上兩個入口不會同時開放給一般使用者——會像講義第 6 節說的，只把 T-code `ZTR28_MAINT` 的權限給一般使用者，`ZR_TR28_PRICE_CALC` 這顆按鈕的存在本身就是要提醒學員「這樣寫是不對的」，不是真的建議這樣上線；正因為這顆按鈕已經足夠示範對照，不需要再另外寫一支專門的清單程式重複同一件事。
 
+### 7.1 按鈕加上圖示：SAP 圖示（Icon）的使用
+
+實務程式的按鈕常常是「圖示＋文字」，例如講義 13 的傳票清單 ZRFI0004：
+
+```abap
+DATA gs_functxt TYPE smp_dyntxt.
+
+INITIALIZATION.
+  gs_functxt-icon_id   = icon_tools.        " 圖示：工具
+  gs_functxt-icon_text = text-t03.          " 圖示旁邊的按鈕文字
+  sscrfields-functxt_01 = gs_functxt.
+```
+
+#### 圖示是什麼：一個 4 字元的代碼
+
+SAP 的每個圖示都有一個 **4 個字元的內部代碼**，格式是 `@xx@`。SAP GUI 在畫面上遇到這種代碼，就把它畫成對應的圖案。系統裡的圖示登記在表 **`ICON`**，本系統共 1,230 個。實際查到的幾個例子：
+
+| 常數名稱 | 代碼 | 圖示 |
+|---|---|---|
+| `icon_green_light` | `@08@` | 綠燈 |
+| `icon_yellow_light` | `@09@` | 黃燈 |
+| `icon_red_light` | `@0A@` | 紅燈 |
+| `icon_okay` | `@0V@` | 勾勾（確定） |
+| `icon_cancel` | `@0W@` | 叉叉（取消） |
+| `icon_change` | `@0Z@` | 鉛筆（修改） |
+| `icon_display` | `@10@` | 眼鏡（顯示） |
+| `icon_tools` | `@45@` | 工具 |
+
+程式裡**不要直接寫 `'@45@'`**，要用常數 `icon_tools`：名稱看得懂，而且 SAP 保證常數跟代碼永遠對得上。這些常數定義在 Type Group（型別群組）**`ICON`** 裡。舊程式會先寫 `TYPE-POOLS: icon.` 才能用；ABAP 7.02 之後系統會自動載入，不寫也可以（本系統實測，沒寫 `TYPE-POOLS` 也能正常啟用）。看到舊程式的 `TYPE-POOLS` 保留無妨，新程式可以省略。
+
+#### 怎麼找到想要的圖示
+
+- **交易碼 `ICON`**：列出所有圖示的圖案、名稱與代碼，可依名稱搜尋，最方便。
+- 報表 **`SHOWICON`**（SE38 執行）：同樣列出全部圖示。
+- 找到後，名稱轉成小寫就是常數名稱，例如 `ICON_EXECUTE_OBJECT` → `icon_execute_object`。
+
+#### 用法一：選擇畫面工具列按鈕（FUNCTION KEY）
+
+`sscrfields-functxt_01～04` 除了直接放文字（本節前面的寫法），也可以放一個 **`SMP_DYNTXT`** 結構，一次給圖示、文字和滑鼠提示：
+
+| `SMP_DYNTXT` 欄位 | 用途 |
+|---|---|
+| `icon_id` | 圖示代碼，填 `icon_xxx` 常數 |
+| `icon_text` | 按鈕上圖示旁邊的文字 |
+| `quickinfo` | 滑鼠停在按鈕上時的提示文字 |
+
+```abap
+DATA gs_functxt TYPE smp_dyntxt.
+
+INITIALIZATION.
+  gs_functxt-icon_id   = icon_tools.
+  gs_functxt-icon_text = '工具'.
+  gs_functxt-quickinfo = '開啟維護工具'.
+  sscrfields-functxt_01 = gs_functxt.
+
+  CLEAR gs_functxt.                         " 第二顆按鈕前先清空，不然會帶到上一顆的提示
+  gs_functxt-icon_id   = icon_display.
+  gs_functxt-icon_text = '查詢'.
+  sscrfields-functxt_02 = gs_functxt.
+```
+
+ZRFI0004 設第二顆按鈕前先 `CLEAR functxt`，就是這個原因：同一個結構重複使用，沒清空的欄位會沿用上一顆的值。
+
+#### 用法二：選擇畫面上的按鈕（PUSHBUTTON）與 `ICON_CREATE`
+
+選擇畫面本身也可以放按鈕。按鈕文字欄位要同時放圖示和文字時，用標準 FM **`ICON_CREATE`** 組出來：
+
+```abap
+SELECTION-SCREEN PUSHBUTTON /1(20) b_run USER-COMMAND zrun.   " b_run 是按鈕文字欄位
+
+INITIALIZATION.
+  CALL FUNCTION 'ICON_CREATE'
+    EXPORTING
+      name                  = icon_execute_object   " 圖示
+      text                  = '執行檢查'            " 圖示旁的文字
+      info                  = '依等級顯示結果'      " 滑鼠提示
+    IMPORTING
+      result                = b_run
+    EXCEPTIONS
+      icon_not_found        = 1
+      outputfield_too_short = 2
+      OTHERS                = 3.
+  IF sy-subrc <> 0.
+    b_run = '執行檢查'.                     " 組不出來就只放文字
+  ENDIF.
+
+AT SELECTION-SCREEN.
+  IF sscrfields-ucomm = 'ZRUN'.             " PUSHBUTTON 的代碼是自己取的 USER-COMMAND
+    ...
+  ENDIF.
+```
+
+`ICON_CREATE` 組出來的內容長這樣（實測）：`@0V\Q全部資料已處理@處理完成`，也就是「`@`＋圖示代碼＋`\Q`＋提示文字＋`@`＋顯示文字」。SAP GUI 看得懂這個格式，會畫成「圖示＋文字，滑鼠停上去顯示提示」。所以目標欄位要夠長，放不下時 FM 會回 `outputfield_too_short`。
+
+#### 用法三：清單輸出圖示（WRITE ... AS ICON）
+
+報表常用紅黃綠燈表示狀態，`WRITE` 加 `AS ICON`：
+
+```abap
+CASE gs_result-level.
+  WHEN 'S'.
+    WRITE / icon_green_light AS ICON.
+  WHEN 'W'.
+    WRITE / icon_yellow_light AS ICON.
+  WHEN OTHERS.
+    WRITE / icon_red_light AS ICON.
+ENDCASE.
+WRITE gs_result-text.
+```
+
+- `AS ICON` 告訴清單這個欄位要畫成圖示。
+- 圖示在清單上的寬度不一定一樣：表 `ICON` 的 `OLENG` 欄位記錄每個圖示佔幾格，例如紅綠燈佔 4 格，工具、勾勾佔 2 格。排版欄位座標表時要把這個寬度算進去（講義 12）。
+- ALV 也能顯示圖示：欄位內容放圖示代碼，Field Catalog 設 `icon = 'X'`（講義 9）。
+
+完整示範程式：`ZR_TR28_ICON_DEMO`（`$TMP`，快照 [zr_tr28_icon_demo.prog.abap](../zr_tr28_icon_demo.prog.abap)），四種用法都在裡面。圖示要在 SAP GUI 上執行才看得到（SE38 → F8），無頭執行只看得到代碼與文字。
+
 ## 8. 整體流程總結
 
 ```

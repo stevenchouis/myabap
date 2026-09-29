@@ -114,6 +114,7 @@ gv_last = gv_last - 1.
 
 - 拆年月日就用位移：`gv_today+0(4)` 年、`gv_today+4(2)` 月、`gv_today+6(2)` 日。
 - `WRITE gv_today.` 會依使用者設定格式化（如 05.07.2026）；要固定格式就自己用位移拼。
+- 想要「跟畫面上 WRITE 出來一樣的格式」、但先放進變數再用：`WRITE gv_today TO gv_text.`（`gv_text` 是 `c LENGTH 10`）。`WRITE ... TO` 不輸出到清單，只把格式化後的文字放進變數，日期、金額、數字都適用；加 `LEFT-JUSTIFIED` 可以靠左、去掉前面的空白（講義 13 的 ZRFI0004 用它組「頁碼 3/&」）。
 - 時間 `t`（HHMMSS）同理可加減秒數；`sy-uzeit` 是現在時間。
 - 星期幾、加「工作日」、民國年轉換等進階需求：標準 FM 都有（如 `DATE_COMPUTE_DAY`），講義 15 學會 CALL FUNCTION 後就能用——先記得「日期難題先找標準 FM」。
 

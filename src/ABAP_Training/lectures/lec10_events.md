@@ -78,6 +78,19 @@ END-OF-SELECTION.
   WRITE: / '符合條件筆數：', gv_count.
 ```
 
+**查無資料時提早結束：`STOP`**。舊程式常這樣寫（講義 13 的實戰案例 ZRFI0004）：
+
+```abap
+START-OF-SELECTION.
+  SELECT ... INTO TABLE t_dochd ...
+  IF t_dochd[] IS INITIAL.
+    MESSAGE i001(fot_b2a).     " 彈窗告知查無資料
+    STOP.
+  ENDIF.
+```
+
+注意 `STOP` 不是「整支程式直接結束」：官方文件（`STOP`）規定，它會離開目前的 `START-OF-SELECTION`（或 `AT SELECTION-SCREEN`）區塊，然後**照樣觸發 `END-OF-SELECTION`**。所以 END-OF-SELECTION 裡的輸出邏輯仍然會跑，要能承受「內表是空的」這個狀況（ZRFI0004 的 `LOOP AT t_dochd` 遇到空表就什麼都不印，剛好沒問題）。`STOP` 只能用在報表程式的這幾個事件，寫在 FORM 裡時要確定它是從這些事件呼叫的。
+
 ### 3.4 TOP-OF-PAGE：每頁表頭
 
 ```abap

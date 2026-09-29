@@ -23,10 +23,30 @@
 | Structure（結構） | 純欄位組合，**不對應資料庫表**（如畫面用的暫存結構） | 程式、畫面 |
 | Table（透明表） | 對應資料庫的真實表 | Open SQL、SM30、程式 |
 | Table Type | 表格型別（「很多列」的定義），可跨程式共用 | 方法/FM 的表格參數 |
+| View（檢視） | 把一張或多張表的欄位「組合」起來看，本身不存資料（四種，見 1.1） | 程式、SM30、Search Help |
 | Search Help | F4 選單來源 | 畫面欄位、Data Element |
 | Lock Object | 產生 ENQUEUE/DEQUEUE FM，防止多人同時改同一筆（講義 21 提過，進階課題） | 程式 |
 
 關鍵觀念：**這些定義只寫一次，程式（用 `TYPE`）跟畫面（Dynpro/SM30）共用同一份**——這就是接下來 Global Type 觀念的基礎。
+
+### 1.1 View 的四種類型
+
+View 不存資料，只是把表的欄位組合起來。SE11 → **View** 建立時要先選類型，四種用途完全不同：
+
+| 類型 | 做什麼 | 表怎麼連 | 程式能 SELECT 嗎 | 系統標準範例 | 詳見 |
+|---|---|---|---|---|---|
+| **Database View** | 多張表 JOIN 成一個物件，程式直接讀 | INNER JOIN，條件自己定（可參考外鍵帶出） | ✅ 可以 | `SFLIGHTS`（SCARR＋SPFLI＋SFLIGHT） | 講義 11 §2.1 |
+| **Projection View** | 只露出**一張表**的部分欄位 | 只有一張表 | ✅ 可以 | `DEMO_SPFLI`（SPFLI 部分欄位） | 本節 |
+| **Maintenance View** | 讓 SM30 **一次維護多張相關的表**（例如主檔＋文字表） | INNER JOIN，必須沿用外鍵 | ❌ 不行 | `V_TCURC`（幣別 TCURC＋文字 TCURT） | 講義 21 §3.1 |
+| **Help View** | 當 **Search Help** 的資料來源 | **OUTER JOIN**，必須沿用外鍵 | ❌ 不行 | `H_T005`（國家 T005＋文字 T005T） | 講義 21 §4.4 |
+
+- 四種都能當 `TYPE` 用（`DATA gs_x TYPE v_tcurc.`），因為 View 在 DDIC 裡也定義了一個結構。
+- 對 Maintenance View 或 Help View 寫 `SELECT`，啟用時直接報錯（2026-09-29 實測）：`"V_TCURC" is not declared as a table, projection view, or database view in ABAP Dictionary`。錯誤訊息本身就列出了能 SELECT 的只有「表、Projection View、Database View」三種。
+- 只有 Database View 會在資料庫真的建一個 SQL View；另外三種只存在 DDIC，由 SAP 自己處理。
+- S/4HANA 之後，要在程式裡讀多表組合，SAP 建議改用 **CDS View**（CDS 課程），傳統 Database View 以維護舊程式為主。Maintenance View 與 Help View 則沒有被取代，SM30 和 Search Help 仍然常用。
+- 在這個系統，傳統 View 只能用 **SE11** 建立和查看，ADT／Eclipse 讀不到（2026-09-29 實測，讀 `SFLIGHTS` 回傳錯誤），跟 Search Help 一樣屬於 GUI 操作。
+
+示範程式 `ZR_TR25_VIEW_DEMO`（`$TMP`，快照 [zr_tr25_view_demo.prog.abap](../zr_tr25_view_demo.prog.abap)）：讀 `SFLIGHTS`、`DEMO_SPFLI`，並把 `V_TCURC`、`H_T005` 當型別使用。
 
 ## 2. Global Type 回顧：為什麼要引用 DDIC 型別，不要寫死
 

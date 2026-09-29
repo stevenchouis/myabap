@@ -74,6 +74,25 @@ ABAP 基礎教育訓練（授課順序：接在講義 7 之後、講義 8a 之�
 
 ---
 
+<!-- _class: compact -->
+
+## 1.1 View 的四種類型（SE11 → View）
+
+| 類型 | 做什麼 | JOIN | 程式 SELECT | 標準範例 |
+|---|---|---|---|---|
+| **Database View** | 多表 JOIN 成一個物件 | INNER，條件自定 | ✅ | `SFLIGHTS` |
+| **Projection View** | 一張表的部分欄位 | 單表 | ✅ | `DEMO_SPFLI` |
+| **Maintenance View** | SM30 一次維護多張表 | INNER，沿用外鍵 | ❌ | `V_TCURC` |
+| **Help View** | Search Help 的資料來源 | **OUTER**，沿用外鍵 | ❌ | `H_T005` |
+
+- 四種都能當 `TYPE`；SELECT Maintenance／Help View 啟用直接報錯：
+  `"V_TCURC" is not declared as a table, projection view, or database view`
+- 新開發讀多表 → **CDS View**；Maintenance／Help View 仍常用
+- 本系統傳統 View 只能用 **SE11** 建立（ADT 讀不到）
+- 詳見：講義 11 §2.1（Database）、講義 21 §3.1（Maintenance）、§4.4（Help）
+
+---
+
 ## 2. Global Type 回顧
 
 觀念（內建型別／Local Type／Global Type 三層、判斷準則）已在**講義 6 第 1.1 節**講過
