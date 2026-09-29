@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>紙本報表的規格思維：點矩陣印表機、行寬與行數</li>
@@ -186,7 +186,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
 <h2 id="1-%E5%85%88%E6%87%82%E7%B4%99%E5%86%8D%E8%AB%87%E6%8E%92%E7%89%88">1. 先懂紙，再談排版</h2>
 <p>傳統表單常印在<strong>點矩陣印表機＋連續報表紙</strong>：</p>
 <table>
@@ -221,7 +221,7 @@ footer { color: #999; }
                             LINE-COUNT 65(3).
 </code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -248,7 +248,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="4" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="4" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -275,7 +275,120 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
+<h2 id="%E8%B2%B7%E7%B4%99%E6%99%82%E7%9C%8B%E5%88%B0%E7%9A%84%E8%A6%8F%E6%A0%BC80-%E8%A1%8C132-%E8%A1%8C%E4%B8%AD%E4%B8%80%E5%88%80">買紙時看到的規格：80 行、132 行、中一刀</h2>
+<p>品名範例：「電腦報表紙 9.5×11×1P（80行）中一刀」</p>
+<table>
+<thead>
+<tr>
+<th>品名上的字</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>9.5×11</code></td>
+<td>紙寬×紙長（英吋），寬度含兩側孔條</td>
+</tr>
+<tr>
+<td><code>80行</code>／<code>132行</code></td>
+<td><strong>一行幾個字</strong>（＝<code>LINE-SIZE</code>），不是一頁幾行</td>
+</tr>
+<tr>
+<td><code>1P</code>／<code>2P</code></td>
+<td>聯數</td>
+</tr>
+<tr>
+<td>全頁／<strong>中一刀</strong>／中二刀</td>
+<td>一頁中間沒撕線／<strong>1 條撕線（上下兩張 9.5×5.5）</strong>／2 條（三張）</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>撕法</th>
+<th>每張長度</th>
+<th>可印行數（6 LPI）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全頁</td>
+<td>11 吋</td>
+<td>66</td>
+</tr>
+<tr>
+<td>中一刀</td>
+<td>5.5 吋</td>
+<td><strong>33</strong></td>
+</tr>
+<tr>
+<td>中二刀</td>
+<td>約 3.67 吋</td>
+<td>22</td>
+</tr>
+</tbody>
+</table>
+<p>中一刀印半張單據：① <code>LINE-COUNT 33</code>＋Basis 建 33 行自訂格式＋印表機頁長 5.5 吋<br />
+或 ② 維持 66 行，一頁排兩張，第二張 <code>SKIP TO LINE 34</code><br />
+→ <strong>先問清楚用哪種紙</strong>，行寬與頁長都由紙決定</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="5" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
 <h2 id="report-%E9%99%84%E5%8A%A0%E9%A0%85">REPORT 附加項</h2>
 <table>
 <thead>
@@ -304,103 +417,6 @@ footer { color: #999; }
 沒有保留行數，END-OF-PAGE 永遠不觸發<br />
 ——「頁尾怎麼不出來」的最常見原因</p>
 </blockquote>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="5" style="--paginate:true;--class:compact;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="11-%E8%B6%85%E9%81%8E-132-%E6%AC%84line-size-%E8%A6%81%E5%B0%8D%E5%BE%97%E4%B8%8A%E5%88%97%E5%8D%B0%E6%A0%BC%E5%BC%8F">1.1 超過 132 欄：LINE-SIZE 要對得上列印格式</h2>
-<p>實務上看到的寫法：<code>LINE-SIZE 203</code> ＋ <code>LINE-COUNT 65(0)</code></p>
-<ul>
-<li><strong>203 不是標準印表機寬度</strong>：更寬的報表靠壓縮字（約 17 CPI）或雷射橫印</li>
-<li>列印時要選<strong>寬度 ≥ LINE-SIZE</strong> 的格式（本系統實有）：</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>格式</th>
-<th>行 × 字</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>X_65_80</code></td>
-<td>65 × 80</td>
-<td>窄機</td>
-</tr>
-<tr>
-<td><code>X_65_132</code></td>
-<td>65 × 132</td>
-<td><strong>點矩陣寬機標準</strong></td>
-</tr>
-<tr>
-<td><code>X_65_200</code></td>
-<td>65 × 200</td>
-<td>壓縮字／雷射橫印</td>
-</tr>
-<tr>
-<td><code>X_65_255</code></td>
-<td>65 × 255</td>
-<td>傳統清單最大寬度</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>203 &gt; 200 → 要用 <code>X_65_255</code>；<strong>寬報表直接取 200 或 255</strong></li>
-<li><code>65(0)</code>：保留 0 行 → END-OF-PAGE 永不觸發</li>
-</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -456,7 +472,104 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
+<h2 id="11-%E8%B6%85%E9%81%8E-132-%E6%AC%84line-size-%E8%A6%81%E5%B0%8D%E5%BE%97%E4%B8%8A%E5%88%97%E5%8D%B0%E6%A0%BC%E5%BC%8F">1.1 超過 132 欄：LINE-SIZE 要對得上列印格式</h2>
+<p>實務上看到的寫法：<code>LINE-SIZE 203</code> ＋ <code>LINE-COUNT 65(0)</code></p>
+<ul>
+<li><strong>203 不是標準印表機寬度</strong>：更寬的報表靠壓縮字（約 17 CPI）或雷射橫印</li>
+<li>列印時要選<strong>寬度 ≥ LINE-SIZE</strong> 的格式（本系統實有）：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>行 × 字</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>X_65_80</code></td>
+<td>65 × 80</td>
+<td>窄機</td>
+</tr>
+<tr>
+<td><code>X_65_132</code></td>
+<td>65 × 132</td>
+<td><strong>點矩陣寬機標準</strong></td>
+</tr>
+<tr>
+<td><code>X_65_200</code></td>
+<td>65 × 200</td>
+<td>壓縮字／雷射橫印</td>
+</tr>
+<tr>
+<td><code>X_65_255</code></td>
+<td>65 × 255</td>
+<td>傳統清單最大寬度</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>203 &gt; 200 → 要用 <code>X_65_255</code>；<strong>寬報表直接取 200 或 255</strong></li>
+<li><code>65(0)</code>：保留 0 行 → END-OF-PAGE 永不觸發</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="7" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
 <h2 id="12-%E8%A6%81%E5%8D%B0%E5%88%B0%E6%9F%90%E5%8F%B0%E5%8D%B0%E8%A1%A8%E6%A9%9F%E5%85%88%E6%9F%A5%E5%AE%83%E6%94%AF%E6%8F%B4%E7%9A%84-format">1.2 要印到某台印表機：先查它支援的 Format</h2>
 <p>工廠大型機：寬機點矩陣／行式印表機 → 通常 <code>X_65_132</code> 或 <code>X_65_255</code><br />
 （標籤機 Zebra 是另一套：Smartform／ZPL）</p>
@@ -490,73 +603,6 @@ footer { color: #999; }
 <li>LINE-SIZE 可比格式窄，不能比它寬</li>
 <li>固定印某台：<code>GET_PRINT_PARAMETERS</code> 的 <code>LAYOUT</code> 寫死格式</li>
 </ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" data-marpit-pagination="7" style="--paginate:true;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="13-%E6%AD%A3%E5%B8%B8%E5%AD%97%E8%B7%9D%E9%82%84%E6%98%AF%E5%A3%93%E7%B8%AE%E5%AD%97%E7%94%B1-format-%E6%B1%BA%E5%AE%9A">1.3 正常字距還是壓縮字？由 Format 決定</h2>
-<p><strong>ABAP 沒有「切換壓縮字」的指令</strong>，清單只管幾字×幾行</p>
-<ol>
-<li>LINE-SIZE → 列印時系統<strong>帶出預設 Format</strong>（可改選）</li>
-<li>SPAD 裡每個 Device Type × Format 有<strong>印表機初始化控制碼</strong><br />
-→ <code>X_65_255</code> 送出 17 CPI 壓縮字、<code>X_65_132</code> 維持 10 CPI</li>
-<li>Windows 驅動印表機：SAP 依格式寬度<strong>自動縮字</strong></li>
-</ol>
-<blockquote>
-<p>程式只是<strong>間接</strong>影響；字距不對 → 請 Basis 查 SPAD，改程式沒用</p>
-</blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -612,39 +658,17 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="2-write-%E7%B2%BE%E7%A2%BA%E6%8E%92%E7%89%88">2. WRITE 精確排版</h2>
-<p>格式：<code>WRITE /位置(寬度) 資料 [對齊/格式選項].</code></p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">LOOP AT gt_items INTO gs_item.
-  WRITE: /1  '|', 2(6)   gs_item-itemno,
-          9  '|', 10(20) gs_item-name,
-          31 '|', 32(10) gs_item-qty,
-          43 '|', 44(14) gs_item-price  CURRENCY 'USD',
-          59 '|', 60(16) gs_item-amount CURRENCY 'USD',
-          77 '|'.
-ENDLOOP.
-</code></pre>
-<table>
-<thead>
-<tr>
-<th>寫法</th>
-<th>意義</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>/1</code></td>
-<td>換行後從第 1 欄開始</td>
-</tr>
-<tr>
-<td><code>10(20)</code></td>
-<td>從第 10 欄開始、寬度 20</td>
-</tr>
-</tbody>
-</table>
+;" data-marpit-pagination-total="17">
+<h2 id="13-%E6%AD%A3%E5%B8%B8%E5%AD%97%E8%B7%9D%E9%82%84%E6%98%AF%E5%A3%93%E7%B8%AE%E5%AD%97%E7%94%B1-format-%E6%B1%BA%E5%AE%9A">1.3 正常字距還是壓縮字？由 Format 決定</h2>
+<p><strong>ABAP 沒有「切換壓縮字」的指令</strong>，清單只管幾字×幾行</p>
+<ol>
+<li>LINE-SIZE → 列印時系統<strong>帶出預設 Format</strong>（可改選）</li>
+<li>SPAD 裡每個 Device Type × Format 有<strong>印表機初始化控制碼</strong><br />
+→ <code>X_65_255</code> 送出 17 CPI 壓縮字、<code>X_65_132</code> 維持 10 CPI</li>
+<li>Windows 驅動印表機：SAP 依格式寬度<strong>自動縮字</strong></li>
+</ol>
 <blockquote>
-<p>排版的全部秘密：<strong>畫一張欄位座標表</strong><br />
-頁首、明細、頁尾都照表寫，直欄就對得筆直</p>
+<p>程式只是<strong>間接</strong>影響；字距不對 → 請 Basis 查 SPAD，改程式沒用</p>
 </blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
@@ -701,43 +725,40 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="%E6%A0%BC%E5%BC%8F%E9%81%B8%E9%A0%85%E8%88%87%E8%BC%94%E5%8A%A9%E6%8C%87%E4%BB%A4">格式選項與輔助指令</h2>
+;" data-marpit-pagination-total="17">
+<h2 id="2-write-%E7%B2%BE%E7%A2%BA%E6%8E%92%E7%89%88">2. WRITE 精確排版</h2>
+<p>格式：<code>WRITE /位置(寬度) 資料 [對齊/格式選項].</code></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">LOOP AT gt_items INTO gs_item.
+  WRITE: /1  '|', 2(6)   gs_item-itemno,
+          9  '|', 10(20) gs_item-name,
+          31 '|', 32(10) gs_item-qty,
+          43 '|', 44(14) gs_item-price  CURRENCY 'USD',
+          59 '|', 60(16) gs_item-amount CURRENCY 'USD',
+          77 '|'.
+ENDLOOP.
+</code></pre>
 <table>
 <thead>
 <tr>
-<th>選項</th>
-<th>效果</th>
+<th>寫法</th>
+<th>意義</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>CENTERED</code> / <code>RIGHT-JUSTIFIED</code></td>
-<td>指定寬度內置中／靠右</td>
+<td><code>/1</code></td>
+<td>換行後從第 1 欄開始</td>
 </tr>
 <tr>
-<td><code>CURRENCY 'USD'</code></td>
-<td>依幣別小數位格式化——<strong>金額欄必加</strong></td>
-</tr>
-<tr>
-<td><code>NO-GAP</code></td>
-<td>下一個輸出緊貼</td>
-</tr>
-<tr>
-<td><code>NO-ZERO</code></td>
-<td>數字 0 顯示成空白</td>
-</tr>
-<tr>
-<td><code>USING EDIT MASK '__:__'</code></td>
-<td>自訂顯示遮罩</td>
+<td><code>10(20)</code></td>
+<td>從第 10 欄開始、寬度 20</td>
 </tr>
 </tbody>
 </table>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">ULINE.                 &quot; 整行橫線
-ULINE AT /1(77).       &quot; 從第 1 欄畫 77 字元寬
-SKIP.                  &quot; 空一行（SKIP 3. 空三行）
-NEW-PAGE.              &quot; 強制換頁
-</code></pre>
+<blockquote>
+<p>排版的全部秘密：<strong>畫一張欄位座標表</strong><br />
+頁首、明細、頁尾都照表寫，直欄就對得筆直</p>
+</blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -793,7 +814,99 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
+<h2 id="%E6%A0%BC%E5%BC%8F%E9%81%B8%E9%A0%85%E8%88%87%E8%BC%94%E5%8A%A9%E6%8C%87%E4%BB%A4">格式選項與輔助指令</h2>
+<table>
+<thead>
+<tr>
+<th>選項</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CENTERED</code> / <code>RIGHT-JUSTIFIED</code></td>
+<td>指定寬度內置中／靠右</td>
+</tr>
+<tr>
+<td><code>CURRENCY 'USD'</code></td>
+<td>依幣別小數位格式化——<strong>金額欄必加</strong></td>
+</tr>
+<tr>
+<td><code>NO-GAP</code></td>
+<td>下一個輸出緊貼</td>
+</tr>
+<tr>
+<td><code>NO-ZERO</code></td>
+<td>數字 0 顯示成空白</td>
+</tr>
+<tr>
+<td><code>USING EDIT MASK '__:__'</code></td>
+<td>自訂顯示遮罩</td>
+</tr>
+</tbody>
+</table>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">ULINE.                 &quot; 整行橫線
+ULINE AT /1(77).       &quot; 從第 1 欄畫 77 字元寬
+SKIP.                  &quot; 空一行（SKIP 3. 空三行）
+NEW-PAGE.              &quot; 強制換頁
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="11" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
 <h2 id="21-%E4%B8%AD%E6%96%87%E5%AD%97%E6%9C%83%E8%A2%AB%E6%88%AA%E6%8E%89%E5%AF%AC%E5%BA%A6%E8%A6%81%E8%87%AA%E5%B7%B1%E7%B5%A6%E8%B6%B3">2.1 中文字會被截掉：寬度要自己給足</h2>
 <p><code>WRITE</code> 的預設輸出寬度<strong>按字數</strong>算，但中文字、<code>→</code> 每個<strong>佔兩格</strong><br />
 → 結尾被截掉，<strong>沒有錯誤訊息</strong></p>
@@ -806,78 +919,6 @@ WRITE /(60) '測試 2：雙擊這一行 → SUBMIT 另一支報表'.
 <p>用 <code>(寬度)</code> 指定輸出寬度，中文一個字抓<strong>兩格</strong><br />
 欄位座標表裡的中文欄位也以「字數 × 2」規劃</p>
 <p>（講義 10 驗證程式實測，2026-09-25）</p>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" class="compact" data-marpit-pagination="11" style="--paginate:true;--class:compact;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="%E4%BD%8D%E7%BD%AE%EF%BC%8F%E5%AF%AC%E5%BA%A6%E7%94%A8%E8%AE%8A%E6%95%B8skip-to-line%E7%AE%97%E5%AF%A6%E9%9A%9B%E6%A0%BC%E6%95%B8">位置／寬度用變數、SKIP TO LINE、算實際格數</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">WRITE AT /gv_pos(gv_wid) gs_item-name.      &quot; 變數當位置寬度要加 AT
-WRITE: AT /01(t_optfm-hkont) t_docit-hkont,  &quot; 欄寬集中在一個結構
-       AT    (t_optfm-kostl) t_docit-kostl.
-SKIP TO LINE 55.                             &quot; 游標跳到本頁第 55 行
-
-gv_disp = cl_abap_list_utilities=&gt;dynamic_output_length( gv_text ).
-gv_pos  = ( sy-linsz - gv_disp ) / 2.        &quot; 中文標題置中
-WRITE AT /gv_pos gv_text.
-</code></pre>
-<ul>
-<li><code>t_optfm</code> 結構 = 欄位座標表的程式版：改一個 VALUE，所有列一起變</li>
-<li><code>SKIP TO LINE n</code>：n 超過頁長會變成普通 SKIP</li>
-<li>實測「東捷資訊ABC」：<code>strlen</code> = 7、<code>dynamic_output_length</code> = <strong>11</strong></li>
-<li>以上都出自講義 13 的實戰案例 ZRFI0004</li>
-</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -933,7 +974,79 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
+<h2 id="%E4%BD%8D%E7%BD%AE%EF%BC%8F%E5%AF%AC%E5%BA%A6%E7%94%A8%E8%AE%8A%E6%95%B8skip-to-line%E7%AE%97%E5%AF%A6%E9%9A%9B%E6%A0%BC%E6%95%B8">位置／寬度用變數、SKIP TO LINE、算實際格數</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">WRITE AT /gv_pos(gv_wid) gs_item-name.      &quot; 變數當位置寬度要加 AT
+WRITE: AT /01(t_optfm-hkont) t_docit-hkont,  &quot; 欄寬集中在一個結構
+       AT    (t_optfm-kostl) t_docit-kostl.
+SKIP TO LINE 55.                             &quot; 游標跳到本頁第 55 行
+
+gv_disp = cl_abap_list_utilities=&gt;dynamic_output_length( gv_text ).
+gv_pos  = ( sy-linsz - gv_disp ) / 2.        &quot; 中文標題置中
+WRITE AT /gv_pos gv_text.
+</code></pre>
+<ul>
+<li><code>t_optfm</code> 結構 = 欄位座標表的程式版：改一個 VALUE，所有列一起變</li>
+<li><code>SKIP TO LINE n</code>：n 超過頁長會變成普通 SKIP</li>
+<li>實測「東捷資訊ABC」：<code>strlen</code> = 7、<code>dynamic_output_length</code> = <strong>11</strong></li>
+<li>以上都出自講義 13 的實戰案例 ZRFI0004</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="13" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
 <h2 id="3-%E9%A0%81%E9%A6%96%E8%88%87%E9%A0%81%E5%B0%BE%E6%A8%99%E6%BA%96%E7%89%88%E5%9E%8B">3. 頁首與頁尾（標準版型）</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TOP-OF-PAGE.
   WRITE: /1   '程式：', (20) sy-repid,
@@ -958,76 +1071,6 @@ END-OF-PAGE.
 <li><code>sy-pagno</code>：目前頁次，頁首直接印</li>
 <li>明細超過一頁 → 系統自動「頁尾 → 換頁 → 頁首」接下去</li>
 <li>「頁次 n / <strong>總頁數</strong>」的回填技巧 → 期末實作講義 13</li>
-</ul>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" data-marpit-pagination="13" style="--paginate:true;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="31-653-%E6%80%8E%E9%BA%BC%E7%AE%97%E6%9C%80%E5%BE%8C%E4%B8%80%E9%A0%81%E7%82%BA%E4%BD%95%E6%B2%92%E9%A0%81%E5%B0%BE">3.1 65(3) 怎麼算？最後一頁為何沒頁尾？</h2>
-<p><strong>65 = 整頁總行數</strong>：頁首標題、空行、明細、頁尾<strong>全部算在內</strong><br />
-<code>(3)</code> = 從 65 行裡劃出最後 3 行給頁尾</p>
-<blockquote>
-<p>上頁版型：頁首 5 行 ＋ 頁尾 3 行 → 明細最多 <strong>57</strong> 行</p>
-</blockquote>
-<p><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/26a0.svg" data-marp-twemoji=""/> END-OF-PAGE <strong>只在寫到保留區時觸發</strong>（<code>NEW-PAGE</code> 不觸發）<br />
-→ 最後一頁沒寫滿 → <strong>沒有頁尾</strong>；一頁的短報表完全沒頁尾</p>
-<p>實務常見改法：</p>
-<ul>
-<li><code>LINE-COUNT 65(0)</code>：不保留，65 行全給頁首＋明細</li>
-<li>明細 FORM 結尾自己印頁尾，先 <code>RESERVE n LINES.</code> 避免頁尾被拆兩頁</li>
-<li>代價：頁尾只在報表最後，不是每頁都有</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-theme="default" data-style="section {
@@ -1084,14 +1127,20 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
-<h2 id="4-%E9%A9%97%E8%AD%89%E6%96%B9%E5%BC%8F">4. 驗證方式</h2>
+;" data-marpit-pagination-total="17">
+<h2 id="31-653-%E6%80%8E%E9%BA%BC%E7%AE%97%E6%9C%80%E5%BE%8C%E4%B8%80%E9%A0%81%E7%82%BA%E4%BD%95%E6%B2%92%E9%A0%81%E5%B0%BE">3.1 65(3) 怎麼算？最後一頁為何沒頁尾？</h2>
+<p><strong>65 = 整頁總行數</strong>：頁首標題、空行、明細、頁尾<strong>全部算在內</strong><br />
+<code>(3)</code> = 從 65 行裡劃出最後 3 行給頁尾</p>
+<blockquote>
+<p>上頁版型：頁首 5 行 ＋ 頁尾 3 行 → 明細最多 <strong>57</strong> 行</p>
+</blockquote>
+<p><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/26a0.svg" data-marp-twemoji=""/> END-OF-PAGE <strong>只在寫到保留區時觸發</strong>（<code>NEW-PAGE</code> 不觸發）<br />
+→ 最後一頁沒寫滿 → <strong>沒有頁尾</strong>；一頁的短報表完全沒頁尾</p>
+<p>實務常見改法：</p>
 <ul>
-<li>課堂上直接看螢幕清單（清單就是「虛擬的紙」）</li>
-<li>看分頁效果：故意產生超過一頁的測試資料<br />
-（DO 150 TIMES 塞 150 筆）<br />
-→ 觀察每頁的頁首、頁尾、頁次遞增</li>
-<li>列印預覽：清單畫面 → 列印 → 選格式（X_65_132）</li>
+<li><code>LINE-COUNT 65(0)</code>：不保留，65 行全給頁首＋明細</li>
+<li>明細 FORM 結尾自己印頁尾，先 <code>RESERVE n LINES.</code> 避免頁尾被拆兩頁</li>
+<li>代價：頁尾只在報表最後，不是每頁都有</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-theme="default" data-style="section {
@@ -1148,7 +1197,71 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
+<h2 id="4-%E9%A9%97%E8%AD%89%E6%96%B9%E5%BC%8F">4. 驗證方式</h2>
+<ul>
+<li>課堂上直接看螢幕清單（清單就是「虛擬的紙」）</li>
+<li>看分頁效果：故意產生超過一頁的測試資料<br />
+（DO 150 TIMES 塞 150 筆）<br />
+→ 觀察每頁的頁首、頁尾、頁次遞增</li>
+<li>列印預覽：清單畫面 → 列印 → 選格式（X_65_132）</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="16" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="17">
 <h2 id="5-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">5. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -1189,7 +1302,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1216,7 +1329,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="16" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="17" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1243,7 +1356,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="16">
+;" data-marpit-pagination-total="17">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex12</strong>：</p>
 <p>做一張 132 欄寬、65(3) 行的多頁明細報表</p>
