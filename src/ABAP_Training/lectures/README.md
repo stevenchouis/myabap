@@ -11,30 +11,30 @@
 | 1 | [lec01](lec01_syntax_basics.md) | 語法基礎：statement、句點、註解、鏈式寫法 | [ex01](../ex01_syntax_basics.md) |
 | 2 | [lec02](lec02_type_like.md) | 變數與 TYPE / LIKE / CONSTANTS | [ex02](../ex02_type_like.md) |
 | 3 | [lec17](lec17_control_flow.md) | 運算與流程控制：IF / CASE / DO / WHILE / CHECK | [ex17](../ex17_control_flow.md) |
-| 4 | [lec18](lec18_string_date.md) | 字串與日期處理：CONCATENATE / SPLIT / 位移 | [ex18](../ex18_string_date.md) |
+| 4 | [lec18](lec18_string_date.md) | 字串與日期處理：CONCATENATE / SPLIT / 位移、WRITE ... TO | [ex18](../ex18_string_date.md) |
 | 5 | [lec03](lec03_structures.md) | Local Type 與 Structure | [ex03](../ex03_structures.md) |
 | 6 | [lec04](lec04_itab_basics.md) | Internal Table 基礎：APPEND / LOOP / READ TABLE | [ex04](../ex04_itab_basics.md) |
 | 7 | [lec05](lec05_itab_advanced.md) | Internal Table 進階：SORT / MODIFY / DELETE | [ex05](../ex05_itab_advanced.md) |
-| 8 | [lec19](lec19_debugging.md) | 除錯 Debugger：中斷點、單步、Watchpoint、ST22 | [ex19](../ex19_debugging.md) |
+| 8 | [lec19](lec19_debugging.md) | 除錯 Debugger：中斷點、單步、Watchpoint（建立／查看／修改）、ST22 | [ex19](../ex19_debugging.md) |
 | 9 | [lec16](lec16_field_symbols.md) | Field-Symbol：ASSIGN / LOOP ASSIGNING | [ex16](../ex16_field_symbols.md) |
 | 10 | [lec06](lec06_sap_table.md) | 讀 SAP Table：航班模型與 SELECT | [ex06](../ex06_sap_table.md) |
-| 11 | [lec07](lec07_selscreen.md) | 選擇畫面：PARAMETERS / SELECT-OPTIONS / IN | [ex07](../ex07_selscreen.md) |
-| 12 | [lec25](lec25_ddic_overview.md) | Data Dictionary 總覽與 Global Type：重用標準型別、Check Table 指向標準表 | [ex25](../ex25_ddic_overview.md) |
+| 11 | [lec07](lec07_selscreen.md) | 選擇畫面：PARAMETERS / SELECT-OPTIONS / IN；TABLES 表工作區、NO-DISPLAY、MATCHCODE OBJECT | [ex07](../ex07_selscreen.md) |
+| 12 | [lec25](lec25_ddic_overview.md) | Data Dictionary 總覽與 Global Type：重用標準型別、Check Table 指向標準表；View 四種類型（Database／Projection／Maintenance／Help） | [ex25](../ex25_ddic_overview.md) |
 | 13 | [lec08a](lec08a_package_transport.md) | Package 與傳輸請求：SE80 建 Package、SE10 Request/Task 與釋放順序、TR 與版本、釋放後再修改掛新 TR、STMS 匯入佇列 | [ex08a](../ex08a_package_transport.md) |
 | 14 | [lec08](lec08_modularize.md) | 模組化：FORM / USING / CHANGING（補充：Subroutine Pool 與跨程式 PERFORM） | [ex08](../ex08_modularize.md) |
 | 15 | [lec15](lec15_function_module.md) | Function Module：SE37 與 CALL FUNCTION | [ex15](../ex15_function_module.md) |
-| 16 | [lec10](lec10_events.md) | Report Event：事件流程與互動清單 | [ex10](../ex10_events.md) |
+| 16 | [lec10](lec10_events.md) | Report Event：事件流程與互動清單；查無資料 STOP | [ex10](../ex10_events.md) |
 | 17 | [lec22](lec22_texts_messages.md) | Message Class 與多語言文字元素：SE91 / Text Symbol | [ex22](../ex22_texts_messages.md) |
-| 18 | [lec11](lec11_join.md) | 多表 JOIN 與 CORRESPONDING FIELDS | [ex11](../ex11_join.md) |
+| 18 | [lec11](lec11_join.md) | 多表 JOIN 與 CORRESPONDING FIELDS；APPENDING、Database View | [ex11](../ex11_join.md) |
 | 19 | [lec20](lec20_control_break.md) | Control Break 群組小計：AT NEW / AT END OF / SUM | [ex20](../ex20_control_break.md) |
 | 19a | [lec20a](lec20a_sql_aggregate.md) | SQL 聚合與子查詢：GROUP BY / HAVING / DISTINCT / 子查詢（傳統寫法） | [ex20a](../ex20a_sql_aggregate.md) |
-| 20 | [lec12](lec12_print_layout.md) | 列印排版與頁面規劃 | [ex12](../ex12_print_layout.md) |
+| 20 | [lec12](lec12_print_layout.md) | 列印排版與頁面規劃：報表紙規格（80／132 行、中一刀）、列印格式與字距、寬報表、SKIP TO LINE、中文顯示寬度 | [ex12](../ex12_print_layout.md) |
 | 21 | [lec14](lec14_include_split.md) | INCLUDE 拆檔：TOP / F01 慣例 | [ex14](../ex14_include_split.md) |
-| 22 | [lec13](lec13_capstone.md) | 第一階段總整理（傳統報表收尾）：完整報表架構與實作攻略 | [ex13](../ex13_capstone.md) |
+| 22 | [lec13](lec13_capstone.md) | 第一階段總整理（傳統報表收尾）：完整報表架構與實作攻略；多張文件各自頁次、實戰案例傳票清單 ZRFI0004 | [ex13](../ex13_capstone.md) |
 | 23 | [lec09](lec09_alv.md) | Functional ALV 與 MACRO；進階篇（第 8 節起）：REUSE_ALV_GRID_DISPLAY_LVC 可編輯 ALV、STYLEFNAME 反灰、EDT_CLL_CB/DATA_CHANGED | [ex09](../ex09_alv.md)、[ex24](../ex24_alv_lvc.md) |
-| 24 | [lec21](lec21_ztable.md) | 建立 Z 資料表與 Open SQL 寫入：SE11 / SM30 | [ex21](../ex21_ztable.md) |
+| 24 | [lec21](lec21_ztable.md) | 建立 Z 資料表與 Open SQL 寫入：SE11 / SM30；Maintenance View、Help View | [ex21](../ex21_ztable.md) |
 | 25 | [lec27](lec27_lock_object.md) | 並行控制與 Lock Object：SE11 建自訂 Lock Object、ENQUEUE/DEQUEUE FM、SM12 | [ex27](../ex27_lock_object.md) |
-| 26 | [lec28](lec28_auth_wrapper.md) | 進階選修：客製 Table Maintenance 的權限防護與並行控制——SU21 自訂權限物件、Lock Object 鎖定範圍粗於主鍵、VIEW_MAINTENANCE_CALL、SE93 T-code、App bar 按鈕 CALL TRANSACTION | [ex28](../ex28_auth_wrapper.md) |
+| 26 | [lec28](lec28_auth_wrapper.md) | 進階選修：客製 Table Maintenance 的權限防護與並行控制——SU21 自訂權限物件、Lock Object 鎖定範圍粗於主鍵、VIEW_MAINTENANCE_CALL、SE93 T-code、App bar 按鈕 CALL TRANSACTION、SAP 圖示（ICON） | [ex28](../ex28_auth_wrapper.md) |
 | 27 | [lec23](lec23_orders.md) | 期末整合練習：訂單 Header/Detail、外鍵/Search Help/LUW 綜合運用 | [ex23](../ex23_orders.md) |
 | 28 | [lec26](lec26_modern_syntax.md) | 進階選修：新式語法總覽——字串模板／New Open SQL Inline Declaration／COND／SWITCH／VALUE／REDUCE／FILTER | [ex26](../ex26_modern_syntax.md) |
 

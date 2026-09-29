@@ -68,6 +68,12 @@
 
 > - **2026-08-02 補充教材內容缺口**（ex05／ex15 講義補強，非新增練習題）：使用者延續「FM `TABLES` 參數為何棄用」的討論，要求清查並補齊三個知識點：① Header Line 的雙義機制（`lec05` 第 8 節新增）；② FM `TABLES` 棄用的四個具體原因，查證官方 ABAP Keyword Documentation（`lec15` 第 3.1 節新增）；③ Deep Structure／Deep Table（結構包一整張表），查證確認課程完全沒教過（`lec05` 第 9 節新增，`lec03` 補 forward reference）。**接著使用者要求把這兩個知識點各補一題練習**：`ex05` 新增 Part 6（Deep Structure，學生小考成績巢狀表，答案程式 `ZR_TR05_ITAB_ADVANCED` 已擴充並驗證，`84.3`/`62.3` 平均計算正確）；`ex15` 新增 Part 4（`CHANGING` + DDIC Table Type，取代 `TABLES`，新增 FM `Z_TR15_CALC_REVENUE_TAB`＋DDIC 結構 `ZTR15_FLIGHT_REV`＋Table Type `ZTR15_TT_FLIGHT_REV`，呼叫端 `ZR_TR15_CALL_FM` 擴充並驗證，`500×100=50,000`／`800×50=40,000`／`1200×30=36,000` 全部正確）。過程中踩到兩個新 ADT 坑（已記錄進 `.claude/rules/sap-adt-mcp.md`）：FM 的 `CHANGING`/`TABLES` 介面參數型別**不能引用 Function Group Top Include 裡的本地 `TYPES`**，只能是 DDIC 型別或 Type Group（原因：FM 介面要能被呼叫端獨立語法檢查，不依賴這支 FM 所屬 Function Group 有沒有被載入）；DDIC Structure 的必填 enhancement 分類 annotation 正確寫法是 `@AbapCatalog.enhancementCategory`（駝峰單詞），不是官方文件字面示範的 `@AbapCatalog.enhancement.category`（帶點）。
 
+> - **2026-09-29 講義補充**（非新增練習題）：
+>   - **DDIC View**：`lec25` §1.1 四種類型總覽（Database／Projection／Maintenance／Help，各附系統標準範例 `SFLIGHTS`／`DEMO_SPFLI`／`V_TCURC`／`H_T005`）；`lec11` §2.1 Database View；`lec21` §3.1 Maintenance View、§4.4 Help View。示範程式 `ZR_TR25_VIEW_DEMO`（快照 `zr_tr25_view_demo.prog.abap`），實測 SELECT Maintenance／Help View 會啟用失敗。傳統 View 在本系統 ADT 讀不到，只能用 SE11。
+>   - **列印排版**（`lec12`）：報表紙規格（80／132 行、全頁／中一刀／中二刀）、列印格式與字距、寬報表、`LINE-COUNT` 與最後一頁頁尾、`SKIP TO LINE`、`dynamic_output_length` 算中文寬度。
+>   - **實戰案例**（`lec13` §3.1、§6）：多張文件各自「頁次 n/總頁數」（驗證程式 `ZR_TR13_DOCPAGE_TEST`）；讀懂真實傳票清單 ZRFI0004，並用前面所學完成範例程式 `ZR_TR13_ZRFI0004`，與原程式逐行比對通過（程式在 `lectures/cases/`）。
+>   - 其他：`lec07` TABLES／NO-DISPLAY／MATCHCODE OBJECT、`lec10` STOP、`lec11` APPENDING、`lec18` WRITE ... TO、`lec19` Watchpoint 查看與修改、`lec28` §7.1 SAP 圖示（示範程式 `ZR_TR28_ICON_DEMO`）。
+
 ## 建議授課順序（題號 ≠ 順序）
 
 **ex01 → ex02 → ex17（流程控制）→ ex18（字串日期）→ ex03 → ex04 → ex05 → ex19（除錯）→ ex16（Field-Symbol）→ ex06 → ex07 → ex25（Data Dictionary 總覽/Global Type）→ ex08a（Package 與傳輸請求）→ ex08（FORM）→ ex15（Function Module）→ ex10 → ex22（訊息與文字元素）→ ex11 → ex20（群組小計）→ ex20a（SQL 聚合與子查詢，選修）→ ex12 → ex14（INCLUDE 拆檔）→ ex13（第一階段總整理）→ ex09（ALV）→ ex24（可編輯 ALV，進階選修）→ ex21（Z 資料表）→ ex27（並行控制與 Lock Object）→ ex28（權限防護與並行控制整合，進階選修）→ ex23（期末整合練習，全課程最後一題）→ ex26（新式語法總覽，進階選修）**
