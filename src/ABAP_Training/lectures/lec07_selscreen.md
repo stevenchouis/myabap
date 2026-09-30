@@ -39,8 +39,15 @@ PARAMETERS: p_list AS CHECKBOX,                      " 對照：checkbox 可複�
             p_alv  RADIOBUTTON GROUP g1 DEFAULT 'X',
             p_txt  RADIOBUTTON GROUP g1.
 
-IF p_desc = 'X'.       " checkbox / radiobutton 都是判斷 'X'
-  SORT gt_students BY score DESCENDING.
+* checkbox / radiobutton 選取時值都是 'X'，沒選是空白
+IF p_list = 'X'.       " checkbox：只看自己有沒有勾
+  WRITE / '要印清單'.
+ENDIF.
+
+IF p_alv = 'X'.        " radiobutton：同一組一定剛好有一個是 'X'
+  WRITE / '用 ALV 輸出'.
+ELSEIF p_txt = 'X'.
+  WRITE / '輸出成文字檔'.
 ENDIF.
 ```
 
@@ -64,6 +71,16 @@ SELECT-OPTIONS s_carr FOR sflight-carrid.
 
 `TABLES dbtab.` 會宣告一個**跟 DDIC 表（或結構、View）同名、同結構的資料物件**，稱為「表工作區」（table work area），效果大約等於 `DATA sflight TYPE sflight.`。它就是一個跟表同名的結構變數，不是表本身，也不會去讀資料庫。
 
+`TABLES` 後面放的是 DDIC 裡「有欄位結構」的物件：透明表、Structure、View 都可以。這個關鍵字叫 `TABLES` 是歷史名稱，不代表只能放資料表。例如：
+
+| 寫法 | 後面放的是 |
+|---|---|
+| `TABLES scarr.` | 透明表（資料庫裡真的有這張表） |
+| `TABLES sscrfields.` | Structure（只有欄位定義，資料庫裡沒有這張表） |
+| `TABLES sflights.` | Database View（講義 25 會介紹） |
+
+跟 `DATA xxx TYPE xxx.` 比，`TABLES` 宣告的工作區多了一個能力：**可以跟畫面欄位交換資料**。畫面上有同名的欄位時，畫面輸入的值會自動放進這個工作區，程式填進工作區的值也會顯示在畫面上。`DATA` 宣告的變數只是普通變數，跟畫面沒有連結。
+
 舊程式常用它的原因，是 `SELECT-OPTIONS ... FOR` 後面要一個「已存在的資料物件」，寫一行 `TABLES` 之後，表裡每個欄位都能直接拿來當參考（`FOR sflight-carrid`、`FOR sflight-fldate`……），選擇畫面也會帶出該欄位的說明與 F4。不用 `TABLES` 的等效寫法：
 
 ```abap
@@ -78,6 +95,15 @@ SELECT-OPTIONS s_carr FOR gv_carrid.     " F4、欄位說明一樣會有
 | 官方定位（`TABLES` 官方文件） | 只建議用在跟傳統畫面（dynpro）交換資料，例如講義 28 的 `TABLES sscrfields.`；Class 裡不能用 | 一般宣告的標準寫法 |
 
 維護舊程式時還會看到一個相關寫法：`SELECT SINGLE * FROM usr21 WHERE bname = ...`，**沒有寫 `INTO`**。這是因為程式前面有 `TABLES usr21.`，讀到的資料會自動放進同名的表工作區，之後直接用 `usr21-persnumber` 取值（講義 13 的 ZRFI0004 就是這樣寫）。這也是舊式寫法，自己寫時一律明確寫出 `INTO`。
+
+**一定要用 `TABLES` 的情況：`TABLES sscrfields.`**
+
+選擇畫面在執行時，會把工具列按鈕的文字、使用者按下的 Function Code 放在一個叫 `SSCRFIELDS` 的畫面欄位區。程式必須用 `TABLES sscrfields.` 宣告同名工作區，兩邊才會對上：
+
+- 在 `INITIALIZATION` 填 `sscrfields-functxt_01`，按鈕文字才會顯示在畫面上。
+- 在 `AT SELECTION-SCREEN` 讀 `sscrfields-ucomm`，才知道使用者按了哪顆按鈕。
+
+改寫成 `DATA sscrfields TYPE sscrfields.` 的話，只是宣告一個普通變數，跟畫面沒有連結：按鈕不會出現文字，也讀不到按下的代碼。選擇畫面加按鈕的完整寫法見講義 13（ZRFI0004 實戰閱讀）與講義 28 第 7 節。
 
 **課程的慣例**：選擇畫面可以用 `TABLES` 當 `FOR` 的參考（講義 13 的範例就是），但除此之外不要拿表工作區來存資料，資料一律放在自己宣告的 `gs_`／`gt_` 變數。
 

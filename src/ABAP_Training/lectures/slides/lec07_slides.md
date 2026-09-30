@@ -95,8 +95,15 @@ PARAMETERS: p_list AS CHECKBOX,                " checkbox 可複選
             p_alv  RADIOBUTTON GROUP g1 DEFAULT 'X',
             p_txt  RADIOBUTTON GROUP g1.
 
-IF p_desc = 'X'.       " checkbox / radiobutton 都判斷 'X'
-  SORT gt_students BY score DESCENDING.
+* 選取時值都是 'X'，沒選是空白
+IF p_list = 'X'.       " checkbox：只看自己有沒有勾
+  WRITE / '要印清單'.
+ENDIF.
+
+IF p_alv = 'X'.        " radiobutton：同組剛好一個是 'X'
+  WRITE / '用 ALV 輸出'.
+ELSEIF p_txt = 'X'.
+  WRITE / '輸出成文字檔'.
 ENDIF.
 ```
 
@@ -154,6 +161,24 @@ SELECT-OPTIONS s_carr2 FOR gv_carrid.
 - 官方：只建議用在跟畫面交換資料（如講義 28 `TABLES sscrfields.`）
 - 看到 `SELECT SINGLE * FROM usr21 WHERE ...` **沒寫 INTO**？
   → 資料放進了同名的表工作區 `usr21`（舊式，自己寫一律加 INTO）
+
+---
+
+## TABLES 後面放什麼？一定要用的情況
+
+- 透明表、**Structure**、View 都可以；叫 `TABLES` 是歷史名稱
+
+| 寫法 | 後面放的是 |
+|---|---|
+| `TABLES scarr.` | 透明表 |
+| `TABLES sscrfields.` | Structure（資料庫沒有這張表） |
+| `TABLES sflights.` | Database View |
+
+- 比 `DATA` 多一個能力：**跟畫面同名欄位交換資料**
+- `TABLES sscrfields.` 一定要用：
+  - `INITIALIZATION` 填 `sscrfields-functxt_01` → 按鈕文字顯示在畫面
+  - `AT SELECTION-SCREEN` 讀 `sscrfields-ucomm` → 知道按了哪顆按鈕
+  - 改用 `DATA` 就跟畫面斷線
 
 ---
 

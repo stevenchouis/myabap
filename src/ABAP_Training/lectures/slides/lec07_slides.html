@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>選擇畫面是什麼、何時產生</li>
@@ -186,7 +186,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="1-%E9%81%B8%E6%93%87%E7%95%AB%E9%9D%A2%E6%98%AF%E4%BB%80%E9%BA%BC">1. 選擇畫面是什麼</h2>
 <p>宣告區寫 <code>PARAMETERS</code> / <code>SELECT-OPTIONS</code><br />
 → 系統<strong>自動</strong>產生輸入畫面，執行時先顯示<br />
@@ -249,7 +249,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="2-parameters%E5%96%AE%E5%80%BC%E8%BC%B8%E5%85%A5">2. PARAMETERS：單值輸入</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">PARAMETERS p_title TYPE c LENGTH 20 DEFAULT '學生成績清單'.
 PARAMETERS p_carr  TYPE scarr-carrid OBLIGATORY.     &quot; 必填
@@ -341,15 +341,22 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="%E5%96%AE%E9%81%B8%E9%88%95%E8%88%87%E5%88%A4%E6%96%B7">單選鈕與判斷</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 單選鈕：輸出方式擇一
 PARAMETERS: p_list AS CHECKBOX,                &quot; checkbox 可複選
             p_alv  RADIOBUTTON GROUP g1 DEFAULT 'X',
             p_txt  RADIOBUTTON GROUP g1.
 
-IF p_desc = 'X'.       &quot; checkbox / radiobutton 都判斷 'X'
-  SORT gt_students BY score DESCENDING.
+* 選取時值都是 'X'，沒選是空白
+IF p_list = 'X'.       &quot; checkbox：只看自己有沒有勾
+  WRITE / '要印清單'.
+ENDIF.
+
+IF p_alv = 'X'.        &quot; radiobutton：同組剛好一個是 'X'
+  WRITE / '用 ALV 輸出'.
+ELSEIF p_txt = 'X'.
+  WRITE / '輸出成文字檔'.
 ENDIF.
 </code></pre>
 </section>
@@ -407,7 +414,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="3-select-options%E7%AF%84%E5%9C%8D%E6%A2%9D%E4%BB%B6">3. SELECT-OPTIONS：範圍條件</h2>
 <p>「85 到 100」「A 開頭」「這三個代碼」「排除某段」——一行搞定：</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gv_score TYPE i.                 &quot; 需要一個參考欄位決定型別
@@ -472,7 +479,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="%E8%83%8C%E5%BE%8C%E6%98%AF%E4%B8%80%E5%BC%B5-range-%E5%85%A7%E8%A1%A8">背後是一張 range 內表</h2>
 <p><code>s_score</code> 其實是內表，每列四個欄位——理解它就理解一切：</p>
 <table>
@@ -568,7 +575,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="%E8%88%8A%E7%A8%8B%E5%BC%8F%E5%B8%B8%E8%A6%8B%E7%9A%84-tables%E8%B7%9F%E8%A1%A8%E5%90%8C%E5%90%8D%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8D%80">舊程式常見的 TABLES：跟表同名的工作區</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TABLES sflight.                        &quot; ≈ DATA sflight TYPE sflight.
 SELECT-OPTIONS s_carr FOR sflight-carrid.
@@ -638,32 +645,43 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
-<h2 id="%E5%8F%A6%E5%A4%96%E5%85%A9%E5%80%8B%E5%B8%B8%E8%A6%8B%E9%99%84%E5%8A%A0%E9%A0%85">另外兩個常見附加項</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT-OPTIONS: s_usnam FOR bkpf-usnam MATCHCODE OBJECT user_addr,
-                s_bstat FOR bkpf-bstat NO-DISPLAY.
-</code></pre>
+;" data-marpit-pagination-total="14">
+<h2 id="tables-%E5%BE%8C%E9%9D%A2%E6%94%BE%E4%BB%80%E9%BA%BC%E4%B8%80%E5%AE%9A%E8%A6%81%E7%94%A8%E7%9A%84%E6%83%85%E6%B3%81">TABLES 後面放什麼？一定要用的情況</h2>
+<ul>
+<li>透明表、<strong>Structure</strong>、View 都可以；叫 <code>TABLES</code> 是歷史名稱</li>
+</ul>
 <table>
 <thead>
 <tr>
-<th>附加項</th>
-<th>效果</th>
+<th>寫法</th>
+<th>後面放的是</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>MATCHCODE OBJECT sh</code></td>
-<td>F4 改用指定的 Search Help（講義 23）</td>
+<td><code>TABLES scarr.</code></td>
+<td>透明表</td>
 </tr>
 <tr>
-<td><code>NO-DISPLAY</code></td>
-<td>欄位存在、能用 <code>IN</code>，但畫面看不到</td>
+<td><code>TABLES sscrfields.</code></td>
+<td>Structure（資料庫沒有這張表）</td>
+</tr>
+<tr>
+<td><code>TABLES sflights.</code></td>
+<td>Database View</td>
 </tr>
 </tbody>
 </table>
-<p>實戰（講義 13 的 ZRFI0004）：畫面給三個好懂的勾選框<br />
-→ 程式把勾選結果轉成狀態碼，APPEND 進 <code>NO-DISPLAY</code> 的 <code>s_bstat</code><br />
-→ SELECT 只寫一句 <code>AND bstat IN s_bstat</code></p>
+<ul>
+<li>比 <code>DATA</code> 多一個能力：<strong>跟畫面同名欄位交換資料</strong></li>
+<li><code>TABLES sscrfields.</code> 一定要用：
+<ul>
+<li><code>INITIALIZATION</code> 填 <code>sscrfields-functxt_01</code> → 按鈕文字顯示在畫面</li>
+<li><code>AT SELECTION-SCREEN</code> 讀 <code>sscrfields-ucomm</code> → 知道按了哪顆按鈕</li>
+<li>改用 <code>DATA</code> 就跟畫面斷線</li>
+</ul>
+</li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -719,23 +737,32 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
-<h2 id="4-in%E5%A5%97%E7%94%A8-range-%E6%A2%9D%E4%BB%B6">4. IN：套用 range 條件</h2>
-<p>三個場景通用：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 1) SELECT 的 WHERE
-SELECT * FROM sflight INTO TABLE gt_flights
-  WHERE carrid IN s_carr.
-
-* 2) LOOP 的 WHERE
-LOOP AT gt_students INTO gs_student WHERE score IN s_score.
-
-* 3) IF
-IF gs_student-score IN s_score.
+;" data-marpit-pagination-total="14">
+<h2 id="%E5%8F%A6%E5%A4%96%E5%85%A9%E5%80%8B%E5%B8%B8%E8%A6%8B%E9%99%84%E5%8A%A0%E9%A0%85">另外兩個常見附加項</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT-OPTIONS: s_usnam FOR bkpf-usnam MATCHCODE OBJECT user_addr,
+                s_bstat FOR bkpf-bstat NO-DISPLAY.
 </code></pre>
-<blockquote>
-<p><strong>關鍵行為</strong>：range 表是<strong>空的</strong>時，<code>IN</code> 對所有值都成立<br />
-＝不過濾。「不填就是查全部」是 SELECT-OPTIONS 的預設哲學</p>
-</blockquote>
+<table>
+<thead>
+<tr>
+<th>附加項</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MATCHCODE OBJECT sh</code></td>
+<td>F4 改用指定的 Search Help（講義 23）</td>
+</tr>
+<tr>
+<td><code>NO-DISPLAY</code></td>
+<td>欄位存在、能用 <code>IN</code>，但畫面看不到</td>
+</tr>
+</tbody>
+</table>
+<p>實戰（講義 13 的 ZRFI0004）：畫面給三個好懂的勾選框<br />
+→ 程式把勾選結果轉成狀態碼，APPEND 進 <code>NO-DISPLAY</code> 的 <code>s_bstat</code><br />
+→ SELECT 只寫一句 <code>AND bstat IN s_bstat</code></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -791,22 +818,23 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
-<h2 id="5-%E7%95%AB%E9%9D%A2%E6%8E%92%E7%89%88block-%E8%88%87%E6%A8%99%E9%A1%8C">5. 畫面排版：BLOCK 與標題</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE t_b1.
-  PARAMETERS p_title TYPE c LENGTH 20.
-  SELECT-OPTIONS s_score FOR gv_score.
-  PARAMETERS p_desc AS CHECKBOX.
-SELECTION-SCREEN END OF BLOCK b1.
+;" data-marpit-pagination-total="14">
+<h2 id="4-in%E5%A5%97%E7%94%A8-range-%E6%A2%9D%E4%BB%B6">4. IN：套用 range 條件</h2>
+<p>三個場景通用：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 1) SELECT 的 WHERE
+SELECT * FROM sflight INTO TABLE gt_flights
+  WHERE carrid IN s_carr.
 
-INITIALIZATION.
-  t_b1 = '查詢條件'.        &quot; 框標題在 INITIALIZATION 給值
+* 2) LOOP 的 WHERE
+LOOP AT gt_students INTO gs_student WHERE score IN s_score.
+
+* 3) IF
+IF gs_student-score IN s_score.
 </code></pre>
-<ul>
-<li><code>t_xx</code> 由系統自動宣告，INITIALIZATION 裡賦值（事件見講義 10）</li>
-<li>欄位左邊的說明文字正式做法是 <strong>Selection Texts</strong><br />
-（SE38 → Goto → Text Elements，支援多語言——講義 22）</li>
-</ul>
+<blockquote>
+<p><strong>關鍵行為</strong>：range 表是<strong>空的</strong>時，<code>IN</code> 對所有值都成立<br />
+＝不過濾。「不填就是查全部」是 SELECT-OPTIONS 的預設哲學</p>
+</blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -862,7 +890,78 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
+<h2 id="5-%E7%95%AB%E9%9D%A2%E6%8E%92%E7%89%88block-%E8%88%87%E6%A8%99%E9%A1%8C">5. 畫面排版：BLOCK 與標題</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE t_b1.
+  PARAMETERS p_title TYPE c LENGTH 20.
+  SELECT-OPTIONS s_score FOR gv_score.
+  PARAMETERS p_desc AS CHECKBOX.
+SELECTION-SCREEN END OF BLOCK b1.
+
+INITIALIZATION.
+  t_b1 = '查詢條件'.        &quot; 框標題在 INITIALIZATION 給值
+</code></pre>
+<ul>
+<li><code>t_xx</code> 由系統自動宣告，INITIALIZATION 裡賦值（事件見講義 10）</li>
+<li>欄位左邊的說明文字正式做法是 <strong>Selection Texts</strong><br />
+（SE38 → Goto → Text Elements，支援多語言——講義 22）</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="13" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="14">
 <h2 id="6-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">6. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -899,7 +998,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -926,7 +1025,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="13" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="14" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -953,7 +1052,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex07</strong>：</p>
 <p>建 BLOCK 畫面（標題參數、成績範圍、排序 checkbox）</p>

@@ -231,6 +231,7 @@ INITIALIZATION.
   sscrfields-functxt_02 = functxt.
 ```
 
+- `SSCRFIELDS` 是 Structure，不是資料表。一定要用 `TABLES sscrfields.` 宣告（不能改用 `DATA`），程式才能跟選擇畫面交換按鈕文字與按下的代碼，原因見講義 7 第 3.0 節。
 - 只要文字、不要圖示時，直接寫 `sscrfields-functxt_01 = '維護會計主管名稱'.` 就好。
 - 要圖示＋文字時，才用 `smp_dyntxt` 結構：`icon_id` 放圖示常數，`icon_text` 放文字。
 - **`icon_tools` 是什麼**：SAP 內建的圖示常數，代表「工具（扳手）」圖示，值是 `'@45@'`。畫面看到 `@代碼@` 這種格式，就會顯示成對應的圖示。這些常數定義在 Type Group `ICON`，原程式第 29 行的 `TYPE-POOLS: icon.` 就是載入它；新版系統會自動載入，不寫也能用。程式裡用常數名稱，不要直接寫 `'@45@'`，比較看得懂。
