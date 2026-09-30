@@ -39,7 +39,7 @@ style: |
 # 講義 9
 # Functional ALV 與 MACRO
 
-ABAP 基礎教育訓練（授課順序：接在講義 13 之後）
+ABAP 基礎教育訓練（授課順序：接在講義 14 之後）
 
 對應練習 ex09｜答案程式 `ZR_TR09_ALV`
 

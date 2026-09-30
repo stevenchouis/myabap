@@ -1,6 +1,6 @@
 # 練習 25：Data Dictionary 總覽與 Global Type
 
-> 授課順序：接在練習 7（選擇畫面）之後、練習 8a（Package／TR）之前——先學會建 DDIC 型別，後面的 FORM（ex08）與 FM（ex15）參數才能直接引用。本題還沒學 FORM 與 JOIN，程式全部寫在 `START-OF-SELECTION`。講義見 [lec25](lectures/lec25_ddic_overview.md)。
+> 授課順序：接在練習 7（選擇畫面）之後、練習 21（Z 資料表）之前——先學會建 DDIC 型別，後面的 FORM（ex08）與 FM（ex15）參數才能直接引用。本題還沒學 FORM 與 JOIN，程式全部寫在 `START-OF-SELECTION`。講義見 [lec25](lectures/lec25_ddic_overview.md)。
 
 ## 學習目標
 
@@ -32,7 +32,10 @@
 | UPDUSER | | Data Element `SYUNAME` | 異動者 |
 | UPDDATE | | Data Element `SYDATUM` | 異動日 |
 
-   - `CARRID` 欄位的 **Foreign Key** 對話框：Check Table 填 **`SCARR`**（標準表）、Cardinality 選 `[0..1] : 1`、Foreign Key Fields 自動帶出 `CARRID = CARRID`，打開 **Screen Check**
+   - 勾選 `MANDT`、`CARRID` 的 **Key** 後，系統會自動把它們的 **Initial Values** 也勾起來；其他欄位的 Initial Values 不用勾（意義見講義 21 §2.1）
+   - 這張表沒有金額（`CURR`）或數量（`QUAN`）欄位，**Currency/Quantity Fields** 頁籤不用填（`SURCHARGE_PCT` 是百分比，用 `DEC`，見講義 21 §2.2）
+
+   - `CARRID` 欄位的 **Foreign Key** 對話框：Check Table 填 **`SCARR`**（標準表）、基數（Cardinality）填 `1 : C`（每筆設定對應一家航空公司、每家航空公司最多一筆設定，見講義 21 §3.1）、Foreign Key Fields 自動帶出 `CARRID = CARRID`，打開 **Screen Check**
    - Delivery Class `A`；Technical Settings：Data Class `APPL0`、Size Category `0`
    - 存檔啟用
 5. **Table Type** `ZTR25_TT_SURCHG`：SE11 → Data Type → Create → 選 **Table Type**；Line Type 填 `ZTR25_SURCHG`（直接拿表格本身當 Line Type，不用重新定義欄位）；Access Mode 選 `Standard Table`，Key 用預設（Default Key）→ 啟用。這是把「表格型別」也升級成可跨程式共用的 DDIC 物件（對照講義 4 的 Local Type）。

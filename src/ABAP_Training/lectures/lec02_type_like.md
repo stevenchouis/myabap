@@ -29,7 +29,7 @@ DATA: gv_qty   TYPE i,
 
 命名慣例（本課程與團隊風格一致）：全域變數 `gv_`（value）、`gs_`（structure）、`gt_`（table）；區域變數換成 `lv_` / `ls_` / `lt_`。前綴讓人一眼看出「這是什麼形狀的資料」。
 
-## 2. 內建資料型別總表
+## 2. 內建資料型別（Built-in Types）總表
 
 | 型別 | 名稱 | 預設長度 | 初始值 | 用途與注意 |
 |---|---|---|---|---|
@@ -76,7 +76,7 @@ DATA gv_date3 LIKE gv_date1.     " LIKE：跟 gv_date1 同型別
 
 - 想表達「跟某個既有欄位／變數保持一致」用 `LIKE`——來源改了，跟著的變數自動一致。
 - 其他情況用 `TYPE`。本講先用內建型別（`i`、`c`、`d`……）學語法；但**內建型別只適合純區域暫存**（計數器、旗標），只要變數代表業務資料，實務上都是 `TYPE scarr-carrid` 這種參考資料字典欄位的寫法（Global Type，講義 6 第 1.1 節詳解）。
-- 進階常用：`DATA gs LIKE LINE OF gt_tab.`（宣告跟某內表一列同型別的 work area，講義 10 會用到）。
+- 進階常用：`DATA gs LIKE LINE OF gt_tab.`（宣告跟某內表一列同型別的 work area；學完內表後，講義 7 第 3 節第一次用到並詳細說明）。
 
 ## 4. CONSTANTS 常數
 

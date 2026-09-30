@@ -1,4 +1,4 @@
-# 講義 9：Functional ALV 與 MACRO（授課順序：接在講義 13 之後）
+# 講義 9：Functional ALV 與 MACRO（授課順序：接在講義 14 之後）
 
 > 對應練習：[ex09](../ex09_alv.md)｜答案程式：`ZR_TR09_ALV`
 

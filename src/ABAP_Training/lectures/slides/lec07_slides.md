@@ -37,7 +37,7 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 7
-# 選擇畫面
+# 選擇畫面（Selection Screen）
 
 PARAMETERS / SELECT-OPTIONS / IN
 
@@ -174,11 +174,12 @@ SELECT-OPTIONS s_carr2 FOR gv_carrid.
 | `TABLES sscrfields.` | Structure（資料庫沒有這張表） |
 | `TABLES sflights.` | Database View |
 
-- 比 `DATA` 多一個能力：**跟畫面同名欄位交換資料**
-- `TABLES sscrfields.` 一定要用：
+- 選擇畫面輸入**不靠** `TABLES`：值放在 `PARAMETERS`／`SELECT-OPTIONS` 自己建的 `p_xxx`／`s_xxx`；`FOR` 後面只提供型別
+- 畫面欄位**取自 DDIC 結構**（`結構-欄位`）時，才要同名 `TABLES` 傳資料
+- `TABLES sscrfields.` 就是這種情況：
   - `INITIALIZATION` 填 `sscrfields-functxt_01` → 按鈕文字顯示在畫面
   - `AT SELECTION-SCREEN` 讀 `sscrfields-ucomm` → 知道按了哪顆按鈕
-  - 改用 `DATA` 就跟畫面斷線
+  - 不能改用 `DATA`
 
 ---
 
@@ -234,7 +235,9 @@ INITIALIZATION.
   t_b1 = '查詢條件'.        " 框標題在 INITIALIZATION 給值
 ```
 
-- `t_xx` 由系統自動宣告，INITIALIZATION 裡賦值（事件見講義 10）
+- `t_xx` 不用 `DATA`：`TITLE` 後面的名稱，系統自動產生同名全域變數（`c` 長度 70，名稱最多 8 字元），INITIALIZATION 裡賦值（事件見講義 10）
+- ⚠️ `'查詢條件'` 寫死，不會隨登入語言切換；正式寫法用 **Text Symbol**（講義 22）：
+  `WITH FRAME TITLE text-001.`（免 INITIALIZATION），或 `t_b1 = text-001.`
 - 欄位左邊的說明文字正式做法是 **Selection Texts**
   （SE38 → Goto → Text Elements，支援多語言——講義 22）
 

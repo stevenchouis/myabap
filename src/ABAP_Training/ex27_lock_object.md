@@ -1,6 +1,6 @@
 # 練習 27：並行控制與 Lock Object
 
-> 授課順序：接在練習 21（Z 資料表）之後。講義見 [lec27](lectures/lec27_lock_object.md)。
+> 授課順序：接在練習 9／24（ALV）之後，延續練習 21 的 Z 資料表 `ZTR21_STUD`。講義見 [lec27](lectures/lec27_lock_object.md)。
 
 ## 學習目標
 

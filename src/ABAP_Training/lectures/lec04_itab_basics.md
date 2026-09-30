@@ -1,4 +1,4 @@
-# 講義 4：Internal Table 基礎
+# 講義 4：Internal Table（內表：程式執行時放在記憶體裡的表格）基礎
 
 > 對應練習：[ex04](../ex04_itab_basics.md)｜答案程式：`ZR_TR04_ITAB_BASICS`
 

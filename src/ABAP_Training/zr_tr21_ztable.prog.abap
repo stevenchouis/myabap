@@ -3,21 +3,13 @@
 *& 練習 21：Z 資料表 Open SQL 寫入（答案程式）
 *& 前提：SE11 已建立並啟用 ZTR21_STUD（欄位規格見 ex21 第一部分）
 *& 擴充：ZTR21_CLASS（班級主檔）＋ ZTR21_STUD.KLASSE 外鍵（Check Table）教學
+*& JOIN 串兩表的部分在練習 21a（ZR_TR21A_JOIN）
 *&---------------------------------------------------------------------*
 REPORT zr_tr21_ztable.
 
-TYPES: BEGIN OF ty_join,
-         id     TYPE ztr21_stud-id,
-         name   TYPE ztr21_stud-name,
-         klasse TYPE ztr21_stud-klasse,
-         klname TYPE ztr21_class-klname,
-       END OF ty_join.
-
 DATA: gs_stud  TYPE ztr21_stud,          " 表名直接當結構型別
       gt_stud  TYPE STANDARD TABLE OF ztr21_stud,
-      gs_class TYPE ztr21_class,
-      gt_join  TYPE STANDARD TABLE OF ty_join,
-      gs_join  TYPE ty_join.
+      gs_class TYPE ztr21_class.
 
 START-OF-SELECTION.
 *----------------------------------------------------------------------*
@@ -151,27 +143,8 @@ START-OF-SELECTION.
   WRITE / '     Open SQL 呼叫不會被擋下來，資料正確性仍要靠程式自行檢查。'.
 
 *----------------------------------------------------------------------*
-* 12) JOIN 複習：學生 LEFT OUTER JOIN 班級，印出學號/姓名/班級代碼/班級名稱
-*     用 LEFT OUTER JOIN 是因為部分學生的 KLASSE 是初始值或查無班級
-*     （如上一步的 ZZZZ），這種情況 KLNAME 會是空白，不會整列不見
-*     注意：MANDT 是 client field，JOIN 的 ON 條件不可寫出來，
-*     Client Handling 由編譯器自動處理（兩邊都會自動限定同一 client）
-*----------------------------------------------------------------------*
-  SELECT s~id s~name s~klasse c~klname
-    FROM ztr21_stud AS s
-    LEFT OUTER JOIN ztr21_class AS c
-      ON c~klasse = s~klasse
-    INTO CORRESPONDING FIELDS OF TABLE gt_join
-    ORDER BY s~id.
-
-  WRITE / '=== 學生 JOIN 班級（學號／姓名／班級代碼／班級名稱） ==='.
-  LOOP AT gt_join INTO gs_join.
-    WRITE: / gs_join-id, gs_join-name, gs_join-klasse, gs_join-klname.
-  ENDLOOP.
-
-*----------------------------------------------------------------------*
-* 13) 明確結束這個 LUW：全部確認落地
+* 12) 明確結束這個 LUW：全部確認落地
 *    （若中途 sy-subrc 異常，正式寫法是 ROLLBACK WORK. 整包撤銷
-*      + MESSAGE 告知，確保不會只寫一半）
+*      + 通知使用者，確保不會只寫一半）
 *----------------------------------------------------------------------*
   COMMIT WORK.

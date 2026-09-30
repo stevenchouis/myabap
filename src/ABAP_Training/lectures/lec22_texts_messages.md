@@ -1,4 +1,4 @@
-# 講義 22：Message Class 與多語言文字元素（授課順序：接在講義 10 之後）
+# 講義 22：Message Class 與多語言文字元素（Text Elements）（授課順序：接在講義 10 之後）
 
 > 對應練習：[ex22](../ex22_texts_messages.md)｜答案物件：訊息類別 `ZTR22`＋程式 `ZR_TR22_TEXTS`
 

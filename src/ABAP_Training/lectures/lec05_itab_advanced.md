@@ -1,4 +1,4 @@
-# 講義 5：Internal Table 進階
+# 講義 5：Internal Table（內表）進階
 
 > 對應練習：[ex05](../ex05_itab_advanced.md)｜答案程式：`ZR_TR05_ITAB_ADVANCED`
 

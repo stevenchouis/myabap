@@ -1,6 +1,6 @@
 # 練習 20a：SQL 聚合與子查詢
 
-> 授課順序：接在練習 20（Control Break）之後、練習 12（列印排版）之前。講義見 [lec20a](lectures/lec20a_sql_aggregate.md)。
+> 授課順序：接在練習 13（第一階段總整理）之後、練習 14（INCLUDE 拆檔）之前；延續練習 20 的群組小計，改在資料庫端彙總。講義見 [lec20a](lectures/lec20a_sql_aggregate.md)。
 
 ## 學習目標
 

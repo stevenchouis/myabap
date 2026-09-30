@@ -37,7 +37,7 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 16
-# Field-Symbol
+# Field-Symbol（指向資料的別名）
 
 ABAP 基礎教育訓練（授課順序：接在講義 5 之後）
 

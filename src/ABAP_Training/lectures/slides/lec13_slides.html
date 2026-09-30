@@ -65,7 +65,7 @@ footer { color: #999; }
 ;">
 <h1 id="%E8%AC%9B%E7%BE%A9-13">講義 13</h1>
 <h1 id="%E7%AC%AC%E4%B8%80%E9%9A%8E%E6%AE%B5%E7%B8%BD%E6%95%B4%E7%90%86%E5%AE%8C%E6%95%B4%E5%A0%B1%E8%A1%A8%E6%9E%B6%E6%A7%8B%E8%88%87%E5%AF%A6%E4%BD%9C%E6%94%BB%E7%95%A5">第一階段總整理——完整報表架構與實作攻略</h1>
-<p>ABAP 基礎教育訓練（授課順序：接在講義 14 之後；傳統報表階段收尾）</p>
+<p>ABAP 基礎教育訓練（授課順序：接在講義 21a 之後；傳統報表階段收尾）</p>
 <p>對應練習 ex13｜答案程式 <code>ZR_TR13_CAPSTONE</code></p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-theme="default" data-style="section {
@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>把前面各講（ALV 除外）的技能拼成<strong>一支正式等級的傳統報表</strong></li>
@@ -186,7 +186,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="1-%E7%B8%BD%E6%95%B4%E7%90%86%E7%9B%AE%E6%A8%99%E8%88%AA%E7%8F%AD%E7%87%9F%E6%94%B6%E5%A0%B1%E8%A1%A8">1. 總整理目標：航班營收報表</h2>
 <p>選擇畫面過濾 → JOIN 取數 → 計算營收<br />
 → 132 欄分頁排版 → 頁首頁尾 → 頁次「n / 總頁數」</p>
@@ -247,7 +247,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="2-%E5%AE%8C%E6%95%B4%E5%A0%B1%E8%A1%A8%E6%9E%B6%E6%A7%8B%E6%8A%80%E8%83%BD%E7%B8%BD%E5%9C%B0%E5%9C%96">2. 完整報表架構（技能總地圖）</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">REPORT zr_tr13_capstone NO STANDARD PAGE HEADING
                         LINE-SIZE 132
@@ -332,7 +332,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="%E5%90%84-form-%E7%94%A8%E5%88%B0%E7%9A%84%E6%8A%80%E8%83%BD">各 FORM 用到的技能</h2>
 <table>
 <thead>
@@ -415,7 +415,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="3-%E6%96%B0%E6%8A%80%E5%B7%A7%E7%B8%BD%E9%A0%81%E6%95%B8%E5%9B%9E%E5%A1%AB">3. 新技巧：總頁數回填</h2>
 <p>頁首要印「頁次 3 / 12」，但印第 3 頁時總頁數還不知道</p>
 <p><strong>解法</strong>：WRITE 先寫進<strong>清單緩衝區（List Buffer）</strong>（講義 10 第 3.5 節），不是直接上螢幕<br />
@@ -492,7 +492,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="%E5%9B%9E%E5%A1%AB%E7%9A%84%E4%B8%89%E5%80%8B%E8%A6%81%E9%BB%9E">回填的三個要點</h2>
 <ol>
 <li><code>READ LINE n OF PAGE p</code>：把第 p 頁第 n 行讀進 <code>sy-lisel</code></li>
@@ -556,7 +556,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="31-%E4%B8%80%E4%BB%BD%E6%B8%85%E5%96%AE%E5%A4%9A%E5%BC%B5%E6%96%87%E4%BB%B6%E6%AF%8F%E5%BC%B5%E5%90%84%E8%87%AAn--%E7%B8%BD%E9%A0%81%E6%95%B8">3.1 一份清單多張文件：每張各自「n / 總頁數」</h2>
 <p><code>sy-pagno</code> 是<strong>整份清單</strong>的頁數 → 要自己記每張文件的<strong>起訖頁</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">AT NEW carrid.
@@ -630,7 +630,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="4-%E5%AF%A6%E4%BD%9C%E6%94%BB%E7%95%A5%E5%BB%BA%E8%AD%B0%E9%A0%86%E5%BA%8F">4. 實作攻略（建議順序）</h2>
 <ol>
 <li><strong>先讓資料對</strong>：宣告＋選擇畫面＋get_data<br />
@@ -697,7 +697,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="5-%E8%87%AA%E6%88%91%E6%AA%A2%E6%9F%A5%E6%B8%85%E5%96%AE%E7%AC%AC%E4%B8%80%E9%9A%8E%E6%AE%B5%E7%B5%90%E6%A5%AD%E6%A8%99%E6%BA%96">5. 自我檢查清單（第一階段結業標準）</h2>
 <ul>
 <li>☐ 選擇畫面有 BLOCK 框與標題，條件全部生效</li>
@@ -763,7 +763,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="6-%E7%AC%AC%E4%B8%80%E9%9A%8E%E6%AE%B5%E7%B5%90%E6%A5%AD%E5%B0%8D%E7%85%A7%E8%AE%80%E6%AD%A3%E5%BC%8F%E7%A8%8B%E5%BC%8F">6. 第一階段結業對照：讀正式程式</h2>
 <p>打開 <code>Z_INVENTORY_COST_REPORT</code>（或 ZDQM 系列）對照閱讀：</p>
 <p>結構跟你的總整理作品<strong>一模一樣</strong>——<br />
@@ -827,7 +827,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="61-%E5%AF%A6%E6%88%B0%E9%96%B1%E8%AE%80%E5%82%B3%E7%A5%A8%E6%B8%85%E5%96%AE-zrfi0004">6.1 實戰閱讀：傳票清單 ZRFI0004</h2>
 <p>真實客戶程式（2006 起多人多次修改），原始碼：<code>lectures/cases/zrfi0004.prog.abap</code>，<strong>只供閱讀</strong></p>
 <table>
@@ -847,8 +847,12 @@ footer { color: #999; }
 <td>7</td>
 </tr>
 <tr>
-<td><code>AUTHORITY-CHECK</code>、<code>FUNCTION KEY</code>＋<code>CALL TRANSACTION</code></td>
-<td>28（先看懂）</td>
+<td><code>AUTHORITY-CHECK</code>、App bar 按鈕 <code>FUNCTION KEY</code>＋<code>CALL TRANSACTION</code></td>
+<td>28 §7（先看懂）</td>
+</tr>
+<tr>
+<td>按鈕上的 SAP 圖示 <code>icon_tools</code></td>
+<td>28 §7.1</td>
 </tr>
 <tr>
 <td><code>MESSAGE ... STOP</code>、<code>SELECT ... ENDSELECT</code></td>
@@ -927,7 +931,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="%E5%85%A9%E9%A1%86%E6%8C%89%E9%88%95parameter-transaction%E8%AC%9B%E7%BE%A9-28-%E6%89%8D%E6%95%99%E5%BB%BA%E7%AB%8B">兩顆按鈕：Parameter Transaction（講義 28 才教建立）</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">CASE sscrfields-ucomm.
   WHEN 'FC01'. CALL TRANSACTION 'ZFI0037'.    &quot; 維護
@@ -940,7 +944,7 @@ ENDCASE.
 <li><code>ZFI0037</code> → 表 <code>ZFI0037</code>（會計主管表）：可新增、修改</li>
 <li><code>ZFI0037Q</code> → <strong>Read only 的 Maintenance View</strong>：只能顯示，沒有 Change／Display 切換</li>
 <li>只把 T-code 設成顯示模式擋不住：有權限的人在 SM30 按切換就能改</li>
-<li>Maintenance View 見講義 21；SE93 建立步驟見講義 28 §7</li>
+<li>Maintenance View 見講義 21a；SE93 建立步驟見講義 28 §7</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
@@ -997,7 +1001,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="zrfi0004-%E7%9A%84%E5%88%86%E9%A0%81%E8%A8%AD%E8%A8%88%E8%87%AA%E5%B7%B1%E6%8E%A7%E5%88%B6%E6%95%B4%E9%A0%81-65-%E8%A1%8C">ZRFI0004 的分頁設計：自己控制整頁 65 行</h2>
 <table>
 <thead>
@@ -1091,7 +1095,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="zrfi0004%E7%9C%8B%E5%BE%97%E6%87%82%E8%87%AA%E5%B7%B1%E5%AF%AB%E6%99%82%E6%8F%9B%E5%80%8B%E5%81%9A%E6%B3%95">ZRFI0004：看得懂，自己寫時換個做法</h2>
 <table>
 <thead>
@@ -1182,7 +1186,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h2 id="62-%E7%94%A8%E5%89%8D%E9%9D%A2%E6%89%80%E5%AD%B8%E5%AE%8C%E6%88%90%E4%B8%80%E6%94%AF%E5%A5%BD%E7%9A%84%E5%82%B3%E7%A5%A8%E6%B8%85%E5%96%AE">6.2 用前面所學，完成一支好的傳票清單</h2>
 <p>範例程式：<code>lectures/cases/zr_tr13_zrfi0004.prog.abap</code>（<code>$TMP</code> 可直接執行）</p>
 <table>
@@ -1195,8 +1199,8 @@ footer { color: #999; }
 </thead>
 <tbody>
 <tr>
-<td>1. 需求</td>
-<td>條列條件、輸出單位、每頁規則、簽核規則；<strong>有疑問找使用者確認</strong></td>
+<td>1. 讀規格書</td>
+<td>《傳票清單 V1.1》各章節對應到程式；整理需求與簽核規則；<strong>沒寫清楚的先問使用者</strong></td>
 <td>—</td>
 </tr>
 <tr>
@@ -1291,7 +1295,103 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
+<h2 id="%E6%AD%A5%E9%A9%9F-1%E8%AE%80%E6%87%82%E8%A6%8F%E6%A0%BC%E6%9B%B8%E5%82%B3%E7%A5%A8%E6%B8%85%E5%96%AE-v11">步驟 1：讀懂規格書《傳票清單 V1.1》</h2>
+<table>
+<thead>
+<tr>
+<th>規格書章節</th>
+<th>對應到程式</th>
+<th>講義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 功能說明（權限 <code>F_BKPF_BUK</code>、T-code <code>ZFI0007</code>）</td>
+<td><code>check_authority</code>、SE93</td>
+<td>28</td>
+</tr>
+<tr>
+<td>2. 相關 Table</td>
+<td>讀哪些表、怎麼串</td>
+<td>6、11</td>
+</tr>
+<tr>
+<td>3. Selection-Screen（P／S／C、Default、No Display）</td>
+<td>選擇畫面、勾選框轉 range</td>
+<td>7</td>
+</tr>
+<tr>
+<td>4. 欄位說明、Note1（排序跳頁）</td>
+<td>欄位座標表、每張文件換頁</td>
+<td>12、20</td>
+</tr>
+<tr>
+<td>8. 2023/8/1 需求</td>
+<td><code>ZFI0037</code>、簽核欄規則</td>
+<td>21、21a</td>
+</tr>
+</tbody>
+</table>
+<p>簽核欄：主管用<strong>暫存文件建立日</strong>（<code>XREF2_HD</code>，空白用 <code>CPUDT</code>）查 <code>ZFI0037</code>；查不到只印製票員</p>
+<p><strong>先問再寫</strong>：<code>BSEG-</code> 欄位沒寫完整、會計年度必填卻是 Select option、文件日期條件原程式沒用、<br />
+原程式多了規格書沒寫的沖銷交易規則 → 以使用者確認的為準，並請使用者更新規格書</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="18" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="19">
 <h2 id="%E9%A9%97%E8%AD%89%E8%B7%9F%E6%AD%A3%E5%BC%8F%E7%A8%8B%E5%BC%8F-zrfi0004-%E9%80%90%E8%A1%8C%E6%AF%94%E5%B0%8D">驗證：跟正式程式 ZRFI0004 逐行比對</h2>
 <p>比對程式：同條件 <code>SUBMIT ... EXPORTING LIST TO MEMORY</code> 兩支程式<br />
 → <code>LIST_FROM_MEMORY</code> ＋ <code>LIST_TO_ASCI</code> 轉文字 → 逐行比較</p>
@@ -1337,7 +1437,7 @@ footer { color: #999; }
 <li>選擇畫面的「文件日期」條件，SELECT <strong>沒有用到</strong></li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1364,7 +1464,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="18" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="19" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1391,7 +1491,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="18">
+;" data-marpit-pagination-total="19">
 <h1 id="%E7%AC%AC%E4%B8%80%E9%9A%8E%E6%AE%B5%E7%B8%BD%E6%95%B4%E7%90%86%E5%AF%A6%E4%BD%9C">第一階段總整理實作</h1>
 <p>完成 <strong>ex13</strong>：獨立完成航班營收報表</p>
 <p>建議先不看答案程式，卡住時回查對應講義</p>

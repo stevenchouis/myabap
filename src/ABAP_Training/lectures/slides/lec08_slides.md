@@ -37,7 +37,7 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 8
-# 模組化——FORM / USING / CHANGING
+# 模組化（Modularization）——FORM / USING / CHANGING
 
 ABAP 基礎教育訓練（授課順序：接在講義 8a 之後）
 

@@ -39,7 +39,7 @@ style: |
 # 講義 27
 # 並行控制與 Lock Object
 
-ABAP 基礎教育訓練（授課順序：接在講義 21 之後）
+ABAP 基礎教育訓練（授課順序：接在講義 9（ALV）之後；延續講義 21 的 Z 資料表）
 
 對應練習 ex27｜答案物件 Lock Object `EZTR21_STUD`＋程式 `ZR_TR27_LOCK_OBJECT`
 

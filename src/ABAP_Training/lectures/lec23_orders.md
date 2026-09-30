@@ -1,4 +1,4 @@
-# 講義 23：期末整合練習——訂單 Header/Detail（授課順序：接在講義 21 之後）
+# 講義 23：期末整合練習——訂單 Header/Detail（授課順序：接在講義 28 之後，全課程最後一講；需要講義 21 的外鍵／Search Help）
 
 > 對應練習：[ex23](../ex23_orders.md)｜答案物件：資料表 `ZTR23_ORDH` + `ZTR23_ORDI`＋程式 `ZR_TR23_ORDERS`
 

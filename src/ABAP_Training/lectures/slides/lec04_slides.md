@@ -37,7 +37,7 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 4
-# Internal Table 基礎
+# Internal Table（內表：記憶體裡的表格）基礎
 
 ABAP 基礎教育訓練
 

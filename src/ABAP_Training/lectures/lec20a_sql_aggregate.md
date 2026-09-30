@@ -1,4 +1,4 @@
-# 講義 20a：SQL 聚合與子查詢（授課順序：接在講義 20 之後）
+# 講義 20a：SQL 聚合（Aggregate）與子查詢（Subquery）（授課順序：接在講義 13 之後；延續講義 20 的群組小計）
 
 > 對應練習：[ex20a](../ex20a_sql_aggregate.md)｜答案程式：`ZR_TR20A_SQL_AGG`
 
@@ -29,7 +29,7 @@ SELECT carrid SUM( seatsocc ) AS seats
 
 SFLIGHT 有上千列，回傳的只有「每家公司一列」。這就是講義 20 思考題 3 留的伏筆。
 
-## 2. 聚合函數
+## 2. 聚合函數（Aggregate Functions）
 
 | 函數 | 作用 | 備註 |
 |---|---|---|
@@ -119,7 +119,7 @@ SELECT COUNT( DISTINCT airpfrom ) FROM spfli INTO gv_dcnt.
 
 `SELECT DISTINCT 欄位` 跟 `GROUP BY 欄位`（不帶聚合）結果一樣；需要「順便算個數／加總」就用 `GROUP BY`，只要不重複清單用 `DISTINCT` 更直白。
 
-## 6. 子查詢：SELECT 裡面再放一個 SELECT
+## 6. 子查詢（Subquery）：SELECT 裡面再放一個 SELECT
 
 括號裡的 SELECT 先跑，結果拿來當外層的條件。
 

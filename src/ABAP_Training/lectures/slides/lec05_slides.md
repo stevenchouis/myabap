@@ -37,7 +37,7 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 5
-# Internal Table 進階
+# Internal Table（內表）進階
 
 ABAP 基礎教育訓練
 

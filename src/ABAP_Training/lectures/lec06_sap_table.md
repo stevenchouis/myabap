@@ -11,7 +11,7 @@
 - `sy-subrc` 與 `sy-dbcnt`
 - 為什麼不用 `SELECT *`、為什麼避免 `SELECT ... ENDSELECT`
 
-## 1. 資料字典與透明表
+## 1. 資料字典（Data Dictionary）與透明表（Transparent Table）
 
 SAP 的資料表定義集中在**資料字典（Data Dictionary，DDIC）**，用 SE11 檢視：欄位、型別（Data Element）、鍵、外鍵關係都在這裡。透明表（transparent table）就是資料庫裡真實存在的表。
 

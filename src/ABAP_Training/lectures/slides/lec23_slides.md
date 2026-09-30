@@ -39,7 +39,7 @@ style: |
 # 講義 23
 # 期末整合練習：訂單 Header/Detail
 
-ABAP 基礎教育訓練（授課順序：接在講義 21 之後）
+ABAP 基礎教育訓練（授課順序：接在講義 28 之後，全課程最後一講；需要講義 21 的外鍵／Search Help）
 
 對應練習 ex23｜答案：表 `ZTR23_ORDH` + `ZTR23_ORDI`＋程式 `ZR_TR23_ORDERS`
 

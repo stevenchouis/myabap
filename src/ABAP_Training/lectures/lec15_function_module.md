@@ -1,4 +1,4 @@
-# 講義 15：Function Module——SE37 與 CALL FUNCTION（授課順序：接在講義 8 之後）
+# 講義 15：Function Module（放在系統裡、任何程式都能呼叫的共用函式）——SE37 與 CALL FUNCTION（授課順序：接在講義 8 之後）
 
 > 對應練習：[ex15](../ex15_function_module.md)｜答案物件：`ZFG_TR15` / `Z_TR15_CALC_REVENUE` / `ZR_TR15_CALL_FM`
 

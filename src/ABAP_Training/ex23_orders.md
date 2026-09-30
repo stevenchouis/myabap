@@ -1,6 +1,6 @@
 # 練習 23：期末整合練習——訂單 Header/Detail
 
-> 授課順序：接在練習 21（Z 資料表／外鍵／Search Help）之後，作為基礎課的第二個期末整合練習（第一個是 ex13）。講義見 [lec23](lectures/lec23_orders.md)。
+> 授課順序：接在練習 28 之後（需要練習 21 的 Z 資料表／外鍵／Search Help），作為基礎課的第二個期末整合練習（第一個是 ex13）。講義見 [lec23](lectures/lec23_orders.md)。
 
 ## 學習目標
 
@@ -47,7 +47,7 @@
 | UPDUSER | | Data Element `SYUNAME` | 異動者 |
 | UPDDATE | | Data Element `SYDATUM` | 異動日 |
 
-   - `ORDNO` 欄位的 **Foreign Key** 對話框：Check Table 填 `ZTR23_ORDH`，Cardinality 選 `Many : 1`（多筆明細對應一個訂單），開啟 **Screen Check**——注意這次外鍵欄位本身就是 Key，跟 ex21 的 `KLASSE`（非 Key 外鍵）不一樣，是更貼近 SAP 官方文件範例（`SPFLI` 外鍵到 `SCARR`）的寫法
+   - `ORDNO` 欄位的 **Foreign Key** 對話框：Check Table 填 `ZTR23_ORDH`，基數（Cardinality）填 `1 : CN`（每筆明細屬於一張訂單、每張訂單任意多筆明細，見講義 21 §3.1）；Foreign key field type 選 **Key fields/candidates**（`ORDNO` 是明細表主鍵的一部分），開啟 **Screen Check**——注意這次外鍵欄位本身就是 Key，跟 ex21 的 `KLASSE`（非 Key 外鍵）不一樣，是更貼近 SAP 官方文件範例（`SPFLI` 外鍵到 `SCARR`）的寫法
    - Delivery Class `A`；Technical Settings 同上 → 啟用
 9. **維護畫面**：至少幫 `ZTR23_ORDH` 產生 Table Maintenance Generator（Authorization Group `&NC&`、Function Group 自訂如 `ZFG_TR23`）；`ZTR23_ORDI` 的維護畫面視情況決定要不要做
 10. **Search Help** `ZTR23_ORDHSH`（SE11 → Search Help → Elementary Search Help）：

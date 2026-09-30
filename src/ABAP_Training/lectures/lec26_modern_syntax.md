@@ -117,14 +117,14 @@ SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
 - **`INTO` 放在整句最後，本身就是新式寫法的標誌**：傳統寫法的 `INTO` 只能放在「`SELECT` 欄位清單之後」或「`FROM`／`JOIN` 之後、`WHERE` 之前」；一旦像上面範例把 `INTO TABLE @DATA(...)` 放到 `ORDER BY` 後面，編譯器就進入新式模式，強制要求欄位清單用逗號分隔、宿主變數加 `@`（實測：傳統空格分隔的欄位清單搭配句尾 `INTO`，會報 `The elements in the "SELECT LIST" list must be separated using commas`）。所以講義 6～25 的傳統寫法，`INTO` 一律寫在 `FROM` 前面或緊接 `FROM` 之後。
 - **聚合函數裡可以直接放算式（呼應講義 20a 第 7 節）**：講義 20a 用傳統寫法時，`SUM( price * seatsocc )` 會報「must be separated using commas」，因為算式屬於新式語法；改成新式寫法就能在資料庫內直接算出講義 20 的各公司營收，不必撈明細再 `LOOP` 累加：
 
-  ```abap
-  SELECT carrid,
-         SUM( price * seatsocc ) AS revenue
-    FROM sflight
-    GROUP BY carrid
-    ORDER BY carrid
-    INTO TABLE @DATA(gt_rev).
-  ```
+```abap
+SELECT carrid,
+       SUM( price * seatsocc ) AS revenue
+  FROM sflight
+  GROUP BY carrid
+  ORDER BY carrid
+  INTO TABLE @DATA(gt_rev).
+```
 
 ## 3. COND：依條件回傳一個值（取代 IF/ELSEIF 賦值）
 

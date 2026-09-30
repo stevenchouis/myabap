@@ -1,4 +1,4 @@
-# 講義 3：Local Type 與 Structure
+# 講義 3：Local Type（程式裡自己定義的型別）與 Structure（結構）
 
 > 對應練習：[ex03](../ex03_structures.md)｜答案程式：`ZR_TR03_STRUCTURES`
 
@@ -110,7 +110,7 @@ MOVE-CORRESPONDING gs_full TO gs_lite.   " 只搬同名欄位 id、name
 
 規則：**欄位名相同**就搬（逐欄轉換），目的端沒有的欄位丟掉，目的端多的欄位不動。欄位名拼錯就默默不搬——不會報錯，要自己核對。
 
-## 6. 巢狀結構（先看得懂）
+## 6. 巢狀結構（Nested Structure，先看得懂）
 
 結構的欄位也可以是另一個結構，用兩層 `-` 存取：
 

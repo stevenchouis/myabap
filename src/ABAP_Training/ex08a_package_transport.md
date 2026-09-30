@@ -1,6 +1,6 @@
 # 練習 8a：Package 與傳輸請求——從建立到匯入
 
-> 授課順序：接在練習 25（DDIC 總覽）之後、練習 8（FORM）之前；練習 15 建 Function Group 時就會用到本題的 TR 觀念。講義見 [lec08a](lectures/lec08a_package_transport.md)。
+> 授課順序：接在練習 21（Z 資料表）之後、練習 8（FORM）之前；練習 15 建 Function Group 時就會用到本題的 TR 觀念。講義見 [lec08a](lectures/lec08a_package_transport.md)。
 
 ## 學習目標
 

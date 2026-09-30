@@ -37,7 +37,7 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 3
-# Local Type 與 Structure
+# Local Type（程式裡自己定義的型別）與 Structure（結構）
 
 ABAP 基礎教育訓練
 

@@ -1,4 +1,4 @@
-# 講義 16：Field-Symbol（授課順序：接在講義 5 之後）
+# 講義 16：Field-Symbol（指向資料物件的別名，不是複本）（授課順序：接在講義 5 之後）
 
 > 對應練習：[ex16](../ex16_field_symbols.md)｜答案程式：`ZR_TR16_FIELD_SYMBOLS`
 

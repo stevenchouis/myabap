@@ -1,6 +1,6 @@
 # 練習 14：INCLUDE 拆檔——TOP 與 SUBROUTINE
 
-> 授課順序：接在練習 12 之後、練習 13（第一階段總整理）之前。講義見 [lec14](lectures/lec14_include_split.md)。
+> 授課順序：接在練習 20a 之後、練習 9（ALV）之前；練習 13（第一階段總整理）已經寫過一支完整報表，本題教怎麼把這種大程式拆檔。講義見 [lec14](lectures/lec14_include_split.md)。
 
 ## 學習目標
 

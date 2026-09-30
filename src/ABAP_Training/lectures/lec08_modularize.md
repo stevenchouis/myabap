@@ -1,4 +1,4 @@
-# 講義 8：模組化——FORM / USING / CHANGING（授課順序：接在講義 8a 之後）
+# 講義 8：模組化（Modularization）——FORM / USING / CHANGING（授課順序：接在講義 8a 之後）
 
 > 對應練習：[ex08](../ex08_modularize.md)｜答案程式：`ZR_TR08_MODULARIZE`
 
@@ -103,7 +103,7 @@ ENDFORM.
 
 FORM 的參數型別兩種都可以；到了講義 15 的 Function Module 就沒得選——FM 介面參數只能用 DDIC 型別，用 `CHANGING` 搭配 DDIC Table Type 傳整張表，正是取代舊式 `TABLES` 參數的寫法（下一節）。
 
-## 4. 區域變數 vs 全域變數
+## 4. 區域變數（Local）vs 全域變數（Global）
 
 - FORM 裡 `DATA` 宣告的是**區域變數**（`lv_`/`ls_`/`lt_`）：只在該 FORM 內存在，每次呼叫重新初始化。
 - 程式開頭宣告的是**全域變數**（`gv_`/`gs_`/`gt_`）：所有事件與 FORM 都摸得到。

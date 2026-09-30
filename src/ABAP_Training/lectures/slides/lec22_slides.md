@@ -37,7 +37,7 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 22
-# Message Class 與多語言文字元素
+# Message Class 與多語言文字元素（Text Elements）
 
 ABAP 基礎教育訓練（授課順序：接在講義 10 之後）
 

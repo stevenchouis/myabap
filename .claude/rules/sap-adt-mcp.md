@@ -134,7 +134,7 @@ CLAUDE.md 的待補清單原本列著「確認 sap-adt 實際暴露的工具名�
 ## 13. DEC Domain 值域限制、SELECT 子句順序再一坑（2026-07-11 實測，ex25）
 
 - **DEC 型別 Domain 的 Value Range 上下限必須是整數，即使欄位本身有小數位**：`ZTR25_SURPCT`（`DEC` length 6 decimals 2，想設值域 0.00～100.00）第一次帶 `doma:low>0.00</doma:low><doma:high>100.00</doma:high>` 啟用直接報錯 `Fixed value/limit 100.00 for data type DEC must be a whole positive number`——**限定值域的上下限不能帶小數點**，改成整數 `0`／`100` 才啟用成功（欄位本身還是可以存 `15.50` 這種小數值，只有值域邊界卡整數）。
-- **DEC Domain 的 `length` 是「含小數點的總顯示字元數」，不是純數字位數**：一開始設 `length=5 decimals=2` 想存到 `100.00`，啟用報 `Length of fixed value/limit 100.00 > maximum number of positions (5)`——`100.00` 顯示要 6 個字元（含小數點），所以 `length` 至少要給 6；跟 INT4 之類整數 Domain「length 就是位數」的直覺不一樣，DEC 類型的 `length` 得把小數點也算進去。
+- **⚠️ 已更正（2026-09-30 實測）：DEC Domain 的 `length` 是「數字位數」，不含小數點**（官方文件 `ABENDDIC_BUILTIN_TYPES`：`DEC` m,n 對應 ABAP `p` LENGTH m DIV 2 + 1 DECIMALS n）。原本寫「length 含小數點」是誤判：當時 `length=5 decimals=2` 報 `Length of fixed value/limit 100.00 > maximum number of positions (5)`，是值域邊界填了字面文字 `100.00`（6 個字元）造成的，不是型別容量不夠。實測暫時物件 Domain／DE `ZTR25_TDEC`（DEC 5,2、值域 `0`～`100` 整數）可正常啟用，程式裡是 3 bytes 的 `p`，能存 `100.00`、`999.99`，`1000.00` 才 `CX_SY_CONVERSION_OVERFLOW`。
 - **`outputInformation-length` 抓不準沒關係，只是 Warning**：`length=6` 配 `outputLength=7` 啟用時系統回 `type="W"`（非 E）「Output length (7) is less than the calculated output length (8)」，**這是警告不是錯誤，照樣啟用成功**——DDIC 自己會用計算出來的正確輸出長度，POST/PUT 帶的 `outputInformation-length` 只是初始建議值，猜不準不影響啟用。
 - **Open SQL 的 `UP TO n ROWS` 必須放在 `INTO` 子句之後**，不是接在 `ORDER BY` 後面直接寫：`... WHERE ... ORDER BY ... UP TO n ROWS.`（`INTO` 寫在最前面、跳過 ORDER BY 直接接 UP TO）會報 `"UP" is not allowed here. "." is expected.`；正確順序是 `... FROM ... WHERE ... ORDER BY ... INTO TABLE ... UP TO n ROWS.`——`INTO` 子句要嘛在 SELECT 欄位清單後面（最前段），要嘛在 `ORDER BY` 之後、`UP TO` 之前，兩種都合法，但 `UP TO` 永遠要接在 `INTO` 後面，不能直接接在 `ORDER BY` 後面。
 - **欄位清單一旦用逗號分隔的新式寫法（`f~carrid, c~carrname, ...`），就算 `INTO` 用舊式 `CORRESPONDING FIELDS OF TABLE itab`（不帶 `@`），編譯器還是會判定整句進入「新式 Open SQL」模式，要求宿主變數必須加 `@` 跳脫**：不加會報 `If new Open SQL syntax is used, all host variables must be escaped using @. The variable GT_REV is not escaped.`——混用新舊寫法時，只要有一處觸發新式判定（逗號分隔欄位清單、`~` alias 等），全句的宿主變數都要補 `@`，不能只改觸發新式判定的那一段。
@@ -1065,7 +1065,8 @@ rap03 建立 `ZI_RAP03_UMTEST` 時完全沒有做 UI Annotation（當時重點�
 
 - **`INTO` 位置決定編譯器走傳統還是新式模式**：傳統寫法 `INTO` 只能在「`SELECT` 欄位清單後」或「`FROM`／`JOIN ... ON` 之後、`WHERE` 之前」；`INTO ... UP TO n ROWS` 也是傳統位置。把 `INTO` 放到 `ORDER BY` 之後（句尾）就是新式語法——即使欄位清單是傳統空格分隔、`INTO` 用不帶 `@` 的舊式 `CORRESPONDING FIELDS OF TABLE`，仍會啟用失敗：`The elements in the "SELECT LIST" list must be separated using commas.`。把傳統程式從新式改回傳統時，除了拿掉 `@`、逗號改空格，**`INTO` 也要搬回 `FROM` 前面**，`ORDER BY` 多欄位也改空格分隔（`ORDER BY f~carrid f~connid f~fldate`，本次實測有效）。
 - **行內宣告的兩個實測結論**：① `DATA(lv_s) = 'abc'.` 推導出 `c LENGTH 3`（之後賦更長字串被截斷），`DATA(lv_n) = 0.` 是 `i`，`` DATA(lv_str) = `abc`. `` 才是 `string`；② 同一程式單元內同名行內宣告兩次（如兩個 `LOOP ... INTO DATA(gv_x)`）啟用報 `"GV_X" was already declared`。
-- **驗證流程**：改本機 `.prog.abap` 快照後，必須用「LOCK → PUT `source/main` → UNLOCK → activation」推回 SAP，再讀 `?version=active` 比對（SAP 讀回會去掉結尾換行、行尾是 CRLF，比對前要忽略 `` 與結尾換行），有副作用／互動畫面的程式（`VIEW_MAINTENANCE_CALL`、ALV LVC、`PRICE_CALC`）只做 activation 不 `programrun`（第 38 節）。這次八支答案程式改完只跑本機編輯沒推回 SAP，事後才發現 `ZR_TR25_DDIC`／`ZR_TR23_ORDERS` 的句尾 `INTO` 會啟用失敗——**本機改完的答案程式一定要推回 SAP 啟用驗證，不能只改快照**。
+- **驗證流程**：改本機 `.prog.abap` 快照後，必須用「LOCK → PUT `source/main` → UNLOCK → activation」推回 SAP，再讀 `?version=active` 比對（SAP 讀回會去掉結尾換行、行尾是 CRLF，比對前要忽略 `
+` 與結尾換行），有副作用／互動畫面的程式（`VIEW_MAINTENANCE_CALL`、ALV LVC、`PRICE_CALC`）只做 activation 不 `programrun`（第 38 節）。這次八支答案程式改完只跑本機編輯沒推回 SAP，事後才發現 `ZR_TR25_DDIC`／`ZR_TR23_ORDERS` 的句尾 `INTO` 會啟用失敗——**本機改完的答案程式一定要推回 SAP 啟用驗證，不能只改快照**。
 
 
 ## 62. 傳統 DDIC View 無 ADT、大段原始碼上傳腳本、清單輸出比對技巧（2026-09-29 實測，基礎課 lec11/12/13/21/25/28 補充）

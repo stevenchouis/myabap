@@ -64,7 +64,7 @@ blockquote {
 footer { color: #999; }
 ;">
 <h1 id="%E8%AC%9B%E7%BE%A9-7">講義 7</h1>
-<h1 id="%E9%81%B8%E6%93%87%E7%95%AB%E9%9D%A2">選擇畫面</h1>
+<h1 id="%E9%81%B8%E6%93%87%E7%95%AB%E9%9D%A2selection-screen">選擇畫面（Selection Screen）</h1>
 <p>PARAMETERS / SELECT-OPTIONS / IN</p>
 <p>對應練習 ex07｜答案程式 <code>ZR_TR07_SELSCREEN</code></p>
 </section>
@@ -673,12 +673,13 @@ footer { color: #999; }
 </tbody>
 </table>
 <ul>
-<li>比 <code>DATA</code> 多一個能力：<strong>跟畫面同名欄位交換資料</strong></li>
-<li><code>TABLES sscrfields.</code> 一定要用：
+<li>選擇畫面輸入<strong>不靠</strong> <code>TABLES</code>：值放在 <code>PARAMETERS</code>／<code>SELECT-OPTIONS</code> 自己建的 <code>p_xxx</code>／<code>s_xxx</code>；<code>FOR</code> 後面只提供型別</li>
+<li>畫面欄位<strong>取自 DDIC 結構</strong>（<code>結構-欄位</code>）時，才要同名 <code>TABLES</code> 傳資料</li>
+<li><code>TABLES sscrfields.</code> 就是這種情況：
 <ul>
 <li><code>INITIALIZATION</code> 填 <code>sscrfields-functxt_01</code> → 按鈕文字顯示在畫面</li>
 <li><code>AT SELECTION-SCREEN</code> 讀 <code>sscrfields-ucomm</code> → 知道按了哪顆按鈕</li>
-<li>改用 <code>DATA</code> 就跟畫面斷線</li>
+<li>不能改用 <code>DATA</code></li>
 </ul>
 </li>
 </ul>
@@ -902,7 +903,9 @@ INITIALIZATION.
   t_b1 = '查詢條件'.        &quot; 框標題在 INITIALIZATION 給值
 </code></pre>
 <ul>
-<li><code>t_xx</code> 由系統自動宣告，INITIALIZATION 裡賦值（事件見講義 10）</li>
+<li><code>t_xx</code> 不用 <code>DATA</code>：<code>TITLE</code> 後面的名稱，系統自動產生同名全域變數（<code>c</code> 長度 70，名稱最多 8 字元），INITIALIZATION 裡賦值（事件見講義 10）</li>
+<li><img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/26a0.svg" data-marp-twemoji=""/> <code>'查詢條件'</code> 寫死，不會隨登入語言切換；正式寫法用 <strong>Text Symbol</strong>（講義 22）：<br />
+<code>WITH FRAME TITLE text-001.</code>（免 INITIALIZATION），或 <code>t_b1 = text-001.</code></li>
 <li>欄位左邊的說明文字正式做法是 <strong>Selection Texts</strong><br />
 （SE38 → Goto → Text Elements，支援多語言——講義 22）</li>
 </ul>

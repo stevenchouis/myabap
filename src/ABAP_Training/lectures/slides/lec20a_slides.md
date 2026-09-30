@@ -1,23 +1,45 @@
 ---
-<!-- _class: lead -->
-<!-- _paginate: false -->
-
-# 講義 20
-# Control Break 群組小計
-
-ABAP 基礎教育訓練（授課順序：接在講義 11 之後）
-
-對應練習 ex20｜答案程式 `ZR_TR20_CONTROL_BREAK`
-
+marp: true
+theme: default
+paginate: true
+headingDivider: false
+style: |
+  section {
+    font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+    font-size: 26px;
+    padding: 60px;
+  }
+  section.lead {
+    text-align: center;
+    justify-content: center;
+  }
+  section.lead h1 { font-size: 56px; }
+  code, pre {
+    font-family: Consolas, 'Courier New', monospace;
+  }
+  pre {
+    font-size: 21px;
+    line-height: 1.45;
+  }
+  table { font-size: 23px; }
+  section.compact pre { font-size: 19px; }
+  section.compact table { font-size: 20px; }
+  blockquote {
+    border-left: 6px solid #0a6ed1;
+    padding-left: 16px;
+    color: #333;
+    background: #eef6fc;
+  }
+  footer { color: #999; }
 ---
 
 <!-- _class: lead -->
 <!-- _paginate: false -->
 
 # 講義 20a
-# SQL 聚合與子查詢
+# SQL 聚合（Aggregate）與子查詢（Subquery）
 
-ABAP 基礎教育訓練（授課順序：接在講義 20 之後）
+ABAP 基礎教育訓練（授課順序：接在講義 13 之後；延續講義 20 的群組小計）
 
 對應練習 ex20a｜答案程式 `ZR_TR20A_SQL_AGG`
 

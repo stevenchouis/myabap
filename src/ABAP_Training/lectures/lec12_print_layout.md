@@ -258,7 +258,7 @@ WRITE AT /gv_pos gv_text.
 - **中文標題置中**：用 `strlen` 算會偏右，因為字數比實際格數少。ZRFI0004 的 `write_header` 為了算公司名稱的寬度，先把字串轉成繁中編碼（code page 8300）的位元組再數長度，繞了一大圈，用上面這個方法一行就夠。
 - **把長文字切成兩行**：ZRFI0004 的 `split_sgtxt` 逐字呼叫 `dynamic_output_length` 累加格數，超過 50 格的部分放到第二行，所以中文內文不會被從中間截斷。
 
-## 3. 頁首與頁尾
+## 3. 頁首與頁尾（TOP-OF-PAGE／END-OF-PAGE）
 
 搭配講義 10 的清單事件，標準版型長這樣：
 

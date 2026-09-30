@@ -1,6 +1,6 @@
 # 練習 9：Functional ALV 與 MACRO
 
-> 授課順序：接在練習 13（第一階段總整理）之後，是 ALV 階段的第一題；進階篇見 ex24。講義見 [lec09](lectures/lec09_alv.md)。
+> 授課順序：接在練習 14（INCLUDE 拆檔）之後，是 ALV 階段的第一題；進階篇見 ex24。講義見 [lec09](lectures/lec09_alv.md)。
 
 ## 學習目標
 

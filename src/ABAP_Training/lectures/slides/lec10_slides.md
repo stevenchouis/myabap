@@ -37,7 +37,7 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 10
-# Report Event——事件流程與互動清單
+# Report Event（報表事件）——事件流程與互動清單（Interactive List）
 
 ABAP 基礎教育訓練（授課順序：接在講義 15 之後）
 

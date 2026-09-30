@@ -1,4 +1,4 @@
-# 講義 10：Report Event——事件流程與互動清單（授課順序：接在講義 15 之後）
+# 講義 10：Report Event（報表事件：系統在固定時機執行的程式區塊）——事件流程與互動清單（Interactive List）（授課順序：接在講義 15 之後）
 
 > 對應練習：[ex10](../ex10_events.md)｜答案程式：`ZR_TR10_EVENTS`
 
@@ -130,7 +130,7 @@ TOP-OF-PAGE.
 | `READ LINE` | 把某一行的文字讀回 `sy-lisel`（同時也會把那一行 `HIDE` 過的值寫回變數） | 講義 13 |
 | `MODIFY LINE` | 把改好的 `sy-lisel` 寫回同一行 | 講義 13（總頁數回填：全部印完才知道總頁數，再回頭改每頁頁首） |
 
-## 4. 互動清單：AT LINE-SELECTION 與 HIDE
+## 4. 互動清單（Interactive List）：AT LINE-SELECTION 與 HIDE
 
 需求：清單只顯示摘要，使用者**雙擊某行**，就跳到下一層清單看那筆資料的明細。
 

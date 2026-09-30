@@ -37,7 +37,7 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 15
-# Function Module——SE37 與 CALL FUNCTION
+# Function Module（共用函式）——SE37 與 CALL FUNCTION
 
 ABAP 基礎教育訓練（授課順序：接在講義 8 之後）
 

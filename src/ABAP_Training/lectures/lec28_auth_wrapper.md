@@ -35,7 +35,7 @@
 3. Authorization Group `&NC&`（練習用，不檢核）；Function Group 填 `ZFG_TR28B`；Maintenance type 選 **One Step**
 4. 產生後可以先直接用 **SM30** 手動測試維護畫面本身（輸入 View 名稱 `ZTR28_CDISC` → Maintain），確認能新增/修改一筆資料——這一步只是確認 View 本身能動，還沒有套用後面的權限/鎖定 Wrapper，兩者是獨立的
 
-## 3. 自訂權限物件：SU21
+## 3. 自訂權限物件（Authorization Object）：SU21
 
 1. 交易碼輸入 **SU21** → Enter
 2. 左側樹狀選單找一個 Object Class（⚠️ **`BC` 這個代碼本身不存在，是分類的字首不是完整代碼**，實測 F4 選單裡查得到的是 `BC_A`（Basis: Administration）、`BC_C`（Basis - Development Environment）、`BC_Z`（Basis - Central Functions）等更細的子分類——本例選 **`BC_A`**；實務上依表格所屬模組選對應 Class，例如 PP 模組相關的表可以選 `PP`）→ 對該 Class 按滑鼠右鍵 → **Create**（或工具列的「Create」按鈕）
@@ -66,7 +66,7 @@ ENDIF.
 
 **權限物件只是定義了「有哪些欄位可以管控」，真正「誰對什麼值有權限」要靠角色維護（PFCG）**——建好權限物件之後，還沒有任何人真的擁有這個權限，`AUTHORITY-CHECK` 一律會失敗，直到走完下面第 3.1 節的 PFCG 流程為止。
 
-### 3.1 PFCG 角色維護：把權限物件真正指派給使用者
+### 3.1 PFCG 角色（Role）維護：把權限物件真正指派給使用者
 
 這一步是整套機制**真正生效的關鍵**，很多課程或文件會跳過，但沒有這一步，前面 SU21 建的物件形同虛設。完整走一次：
 

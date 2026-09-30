@@ -37,9 +37,9 @@ style: |
 <!-- _paginate: false -->
 
 # 講義 8a
-# Package 與傳輸請求——SE80／SE10／STMS
+# Package（套件）與傳輸請求（Transport Request）——SE80／SE10／STMS
 
-ABAP 基礎教育訓練（授課順序：接在講義 25 之後、講義 8 之前）
+ABAP 基礎教育訓練（授課順序：接在講義 21 之後、講義 8 之前）
 
 對應練習 ex08a｜驗收：SE10 傳輸記錄＋STMS 匯入狀態
 

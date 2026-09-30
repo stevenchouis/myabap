@@ -39,7 +39,7 @@ style: |
 # 講義 13
 # 第一階段總整理——完整報表架構與實作攻略
 
-ABAP 基礎教育訓練（授課順序：接在講義 14 之後；傳統報表階段收尾）
+ABAP 基礎教育訓練（授課順序：接在講義 21a 之後；傳統報表階段收尾）
 
 對應練習 ex13｜答案程式 `ZR_TR13_CAPSTONE`
 
@@ -228,7 +228,8 @@ FORM 區、分頁排版。差別只在業務邏輯的複雜度
 |---|---|
 | 舊式宣告：`TABLES`、`OCCURS 0 WITH HEADER LINE`、macro `cls` | 2、5 §8、9 |
 | 選擇畫面：`MATCHCODE OBJECT`、`NO-DISPLAY`、程式自己填 range 表 | 7 |
-| `AUTHORITY-CHECK`、`FUNCTION KEY`＋`CALL TRANSACTION` | 28（先看懂） |
+| `AUTHORITY-CHECK`、App bar 按鈕 `FUNCTION KEY`＋`CALL TRANSACTION` | 28 §7（先看懂） |
+| 按鈕上的 SAP 圖示 `icon_tools` | 28 §7.1 |
 | `MESSAGE ... STOP`、`SELECT ... ENDSELECT` | 10、6 §4 |
 | `FOR ALL ENTRIES`、`APPENDING`、`saknr AS hkont` | 11 |
 | `AT NEW` 後 `READ TABLE ... INDEX`（繞過 `*` 遮蔽） | 20 |
@@ -251,7 +252,7 @@ ENDCASE.
 - `ZFI0037` → 表 `ZFI0037`（會計主管表）：可新增、修改
 - `ZFI0037Q` → **Read only 的 Maintenance View**：只能顯示，沒有 Change／Display 切換
 - 只把 T-code 設成顯示模式擋不住：有權限的人在 SM30 按切換就能改
-- Maintenance View 見講義 21；SE93 建立步驟見講義 28 §7
+- Maintenance View 見講義 21a；SE93 建立步驟見講義 28 §7
 
 ---
 
@@ -296,7 +297,7 @@ ENDCASE.
 
 | 步驟 | 做法 | 講義 |
 |---|---|---|
-| 1. 需求 | 條列條件、輸出單位、每頁規則、簽核規則；**有疑問找使用者確認** | — |
+| 1. 讀規格書 | 《傳票清單 V1.1》各章節對應到程式；整理需求與簽核規則；**沒寫清楚的先問使用者** | — |
 | 2. 版面 | 65 行配置表、欄寬集中在 `gs_width` 結構 | 12 |
 | 3. 宣告 | TYPES＋內表＋work area、`gt_/gs_/gv_`、`DATA gv_x TYPE bkpf-x` 當 FOR 參考 | 2、3、5、7 |
 | 4. 骨架 | 事件裡只有 PERFORM；勾選框 → `NO-DISPLAY` range；查無資料 `STOP` | 7、10 |
@@ -304,6 +305,25 @@ ENDCASE.
 | 6. 輸出 | 每 10 筆或最後一筆印簽核欄；簽核欄**一個 FORM** | 8、12 |
 | 7. 頁碼 | 起訖頁回填，行號用 `sy-linno` 記錄，不改 `sy-pagno` | 13 §3.1 |
 | 8. 驗證 | 跟正式程式逐行比對，刻意挑邊界情況 | — |
+
+---
+
+<!-- _class: compact -->
+
+## 步驟 1：讀懂規格書《傳票清單 V1.1》
+
+| 規格書章節 | 對應到程式 | 講義 |
+|---|---|---|
+| 1. 功能說明（權限 `F_BKPF_BUK`、T-code `ZFI0007`） | `check_authority`、SE93 | 28 |
+| 2. 相關 Table | 讀哪些表、怎麼串 | 6、11 |
+| 3. Selection-Screen（P／S／C、Default、No Display） | 選擇畫面、勾選框轉 range | 7 |
+| 4. 欄位說明、Note1（排序跳頁） | 欄位座標表、每張文件換頁 | 12、20 |
+| 8. 2023/8/1 需求 | `ZFI0037`、簽核欄規則 | 21、21a |
+
+簽核欄：主管用**暫存文件建立日**（`XREF2_HD`，空白用 `CPUDT`）查 `ZFI0037`；查不到只印製票員
+
+**先問再寫**：`BSEG-` 欄位沒寫完整、會計年度必填卻是 Select option、文件日期條件原程式沒用、
+原程式多了規格書沒寫的沖銷交易規則 → 以使用者確認的為準，並請使用者更新規格書
 
 ---
 

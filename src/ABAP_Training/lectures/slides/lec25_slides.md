@@ -39,7 +39,7 @@ style: |
 # 講義 25
 # Data Dictionary 總覽與 Global Type
 
-ABAP 基礎教育訓練（授課順序：接在講義 7 之後、講義 8a 之前）
+ABAP 基礎教育訓練（授課順序：接在講義 7 之後、講義 21 之前）
 
 對應練習 ex25｜答案物件 `ZTR25_SURPCT`／`ZTR25_ACTIVE`／`ZTR25_SURCHG`／`ZTR25_TT_SURCHG`／`ZR_TR25_DDIC`
 
@@ -50,7 +50,7 @@ ABAP 基礎教育訓練（授課順序：接在講義 7 之後、講義 8a 之�
 - Data Dictionary（SE11）：一張物件地圖，程式與畫面共用同一份定義
 - **Global Type** 回顧（觀念見講義 6）：重點在動手建自己的
 - 為什麼自建 Z 表：業務需求 + SM30 讓非工程師維護
-- Check Table／外鍵／Search Help 總覽
+- Check Table（檢查表）／Foreign Key（外鍵）／Search Help（搜尋輔助）總覽
 - **DDIC Table Type**：區域表格型別升級成全域
 - 案例：SM30 維護的「航空公司旺季加成」設定表
 
@@ -89,7 +89,44 @@ ABAP 基礎教育訓練（授課順序：接在講義 7 之後、講義 8a 之�
   `"V_TCURC" is not declared as a table, projection view, or database view`
 - 新開發讀多表 → **CDS View**；Maintenance／Help View 仍常用
 - 本系統傳統 View 只能用 **SE11** 建立（ADT 讀不到）
-- 詳見：講義 11 §2.1（Database）、講義 21 §3.1（Maintenance）、§4.4（Help）
+- 詳見：講義 11 §2.1（Database）、講義 21a §3（Maintenance）、§4（Help）
+
+---
+
+<!-- _class: compact -->
+
+## Projection View vs 直接從表 SELECT 欄位
+
+**讀資料效能完全一樣**：資料庫不建 View，系統轉成讀原表那幾欄
+
+| | 直接 SELECT 欄位 | Projection View |
+|---|---|---|
+| 欄位清單 | 每支程式各寫一次 | SE11 定義一次，多程式共用 |
+| 只有這幾欄的結構 | 自己寫 TYPES | 直接 `TYPE demo_spfli` |
+| 限制只能讀 | 做不到 | Maint. Status 設 `Read only` |
+
+- 例：`DEMO_SPFLI` 只露出 `SPFLI` 的 `CARRID`／`CONNID`／`CITYFROM`／`CITYTO`，唯讀
+- **不是權限控管**：程式照樣能直接讀原表全部欄位
+- 實務很少自建；主要是看懂標準系統與舊程式（新開發用 CDS View）
+
+---
+
+<!-- _class: compact -->
+
+## 1.2 DDIC 內建型別 vs ABAP 內建型別
+
+| DDIC（SE11，大寫） | ABAP（程式，講義 2） | 說明 |
+|---|---|---|
+| `CHAR` m／`NUMC` m | `c`／`n` LENGTH m | 字元／數字字元 |
+| `INT4` | `i` | 整數 |
+| `DEC` m,n | `p` LENGTH m DIV 2 + 1 DECIMALS n | **m 是數字位數，不含小數點** |
+| `DATS`／`TIMS` | `d`／`t` | 日期／時間 |
+| `CURR`＋`CUKY` | `p`＋`c` 5 | 金額**必須配幣別**，小數位依幣別顯示 |
+| `QUAN`＋`UNIT` | `p`＋`c` | 數量**必須配單位** |
+| `CLNT`／`LANG` | `c` 3／`c` 1 | Client 自動處理／文字表依語言取 |
+
+- DDIC 型別程式不能直接寫，只能透過 Data Element、表格欄位引用
+- 實測：`DEC` 5,2 → `p` 3 bytes，最大 `999.99`；`DEC` 6,2 → `p` 4 bytes，最大 `9999.99`
 
 ---
 
@@ -135,7 +172,7 @@ DATA lv_matnr TYPE c LENGTH 18.   " 升級後默默截斷，不報錯
 
 ---
 
-## 4. Check Table／外鍵／Search Help
+## 4. Check Table（檢查表）／Foreign Key（外鍵）／Search Help（搜尋輔助）
 
 | 名詞 | 解決什麼問題 |
 |---|---|
@@ -147,6 +184,23 @@ DATA lv_matnr TYPE c LENGTH 18.   " 升級後默默截斷，不報錯
 欄位重用標準 Data Element `S_CARR_ID`
 → Search Help 一個都不用建
 
+
+---
+
+<!-- _class: compact -->
+
+## SE11 會看到的相關名詞
+
+| 英文 | 中文 | 意思 |
+|---|---|---|
+| Foreign Key Table | 外鍵表 | 帶外鍵欄位的表（學生表） |
+| Check Table | 檢查表 | 提供合法值的表（班級表） |
+| Cardinality | 基數 | 幾對幾，如 `1 : CN`（講義 21 §3.1） |
+| Screen Check | 畫面檢查 | 外鍵開關，打開畫面輸入才檢查 |
+| Value Table | 值表 | Domain 上的建議檢查表，建外鍵時帶出預設 |
+| F4 Help／Value Help | F4 說明 | 欄位按 F4 跳出的選單 |
+| Selection Method | 選取方法 | Search Help 從哪張表讀資料 |
+| Search Help Parameter | 搜尋輔助參數 | 選單欄位；Import 帶條件進去、Export 帶選到的值回畫面 |
 ---
 
 ## 5. 程式引用 DDIC 物件的寫法
@@ -208,7 +262,7 @@ DATA gv_carrid TYPE scarr-carrid.    " 透過表格路徑（型別相同）
 | SURCHARGE_PCT | | `ZTR25_SURPCT`（自建） |
 | UPDUSER／UPDDATE | | `SYUNAME`／`SYDATUM` |
 
-`CARRID` 外鍵：Check Table 填標準表 **`SCARR`**，Cardinality `[0..1] : 1`，打開 Screen Check
+`CARRID` 外鍵：Check Table 填標準表 **`SCARR`**，基數 `1 : C`（每家航空公司最多一筆設定），打開 Screen Check
 
 ```abap
 key carrid : s_carr_id not null

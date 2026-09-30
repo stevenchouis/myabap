@@ -1,4 +1,4 @@
-# 講義 27：並行控制與 Lock Object（授課順序：接在講義 21 之後）
+# 講義 27：並行控制與 Lock Object（授課順序：接在講義 9（ALV）之後；延續講義 21 的 Z 資料表）
 
 > 對應練習：[ex27](../ex27_lock_object.md)｜答案物件：Lock Object `EZTR21_STUD`（沿用練習 21 的 `ZTR21_STUD`）＋程式 `ZR_TR27_LOCK_OBJECT`
 
@@ -26,7 +26,7 @@
 
 **解法不是「程式自己判斷」**（例如 A、B 各自 SELECT 一次比對時間戳記，土法煉鋼容易漏case），而是 SAP 提供了一套系統層級的機制：**Lock Object（鎖定物件）**。概念很單純：A 要改之前先跟系統「登記」（ENQUEUE），系統記下「這筆資料現在被 A 佔用」；B 也想改時，系統一查已經有人登記了，直接擋下 B（丟出例外），B 只能等 A 做完、解除登記（DEQUEUE）之後才能繼續。
 
-## 2. Enqueue Server 與 Lock Table（觀念，不用深究底層）
+## 2. Enqueue Server（負責管理鎖定的服務）與 Lock Table（目前所有鎖定的清單）（觀念，不用深究底層）
 
 SAP 系統有一個獨立的**鎖定管理員（Enqueue Server）**，維護一張**鎖定表（Lock Table）**，記錄「誰、鎖了哪張表的哪一筆、什麼模式」。這張表**不是資料庫表**，是 SAP Kernel 在記憶體裡管理的（可以用 **SM12** 交易碼查看目前所有鎖定紀錄）。
 
