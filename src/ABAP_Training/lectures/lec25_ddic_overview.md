@@ -29,6 +29,26 @@
 
 關鍵觀念：**這些定義只寫一次，程式（用 `TYPE`）跟畫面（Dynpro/SM30）共用同一份**——這就是接下來 Global Type 觀念的基礎。
 
+用航空公司代碼 `CARRID` 當例子。它在 DDIC 裡只定義一次：
+
+- Domain `S_CARR_ID`：技術屬性，`CHAR` 長度 3
+- Data Element `S_CARR_ID`：語意，包含欄位標籤、F1 說明，以及掛好的 Search Help `S_CARRIER_ID`（F4 選單）
+
+之後所有地方都引用這一份：
+
+| 誰在用 | 怎麼引用 | 拿到什麼 |
+|---|---|---|
+| 程式變數 | `DATA gv_carrid TYPE s_carr_id.` | 型別、長度自動是 CHAR 3 |
+| 選擇畫面 | `PARAMETERS p_carr TYPE s_carr_id.` | 型別、長度，加上 F1 說明、F4 選單，不用自己寫 |
+| 表格欄位 | `SCARR-CARRID`、`SPFLI-CARRID`、`SFLIGHT-CARRID` | 同一個型別，JOIN 時兩邊保證對得上 |
+| SM30 維護畫面 | 系統依表格欄位自動產生 | 欄位標題、F1、F4 都從 Data Element 帶出來 |
+
+「畫面」這一邊（選擇畫面、Dynpro、SM30）的欄位標題、F1、F4，都不是畫面自己定義的，而是從 DDIC 帶過來。
+
+好處在修改時最明顯：如果長度要從 3 改成 4，只要改 Domain 一個地方，所有引用它的程式、畫面、表格都跟著變。反過來，如果每支程式都自己寫 `TYPE c LENGTH 3`，就要一支一支找出來改，漏改一支就會出錯（值被截斷、型別對不上）。
+
+這種「在 SE11 定義、全系統都能引用」的型別就叫 **Global Type**；相對的是講義 3、4 教的 Local Type（程式裡的 `TYPES`），只在那支程式裡有效。本講接下來就是教怎麼建自己的 Global Type。
+
 ### 1.1 View 的四種類型
 
 View 不存資料，只是把表的欄位組合起來。SE11 → **View** 建立時要先選類型，四種用途完全不同：
