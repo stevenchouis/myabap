@@ -194,7 +194,7 @@ ENDLOOP.
 | `TABLES`、`LIKE`、`BEGIN OF ... OCCURS 0`、`OCCURS 0 WITH HEADER LINE` | 舊式宣告，全部內表都帶 Header Line | 2、5 §8、7 |
 | `DEFINE cls` | macro，一次做 `CLEAR` 加 `REFRESH` | 9（後面才教，先看懂） |
 | 選擇畫面：`BLOCK`、`OBLIGATORY`、`DEFAULT`、`AS CHECKBOX`、`MATCHCODE OBJECT`、`NO-DISPLAY` | | 7 |
-| `INITIALIZATION` 裡的 `SELECTION-SCREEN FUNCTION KEY`、`AT SELECTION-SCREEN` 的 `CALL TRANSACTION` | 選擇畫面上的兩顆工具按鈕 | 28（選修，先看懂） |
+| `INITIALIZATION` 裡的 `SELECTION-SCREEN FUNCTION KEY`、`AT SELECTION-SCREEN` 的 `CALL TRANSACTION` | 選擇畫面上的兩顆工具按鈕，跳到 SM30 維護／查詢會計主管表 `ZFI0037`（見下方說明） | 28（選修，先看懂） |
 | `check_auth_object`：`AUTHORITY-CHECK` 依序試 `ACTVT` 01／02／03 | 有新增、修改、顯示任一權限就放行 | 28 |
 | `initial_document_status_range`：呼叫 `GET_DOMAIN_VALUES` 取 Domain 固定值，**在程式裡自己填 `NO-DISPLAY` 的 `s_bstat`** | 把三個勾選框轉成 range 表，再用 `IN` 查詢 | 7、15、25 |
 | `extract_acct_doc_header_data`：`SELECT ... IN`、查無資料 `MESSAGE ... STOP` | | 6、7、10 |
@@ -205,6 +205,73 @@ ENDLOOP.
 | `WRITE AT (t_optfm-hkont) ...` | 欄寬集中寫在結構 `t_optfm`，就是「欄位座標表」的程式版 | 12 |
 | `split_sgtxt`：用 `cl_abap_list_utilities=>dynamic_output_length` 逐字算顯示寬度，把內文切成兩行 | 中文字佔兩格 | 12 §2.1、18 |
 | `write_header`：`convert_string_to_xstring` 算字串位元組數、用 `sy-linsz` 算置中位置 | 中文標題置中 | 12 |
+
+#### 選擇畫面上的兩顆按鈕（講義 28 第 7 節才正式教）
+
+執行畫面最上方，標題「傳票清單」下面那一列的「維護會計主管名稱」「顯示會計主管名稱」，是選擇畫面**工具列**上的按鈕，分三步加進來：
+
+```abap
+" 1. 宣告：TABLES sscrfields 是選擇畫面的系統結構；smp_dyntxt 放「圖示＋文字」
+TABLES sscrfields.
+DATA functxt TYPE smp_dyntxt.
+
+" 2. 在選擇畫面宣告區加按鈕，最多 4 顆（FUNCTION KEY 1～4）
+SELECTION-SCREEN: FUNCTION KEY 1,
+                  FUNCTION KEY 2.
+
+INITIALIZATION.
+  " 3. 設定按鈕的圖示和文字：functxt_01 對應 FUNCTION KEY 1，以此類推
+  functxt-icon_id   = icon_tools.       " 圖示（扳手工具）
+  functxt-icon_text = text-t03.         " 文字：維護會計主管名稱
+  sscrfields-functxt_01 = functxt.
+
+  CLEAR functxt.                        " 同一個結構重複用，先清空
+  functxt-icon_id   = icon_tools.
+  functxt-icon_text = text-t04.         " 文字：顯示會計主管名稱
+  sscrfields-functxt_02 = functxt.
+```
+
+- 只要文字、不要圖示時，直接寫 `sscrfields-functxt_01 = '維護會計主管名稱'.` 就好。
+- 要圖示＋文字時，才用 `smp_dyntxt` 結構：`icon_id` 放圖示常數，`icon_text` 放文字。
+- **`icon_tools` 是什麼**：SAP 內建的圖示常數，代表「工具（扳手）」圖示，值是 `'@45@'`。畫面看到 `@代碼@` 這種格式，就會顯示成對應的圖示。這些常數定義在 Type Group `ICON`，原程式第 29 行的 `TYPE-POOLS: icon.` 就是載入它；新版系統會自動載入，不寫也能用。程式裡用常數名稱，不要直接寫 `'@45@'`，比較看得懂。
+- 要換別的圖示，SE38 執行報表 `SHOWICON` 可以看到全部圖示和常數名稱。常用圖示對照與其他用法（清單、ALV 裡放圖示）見講義 28 第 7.1 節。
+- 原程式把 `SELECTION-SCREEN FUNCTION KEY` 寫在 `INITIALIZATION` 事件裡面。它是**宣告**，不是執行時才跑的指令，寫在哪裡都會生效，但容易讓人誤以為它是事件裡的邏輯。自己寫時放在 `PARAMETERS`／`SELECT-OPTIONS` 那一區比較清楚；`INITIALIZATION` 裡只留設定按鈕文字的程式。
+
+按下按鈕後的處理：
+
+```abap
+AT SELECTION-SCREEN.
+  CASE sscrfields-ucomm.
+    WHEN 'FC01'.
+      CALL TRANSACTION 'ZFI0037'.    " 按鈕 1
+    WHEN 'FC02'.
+      CALL TRANSACTION 'ZFI0037Q'.   " 按鈕 2
+  ENDCASE.
+```
+
+- 按下按鈕會觸發 `AT SELECTION-SCREEN`，`sscrfields-ucomm` 分別是 `'FC01'`、`'FC02'`（系統固定的代碼，不能自己改）。
+- `CALL TRANSACTION 'ZFI0037'` 跟在命令欄輸入 `ZFI0037` 一樣，會開啟這個 T-code 的畫面。
+- `ZFI0037`、`ZFI0037Q` **不是程式，是 SE93 建的 Parameter Transaction**。這種 T-code 不指向自己的程式，而是呼叫另一個 T-code（這裡是 SM30），並預先填好那個畫面的欄位：
+  - SM30 的「Table/View」欄位先填好要維護的對象：`ZFI0037` 填會計主管表 `ZFI0037` 本身（簽核欄的主管姓名就從這張表查）；`ZFI0037Q` 填的是另一個唯讀 View（見下方）。
+  - 勾選「Skip initial screen」，跳過 SM30 的初始畫面，直接進入維護畫面。
+  - `ZFI0037Q` 的結尾 `Q` 是查詢（Query）版，只能看、不能改。
+
+所以按鈕的用途是：印傳票前，發現主管資料不對，可以直接按按鈕進 SM30 修改，不用另外記 T-code；只負責查詢的人用第二顆按鈕。
+
+##### 查詢版為什麼要另外建一個唯讀的 Maintenance View
+
+SM30 維護畫面的工具列有一顆「Display ↔ Change」切換按鈕。就算 Parameter Transaction 讓 SM30 以顯示模式開啟，使用者只要有這張表的維護權限，按一下切換按鈕就能改資料。只在 T-code 上設定「顯示」，擋不住這一步。
+
+所以查詢版不讓 SM30 直接開 `ZFI0037` 這張表，而是在 SE11 另外建一個 **Maintenance View**，在 **Maint. Status** 頁籤把 Access 設成 **Read only**，再讓 `ZFI0037Q` 開這個 View：
+
+| T-code | SM30 開啟的對象 | 結果 |
+|---|---|---|
+| `ZFI0037` | 表 `ZFI0037` | 可以新增、修改 |
+| `ZFI0037Q` | 唯讀的 Maintenance View | 只能顯示，畫面上**沒有** Change／Display 切換 |
+
+控制放在 View 的定義上，不管使用者怎麼進 SM30、有什麼權限，這個 View 都改不了資料。
+
+現在只要看得懂這段程式在做什麼。Maintenance View 在講義 21 介紹；SE93 建立 Parameter Transaction 的步驟、要填哪些欄位，在講義 28 第 7 節。講義 28 也會說明這種做法的缺點：Parameter Transaction 只是跳進 SM30，本身沒有業務權限檢查、沒有鎖定，實務上要另外包一層檢查程式。
 
 #### 分頁設計：自己控制整頁 65 行
 

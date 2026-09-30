@@ -210,6 +210,8 @@ AT SELECTION-SCREEN.
 
 `VIEWNAME` 是 SM30 初始畫面「Table/View」欄位的實際技術欄位名稱，`UPDATE = X` 讓畫面直接進入維護（更新）模式而不是唯讀顯示——兩者都是**直接指定 SM30 那張畫面上的欄位值**，跟「Values for SPA/GPA Parameters」（先把值塞進 SPA/GPA 記憶體、由畫面自己讀取）是兩種不同機制，SM30 這個情境要用前者才會生效。
 
+講義 13 的傳票清單 ZRFI0004 也是這個寫法：選擇畫面的兩顆按鈕 `CALL TRANSACTION 'ZFI0037'`／`'ZFI0037Q'`，就是用 Parameter Transaction 開啟會計主管表 `ZFI0037` 的 SM30 維護／查詢畫面。當時只要求看懂，到這裡才實際建立。它的查詢版還多做一步：`ZFI0037Q` 開的不是表本身，而是 Maint. Status 設成 `Read only` 的 Maintenance View。原因是 `UPDATE` 留空讓 SM30 以顯示模式開啟，有維護權限的使用者還是能按 Change／Display 切換去改資料；唯讀 View 根本沒有這顆切換按鈕。
+
 ### ⚠️ 這顆按鈕故意示範「沒有保護」的做法，跟 `ZR_TR28_PARAM_MAINT` 對照
 
 這裡刻意**不**透過 `ZR_TR28_PARAM_MAINT` 那個 Wrapper，而是透過 `ZTR28_SM30` 這個 Parameter Transaction 直接跳進 SM30——這是為了跟 Wrapper 的正規做法做對比教學，兩者差在：

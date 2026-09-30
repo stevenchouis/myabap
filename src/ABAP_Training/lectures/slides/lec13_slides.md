@@ -237,6 +237,24 @@ FORM 區、分頁排版。差別只在業務邏輯的複雜度
 
 ---
 
+## 兩顆按鈕：Parameter Transaction（講義 28 才教建立）
+
+```abap
+CASE sscrfields-ucomm.
+  WHEN 'FC01'. CALL TRANSACTION 'ZFI0037'.    " 維護
+  WHEN 'FC02'. CALL TRANSACTION 'ZFI0037Q'.   " 查詢
+ENDCASE.
+```
+
+- `ZFI0037`／`ZFI0037Q` 不是程式，是 **SE93 建的 Parameter Transaction**
+- 呼叫 **SM30**，預先填好要開的表／View，跳過初始畫面
+- `ZFI0037` → 表 `ZFI0037`（會計主管表）：可新增、修改
+- `ZFI0037Q` → **Read only 的 Maintenance View**：只能顯示，沒有 Change／Display 切換
+- 只把 T-code 設成顯示模式擋不住：有權限的人在 SM30 按切換就能改
+- Maintenance View 見講義 21；SE93 建立步驟見講義 28 §7
+
+---
+
 <!-- _class: compact -->
 
 ## ZRFI0004 的分頁設計：自己控制整頁 65 行

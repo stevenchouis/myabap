@@ -84,7 +84,7 @@ SM30 輸入 `V_TCURC` → Display 就能看到：同一個畫面上，代碼和�
 1. SE11 → **View** → 輸入名稱（如 `ZV_TR21_XXX`）→ Create → 類型選 **Maintenance view**
 2. **Table/Join Conditions** 頁籤：填主表 → 按 **Relationships**，勾要加入的附屬表（系統依外鍵帶出連接條件）
 3. **View Fields** 頁籤：按 **Table fields** 選要出現的欄位；主表的 Key 欄位必須全部包含
-4. **Maint. Status** 頁籤：Access 選 `Read, change, delete and insert`
+4. **Maint. Status** 頁籤：Access 選 `Read, change, delete and insert`。如果這個 View 只給人查詢，改選 `Read only`：SM30 開這個 View 時只能顯示，畫面上沒有 Change／Display 切換按鈕，有維護權限的人也改不了（講義 13 傳票清單 ZRFI0004 的查詢按鈕 `ZFI0037Q` 就是這樣做的）
 5. 啟用 → Utilities → **Table Maintenance Generator**，跟上面一張表的做法一樣產生維護畫面
 6. SM30 輸入 View 名稱測試
 
