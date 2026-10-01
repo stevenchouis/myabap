@@ -74,6 +74,22 @@ ENDLOOP.
 
 注意：SUM 是「所有數值欄」一起總——結構裡若有不該加總的數值欄（如單價），小計行**不要去印它**（值是無意義的總和）。
 
+**`gs_rev` 平常放的是目前這一列，為什麼可以拿來放合計？** 因為進出 `AT ... ENDAT` 時系統會暫時改寫 work area，離開時再還原（官方文件 `ABAPAT_ITAB`、`ABAPSUM`）。下面是實跑結果（2026-09-30，驗證程式 `ZR_TR20_SUM_CHK`，AA 兩筆 `seatsocc` 10、20）：
+
+| 時間點 | `gs_rev` 的內容 | 實跑輸出 |
+|---|---|---|
+| 1. 進 `AT END OF carrid` 之前 | 目前這一列，也就是這組的最後一筆 | `AA  American  0064  20` |
+| 2. 一進入 `AT END OF carrid` | 群組鍵 `carrid` 保留；右邊的字元類欄位填成 `*`；其他欄位清成初始值 | `AA  ********  ****   0` |
+| 3. 執行 `SUM` 之後 | 數值欄填入**這一整組**的加總 | `AA  ********  ****  30` |
+| 4. 離開 `ENDAT` 之後 | 系統把目前這一列重新放回 `gs_rev` | `AA  American  0064  20` |
+
+所以：
+
+- 小計行 `WRITE gs_rev-seatsocc` 印的是合計 30，不是最後一筆的 20。
+- `SUM` 不是把合計加到最後一筆上：第 2 步已經清成 0，第 3 步才填入全組合計。
+- `ENDAT` 之後的程式碼再用 `gs_rev`，拿到的又是正常的明細資料，不會被合計污染。
+- `SUM` 只能搭配 `LOOP AT ... INTO gs_rev`：用 `LOOP AT ... ASSIGNING`（講義 16）執行到 `SUM` 會 dump（執行期錯誤 `SUM_NO_ASSIGNING`）。
+
 ## 4. 兩條鐵則與遮蔽規則
 
 ### 鐵則一：先 SORT
@@ -111,7 +127,7 @@ ENDAT.
 
 ## 5. 適用邊界
 
-- Control Break 專屬 `LOOP AT ... INTO`（work area 型）；搭配 `ASSIGNING` 不能用 AT 區塊。
+- `AT` 區塊搭配 `LOOP AT ... INTO` 或 `ASSIGNING` 都可以用，但**要用 `SUM` 就一定要 `INTO` work area**（見第 3 節）；用 `ASSIGNING` 時進出 `AT` 區塊不會遮蔽或還原資料，那一列維持原樣。
 - 迴圈若加了 `WHERE` 條件或中途 DELETE，群組判斷可能失真——要過濾就**先把資料整理成乾淨的內表**再 LOOP。
 - 只要「總計」不要明細時，別用 LOOP+AT LAST，直接 `SELECT SUM( ... ) GROUP BY`（資料庫端彙總）或 `COLLECT` 更省——資料庫端彙總的完整寫法見[講義 20a](lec20a_sql_aggregate.md)。
 
@@ -123,7 +139,7 @@ ENDAT.
 | 組頭/小計行印出 `*****` | 遮蔽規則：AT 區塊內右邊字元欄被遮——改用右側欄位當 AT 斷點或別印 |
 | 小計數字大得離譜 | SUM 加總了不該總的數值欄（如單價）還把它印出來 |
 | AT NEW 太常觸發 | 群組欄位左邊還有會變動的欄位——群組欄位移到結構最前 |
-| ASSIGNING 迴圈裡 AT 區塊報錯 | Control Break 只支援 INTO 形式 |
+| ASSIGNING 迴圈執行到 `SUM` 就 dump（`SUM_NO_ASSIGNING`） | `SUM` 只支援 `LOOP AT ... INTO` work area；`AT` 區塊本身可以搭配 `ASSIGNING` |
 
 ## 7. 課堂練習
 

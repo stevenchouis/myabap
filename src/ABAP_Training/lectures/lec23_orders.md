@@ -82,7 +82,8 @@ SELECT SINGLE * FROM ztr23_ordh INTO gs_check WHERE ordno = 'ORD0002'.
 | Search Help Activate 失敗 | Selection Method 表裡的欄位沒有 Data Element（講義 21 教訓，`CUSTOMER` 一定要有 DE） |
 | 以為 ROLLBACK WORK 只會撤銷「最後一個」INSERT | 錯——LUW 是以「上一次 COMMIT/ROLLBACK 之後」的所有動作為單位整包處理，不分先後 |
 | Header+Detail 中間插了一個 COMMIT WORK | 一旦 COMMIT，前面的動作就永久生效，之後再 ROLLBACK 救不回已提交的部分——這是「交易邊界」設計錯誤，思考題 2 會碰到 |
-| JOIN 的 ON 條件寫了 MANDT 或 ORDER BY 放在 INTO TABLE 後面 | 語法錯誤：client 欄位由編譯器自動處理；`ORDER BY` 要寫在 `INTO TABLE` **之前** |
+| JOIN 的 ON 條件寫了 MANDT | 語法錯誤：client 欄位由編譯器自動處理 |
+| `INTO TABLE` 寫在 `ORDER BY` 後面（句尾） | 傳統寫法的 `INTO` 要放在 `FROM`／`JOIN ... ON` 之後、`WHERE` 之前；放到句尾就變成新式寫法，欄位清單必須改用逗號（講義 6 §3.5、講義 26） |
 | 外鍵設了 Screen Check 還是插入孤兒明細 | 正常——DDIC 外鍵只擋畫面輸入，Open SQL 不受影響（講義 21 重點，這題再驗證一次） |
 
 ## 6. 課堂練習

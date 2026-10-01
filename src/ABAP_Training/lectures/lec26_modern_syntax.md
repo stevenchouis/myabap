@@ -113,7 +113,7 @@ SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
 
 - `@DATA(gt_flight)`：不用先 `TYPES`/`DATA` 宣告內表，型別由 `SELECT` 清單自動推導——對照講義 11 的 JOIN 寫法，少了一段結構宣告；`@` 標記這是「要行內宣告的宿主變數」。
 - `CASE WHEN ... THEN ... END AS alias`：在資料庫層就把分類算好，比撈回 ABAP 再用 `LOOP` + `IF` 判斷少一次資料搬移；`END AS` 給的別名會成為推導出結構的欄位名（`PRICE_LEVEL`）。
-- 位置規則複習（講義 11／25 已練過，這裡再次出現）：`ORDER BY` 要在 `INTO` 之前；`UP TO n ROWS` 要接在 `INTO` 之後。
+- 位置規則：新式寫法把 `INTO` 放到句尾時，`ORDER BY` 要寫在 `INTO` 之前，`UP TO n ROWS` 要接在 `INTO` 之後。傳統寫法則是 `INTO` 在 `WHERE` 之前、`ORDER BY` 在 `WHERE` 之後（講義 6 §3.5）。
 - **`INTO` 放在整句最後，本身就是新式寫法的標誌**：傳統寫法的 `INTO` 只能放在「`SELECT` 欄位清單之後」或「`FROM`／`JOIN` 之後、`WHERE` 之前」；一旦像上面範例把 `INTO TABLE @DATA(...)` 放到 `ORDER BY` 後面，編譯器就進入新式模式，強制要求欄位清單用逗號分隔、宿主變數加 `@`（實測：傳統空格分隔的欄位清單搭配句尾 `INTO`，會報 `The elements in the "SELECT LIST" list must be separated using commas`）。所以講義 6～25 的傳統寫法，`INTO` 一律寫在 `FROM` 前面或緊接 `FROM` 之後。
 - **聚合函數裡可以直接放算式（呼應講義 20a 第 7 節）**：講義 20a 用傳統寫法時，`SUM( price * seatsocc )` 會報「must be separated using commas」，因為算式屬於新式語法；改成新式寫法就能在資料庫內直接算出講義 20 的各公司營收，不必撈明細再 `LOOP` 累加：
 
@@ -223,7 +223,7 @@ ENDLOOP.
 | `COND`/`SWITCH` 沒有任何分支命中，結果不是預期的錯誤訊息而是空值/0 | 沒寫 `ELSE`，未命中時回傳初始值，不會報錯也不會 dump，容易誤判成邏輯算對了 |
 | 字串模板 `{ }` 裡的方法呼叫編譯錯誤 | 只能放單一運算式／`RETURNING` 方法呼叫，不能是有 `EXPORTING`/`IMPORTING` 多參數的方法 |
 | `VALUE` 建 `SORTED TABLE` 執行期 dump | 給的資料順序不符合宣告的主鍵排序 |
-| `ORDER BY`/`UP TO n ROWS` 位置編譯錯誤 | 複習講義 11／25：`ORDER BY` 在 `INTO` 之前，`UP TO n ROWS` 在 `INTO` 之後 |
+| `ORDER BY`/`UP TO n ROWS` 位置編譯錯誤 | 新式寫法 `INTO` 放句尾時：`ORDER BY` 在 `INTO` 之前，`UP TO n ROWS` 在 `INTO` 之後（傳統寫法的位置見講義 6 §3.5） |
 
 ## 10. 課堂練習
 

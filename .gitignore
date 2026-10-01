@@ -18,3 +18,9 @@
 
 # 個人筆記（docx 一律視為個人筆記），不進版控
 *.docx
+
+# 講師參考用的第三方／客戶 SAP 表清單文件與執行檔（版權與來源不明），不進版控
+src/ABAP_Training/lectures/cases/sap table/
+
+# 客戶規格書不進版控
+src/ABAP_Training/lectures/cases/*.doc

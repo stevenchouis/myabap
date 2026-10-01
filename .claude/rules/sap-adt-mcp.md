@@ -1078,3 +1078,12 @@ rap03 建立 `ZI_RAP03_UMTEST` 時完全沒有做 UI Annotation（當時重點�
 - **清單行為實測**：① `WRITE` 之後接 `SKIP.` 再 `WRITE /`，中間會空一行；但 `SKIP TO LINE n` 之後的 `WRITE /` 不換行，直接印在第 n 行。② `NEW-PAGE` 後寫 `sy-pagno = 1` 會讓頁碼從 1 重新算，但 `READ LINE ... OF PAGE p` 的 p 仍是清單實際頁序。③ `ICON_CREATE` 結果格式 `@<id>\Q<提示>@<文字>`；不寫 `TYPE-POOLS icon` 也能用 `icon_xxx` 常數。④ `cl_abap_list_utilities=>dynamic_output_length` 回傳顯示格數（「東捷資訊ABC」＝11，`strlen`＝7）。⑤ Domain `KURSF` 有轉換常式 `EXCRT`，值 0 會顯示成空白。
 - **SAP 連線會中斷**：bridge 回 `RFC_COMMUNICATION_FAILURE ... partner '211.72.107.200:3299' not reached / WSAENETUNREACH` 是連不到 SAProuter（網路問題），不是程式錯；恢復後重試即可。若中斷時已 LOCK，重試前先 `sap_lock`→`sap_unlock` 清鎖。
 - **列印格式的字典表**（2026-09-30 查證）：`TSP1D`（格式：`PAPART` 名稱、`TYPE` L＝ABAP 清單／S＝SAPscript・Smartform、`OUTROWS`×`OUTCOLUMNS`、`PFORMAT` 指向紙張格式）、`TSP08`（紙張格式寬高與單位）、`TSP1T`（說明）、`TSP06A`（格式指派給哪些 Device Type）、`TSP03`（Output Device，`PATYPE`＝Device Type）。本系統客戶自建：清單格式 `Z_65_256`／`Z_65_360`，表單用紙張格式 `ZLTER2`（說明「中一刀」，215×140 mm）。
+
+## 63. S/4HANA 舊表狀態的查法：`DD02L-TABCLASS`／`VIEWREF`＋`DDLDEPENDENCY`；`datapreview/freestyle` 的兩個解析坑（2026-10-01 實測，基礎課 lec06 §2.2）
+
+- **判斷舊表在 S/4HANA 1909 變成什麼**：`SELECT TABNAME, TABCLASS, VIEWREF FROM DD02L WHERE AS4LOCAL = 'A' AND TABNAME IN (...)`。
+  - `TABCLASS = VIEW`：舊表名本身已是 CDS View 的 SQL View（如 `BSIS`→CDS `BSIS_DDL`、`GLT0`→`GLT0_DDL`、`FAGLFLEXT`→`V_FAGLFLEXT_DDL`、`COSP`／`COSS`→`V_COSP_DDL`／`V_COSS_DDL`），`DD25L-VIEWCLASS = D`。
+  - `TABCLASS = TRANSP` 且 `VIEWREF` 有值：透明表掛了替代物件（Proxy），`VIEWREF` 是 Proxy 的 **SQL View 名**（如 `MARD`→`NSDM_V_MARD`）；CDS DDL 名要再查 `SELECT DDLNAME, OBJECTNAME FROM DDLDEPENDENCY WHERE STATE = 'A' AND OBJECTNAME IN (...)`（`NSDM_V_MARD`→`NSDM_DDL_MARD`、`FGLV_FAGLFLEXA`→`FGL_FAGLFLEXA`、`MBVMBEW`→`MBV_MBEW`）。
+  - 兩者都不是，再 `SELECT COUNT(*)` 看筆數：本系統 `VBUK`／`VBUP`／`KONV` 是透明表、無 Proxy、0 筆（資料已改存 `VBAK` 等／`PRCD_ELEMENTS`）。`MLIT` 仍有 693 筆，跟官方 FAQ「已併入 ACDOCA」的說法不一致，講義沒寫進去。
+- **`datapreview/freestyle` 的 SQL 單一行太長會被誤判**：一行塞 40 個表名的 `IN (...)` 報 `The text literal "..." is longer than 255 characters`；把 SQL 拆成多行送出即可。
+- **空值的 XML 是自我封閉的 `<dataPreview:data/>`**：只抓 `<dataPreview:data>值</dataPreview:data>` 會漏掉空值，各欄位筆數對不上、結果錯位（這次差點把 `VIEWREF` 對錯表）；解析時要把 `<dataPreview:data/>` 也算成一個空字串。

@@ -78,7 +78,12 @@ FORM update_total_pages.
 ENDFORM.
 ```
 
-- `READ LINE n OF PAGE p`：把清單第 p 頁第 n 行的內容讀進 `sy-lisel`。
+- `READ LINE n OF PAGE p`：把清單第 p 頁第 n 行的內容讀進 `sy-lisel`；讀得到 `sy-subrc = 0`，那一頁沒有第 n 行則不等於 0。
+- **`sy-lisel` 是什麼**：系統欄位（跟 `sy-subrc`、`sy-pagno` 一樣屬於系統結構 `SYST`），型別是 `c` 長度 255（2026-09-30 查 `DD03L`），放的是**清單上一整行的畫面文字**，也就是 `WRITE` 排好版之後、螢幕上看到的那串字。系統在兩個時機填它：
+  - 互動清單使用者雙擊某一行時（講義 10 第 4.5 節），放被雙擊那一行的文字。
+  - 程式執行 `READ LINE` 時（本節），放讀到那一行的文字（官方文件 `ABAPREAD_LINE`）。
+
+  它是一般的字元欄位，所以可以直接對它做 `REPLACE`；改好之後，`MODIFY LINE` 預設就是拿 `sy-lisel` 的內容寫回那一行。一般系統欄位不建議自己改（第 6 節會看到改 `sy-pagno` 的副作用），`sy-lisel` 是例外：它本來就是設計給 `READ LINE` → 修改 → `MODIFY LINE` 這個流程當暫存區用的。
 - `MODIFY LINE`：把改好的 `sy-lisel` 寫回同一行。
 - 佔位符（`###`）要選**內容裡不會自然出現**的字串，行號要跟頁首版型一致（範例中「頁次」在頁首第 2 行）。
 - `MODIFY CURRENT LINE`：改寫「最近一次 `READ LINE` 讀到的那一行」，效果等於 `MODIFY LINE n OF PAGE p`，舊程式常見（第 6 節案例就是這樣寫）。
@@ -199,7 +204,7 @@ ENDLOOP.
 | `check_auth_object`：`AUTHORITY-CHECK` 依序試 `ACTVT` 01／02／03 | 有新增、修改、顯示任一權限就放行 | 28 |
 | `initial_document_status_range`：呼叫 `GET_DOMAIN_VALUES` 取 Domain 固定值，**在程式裡自己填 `NO-DISPLAY` 的 `s_bstat`** | 把三個勾選框轉成 range 表，再用 `IN` 查詢 | 7、15、25 |
 | `extract_acct_doc_header_data`：`SELECT ... IN`、查無資料 `MESSAGE ... STOP` | | 6、7、10 |
-| 同一個 FORM 後半：`SELECT ... ENDSELECT` 加 `ORDER BY ... DESCENDING`、抓到第一筆就 `EXIT` | 找「生效日不晚於暫存文件建立日的最近一任會計主管」（規則見 6.2 步驟 1） | 6 §4 |
+| 同一個 FORM 後半：`SELECT ... ENDSELECT` 加 `ORDER BY ... DESCENDING`、抓到第一筆就 `EXIT` | 找「生效日不晚於暫存文件建立日的最近一任會計主管」（規則見 6.2 步驟 1） | 6 §3.5、§4 |
 | `extract_acct_doc_item_data`：`FOR ALL ENTRIES`、`APPENDING CORRESPONDING FIELDS`、欄位別名 `saknr AS hkont`、`MOVE-CORRESPONDING` | 過帳文件讀 BSEG；暫存文件讀四張 VBSEG* 後合併 | 3、11 |
 | `extract_acct_text_data`：`LOOP` 裡逐筆 `SELECT SINGLE` 查科目、成本中心、客戶／供應商名稱 | 可以看懂，但是效能反面教材 | 11 |
 | `write_report`：`AT NEW gjahr` 後馬上 `READ TABLE t_dochd INDEX l_tabix` | 繞過 AT 區塊把右邊欄位遮成 `*` 的規則 | 20 |

@@ -58,7 +58,7 @@
 2. 用第一部分建的 **DDIC Table Type** 宣告內表：`DATA gt_surchg TYPE ztr25_tt_surchg.`，`SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.`，再 `DESCRIBE TABLE ... LINES` 輸出讀到的筆數
 3. SFLIGHT（`WHERE seatsocc > 0`）與 SCARR 各自 `SELECT ... INTO TABLE` 讀進內表；`LOOP` 航班，每筆用 `READ TABLE ... WITH KEY carrid = ...` 找航空公司名稱與加成設定——**找不到加成設定時不要跳過**，`ACTIVE`／`SURCHARGE_PCT` 維持初始值，照樣放進結果表
 4. 逐筆計算：`revenue = price * seatsocc`；`active = 'X'` 時 `revenue_adj = revenue * (1 + surcharge_pct / 100)`，否則 `revenue_adj = revenue`
-5. 輸出清單：航空公司、航線、日期、原始營收、加成後營收，並標明是否套用加成
+5. 輸出清單：航空公司、航線、日期、原始營收、加成後營收、幣別，並標明是否套用加成。金額用 `WRITE ... CURRENCY` 依**該航班自己的幣別**（`SFLIGHT-CURRENCY`）格式化，不要寫死 `'USD'`（航班幣別有 USD、EUR、JPY……）
 6. **驗證外鍵只擋畫面、不擋 Open SQL（這次 Check Table 是標準表）**：
    - 先 `DELETE FROM ztr25_surchg WHERE carrid = 'ZZ'.` 防呆
    - `INSERT` 一筆 `CARRID = 'ZZ'`（`SCARR` 沒有這家航空公司）、`ACTIVE = 'X'`、`SURCHARGE_PCT = 20.00`
@@ -78,9 +78,9 @@ gv_carrid_hard（TYPE c LENGTH 3）：LH
 讀到旺季加成設定：          2 筆（DDIC Table Type ZTR25_TT_SURCHG）
 
 === 航班加成營收 ===
-AA American Airlines  0017  2026.01.03  原始營收      159,494.31  加成後      183,418.46（已加成 15%）
-LH Lufthansa          0400  2026.02.10  原始營收       98,765.00  加成後      108,641.50（已加成 10%）
-AF Air France         0800  2026.03.01  原始營收       75,000.00  加成後       75,000.00（未設定，維持原價）
+AA American Airlines  0017  2026.01.03  原始營收      159,494.31  加成後      183,418.46  USD（已加成 15%）
+LH Lufthansa          0400  2026.02.10  原始營收       98,765.00  加成後      108,641.50  EUR（已加成 10%）
+AF Air France         0800  2026.03.01  原始營收       75,000.00  加成後       75,000.00  EUR（未設定，維持原價）
 ...
 
 === 驗證：Check Table 換成標準表，Open SQL 依然不受外鍵約束 ===

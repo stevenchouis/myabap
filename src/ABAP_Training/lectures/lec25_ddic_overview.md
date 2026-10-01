@@ -274,6 +274,19 @@ DATA gv_carrid TYPE scarr-carrid.     " 透過表格路徑引用（兩者型別�
 | UPDUSER | | Data Element `SYUNAME` | 異動者 |
 | UPDDATE | | Data Element `SYDATUM` | 異動日 |
 
+**第一欄一律是 `MANDT`**：我們建的每一張 Z 表，第一個欄位都放 `MANDT`、勾 Key，型別直接填標準 Data Element **`MANDT`**（不要自建，也不要在 DDL 寫成內建型別 `abap.clnt`）。
+
+- **它是什麼**：Data Element `MANDT` 的 Domain 也叫 `MANDT`，資料型別 `CLNT`、長度 3，Value Table 是 `T000`（系統的 client 清單）（2026-09-30 查 `DD04L`／`DD01L`）。
+- **為什麼要放**：同一套 SAP 系統裡有好幾個 client（講義 0 §4），各 client 的業務資料要分開。表的第一個欄位是 `CLNT` 型別的 Key，系統就把這張表當成 **client 相關表**（client-dependent）：Open SQL 自動只讀寫登入的 client，`WHERE` 不用寫 `MANDT`，`INSERT` 也不用填它（講義 6、講義 21 §5）；SE16N、SM30 也只看到本 client 的資料。
+- **沒放會怎樣**：表變成 **client 無關**（cross-client），你在 client 130 寫的資料，其他 client 也看得到、改得到，大家的測試資料會互相干擾。SAP 只有少數系統層級的表故意設計成 client 無關（例如 Repository 物件目錄 `TADIR`，因為程式本來就跨 client 共用）；業務資料表一律要有 `MANDT`。
+- **為什麼是第一欄**：`MANDT` 必須是第一個 Key 欄位，系統才會把它當 client 欄位處理；放到後面，這張表仍然算 client 無關。
+
+DDL 檢視裡它長這樣（`key` 表示主鍵、`not null` 表示勾了 Initial Values，下一段說明）：
+
+```abap
+key mandt  : mandt not null;
+```
+
 **Key 與 Initial Values 兩個勾選框**：**Key** 勾起來的欄位合起來是這張表的主鍵，用來唯一識別一筆資料；這張表一家航空公司只有一筆設定，所以主鍵是 `MANDT`＋`CARRID`，而且 Key 欄位必須連續排在最前面。Key 右邊還有一格 **Initial Values**（欄寬窄時顯示 `Init...`，DDL 寫成 `not null`），表示資料庫欄位不允許 NULL，沒給值時填初始值（空白、`0`）。**勾了某個欄位的 Key 之後，系統會自動把同一列的 Initial Values 也勾起來**（Key 欄位一定不能是 NULL）；這張表不是 Key 的欄位（`ACTIVE`、`SURCHARGE_PCT`、`UPDUSER`、`UPDDATE`），Initial Values 維持不勾即可。什麼是 NULL、什麼情況一定要勾（在已有資料的表加新欄位），主鍵的完整規則，下一講講義 21 §2.1 詳細說明。
 
 **Currency/Quantity Fields 頁籤不用填**：表裡如果有金額（`CURR`）或數量（`QUAN`）欄位，要在這個頁籤填 **Reference table**／**Ref. field**，指定它的幣別或單位欄位，否則表無法啟用（講義 21 §2.2）。這張表的加成百分比 `SURCHARGE_PCT` 是 `DEC` 型別：百分比不是金額，沒有幣別，所以用 `DEC` 而不用 `CURR`，這個頁籤就不用填。
@@ -312,7 +325,7 @@ DATA: gt_surchg TYPE ztr25_tt_surchg,             " DDIC Table Type（見 6.6）
       gs_flight TYPE sflight,
       gt_scarr  TYPE STANDARD TABLE OF scarr,
       gs_scarr  TYPE scarr,
-      gt_rev    TYPE STANDARD TABLE OF ty_rev,     " ty_rev：航班欄位＋active／surcharge_pct／revenue／revenue_adj
+      gt_rev    TYPE STANDARD TABLE OF ty_rev,     " ty_rev：航班欄位（含幣別 currency）＋active／surcharge_pct／revenue／revenue_adj
       gs_rev    TYPE ty_rev.
 
 SELECT * FROM sflight INTO TABLE gt_flight
@@ -328,6 +341,7 @@ LOOP AT gt_flight INTO gs_flight.
   gs_rev-fldate   = gs_flight-fldate.
   gs_rev-seatsocc = gs_flight-seatsocc.
   gs_rev-price    = gs_flight-price.
+  gs_rev-currency = gs_flight-currency.            " 每筆航班自己的幣別
 
   READ TABLE gt_scarr INTO gs_scarr WITH KEY carrid = gs_flight-carrid.
   IF sy-subrc = 0.
@@ -352,6 +366,19 @@ ENDLOOP.
 
 關鍵在第二個 `READ TABLE`：沒被財務設定過的航空公司找不到（`sy-subrc <> 0`），`active`／`surcharge_pct` 維持初始值，`revenue_adj` 自然等於原始營收，這筆航班照樣出現在報表上。
 
+輸出金額時用 `CURRENCY` 指定幣別（講義 12 的格式選項）：
+
+```abap
+LOOP AT gt_rev INTO gs_rev.
+  WRITE: / gs_rev-carrid, gs_rev-carrname, gs_rev-connid, gs_rev-fldate,
+           '原始營收', gs_rev-revenue CURRENCY gs_rev-currency,
+           '加成後', gs_rev-revenue_adj CURRENCY gs_rev-currency,
+           gs_rev-currency.
+ENDLOOP.
+```
+
+`CURRENCY` 後面接的是**幣別代碼**，不是另一個金額欄位。`SFLIGHT` 的航班幣別各不相同（2026-09-30 查：AA／DL／UA 是 `USD`，AZ／LH 是 `EUR`，JL 是 `JPY`，QF 是 `AUD`，SQ 是 `SGD`），所以要用資料列自己的幣別欄位 `gs_rev-currency`，不能寫死 `CURRENCY 'USD'`：JPY 沒有小數位，寫死 USD 印出來會差 100 倍（原理見講義 21 §2.2）。數量欄位的寫法相同，改用 `UNIT 單位`。
+
 > 講義 11 會學到 JOIN：這種「對照另一張表、找不到也要保留」的讀法，可以用一句 `LEFT OUTER JOIN` 完成。到時候回頭對照這段，就知道 JOIN 省了什麼。
 
 ### 6.6 把「表格型別」也升級成 Global Type：建立 DDIC Table Type
@@ -375,7 +402,25 @@ SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.
 
 任何程式都能宣告 `TYPE ztr25_tt_surchg`，拿到的是同一份定義——這就是「表格級別」的 Global Type。
 
+**Line Type 不一定要是 Structure**：Line Type 要的是「有欄位結構的 DDIC 型別」，SE11 建的 Structure、透明表、View 都可以。每張透明表在 DDIC 裡同時也是一個結構型別，欄位就是表的欄位，所以程式裡才能寫 `DATA ls_surchg TYPE ztr25_surchg.`；Line Type 填表名，意思完全一樣。SAP 標準也這樣做：Table Type `SFLIGHT_TAB2` 的 Line Type 是透明表 `SFLIGHT`，`SPFLI_TAB` 的是 `SPFLI`（2026-09-30 查 `DD40L`／`DD02L`）。
+
+什麼時候用表、什麼時候另建 Structure：
+
+| 每一列裝的是什麼 | Line Type 用什麼 | 例子 |
+|---|---|---|
+| 就是某張表的一筆完整資料 | **直接用那張表**：表加欄位時 Table Type 自動跟著加，不用維護兩份定義 | `ZTR25_TT_SURCHG` → 表 `ZTR25_SURCHG` |
+| 只要表的部分欄位，或多張表的欄位組合、再加計算欄位 | **另建 Structure**：這不是任何一張表的一筆資料，只能自己定義欄位 | 講義 15 的 `ZTR15_TT_FLIGHT_REV` → Structure `ZTR15_FLIGHT_REV`（航班欄位＋計算出的營收） |
+
 **它真正發揮作用的地方，是當「參數型別」**：接下來講義 8 的 FORM 可以用它當 `CHANGING` 參數；講義 15 的 Function Module 更是**一定要**用 DDIC 型別定義介面參數（FM 介面不能用程式裡自己宣告的 `TYPES`），用 `CHANGING` 搭配 Table Type 傳一整張表，正是取代舊式 `TABLES` 參數的寫法。所以本講先學會建 Table Type，後面兩講直接用得上。
+
+**那直接用表宣告內表不行嗎？** 可以。`DATA gt_surchg TYPE STANDARD TABLE OF ztr25_surchg.` 跟 `TYPE ztr25_tt_surchg` 得到的內表完全一樣。差別在**參數**：FORM、Function Module、Method 的參數後面只能寫 `TYPE 型別名稱`，不能現場寫 `TYPE STANDARD TABLE OF ...`（這種寫法只能用在 `DATA`／`TYPES`，官方文件 `ABENTYPING_COMPLETE`）。所以要把整張內表當參數傳，就需要一個有名字的表格型別：
+
+| 用途 | 怎麼宣告 |
+|---|---|
+| 程式內部的變數 | `TYPE STANDARD TABLE OF ztr25_surchg` 就夠了，不需要 Table Type |
+| 當參數傳，只在這支程式裡用 | 程式裡 `TYPES tt_surchg TYPE STANDARD TABLE OF ztr25_surchg.`，參數寫 `TYPE tt_surchg` |
+| 當參數傳，要跨程式共用 | SE11 建 Table Type（本節的 `ZTR25_TT_SURCHG`） |
+| Function Module 的參數 | 一定要 SE11 的 Table Type：FM 介面只認 DDIC 型別，程式裡的 `TYPES` 不算（講義 15） |
 
 判斷原則跟前面幾種模式一致：**只有本程式用**就地 `TYPES` 宣告（講義 4）就好，不用每個表都跑一次 SE11；**多支程式／FM／方法要共用同一種表格參數**，才值得升級成 DDIC Table Type。
 

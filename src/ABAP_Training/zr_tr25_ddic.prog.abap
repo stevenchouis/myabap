@@ -16,6 +16,7 @@ TYPES: BEGIN OF ty_rev,
          fldate        TYPE sflight-fldate,
          seatsocc      TYPE sflight-seatsocc,
          price         TYPE sflight-price,
+         currency      TYPE sflight-currency,       " 航班的幣別（CUKY），WRITE 金額時用
          active        TYPE ztr25_surchg-active,
          surcharge_pct TYPE ztr25_surchg-surcharge_pct,
          revenue       TYPE p LENGTH 12 DECIMALS 2,
@@ -85,6 +86,7 @@ START-OF-SELECTION.
     gs_rev-fldate   = gs_flight-fldate.
     gs_rev-seatsocc = gs_flight-seatsocc.
     gs_rev-price    = gs_flight-price.
+    gs_rev-currency = gs_flight-currency.
 
     READ TABLE gt_scarr INTO gs_scarr WITH KEY carrid = gs_flight-carrid.
     IF sy-subrc = 0.
@@ -115,8 +117,11 @@ START-OF-SELECTION.
     WRITE / '=== 航班加成營收 ==='.
     LOOP AT gt_rev INTO gs_rev.
       WRITE: / gs_rev-carrid, gs_rev-carrname, gs_rev-connid, gs_rev-fldate,
-               '原始營收', gs_rev-revenue CURRENCY 'USD',
-               '加成後', gs_rev-revenue_adj CURRENCY 'USD'.
+               '原始營收', gs_rev-revenue CURRENCY gs_rev-currency,
+               '加成後', gs_rev-revenue_adj CURRENCY gs_rev-currency,
+               gs_rev-currency.
+*     CURRENCY 後面接幣別代碼：每筆航班幣別不同（USD、EUR、JPY…），
+*     要用資料列自己的幣別欄位，不能寫死 'USD'（JPY 沒有小數，寫死會差 100 倍）
       IF gs_rev-active = 'X'.
         WRITE: '（已加成', gs_rev-surcharge_pct, '%）'.
       ELSE.

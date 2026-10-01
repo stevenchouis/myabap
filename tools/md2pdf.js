@@ -35,7 +35,9 @@ if (!EDGE) throw new Error('找不到 Microsoft Edge');
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 function inline(s) {
-  s = esc(s);
+  // 行內程式碼以外的 <br>（表格儲存格內換行）保留成真正的 HTML 換行
+  s = s.split(/(`[^`]+`)/).map(p => p.startsWith('`') ? esc(p)
+        : esc(p).replace(/&lt;br\s*\/?&gt;/gi, '<br>')).join('');
   s = s.replace(/`([^`]+)`/g, (m, c) => '<code>' + c + '</code>');
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
