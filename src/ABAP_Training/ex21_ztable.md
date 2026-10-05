@@ -62,7 +62,7 @@
    - 存檔啟用
 7. **Search Help** `ZTR21_CLASSH`（SE11 → Search Help → Elementary Search Help）：
    - Selection Method：`ZTR21_CLASS`
-   - Search Help Parameters：`KLASSE`（勾 Import Parameter + Export Parameter + SelOnScr，設為 SH field／LPos 1）、`KLNAME`（只勾 Export Parameter，LPos 2，純顯示用）
+   - Search Help Parameters：`KLASSE`（勾 IMP、EXP，LPos 1、SPos 1）、`KLNAME`（只勾 EXP，LPos 2、SPos 2，純顯示用）；Dialog type 選 `D` Display values immediately。各欄位意思見講義 21 §3.3
    - 存檔啟用，套件 `$TMP`——若 Activate 失敗報錯跟欄位語意/Data Element 有關，回頭檢查 `ZTR21_CLASS` 的欄位是不是都掛了 Data Element（見第 5 點）
    - 回到 Data Element `ZTR21_KLASSE` → Change → **Further Characteristics** 頁籤 → Search Help 欄位填 `ZTR21_CLASSH` → 存檔啟用
    - `ZTR21_CLASS` 也用 Table Maintenance Generator 產生維護畫面（Function Group 同樣填 `ZFG_TR21`），到 SM30 新增一筆班級 `S101` / 資訊一班

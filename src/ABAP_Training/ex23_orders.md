@@ -52,7 +52,7 @@
 9. **維護畫面**：至少幫 `ZTR23_ORDH` 產生 Table Maintenance Generator（Authorization Group `&NC&`、Function Group 自訂如 `ZFG_TR23`）；`ZTR23_ORDI` 的維護畫面視情況決定要不要做
 10. **Search Help** `ZTR23_ORDHSH`（SE11 → Search Help → Elementary Search Help）：
     - Selection Method：`ZTR23_ORDH`
-    - Search Help Parameters：`ORDNO`（勾 Import Parameter + Export Parameter + SelOnScr，設為 SH field）、`CUSTOMER`（只勾 Export Parameter，純顯示用）
+    - Search Help Parameters：`ORDNO`（勾 IMP、EXP，LPos 1、SPos 1）、`CUSTOMER`（只勾 EXP，LPos 2、SPos 2，純顯示用）；Dialog type 選 `D` Display values immediately。各欄位意思見講義 21 §3.3
     - 存檔啟用，套件 `$TMP`
     - 回到 Data Element `ZTR23_ORDNO` → Change → **Further Characteristics** 頁籤 → Search Help 欄位填 `ZTR23_ORDHSH` → 存檔啟用
 

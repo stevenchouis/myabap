@@ -324,10 +324,96 @@ Search Help（搜尋輔助）解決的是另一個問題：**使用者不用背�
 - 只設外鍵沒設 Search Help：畫面會擋錯誤輸入，但沒有 F4 選單，要自己背代碼
 - 只設 Search Help 沒設外鍵：F4 能選，但使用者若不透過 F4、手動打一個不存在的代碼，畫面不會擋
 
-建立方式（SE11 → Search Help → Elementary Search Help）：
-- **Selection Method**：資料來源表（本例 `ZTR21_CLASS`）
-- **Search Help Parameters**：每個要出現在選單裡的欄位；哪一個是「查完之後要帶回畫面」的欄位（本例 `KLASSE`）勾 Import+Export+SH field，純顯示用的欄位（`KLNAME`）只勾 Export
-- 建好後要**掛到 Data Element**（`ZTR21_KLASSE` 的 Further Characteristics 頁籤填 Search Help 名稱）才會在所有用到這個 DE 的欄位自動生效——這也是三層件「改一處全生效」精神的延伸
+建立方式（SE11 → Search Help → Elementary Search Help），**Definition** 頁籤要填三塊：
+
+**1. Data Collection：資料從哪裡來**
+
+- **Selection Method**：資料來源表（本例 `ZTR21_CLASS`）。
+
+**2. Dialog Behavior：按 F4 之後先做什麼**
+
+- **Dialog type** 有三種（2026-10-05 查 Domain `DDSHDIATYP`）：
+
+| 值 | 意思 | 適用情境 |
+|---|---|---|
+| `D` Display values immediately | 按 F4 立刻查詢、直接列出結果 | 資料少，例如本例的班級（本例選這個） |
+| `C` Dialog with value restriction | 先跳出條件畫面，按確認才查 | 資料多，不先篩選會撈太多 |
+| `A` Dialog depends on set of values | 筆數少就直接列出，多就先跳條件畫面 | 不確定資料量時 |
+
+- **Hot key**：留空。它是給集合 Search Help（多個 Search Help 組成的頁籤）切換用的快速鍵，單一 Search Help 用不到。
+
+**3. Parameter：哪些欄位要出現、怎麼用**
+
+每個要出現在 F4 視窗的欄位都列一行，右邊幾個欄位的意思：
+
+| 欄位 | 意思 | `KLASSE` | `KLNAME` |
+|---|---|---|---|
+| **IMP**（Import） | 按 F4 時，把畫面欄位**已經輸入的值帶進來**當查詢條件 | ✔ | — |
+| **EXP**（Export） | 選好一筆後，把這個值**帶回畫面欄位** | ✔ | ✔ |
+| **LPos**（List Position） | 在 F4 視窗下方的**結果清單**排第幾欄；留空就不出現在清單 | 1 | 2 |
+| **SPos**（Selection Position） | 在 F4 視窗上方的**條件區**排第幾個；留空就不能當條件 | 1 | 2 |
+| **SDis**（Selection Display only） | 勾了表示條件區這個欄位只能看、不能輸入 | 不勾 | 不勾 |
+
+（2026-10-05 查 `DD30L`／`DD32S`，本例實際設定如上表）
+
+按 F4 看到的視窗對照這些設定：
+
+- **上半部條件區**：依 SPos 排出「班級代碼、班級名稱」兩格。Dialog type 是 `D`，所以一打開下半部就已經有結果，條件區是拿來再縮小範圍用的。
+- **下半部結果清單**：依 LPos 排出「班級代碼、班級名稱」兩欄。
+- **欄位標題**：取自各欄位 Data Element 的 Field Label，所以 Selection Method 表的欄位一定要引用 Data Element（見下方的坑）。
+- **IMP**：在班級欄位先打 `S*` 再按 F4，條件區的「班級代碼」會自動帶入 `S*`，清單只列出 `S101`（本系統 `ZTR21_CLASS` 有 `A`、`B`、`S101` 三筆，2026-10-05 查）。`KLNAME` 沒勾 IMP，畫面上的值不會帶進來。
+- **EXP**：雙擊清單中的一筆，班級代碼填回畫面欄位。
+
+**建好後要掛到 Data Element**：`ZTR21_KLASSE` 的 Further Characteristics 頁籤填 Search Help 名稱，以及要帶回的參數 `KLASSE`（系統記錄在 `DD04L-SHLPFIELD`）。這樣所有用到這個 DE 的欄位都會自動有 F4，這也是三層件「改一處全生效」精神的延伸。
+
+掛在 Data Element 上時，只會帶回 Data Element 指定的那一個參數（本例 `KLASSE`）。`KLNAME` 雖然勾了 EXP，這裡只是清單裡的顯示欄位；只有 Search Help 掛在畫面欄位或 Check Table、而且畫面上真的有班級名稱欄位時，才會一起帶回。
+
+**什麼時候要勾多個 IMP：這個欄位能選什麼，取決於另一個欄位**
+
+F4 雖然是在單一欄位上按，但 Search Help 可以讀取同一個畫面上其他欄位的值。標準的儲存地點 Search Help 就是這樣設計的（`H_T001L` 是集合 Search Help，實際做事的是它包住的 `H_T001L_OLD`；2026-10-05 查 `DD30L`／`DD31S`／`DD32S`）：
+
+| 參數 | IMP | EXP | LPos |
+|---|---|---|---|
+| `WERKS`（廠別） | ✔ | ✔ | 1 |
+| `LGORT`（儲存地點） | ✔ | ✔ | 2 |
+| `LGOBE`（儲存地點說明） | — | ✔ | 3 |
+
+儲存地點代碼是**跟著廠別**的：同樣是 `101A`，在廠別 `1010` 和 `1011` 是兩個不同的儲存地點（`T001L` 的主鍵是 `WERKS`＋`LGORT`）。所以畫面上有廠別、儲存地點兩個欄位時：
+
+1. 使用者先在廠別填 `1010`。
+2. 在**儲存地點**欄位按 F4。
+3. `WERKS` 也勾了 IMP，系統把畫面上的 `1010` 一起帶進來當條件，清單只列出廠別 `1010` 的儲存地點，不會把 `1011` 的也混進來。
+4. 選一筆之後，`WERKS`、`LGORT` 都勾了 EXP，兩個欄位一起填回畫面。
+
+**多個 IMP 要有作用，Search Help 不能只掛在 Data Element**：掛在 Data Element 只對應一個參數（上一段）。`H_T001L` 是掛在 Check Table `T001L` 上，例如 `MARD-LGORT` 的外鍵檢查表就是 `T001L`；透過外鍵，畫面上的廠別、儲存地點兩個欄位都對應得到參數，兩個 IMP 才會一起生效。
+
+| Search Help 掛在哪裡 | 對應幾個畫面欄位 | 多個 IMP 有沒有用 |
+|---|---|---|
+| Data Element（本講 `ZTR21_CLASSH` 的做法） | 一個 | 沒用 |
+| Check Table（外鍵的檢查表，如 `T001L`） | 外鍵的每個鍵欄位各一個 | 有用 |
+
+自己試：SE11 開 Search Help `H_T001L_OLD` → Test，在 `WERKS` 那格填 `1010` 再執行，清單應該只會列出廠別 `1010` 的儲存地點。
+
+**SDis 搭配 IMP：亮出條件，但不讓改**
+
+SDis 欄位不能輸入，所以它的值一定是系統帶進來的：IMP 從畫面帶入，或 Default value 欄填的固定值。顯示在條件區，是讓使用者知道「清單只有這些，是因為已經套用了這個條件」。本系統所有勾 SDis 的參數約 2,830 個，其中 2,505 個同時勾了 IMP，其餘大多填了 Default value（2026-10-05 查 `DD32S`）。沒有 IMP 也沒有預設值、單獨勾 SDis，只會得到一個永遠空白又不能填的欄位。
+
+| 設定 | 條件區的效果 | 例子 |
+|---|---|---|
+| IMP、不勾 SDis | 帶入畫面上的值，**可以改** | `H_T001L_OLD` 的 `WERKS`：條件區帶入工廠 `1010`，使用者可以改成 `1011`，看別的工廠有哪些倉別 |
+| IMP＋SDis | 帶入畫面上的值，**不能改** | Business Place 的 `H_BUPLA` 的 `BUKRS`：Business Place 依公司代碼定義，條件區顯示畫面上的公司代碼並鎖住，只能在這家公司的範圍內挑 |
+| Default value＋SDis | 顯示固定值，不能改 | 這個 Search Help 永遠只查某一類資料 |
+
+**在自己的選擇畫面上也會連動**：兩個欄位都參考有外鍵的表格欄位即可，不用另外寫程式：
+
+```abap
+PARAMETERS: p_werks TYPE mard-werks,
+            p_lgort TYPE mard-lgort.    " MARD-LGORT 的外鍵檢查表是 T001L
+```
+
+先在 `p_werks` 填 `1010`（不必按 Enter），再在 `p_lgort` 按 F4：F4 視窗上方條件區的 Plant 自動帶入 `1010`，清單只列出 `1010` 的儲存地點。畫面欄位雖然叫 `P_WERKS`，不叫 `MARD-WERKS`，一樣對得上。`SELECT-OPTIONS ... FOR mard-werks`、加 `MEMORY ID` 的寫法也一樣會連動（2026-10-05 用驗證程式 `ZR_TR21_SHLP_DEP` 實測）。
+
+> 驗證程式裡還有第 4 種寫法：在 `AT SELECTION-SCREEN ON VALUE-REQUEST`（講義 10）自己讀畫面上的工廠、`SELECT` 出該工廠的倉別，再交給 FM `F4IF_INT_TABLE_VALUE_REQUEST` 顯示。清單一樣正確，但 F4 視窗上方的條件區是空的：篩選在程式裡就做完了，這支 FM 只負責顯示傳進去的內表，條件區是它依內表欄位自動產生的，沒有任何 IMP 設定。這種自己寫 F4 的做法，留給沒有現成 Check Table／Search Help 可用的欄位。
 
 除了在 SM30 按 F4（第 4 節），也可以寫一支只有選擇畫面的小程式，參數參考這個 Data Element（講義 7）來測：
 
