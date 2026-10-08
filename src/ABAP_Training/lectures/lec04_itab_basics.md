@@ -153,7 +153,10 @@ IF sy-subrc = 0.
   ...
 ENDIF.
 
-* 新式寫法
+* 新式寫法一：READ TABLE 照用，work area 行內宣告
+READ TABLE gt_students INTO DATA(gs_hit) WITH KEY id = 'S0002'.
+
+* 新式寫法二：表格運算式
 IF line_exists( gt_students[ id = 'S0002' ] ).        " 先確認有這筆
   gv_name = gt_students[ id = 'S0002' ]-name.         " 直接取那一列的欄位
 ENDIF.
@@ -167,6 +170,7 @@ ENDIF.
 
 語法拆解：
 
+- 寫法一只把 work area 改成行內宣告（`INTO DATA(gs_hit)`，型別是內表的列型別），其餘跟傳統寫法一樣，照常檢查 `sy-subrc`。
 - **`內表[ 條件 ]`** 叫表格運算式，本身就代表「符合條件的那一列」，可以整列賦值、也可以直接接 `-欄位` 取單一欄位。中括號裡寫 `欄位 = 值`（等於 `WITH KEY`），或直接寫數字（等於 `INDEX`）。
 - **找不到時不會設定 `sy-subrc`，而是發生例外 `CX_SY_ITAB_LINE_NOT_FOUND`**，沒有處理的話程式會 dump（2026-10-08 實測）。所以要先用 `line_exists( 內表[ 條件 ] )` 判斷有沒有這筆，它回傳真／假，可以直接放在 `IF` 後面，取代 `TRANSPORTING NO FIELDS` 的用法。
 - 也可以寫 `gs_student = VALUE #( gt_students[ id = 'S9999' ] OPTIONAL ).`：找不到時回傳空的一列，不會發生例外。

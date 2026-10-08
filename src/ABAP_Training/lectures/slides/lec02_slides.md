@@ -105,6 +105,25 @@ DATA(gv_count) = 3.
 
 <!-- _class: compact -->
 
+## 可以用 `DATA( )` 的位置
+
+| 位置 | 寫法 | 推導型別 |
+|---|---|---|
+| `LOOP`／`READ TABLE ... INTO` | `INTO DATA(gs)` | 內表的列型別 |
+| `SELECT ... INTO` | `INTO TABLE @DATA(gt)` | 依 SELECT 清單 |
+| `SPLIT`／`CONCATENATE ... INTO` | `INTO DATA(a) DATA(b)` | `string` |
+| `FIND`／`REPLACE` 計數 | `MATCH COUNT DATA(n)` | `i` |
+| `DESCRIBE TABLE ... LINES` | `LINES DATA(n)` | `i` |
+| `GET TIME STAMP FIELD` | `FIELD DATA(ts)` | `TZNTSTMPS` |
+| `CATCH ... INTO` | `INTO DATA(lx)` | 例外類別的參照 |
+| `ASSIGNING`／`ASSIGN ... TO` | `FIELD-SYMBOL(<fs>)` | 內表的列型別 |
+
+**不能用**：`WRITE ... TO DATA( )`、`CALL FUNCTION` 的參數（要先宣告）
+
+---
+
+<!-- _class: compact -->
+
 ## 2. 內建資料型別總表
 
 | 型別 | 名稱 | 初始值 | 用途與注意 |

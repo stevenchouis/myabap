@@ -207,6 +207,7 @@ READ TABLE gt_students INTO gs_student INDEX 3.
 READ TABLE gt_students TRANSPORTING NO FIELDS WITH KEY id = 'S0002'.
 
 * 新式
+READ TABLE gt_students INTO DATA(gs_hit) WITH KEY id = 'S0002'.
 IF line_exists( gt_students[ id = 'S0002' ] ).    " 先確認有這筆
   gv_name = gt_students[ id = 'S0002' ]-name.     " 直接取欄位
 ENDIF.

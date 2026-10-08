@@ -55,6 +55,31 @@ DATA(gv_count) = 3.
 - **帶小數的金額**：寫 `DATA(gv_price) = '1250.50'.` 得到的是 `c LENGTH 7`（文字），不是 `p`。金額這類型別無法從字面值推導的，仍要 `DATA gv_price TYPE p LENGTH 8 DECIMALS 2.`。
 - **同一個名稱只能行內宣告一次**：作用範圍是整個程式單元（程式主體／FORM／方法），第二次寫 `DATA(gv_count)` 會編譯錯誤 `"GV_COUNT" was already declared`。
 
+**可以用 `DATA( )` 的位置**：不只賦值，很多指令「放結果的地方」都能行內宣告。2026-10-08 用 `ZR_TR02_INLINE_CHK` 逐一實測：
+
+| 位置 | 寫法 | 推導出的型別 | 詳見 |
+|---|---|---|---|
+| 賦值左邊 | `DATA(gv_count) = 3.` | 右邊值的型別 | 本節 |
+| `LOOP ... INTO` | `LOOP AT gt INTO DATA(gs).` | 內表的列型別 | 講義 4 §4 |
+| `READ TABLE ... INTO` | `READ TABLE gt INTO DATA(gs) WITH KEY ...` | 內表的列型別 | 講義 4 §5 |
+| `SELECT ... INTO` | `INTO TABLE @DATA(gt)`、`INTO @DATA(gv)` | 依 SELECT 清單 | 講義 6 §3.6 |
+| `SPLIT ... INTO` | `SPLIT gv_csv AT ',' INTO DATA(a) DATA(b).` | `string` | 講義 18 §2 |
+| `CONCATENATE ... INTO` | `CONCATENATE a b INTO DATA(gv_full).` | `string` | 講義 18 §1 |
+| `FIND` 的計數 | `FIND ALL OCCURRENCES OF 'a' IN s MATCH COUNT DATA(gv_cnt).` | `i` | |
+| `REPLACE` 的計數 | `REPLACE ALL OCCURRENCES OF ... REPLACEMENT COUNT DATA(gv_cnt).` | `i` | |
+| `DESCRIBE TABLE` | `DESCRIBE TABLE gt LINES DATA(gv_lines).` | `i` | 講義 5 §5 |
+| `GET TIME STAMP` | `GET TIME STAMP FIELD DATA(gv_ts).` | 字典型別 `TZNTSTMPS` | |
+| `LOOP ... GROUP BY` | `GROUP BY ( ... ) INTO DATA(gs_grp)` | 群組 | 講義 20 §5.1 |
+| `CATCH` 例外 | `CATCH cx_sy_zerodivide INTO DATA(lx_err).` | 指向該例外類別的參照 | OOP 課程 |
+| Field-Symbol | `LOOP AT gt ASSIGNING FIELD-SYMBOL(<fs>).` | 內表的列型別 | 講義 16 §7 |
+
+**不能用的位置**（要事先宣告好變數）：
+
+- `WRITE ... TO`：`WRITE sy-datum TO DATA(gv_txt).` 啟用時報 `Field "GV_TXT" is unknown`（實測）。
+- `CALL FUNCTION` 的參數：`CALL FUNCTION ... IMPORTING ev_x = DATA(gv_x)` 報 `The inline declaration "DATA(GV_X)" is not possible in this position`（講義 15 會用到 `CALL FUNCTION`）。
+
+`SPLIT`、`CONCATENATE` 推導出的一律是 `string`，即使來源是 `c` 字面值；要固定長度的 `c`，就得事先宣告。
+
 行內宣告只是少寫一行宣告，執行結果與效能跟傳統寫法相同。練習 2 的新式寫法版本見答案程式 `ZR_TR02_TYPE_LIKE_NEW`，輸出跟原版逐行比對過，只有日期一行因為上表的型別差異而格式不同。
 
 命名慣例（本課程與團隊風格一致）：全域變數 `gv_`（value）、`gs_`（structure）、`gt_`（table）；區域變數換成 `lv_` / `ls_` / `lt_`。前綴讓人一眼看出「這是什麼形狀的資料」。

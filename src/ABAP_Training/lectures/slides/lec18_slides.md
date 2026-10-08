@@ -83,6 +83,7 @@ CONCATENATE gv_last gv_first INTO gv_full.
 CONCATENATE 'A' 'B' 'C' INTO gv_path SEPARATED BY '-'.
 
 * 新式
+CONCATENATE gv_last gv_first INTO DATA(gv_full2).   " 接收變數行內宣告 → string
 gv_full = |{ gv_last }{ gv_first }|.
 gv_path = `A` && `-` && `B` && `-` && `C`.
 WRITE |全名：{ gv_last }{ gv_first }|.
@@ -142,6 +143,7 @@ REPLACE 'fun' WITH 'great' INTO gv_text.
 TRANSLATE gv_text TO UPPER CASE.
 
 * 新式：回傳結果，要自己賦值回去
+SPLIT gv_csv AT ',' INTO DATA(lv_id) DATA(lv_name) DATA(lv_score).   " → string
 gv_name = segment( val = gv_csv index = 2 sep = ',' ).
 gv_text = condense( gv_text ).
 gv_text = condense( val = gv_text del = ` ` from = ` ` to = `` ).
