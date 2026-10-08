@@ -833,8 +833,12 @@ footer { color: #999; }
 <td>指定寬度內置中／靠右</td>
 </tr>
 <tr>
-<td><code>CURRENCY 'USD'</code></td>
-<td>依幣別小數位格式化——<strong>金額欄必加</strong></td>
+<td><code>CURRENCY 'USD'</code>／<code>CURRENCY 幣別欄位</code></td>
+<td>依幣別小數位格式化金額——<strong>金額欄必加</strong>；後面接<strong>幣別代碼</strong>，不是金額欄位</td>
+</tr>
+<tr>
+<td><code>UNIT 'KG'</code>／<code>UNIT 單位欄位</code></td>
+<td>依單位小數位格式化數量；只去掉多出來的 0，不四捨五入</td>
 </tr>
 <tr>
 <td><code>NO-GAP</code></td>

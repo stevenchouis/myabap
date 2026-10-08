@@ -131,6 +131,46 @@ ENDAT.
 - 迴圈若加了 `WHERE` 條件或中途 DELETE，群組判斷可能失真——要過濾就**先把資料整理成乾淨的內表**再 LOOP。
 - 只要「總計」不要明細時，別用 LOOP+AT LAST，直接 `SELECT SUM( ... ) GROUP BY`（資料庫端彙總）或 `COLLECT` 更省——資料庫端彙總的完整寫法見[講義 20a](lec20a_sql_aggregate.md)。
 
+## 5.1 新式寫法對照（7.40 之後）：`LOOP AT ... GROUP BY`
+
+`AT NEW`／`AT END OF` 依賴「先排序、群組欄位放最前面、右邊欄位被遮成 `*`」這些規則。7.40 之後可以改用 `LOOP AT ... GROUP BY`，直接指定「依什麼分組」：
+
+```abap
+LOOP AT gt_rev INTO DATA(gs_rev)
+     GROUP BY ( carrid = gs_rev-carrid carrname = gs_rev-carrname )
+     INTO DATA(gs_grp).
+
+  WRITE: / gs_grp-carrid, gs_grp-carrname.              " 組頭：每組一次
+
+  LOOP AT GROUP gs_grp INTO DATA(gs_mem).               " 這一組的每一筆
+    WRITE: /5 gs_mem-connid, gs_mem-fldate, gs_mem-seatsocc, gs_mem-revenue.
+  ENDLOOP.
+
+  gv_seats = REDUCE i( INIT s = 0
+                       FOR m IN GROUP gs_grp
+                       NEXT s = s + m-seatsocc ).        " 小計自己算
+  WRITE: /5 '小計', 20 gv_seats.
+ENDLOOP.
+```
+
+語法拆解：
+
+- `GROUP BY ( 名稱 = 值 ... )`：括號裡定義群組鍵，值相同的列歸成一組；可以放多個欄位。
+- `INTO DATA(gs_grp)`：`gs_grp` 代表「群組本身」，可以讀群組鍵 `gs_grp-carrid`、`gs_grp-carrname`。
+- 外層 `LOOP` **每組只跑一次**；要讀組裡的每一筆，用內層 `LOOP AT GROUP gs_grp`。
+- 沒有 `SUM`：小計用 `REDUCE ... FOR m IN GROUP gs_grp` 自己加，只加需要的欄位，不會像 `SUM` 把單價也加起來。累加的是金額時，`INIT` 要寫 `INIT r TYPE 金額型別`，寫 `INIT r = 0` 會讓累加變數變成整數，小數被截掉。
+
+跟傳統 `AT` 區塊比：
+
+| | `AT NEW`／`AT END OF` | `LOOP AT ... GROUP BY` |
+|---|---|---|
+| 要先排序 | 要，而且順序要對 | 不用，同一組的列會被收在一起 |
+| 群組欄位位置 | 要放結構最前面 | 任何欄位都可以 |
+| 組頭讀得到群組欄位 | 右邊欄位被遮成 `*` | 群組鍵完整可讀 |
+| 小計 | `SUM` 自動加所有數值欄 | 自己用 `REDUCE` 加需要的欄位 |
+
+練習 20 的新式寫法版本見答案程式 `ZR_TR20_CONTROL_BREAK_NEW`（382 行輸出跟原版逐行比對相同）。維護舊程式時 `AT` 區塊非常常見，兩種都要看得懂。
+
 ## 6. 常見錯誤與陷阱
 
 | 症狀 | 原因 |

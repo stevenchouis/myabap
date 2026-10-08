@@ -103,6 +103,32 @@ ENDIF.
 
 ---
 
+<!-- _class: compact -->
+
+## 新式寫法對照：`COND`
+
+```abap
+* 傳統
+IF gv_score >= 80.
+  gv_grade = 'A'.
+ELSEIF gv_score >= 60.
+  gv_grade = 'B'.
+ELSE.
+  gv_grade = 'C'.
+ENDIF.
+
+* 新式：依條件「算出一個值」
+gv_grade = COND #( WHEN gv_score >= 80 THEN 'A'
+                   WHEN gv_score >= 60 THEN 'B'
+                   ELSE 'C' ).
+```
+
+- `#`：型別取自左邊的目標；也可寫 `COND string( ... )`
+- **沒寫 `ELSE` 又都不成立 → 初始值，不報錯**
+- 分支裡要做好幾件事時，還是用 `IF`
+
+---
+
 ## 比較與邏輯運算子
 
 | 符號寫法 | 舊字母寫法 | 意義 |
@@ -150,6 +176,32 @@ ENDCASE.
 
 - CASE 比的是**完全相等**；範圍條件（`>= 60`）只能用 IF
 - 不寫 `WHEN OTHERS`：比不中就默默跳過，容易吞掉資料異常
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：`SWITCH`
+
+```abap
+* 傳統
+CASE gv_grade.
+  WHEN 'A'.        gv_text = '優等'.
+  WHEN 'B' OR 'C'. gv_text = '普通'.
+  WHEN OTHERS.     gv_text = '資料異常'.
+ENDCASE.
+
+* 新式：同一個值比對多個候選值
+gv_text = SWITCH #( gv_grade
+                    WHEN 'A' THEN '優等'
+                    WHEN 'B' THEN '普通'
+                    WHEN 'C' THEN '普通'
+                    ELSE '資料異常' ).
+```
+
+- `WHEN` 後只能一個值：`'B' OR 'C'` 要拆成兩個 `WHEN`
+- 範圍、多欄位條件 → `COND`；值對應值 → `SWITCH`
+- 迴圈（`DO`／`WHILE`／`CHECK`）沒有新式寫法
 
 ---
 

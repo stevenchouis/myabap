@@ -373,8 +373,8 @@ LOOP AT gt_students ASSIGNING &lt;ls_student&gt;.
 ENDLOOP.
 </code></pre>
 <p>本講一律：<strong>先 <code>FIELD-SYMBOLS</code> 宣告，再 <code>ASSIGNING &lt;fs&gt;</code></strong><br />
-7.40 之後有行內宣告 <code>ASSIGNING FIELD-SYMBOL(&lt;fs&gt;)</code>（宣告＋指派合一）<br />
-講義 26 才教；讀到時知道它等於兩步合併即可</p>
+7.40 之後的行內宣告 <code>ASSIGNING FIELD-SYMBOL(&lt;fs&gt;)</code>（宣告＋指派合一）<br />
+見本講最後的「新式寫法對照」</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -576,7 +576,7 @@ blockquote {
 }
 footer { color: #999; }
 ;" data-marpit-pagination-total="11">
-<h2 id="%E8%A3%9C%E5%85%85%E8%A1%8C%E5%85%A7%E5%AE%A3%E5%91%8Ainline-declaration%E6%96%B0%E5%AF%AB%E6%B3%95">補充：行內宣告（Inline Declaration）新寫法</h2>
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7field-symbol--%E8%88%87-assign-itab">新式寫法對照：<code>FIELD-SYMBOL( )</code> 與 <code>ASSIGN itab[ ]</code></h2>
 <p>7.40 之後可在「第一次使用處」直接宣告：<code>FIELD-SYMBOL(&lt;名稱&gt;)</code></p>
 <table>
 <thead>
@@ -607,7 +607,9 @@ footer { color: #999; }
 <ul>
 <li>型別自動推導（<code>ASSIGN COMPONENT</code> 推導出 <code>any</code>）</li>
 <li>作用範圍是<strong>整個程式單元</strong>：同一個 FORM／方法內，同名不能行內宣告兩次</li>
-<li>效果完全相同，只是少寫一行；講義 26 系統性整理</li>
+<li>指向某一列：<code>ASSIGN gt_students[ id = 'S0004' ] TO FIELD-SYMBOL(&lt;ls_hit&gt;).</code><br />
+<strong>找不到不會例外，而是 <code>sy-subrc = 4</code></strong>，照樣用 <code>IF sy-subrc = 0.</code> 判斷</li>
+<li>效果完全相同，只是少寫一行</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {

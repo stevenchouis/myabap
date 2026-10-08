@@ -45,3 +45,5 @@
 ## 答案
 
 見 `zr_tr02_type_like.prog.abap`（SAP 端程式 `ZR_TR02_TYPE_LIKE`）。
+
+新式寫法版本見 `zr_tr02_type_like_new.prog.abap`（SAP 端程式 `ZR_TR02_TYPE_LIKE_NEW`），只有日期一行格式不同（行內宣告抄到字典型別 `SYDATUM`，見講義 2）；新舊寫法的對照說明見講義 2 §1的「新式寫法對照」。

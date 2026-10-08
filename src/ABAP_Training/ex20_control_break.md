@@ -52,3 +52,5 @@ AZ Alitalia
 ## 答案
 
 見 `zr_tr20_control_break.prog.abap`（SAP 端程式 `ZR_TR20_CONTROL_BREAK`）。
+
+新式寫法版本見 `zr_tr20_control_break_new.prog.abap`（SAP 端程式 `ZR_TR20_CONTROL_BREAK_NEW`），輸出跟原版逐行比對相同；新舊寫法的對照說明見講義 20 §5.1的「新式寫法對照」。

@@ -72,3 +72,5 @@ S0004 張三豐         75 B
 ## 答案
 
 見 `zr_tr16_field_symbols.prog.abap`（SAP 端程式 `ZR_TR16_FIELD_SYMBOLS`）。
+
+新式寫法版本見 `zr_tr16_field_symbols_new.prog.abap`（SAP 端程式 `ZR_TR16_FIELD_SYMBOLS_NEW`），輸出跟原版逐行比對相同；新舊寫法的對照說明見講義 16 §7的「新式寫法對照」。

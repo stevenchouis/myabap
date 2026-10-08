@@ -514,8 +514,8 @@ footer { color: #999; }
 <td>一旦 COMMIT 就永久生效，之後 ROLLBACK 救不回來</td>
 </tr>
 <tr>
-<td>ORDER BY 放在 INTO TABLE 後面</td>
-<td>語法錯誤：要寫在 INTO TABLE <strong>之前</strong></td>
+<td><code>INTO TABLE</code> 寫在 <code>ORDER BY</code> 後面（句尾）</td>
+<td>傳統寫法 <code>INTO</code> 要在 <code>WHERE</code> 之前；放句尾就變新式寫法，欄位要用逗號</td>
 </tr>
 <tr>
 <td>外鍵設了 Screen Check 還是插入孤兒明細</td>

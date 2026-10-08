@@ -67,3 +67,5 @@
 ## 答案
 
 見 `zr_tr05_itab_advanced.prog.abap`（SAP 端程式 `ZR_TR05_ITAB_ADVANCED`）。
+
+新式寫法版本見 `zr_tr05_itab_advanced_new.prog.abap`（SAP 端程式 `ZR_TR05_ITAB_ADVANCED_NEW`），輸出跟原版逐行比對相同；新舊寫法的對照說明見講義 5 §3、§9的「新式寫法對照」。

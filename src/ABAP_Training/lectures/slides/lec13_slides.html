@@ -495,7 +495,8 @@ footer { color: #999; }
 ;" data-marpit-pagination-total="19">
 <h2 id="%E5%9B%9E%E5%A1%AB%E7%9A%84%E4%B8%89%E5%80%8B%E8%A6%81%E9%BB%9E">回填的三個要點</h2>
 <ol>
-<li><code>READ LINE n OF PAGE p</code>：把第 p 頁第 n 行讀進 <code>sy-lisel</code></li>
+<li><code>READ LINE n OF PAGE p</code>：把第 p 頁第 n 行讀進 <code>sy-lisel</code><br />
+（<code>sy-lisel</code>：系統欄位，<code>c</code> 長度 255，放一整行的畫面文字；可以直接 <code>REPLACE</code>）</li>
 <li><code>MODIFY LINE</code>：把改好的 <code>sy-lisel</code> 寫回同一行</li>
 <li>佔位符（<code>###</code>）要選<strong>內容裡不會自然出現</strong>的字串<br />
 行號要跟頁首版型一致（範例中「頁次」在第 2 行）</li>

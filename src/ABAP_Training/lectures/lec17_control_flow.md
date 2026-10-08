@@ -49,6 +49,35 @@ ENDIF.
 - 由上往下判斷，**第一個成立的分支執行完就跳出**——所以條件要從嚴到寬排（先 >= 80 再 >= 60）。
 - `ELSEIF`／`ELSE` 都可省略；`ENDIF` 不可省略。
 
+**新式寫法對照（7.40 之後）：`COND`**
+
+上面這種「依條件決定給變數什麼值」的 `IF`，可以寫成一個運算式：
+
+```abap
+* 傳統寫法
+IF gv_score >= 80.
+  gv_grade = 'A'.
+ELSEIF gv_score >= 60.
+  gv_grade = 'B'.
+ELSE.
+  gv_grade = 'C'.
+ENDIF.
+
+* 新式寫法
+gv_grade = COND #( WHEN gv_score >= 80 THEN 'A'
+                   WHEN gv_score >= 60 THEN 'B'
+                   ELSE 'C' ).
+```
+
+語法拆解：
+
+- `COND 型別( ... )`：整段是一個「會算出一個值」的運算式，可以放在等號右邊、`WRITE` 後面等任何需要值的地方。
+- `#`：型別由目標決定，這裡是 `gv_grade` 的型別。也可以寫明確型別，如 `COND string( ... )`。目標是行內宣告 `DATA(gv_grade)` 時，型別取第一個 `THEN` 的值（`'A'` → `c LENGTH 1`）。
+- `WHEN 條件 THEN 值`：跟 `IF`／`ELSEIF` 一樣由上往下判斷，第一個成立的就回傳它的值。
+- `ELSE 值`：都不成立時的值。**沒寫 `ELSE`、又沒有任何條件成立，結果是初始值（空白／0），不會報錯**（實測），容易誤以為有算到。
+
+`COND` 只取代「依條件賦值」這種 `IF`；分支裡要做好幾件事（`WRITE`、呼叫 FORM……）時，還是用 `IF`。
+
 ### 2.1 比較與邏輯運算子
 
 | 符號寫法 | 舊字母寫法（看得懂即可） | 意義 |
@@ -92,6 +121,37 @@ ENDCASE.
 
 - CASE 比的是**完全相等**；範圍條件（>= 60）只能用 IF。
 - `WHEN OTHERS` 接住預期外的值——不寫的話，比不中就默默什麼都不做，容易吞掉資料異常。
+
+**新式寫法對照（7.40 之後）：`SWITCH`**
+
+`CASE` 的每個分支如果只是「對應到一個值」，可以寫成 `SWITCH` 運算式：
+
+```abap
+* 傳統寫法
+CASE gv_grade.
+  WHEN 'A'.
+    gv_text = '優等'.
+  WHEN 'B' OR 'C'.
+    gv_text = '普通'.
+  WHEN OTHERS.
+    gv_text = '資料異常'.
+ENDCASE.
+
+* 新式寫法
+gv_text = SWITCH #( gv_grade
+                    WHEN 'A' THEN '優等'
+                    WHEN 'B' THEN '普通'
+                    WHEN 'C' THEN '普通'
+                    ELSE '資料異常' ).
+```
+
+語法拆解：
+
+- `SWITCH 型別( 比對的值 WHEN 候選值 THEN 結果 ... ELSE 結果 )`：拿第一個值跟各個 `WHEN` 的候選值比對，相等就回傳對應的結果。
+- **`WHEN` 後面只能放一個值**：`CASE` 的 `WHEN 'B' OR 'C'` 要拆成兩個 `WHEN`。
+- `ELSE` 對應 `WHEN OTHERS`；沒寫 `ELSE` 又比不中，結果是初始值，不會報錯（實測）。
+
+選哪一個：判斷條件是範圍、多個欄位、`AND`／`OR` → `COND`；只是「這個值等於什麼就對應到什麼」→ `SWITCH`。練習 17 的新式寫法版本見答案程式 `ZR_TR17_CONTROL_FLOW_NEW`（輸出跟原版逐行比對相同）。
 
 ## 4. 迴圈：DO 與 WHILE
 

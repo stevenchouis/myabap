@@ -479,6 +479,34 @@ DELETE FROM ztr21_stud WHERE id = 'S0001'.
 - MANDT 欄位一樣不用（不要）自己塞，系統自動帶當前 client。
 - 寫入欄位建議程式帶齊稽核欄（如異動者 `sy-uname`、異動日 `sy-datum`）——查問題時會感謝自己。
 
+**新式寫法對照（7.40 之後）：寫入的來源加 `@`**
+
+```abap
+* 新式寫法：來源是變數 → @變數
+MODIFY ztr21_stud FROM @gs_stud.
+
+* 來源可以是運算式 → @( 運算式 )，不必先填 work area
+INSERT ztr21_stud FROM @( VALUE #( id = 'S0001' name = '王小明' score = 85
+                                   upduser = sy-uname upddate = sy-datum ) ).
+
+INSERT ztr21_stud FROM TABLE @( VALUE #( ( id = 'S0002' name = '李小美' score = 92 )
+                                         ( id = 'S0003' name = '陳大文' score = 67 ) ) )
+  ACCEPTING DUPLICATE KEYS.
+
+* UPDATE：SET 的欄位之間用逗號，宿主變數加 @
+UPDATE ztr21_stud SET score   = 90,
+                      upduser = @sy-uname,
+                      upddate = @sy-datum
+  WHERE id = 'S0001'.
+```
+
+- 跟 SELECT 一樣（講義 6 §3.6），寫入指令裡的程式變數也是宿主變數，新式寫法要加 `@`。
+- 來源是 `VALUE #( )` 這類運算式時，要用 `@( )` 包起來；`#` 的型別取自目標資料表的列。
+- `UPDATE ... SET` 有好幾個欄位時，新式寫法要用逗號分隔，傳統寫法則是空格。
+- `DELETE FROM ... WHERE`、`COMMIT WORK` 沒有新舊之分。
+
+練習 21 的新式寫法版本見答案程式 `ZR_TR21_ZTABLE_NEW`（輸出跟原版逐行比對相同）。
+
 ## 6. LUW 與 COMMIT WORK
 
 資料庫的變更不是逐句永久生效，而是以 **LUW（Logical Unit of Work）**為單位，最後一次「確認」才真正落地：

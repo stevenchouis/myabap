@@ -142,6 +142,7 @@ ENDFORM.
 ## 回填的三個要點
 
 1. `READ LINE n OF PAGE p`：把第 p 頁第 n 行讀進 `sy-lisel`
+   （`sy-lisel`：系統欄位，`c` 長度 255，放一整行的畫面文字；可以直接 `REPLACE`）
 2. `MODIFY LINE`：把改好的 `sy-lisel` 寫回同一行
 3. 佔位符（`###`）要選**內容裡不會自然出現**的字串
    行號要跟頁首版型一致（範例中「頁次」在第 2 行）

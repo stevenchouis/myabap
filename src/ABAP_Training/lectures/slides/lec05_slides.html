@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="12">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li><code>SORT</code>：單欄／多欄、升冪／降冪</li>
@@ -187,7 +187,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="12">
 <h2 id="1-sort%E6%8E%92%E5%BA%8F">1. SORT：排序</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SORT gt_students BY score DESCENDING.   &quot; 成績由高到低
 SORT gt_students BY score.              &quot; 不寫就是 ASCENDING
@@ -254,7 +254,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="12">
 <h2 id="sort--binary-search">SORT + BINARY SEARCH</h2>
 <p>排序後可用二分搜尋加速 READ（大表差很多）：</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SORT gt_students BY id.
@@ -320,7 +320,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="12">
 <h2 id="2-modify%E4%BF%AE%E6%94%B9%E8%A1%A8%E4%B8%AD%E7%9A%84%E5%88%97">2. MODIFY：修改表中的列</h2>
 <p>把 work area 的內容<strong>寫回</strong>表中指定的列：</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 指定第幾筆
@@ -396,7 +396,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="12">
 <h2 id="3-delete%E5%88%AA%E9%99%A4%E5%88%97">3. DELETE：刪除列</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DELETE gt_students INDEX 3.              &quot; 刪第 3 筆
 DELETE gt_students WHERE score &lt; 60.     &quot; 刪所有不及格
@@ -415,7 +415,7 @@ DELETE ADJACENT DUPLICATES FROM gt_students COMPARING id.
 初學建議：先 LOOP 蒐集、迴圈外再刪，或直接 <code>DELETE ... WHERE</code></p>
 </blockquote>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -442,7 +442,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="7" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="7" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -469,18 +469,21 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
-<h2 id="4-insert%EF%BC%8F5-%E5%8F%96%E5%BE%97%E7%AD%86%E6%95%B8">4. INSERT／5. 取得筆數</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* APPEND 只能加表尾；插中間用 INSERT：
-INSERT gs_student INTO gt_students INDEX 2.   &quot; 原本的往後推
-</code></pre>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 筆數兩種寫法都要看得懂：
-DESCRIBE TABLE gt_students LINES gv_lines.    &quot; 傳統寫法
-gv_lines = lines( gt_students ).              &quot; 內建函數（較新）
+;" data-marpit-pagination-total="12">
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7filter-%E7%AF%A9%E5%87%BA%E6%96%B0%E8%A1%A8">新式寫法對照：<code>FILTER</code> 篩出新表</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統：保留原表，另外蒐集符合的列
+LOOP AT gt_item INTO gs_item WHERE qty &gt;= 10.
+  APPEND gs_item TO gt_item_big.
+ENDLOOP.
 
-* 判斷空表：
-IF gt_students IS INITIAL.
+* 新式
+gt_item_big = FILTER #( gt_item USING KEY by_qty WHERE qty &gt;= 10 ).
 </code></pre>
+<ul>
+<li><code>DELETE ... WHERE</code> 是刪原表；<code>FILTER</code> 是得到一張新表</li>
+<li><strong><code>WHERE</code> 的欄位必須是表格鍵</strong>（SORTED／HASHED 主鍵，或 <code>USING KEY</code> 次要鍵）</li>
+<li>條件欄位不是鍵時，<code>LOOP ... WHERE</code> 比較單純（完整範例見講義 26）</li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -536,24 +539,17 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
-<h2 id="6-%E7%B6%9C%E5%90%88%E7%AF%84%E4%BE%8B">6. 綜合範例</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 需求：去重複 → 全班加 5 分 → 刪不及格 → 依成績排名輸出
-SORT gt_students BY id.
-DELETE ADJACENT DUPLICATES FROM gt_students COMPARING id.
+;" data-marpit-pagination-total="12">
+<h2 id="4-insert%EF%BC%8F5-%E5%8F%96%E5%BE%97%E7%AD%86%E6%95%B8">4. INSERT／5. 取得筆數</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* APPEND 只能加表尾；插中間用 INSERT：
+INSERT gs_student INTO gt_students INDEX 2.   &quot; 原本的往後推
+</code></pre>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 筆數兩種寫法都要看得懂：
+DESCRIBE TABLE gt_students LINES gv_lines.    &quot; 傳統寫法
+gv_lines = lines( gt_students ).              &quot; 內建函數（較新）
 
-LOOP AT gt_students INTO gs_student.
-  gs_student-score = gs_student-score + 5.
-  MODIFY gt_students FROM gs_student TRANSPORTING score.
-ENDLOOP.
-
-DELETE gt_students WHERE score &lt; 60.
-
-SORT gt_students BY score DESCENDING.
-LOOP AT gt_students INTO gs_student.
-  WRITE: / sy-tabix, gs_student-id, gs_student-score.
-ENDLOOP.
-WRITE: / '倖存', lines( gt_students ), '人'.
+* 判斷空表：
+IF gt_students IS INITIAL.
 </code></pre>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
@@ -610,7 +606,153 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="12">
+<h2 id="6-%E7%B6%9C%E5%90%88%E7%AF%84%E4%BE%8B">6. 綜合範例</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 需求：去重複 → 全班加 5 分 → 刪不及格 → 依成績排名輸出
+SORT gt_students BY id.
+DELETE ADJACENT DUPLICATES FROM gt_students COMPARING id.
+
+LOOP AT gt_students INTO gs_student.
+  gs_student-score = gs_student-score + 5.
+  MODIFY gt_students FROM gs_student TRANSPORTING score.
+ENDLOOP.
+
+DELETE gt_students WHERE score &lt; 60.
+
+SORT gt_students BY score DESCENDING.
+LOOP AT gt_students INTO gs_student.
+  WRITE: / sy-tabix, gs_student-id, gs_student-score.
+ENDLOOP.
+WRITE: / '倖存', lines( gt_students ), '人'.
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="10" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="12">
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7%E5%B7%A2%E7%8B%80-value-%E8%88%87-reduce">新式寫法對照：巢狀 <code>VALUE</code> 與 <code>REDUCE</code></h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* VALUE 可以巢狀：結構裡的 items 欄位是一張表
+gs_order = VALUE #( ordno = 'SO0001' customer = 'ACME'
+                    items = VALUE #( ( posnr = 10 matnr = 'MAT-A' qty = 5 )
+                                     ( posnr = 20 matnr = 'MAT-B' qty = 3 ) ) ).
+
+* REDUCE：把整張表濃縮成一個值
+DATA(gv_total_qty) = REDUCE i( INIT sum = 0
+                               FOR item IN gs_order-items
+                               NEXT sum = sum + item-qty ).
+</code></pre>
+<ul>
+<li><code>INIT</code> 累加變數＋初始值、<code>FOR ... IN</code> 相當於 <code>LOOP AT</code>、<code>NEXT</code> 每列怎麼更新</li>
+<li>累加金額要寫 <code>INIT r TYPE 金額型別</code>；<code>INIT r = 0</code> 會變整數、小數被截掉</li>
+<li>邏輯複雜（中途 <code>EXIT</code>、多層判斷）時，傳統 <code>LOOP</code> 比較好讀</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="11" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="12">
 <h2 id="7-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">7. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -643,7 +785,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -670,7 +812,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="10" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="12" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -697,7 +839,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="12">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex05</strong>：</p>
 <p>SORT、MODIFY 加分、DELETE 篩選與去重複<br />

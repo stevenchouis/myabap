@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="13">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>為什麼需要結構：一筆資料有多個欄位</li>
@@ -186,7 +186,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="13">
 <h2 id="1-%E7%82%BA%E4%BB%80%E9%BA%BC%E9%9C%80%E8%A6%81%E7%B5%90%E6%A7%8B">1. 為什麼需要結構</h2>
 <p>三個散裝變數：「屬於同一筆」的關係只存在你腦中</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 沒有結構：三個散裝變數
@@ -256,7 +256,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="13">
 <h2 id="2-types%E5%AE%9A%E7%BE%A9%E8%87%AA%E8%A8%82%E7%B5%90%E6%A7%8B%E5%9E%8B%E5%88%A5">2. TYPES：定義自訂結構型別</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TYPES: BEGIN OF ty_student,
          id    TYPE c LENGTH 5,     &quot; 學號
@@ -327,7 +327,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="13">
 <h2 id="3-types-vs-data%E6%A8%A1%E5%85%B7%E8%88%87%E7%94%A2%E5%93%81">3. TYPES vs DATA：模具與產品</h2>
 <table>
 <thead>
@@ -418,7 +418,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="13">
 <h2 id="4-%E6%AC%84%E4%BD%8D%E5%AD%98%E5%8F%96%E9%80%A3%E5%AD%97%E8%99%9F">4. 欄位存取：連字號 <code>-</code></h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gs_student TYPE ty_student.
 
@@ -487,20 +487,21 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="5-%E7%B5%90%E6%A7%8B%E7%9A%84%E6%95%B4%E9%AB%94%E6%93%8D%E4%BD%9C">5. 結構的整體操作</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 同型別：直接賦值 = 整筆複製
-gs_b = gs_a.
+;" data-marpit-pagination-total="13">
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7value---%E5%A1%AB%E7%B5%90%E6%A7%8B">新式寫法對照：<code>VALUE #( )</code> 填結構</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統：一個欄位一行
+gs_student-id    = 'S0001'.
+gs_student-name  = '王小明'.
+gs_student-score = 85.
 
-* 整筆歸零：所有欄位回初始值
-CLEAR gs_a.
+* 新式：一次填好整個結構
+gs_student = VALUE #( id = 'S0001' name = '王小明' score = 85 ).
 </code></pre>
-<blockquote>
-<p>習慣：重複用同一個結構填資料時，<strong>先 CLEAR</strong><br />
-避免上一筆殘留值混進來——實務很常見的 bug 來源</p>
-</blockquote>
-<p><strong>不同型別</strong>的結構直接 <code>=</code> 會照「位置」硬轉、結果錯亂<br />
-→ 要用 MOVE-CORRESPONDING（下一頁）</p>
+<ul>
+<li>欄位之間用空白，不用逗號；<code>#</code> 型別取自左邊</li>
+<li><strong>沒寫到的欄位是初始值</strong>：等於先 <code>CLEAR</code> 再逐欄賦值</li>
+<li>只改一個欄位、其他保留 → 還是用 <code>gs_student-score = 90.</code></li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -556,24 +557,20 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="move-corresponding%E5%90%8C%E5%90%8D%E6%AC%84%E4%BD%8D%E5%B0%8D%E6%90%AC">MOVE-CORRESPONDING：同名欄位對搬</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TYPES: BEGIN OF ty_student_lite,
-         id   TYPE c LENGTH 5,
-         name TYPE string,
-       END OF ty_student_lite.
+;" data-marpit-pagination-total="13">
+<h2 id="5-%E7%B5%90%E6%A7%8B%E7%9A%84%E6%95%B4%E9%AB%94%E6%93%8D%E4%BD%9C">5. 結構的整體操作</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 同型別：直接賦值 = 整筆複製
+gs_b = gs_a.
 
-DATA: gs_full TYPE ty_student,
-      gs_lite TYPE ty_student_lite.
-
-MOVE-CORRESPONDING gs_full TO gs_lite.   &quot; 只搬同名欄位 id、name
+* 整筆歸零：所有欄位回初始值
+CLEAR gs_a.
 </code></pre>
-<p>規則：<strong>欄位名相同就搬</strong>（逐欄轉換）</p>
-<ul>
-<li>目的端沒有的欄位 → 丟掉</li>
-<li>目的端多的欄位 → 不動</li>
-<li>欄位名拼錯 → <strong>默默不搬、不報錯</strong>，要自己核對</li>
-</ul>
+<blockquote>
+<p>習慣：重複用同一個結構填資料時，<strong>先 CLEAR</strong><br />
+避免上一筆殘留值混進來——實務很常見的 bug 來源</p>
+</blockquote>
+<p><strong>不同型別</strong>的結構直接 <code>=</code> 會照「位置」硬轉、結果錯亂<br />
+→ 要用 MOVE-CORRESPONDING（下一頁）</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -629,7 +626,165 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="13">
+<h2 id="move-corresponding%E5%90%8C%E5%90%8D%E6%AC%84%E4%BD%8D%E5%B0%8D%E6%90%AC">MOVE-CORRESPONDING：同名欄位對搬</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TYPES: BEGIN OF ty_student_lite,
+         id   TYPE c LENGTH 5,
+         name TYPE string,
+       END OF ty_student_lite.
+
+DATA: gs_full TYPE ty_student,
+      gs_lite TYPE ty_student_lite.
+
+MOVE-CORRESPONDING gs_full TO gs_lite.   &quot; 只搬同名欄位 id、name
+</code></pre>
+<p>規則：<strong>欄位名相同就搬</strong>（逐欄轉換）</p>
+<ul>
+<li>目的端沒有的欄位 → 丟掉</li>
+<li>目的端多的欄位 → 不動</li>
+<li>欄位名拼錯 → <strong>默默不搬、不報錯</strong>，要自己核對</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="10" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="13">
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7corresponding">新式寫法對照：<code>CORRESPONDING #( )</code></h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">MOVE-CORRESPONDING gs_full TO gs_lite.                    &quot; 傳統
+gs_lite = CORRESPONDING #( gs_full ).                     &quot; 新式
+gs_lite = CORRESPONDING #( BASE ( gs_lite ) gs_full ).    &quot; 新式＋保留原值
+</code></pre>
+<p><strong>兩者不完全相同</strong>：目的端多一個 <code>memo</code> 欄位、原值 <code>KEEP</code>（實測）</p>
+<table>
+<thead>
+<tr>
+<th>寫法</th>
+<th><code>memo</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MOVE-CORRESPONDING</code></td>
+<td>保留 <code>KEEP</code></td>
+</tr>
+<tr>
+<td><code>CORRESPONDING #( )</code></td>
+<td><strong>被清成空白</strong></td>
+</tr>
+<tr>
+<td><code>CORRESPONDING #( BASE ( gs_lite ) ... )</code></td>
+<td>保留 <code>KEEP</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>CORRESPONDING #( )</code> 是先建一筆新的再整筆賦值；舊程式改寫時要注意</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="11" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="13">
 <h2 id="6-%E5%B7%A2%E7%8B%80%E7%B5%90%E6%A7%8B%E5%85%88%E7%9C%8B%E5%BE%97%E6%87%82">6. 巢狀結構（先看得懂）</h2>
 <p>結構的欄位也可以是另一個結構，用兩層 <code>-</code> 存取：</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TYPES: BEGIN OF ty_address,
@@ -646,7 +801,7 @@ gs_person-address-city = '台北'.
 </code></pre>
 <p>SAP 標準結構常有巢狀，先能讀懂即可</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -673,7 +828,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="10" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" data-marpit-pagination="12" style="--paginate:true;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -700,7 +855,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="13">
 <h2 id="7-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">7. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -733,7 +888,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -760,7 +915,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="11" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="13" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -787,7 +942,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="13">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex03</strong>：</p>
 <p>定義學生結構、填值輸出、<br />

@@ -96,6 +96,22 @@ SELECT f~carrid f~connid f~fldate c~carrname
 
 ---
 
+## 新式寫法對照：JOIN 加行內宣告
+
+```abap
+SELECT f~carrid, f~connid, f~fldate, c~carrname
+  FROM sflight AS f
+  INNER JOIN scarr AS c ON f~carrid = c~carrid
+  WHERE f~fldate >= '20260101'
+  INTO TABLE @DATA(gt_flights).
+```
+
+- 規則同講義 6：逗號、`INTO` 放最後、宿主變數加 `@`
+- **不用先寫接收結構**：系統依 SELECT 清單產生，欄位名是 `carrid`、`carrname`……
+- 放進既有內表：`INTO CORRESPONDING FIELDS OF TABLE @gt_flights`
+
+---
+
 <!-- _class: compact -->
 
 ## 2.1 Database View：把 JOIN 定義在 DDIC

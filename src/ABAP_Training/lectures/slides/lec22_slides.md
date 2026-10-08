@@ -159,6 +159,22 @@ MESSAGE s003(ztr22) WITH 999 DISPLAY LIKE 'E'.
 
 ---
 
+## 在 REPORT 宣告預設訊息類別：`MESSAGE-ID`
+
+```abap
+REPORT zr_tr22_texts MESSAGE-ID ztr22.
+
+MESSAGE e001.                              " 等於 MESSAGE e001(ztr22).
+MESSAGE s002 WITH lv_count sy-uname sy-datum.
+MESSAGE s001(00) WITH '...'.               " 括號寫了別的類別，以括號為準
+```
+
+- 省略括號的前提：程式第一行有 `MESSAGE-ID`
+- Function Group 同樣寫法：`FUNCTION-POOL zfg_xxx MESSAGE-ID zxx.`
+- 只用一個訊息類別 → 宣告較簡潔；用好幾個 → 每則寫括號較清楚
+
+---
+
 ## 5. 翻譯與登入語言
 
 - 文字元素有「**原始語言**」（程式屬性 Original Language）

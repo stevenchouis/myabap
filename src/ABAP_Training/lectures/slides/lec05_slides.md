@@ -135,6 +135,26 @@ DELETE ADJACENT DUPLICATES FROM gt_students COMPARING id.
 
 ---
 
+<!-- _class: compact -->
+
+## 新式寫法對照：`FILTER` 篩出新表
+
+```abap
+* 傳統：保留原表，另外蒐集符合的列
+LOOP AT gt_item INTO gs_item WHERE qty >= 10.
+  APPEND gs_item TO gt_item_big.
+ENDLOOP.
+
+* 新式
+gt_item_big = FILTER #( gt_item USING KEY by_qty WHERE qty >= 10 ).
+```
+
+- `DELETE ... WHERE` 是刪原表；`FILTER` 是得到一張新表
+- **`WHERE` 的欄位必須是表格鍵**（SORTED／HASHED 主鍵，或 `USING KEY` 次要鍵）
+- 條件欄位不是鍵時，`LOOP ... WHERE` 比較單純（完整範例見講義 26）
+
+---
+
 ## 4. INSERT／5. 取得筆數
 
 ```abap
@@ -173,6 +193,28 @@ LOOP AT gt_students INTO gs_student.
 ENDLOOP.
 WRITE: / '倖存', lines( gt_students ), '人'.
 ```
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：巢狀 `VALUE` 與 `REDUCE`
+
+```abap
+* VALUE 可以巢狀：結構裡的 items 欄位是一張表
+gs_order = VALUE #( ordno = 'SO0001' customer = 'ACME'
+                    items = VALUE #( ( posnr = 10 matnr = 'MAT-A' qty = 5 )
+                                     ( posnr = 20 matnr = 'MAT-B' qty = 3 ) ) ).
+
+* REDUCE：把整張表濃縮成一個值
+DATA(gv_total_qty) = REDUCE i( INIT sum = 0
+                               FOR item IN gs_order-items
+                               NEXT sum = sum + item-qty ).
+```
+
+- `INIT` 累加變數＋初始值、`FOR ... IN` 相當於 `LOOP AT`、`NEXT` 每列怎麼更新
+- 累加金額要寫 `INIT r TYPE 金額型別`；`INIT r = 0` 會變整數、小數被截掉
+- 邏輯複雜（中途 `EXIT`、多層判斷）時，傳統 `LOOP` 比較好讀
 
 ---
 

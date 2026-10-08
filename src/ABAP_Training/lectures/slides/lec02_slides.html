@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="12">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li><code>DATA</code> 宣告變數：TYPE、LENGTH、DECIMALS、VALUE</li>
@@ -186,7 +186,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="12">
 <h2 id="1-%E5%AE%A3%E5%91%8A%E8%AE%8A%E6%95%B8data">1. 宣告變數：DATA</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA 變數名 TYPE 型別 [LENGTH 長度] [DECIMALS 小數位] [VALUE 初始值].
 </code></pre>
@@ -256,7 +256,99 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="12">
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7%E8%A1%8C%E5%85%A7%E5%AE%A3%E5%91%8A-data">新式寫法對照：行內宣告 <code>DATA( )</code></h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統：先宣告，再賦值
+DATA gv_count TYPE i.
+gv_count = 3.
+
+* 新式（7.40 之後）：第一次賦值時順便宣告
+DATA(gv_count) = 3.
+</code></pre>
+<p>型別<strong>照抄右邊的值</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>寫法</th>
+<th>推導出的型別</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DATA(gv_n) = 3.</code></td>
+<td><code>i</code></td>
+</tr>
+<tr>
+<td><code>DATA(gv_s) = 'TR02'.</code></td>
+<td><code>c LENGTH 4</code>（之後放更長會被截斷）</td>
+</tr>
+<tr>
+<td><code>DATA(gv_s) = `ABAP`.</code></td>
+<td><code>string</code></td>
+</tr>
+<tr>
+<td><code>DATA(gv_d) = sy-datum.</code></td>
+<td>字典型別 <code>SYDATUM</code>，<code>WRITE</code> 印 <code>2026/10/08</code></td>
+</tr>
+</tbody>
+</table>
+<p>金額（<code>p</code> 帶小數）仍要先宣告；同名只能行內宣告一次</p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="5" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="12">
 <h2 id="2-%E5%85%A7%E5%BB%BA%E8%B3%87%E6%96%99%E5%9E%8B%E5%88%A5%E7%B8%BD%E8%A1%A8">2. 內建資料型別總表</h2>
 <table>
 <thead>
@@ -327,72 +419,6 @@ footer { color: #999; }
 <p>三個最容易踩的點：<br />
 <code>TYPE c</code> 忘 LENGTH（只剩 1 字）｜金額用 <code>f</code>（0.1 存不準）｜<code>n</code> 參與運算</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-theme="default" data-style="section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-" lang="en-US" data-marpit-pagination="5" style="--paginate:true;--theme:default;--style:section {
-  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
-  font-size: 26px;
-  padding: 60px;
-}
-section.lead {
-  text-align: center;
-  justify-content: center;
-}
-section.lead h1 { font-size: 56px; }
-code, pre {
-  font-family: Consolas, 'Courier New', monospace;
-}
-pre {
-  font-size: 21px;
-  line-height: 1.45;
-}
-table { font-size: 23px; }
-section.compact pre { font-size: 19px; }
-section.compact table { font-size: 20px; }
-blockquote {
-  border-left: 6px solid #0a6ed1;
-  padding-left: 16px;
-  color: #333;
-  background: #eef6fc;
-}
-footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="%E6%97%A5%E6%9C%9F%E9%81%8B%E7%AE%97%E7%AF%84%E4%BE%8B">日期運算範例</h2>
-<p><code>d</code> 型別可以直接加減天數：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA: gv_today TYPE d,
-      gv_due   TYPE d.
-
-gv_today = sy-datum.          &quot; 系統欄位：今天日期
-gv_due   = gv_today + 30.     &quot; 30 天後
-
-WRITE: / '今天：', gv_today, '30 天後：', gv_due.
-</code></pre>
-</section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
@@ -447,39 +473,17 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="3-type-%E8%88%87-like-%E7%9A%84%E5%B7%AE%E5%88%A5">3. TYPE 與 LIKE 的差別</h2>
-<table>
-<thead>
-<tr>
-<th>寫法</th>
-<th>參考對象</th>
-<th>讀法</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>DATA a TYPE i.</code></td>
-<td><strong>型別</strong></td>
-<td>「a 的型別是 i」</td>
-</tr>
-<tr>
-<td><code>DATA b LIKE a.</code></td>
-<td><strong>另一個資料物件</strong></td>
-<td>「b 跟 a 長一樣」</td>
-</tr>
-</tbody>
-</table>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gv_date1 TYPE d.            &quot; TYPE：參考型別
-DATA gv_date2 LIKE sy-datum.     &quot; LIKE：參考系統欄位
-DATA gv_date3 LIKE gv_date1.     &quot; LIKE：跟 gv_date1 同型別
+;" data-marpit-pagination-total="12">
+<h2 id="%E6%97%A5%E6%9C%9F%E9%81%8B%E7%AE%97%E7%AF%84%E4%BE%8B">日期運算範例</h2>
+<p><code>d</code> 型別可以直接加減天數：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA: gv_today TYPE d,
+      gv_due   TYPE d.
+
+gv_today = sy-datum.          &quot; 系統欄位：今天日期
+gv_due   = gv_today + 30.     &quot; 30 天後
+
+WRITE: / '今天：', gv_today, '30 天後：', gv_due.
 </code></pre>
-<ul>
-<li>「跟某個既有欄位保持一致」用 <code>LIKE</code>——來源改了自動跟</li>
-<li>內建型別只適合<strong>純區域暫存</strong>（計數器、旗標）<br />
-業務資料實務上都是 <code>TYPE scarr-carrid</code>（Global Type，講義 6）</li>
-<li>進階：<code>DATA gs LIKE LINE OF gt_tab.</code>（講義 10）</li>
-</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -535,20 +539,38 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="4-constants-%E5%B8%B8%E6%95%B8">4. CONSTANTS 常數</h2>
-<p>宣告後不可改值，<strong>必須</strong>給 <code>VALUE</code>：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">CONSTANTS gc_max_score TYPE i VALUE 100.
-CONSTANTS gc_pass_line TYPE i VALUE 60.
-
-IF gv_score &gt;= gc_pass_line.
-  WRITE / '及格'.
-ENDIF.
+;" data-marpit-pagination-total="12">
+<h2 id="3-type-%E8%88%87-like-%E7%9A%84%E5%B7%AE%E5%88%A5">3. TYPE 與 LIKE 的差別</h2>
+<table>
+<thead>
+<tr>
+<th>寫法</th>
+<th>參考對象</th>
+<th>讀法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DATA a TYPE i.</code></td>
+<td><strong>型別</strong></td>
+<td>「a 的型別是 i」</td>
+</tr>
+<tr>
+<td><code>DATA b LIKE a.</code></td>
+<td><strong>另一個資料物件</strong></td>
+<td>「b 跟 a 長一樣」</td>
+</tr>
+</tbody>
+</table>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gv_date1 TYPE d.            &quot; TYPE：參考型別
+DATA gv_date2 LIKE sy-datum.     &quot; LIKE：參考系統欄位
+DATA gv_date3 LIKE gv_date1.     &quot; LIKE：跟 gv_date1 同型別
 </code></pre>
 <ul>
-<li>把「魔術數字」集中命名：改規則只改一處</li>
-<li><code>gc_pass_line</code> 比裸寫 <code>60</code> 可讀得多</li>
-<li>對常數賦值 → 直接編譯錯誤（這是保護不是限制）</li>
+<li>「跟某個既有欄位保持一致」用 <code>LIKE</code>——來源改了自動跟</li>
+<li>內建型別只適合<strong>純區域暫存</strong>（計數器、旗標）<br />
+業務資料實務上都是 <code>TYPE scarr-carrid</code>（Global Type，講義 6）</li>
+<li>進階：<code>DATA gs LIKE LINE OF gt_tab.</code>（講義 10）</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
@@ -605,22 +627,21 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="5-%E8%B3%A6%E5%80%BCclear-%E8%88%87%E5%9E%8B%E5%88%A5%E8%BD%89%E6%8F%9B">5. 賦值、CLEAR 與型別轉換</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">gv_count = 42.                 &quot; 賦值就是等號
-CLEAR gv_count.                &quot; 恢復初始值（i 是 0，c 是空白）
+;" data-marpit-pagination-total="12">
+<h2 id="4-constants-%E5%B8%B8%E6%95%B8">4. CONSTANTS 常數</h2>
+<p>宣告後不可改值，<strong>必須</strong>給 <code>VALUE</code>：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">CONSTANTS gc_max_score TYPE i VALUE 100.
+CONSTANTS gc_pass_line TYPE i VALUE 60.
+
+IF gv_score &gt;= gc_pass_line.
+  WRITE / '及格'.
+ENDIF.
 </code></pre>
-<p>不同型別互相賦值會<strong>自動轉換</strong>——方便也危險：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA: gv_char TYPE c LENGTH 3 VALUE '123',
-      gv_int  TYPE i.
-gv_int = gv_char.              &quot; '123' → 123，成功
-gv_char = 'ABC'.
-* gv_int = gv_char.            &quot; 執行期當掉 CONVT_NO_NUMBER！
-</code></pre>
-<blockquote>
-<p>鐵律：轉換錯誤是<strong>執行期</strong>才爆，語法檢查抓不到<br />
-來源資料不可信時，賦值前要自己驗證</p>
-</blockquote>
+<ul>
+<li>把「魔術數字」集中命名：改規則只改一處</li>
+<li><code>gc_pass_line</code> 比裸寫 <code>60</code> 可讀得多</li>
+<li>對常數賦值 → 直接編譯錯誤（這是保護不是限制）</li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -676,43 +697,22 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="6-%E7%B3%BB%E7%B5%B1%E6%AC%84%E4%BD%8D%E5%88%9D%E6%8E%A2structure-sy">6. 系統欄位初探（structure SY)</h2>
-<p>用 <code>sy-欄位名</code> 取用，本課程常用：</p>
-<table>
-<thead>
-<tr>
-<th>欄位</th>
-<th>內容</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>sy-datum</code></td>
-<td>今天日期（伺服器）</td>
-</tr>
-<tr>
-<td><code>sy-uzeit</code></td>
-<td>現在時間</td>
-</tr>
-<tr>
-<td><code>sy-uname</code></td>
-<td>登入帳號</td>
-</tr>
-<tr>
-<td><code>sy-subrc</code></td>
-<td>上一個操作的回傳碼（0 = 成功）——講義 4 起天天用</td>
-</tr>
-<tr>
-<td><code>sy-tabix</code></td>
-<td>內表迴圈目前筆數（講義 4）</td>
-</tr>
-<tr>
-<td><code>sy-index</code></td>
-<td><code>DO</code> 迴圈目前圈數（講義 17）</td>
-</tr>
-</tbody>
-</table>
+;" data-marpit-pagination-total="12">
+<h2 id="5-%E8%B3%A6%E5%80%BCclear-%E8%88%87%E5%9E%8B%E5%88%A5%E8%BD%89%E6%8F%9B">5. 賦值、CLEAR 與型別轉換</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">gv_count = 42.                 &quot; 賦值就是等號
+CLEAR gv_count.                &quot; 恢復初始值（i 是 0，c 是空白）
+</code></pre>
+<p>不同型別互相賦值會<strong>自動轉換</strong>——方便也危險：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA: gv_char TYPE c LENGTH 3 VALUE '123',
+      gv_int  TYPE i.
+gv_int = gv_char.              &quot; '123' → 123，成功
+gv_char = 'ABC'.
+* gv_int = gv_char.            &quot; 執行期當掉 CONVT_NO_NUMBER！
+</code></pre>
+<blockquote>
+<p>鐵律：轉換錯誤是<strong>執行期</strong>才爆，語法檢查抓不到<br />
+來源資料不可信時，賦值前要自己驗證</p>
+</blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -768,7 +768,99 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="12">
+<h2 id="6-%E7%B3%BB%E7%B5%B1%E6%AC%84%E4%BD%8D%E5%88%9D%E6%8E%A2structure-sy">6. 系統欄位初探（structure SY)</h2>
+<p>用 <code>sy-欄位名</code> 取用，本課程常用：</p>
+<table>
+<thead>
+<tr>
+<th>欄位</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sy-datum</code></td>
+<td>今天日期（伺服器）</td>
+</tr>
+<tr>
+<td><code>sy-uzeit</code></td>
+<td>現在時間</td>
+</tr>
+<tr>
+<td><code>sy-uname</code></td>
+<td>登入帳號</td>
+</tr>
+<tr>
+<td><code>sy-subrc</code></td>
+<td>上一個操作的回傳碼（0 = 成功）——講義 4 起天天用</td>
+</tr>
+<tr>
+<td><code>sy-tabix</code></td>
+<td>內表迴圈目前筆數（講義 4）</td>
+</tr>
+<tr>
+<td><code>sy-index</code></td>
+<td><code>DO</code> 迴圈目前圈數（講義 17）</td>
+</tr>
+</tbody>
+</table>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="11" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="12">
 <h2 id="7-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">7. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -801,7 +893,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -828,7 +920,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="11" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="12" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -855,7 +947,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="12">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex02</strong>：</p>
 <p>宣告各型別變數、用 LIKE 參考、<br />

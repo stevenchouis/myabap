@@ -53,3 +53,5 @@
 ## 答案
 
 見 `zr_tr17_control_flow.prog.abap`（SAP 端程式 `ZR_TR17_CONTROL_FLOW`）。
+
+新式寫法版本見 `zr_tr17_control_flow_new.prog.abap`（SAP 端程式 `ZR_TR17_CONTROL_FLOW_NEW`），輸出跟原版逐行比對相同；新舊寫法的對照說明見講義 17 §2、§3的「新式寫法對照」。

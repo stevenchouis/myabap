@@ -198,7 +198,7 @@ LOOP AT gt_data ASSIGNING <ls_row> WHERE sel = 'X'.
 ENDLOOP.
 ```
 
-> **補充**：`ASSIGNING <ls_row>` 也可以寫成行內宣告 `ASSIGNING FIELD-SYMBOL(<ls_row>)`（7.40 之後的新寫法，省掉上面 `FIELD-SYMBOLS` 那一行），講義 16 補充、講義 26 詳述。
+> **補充**：`ASSIGNING <ls_row>` 也可以寫成行內宣告 `ASSIGNING FIELD-SYMBOL(<ls_row>)`（7.40 之後的新寫法，省掉上面 `FIELD-SYMBOLS` 那一行），見講義 16 §7。
 
 刷新畫面後（`selfield-refresh = 'X'`，見 8.3），這些列的 checkbox／備註就是灰的。常用樣式常數還有 `mc_style_enabled`（解鎖）、`mc_style_hotspot`。`celltab` 欄位本身**不要**放進 fieldcat。
 
@@ -267,7 +267,7 @@ CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY_LVC'
     t_outtab        = gt_data ...
 ```
 
-> **補充：`VALUE #( ... )` 新寫法**：事件表那三行（填 `gs_event`＋`APPEND`）在 7.40 之後可以寫成一句 `APPEND VALUE #( name = slis_ev_data_changed form = 'DATA_CHANGED' ) TO gt_events.`，同時建出一列並 APPEND，型別由 `gt_events` 的列自動推導，效果相同；`VALUE` 的完整用法留到講義 26。
+> **補充：`VALUE #( ... )` 新寫法**：事件表那三行（填 `gs_event`＋`APPEND`）在 7.40 之後可以寫成一句 `APPEND VALUE #( name = slis_ev_data_changed form = 'DATA_CHANGED' ) TO gt_events.`，同時建出一列並 APPEND，型別由 `gt_events` 的列自動推導，效果相同；`VALUE` 的用法見講義 4 §3。
 
 **其三：FORM 介面固定，第一個參數收 `cl_alv_changed_data_protocol` 物件**（型別是固定的，不是自己宣告的 class）：
 

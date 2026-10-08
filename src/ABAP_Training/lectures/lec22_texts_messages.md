@@ -91,6 +91,23 @@ MESSAGE ID 'ZTR22' TYPE 'E' NUMBER '001'.
 MESSAGE s003(ztr22) WITH 999 DISPLAY LIKE 'E'.
 ```
 
+**在 `REPORT` 宣告預設訊息類別**：整支程式都用同一個訊息類別時，可以在程式第一行加 `MESSAGE-ID`，之後的 `MESSAGE` 就不用每次寫括號：
+
+```abap
+REPORT zr_tr22_texts MESSAGE-ID ztr22.
+
+MESSAGE e001.                              " 等於 MESSAGE e001(ztr22).
+MESSAGE s002 WITH lv_count sy-uname sy-datum.
+MESSAGE s001(00) WITH '...'.               " 括號寫了別的類別，以括號為準
+```
+
+- 括號裡有寫訊息類別時，以括號為準，蓋過 `REPORT` 的預設。
+- 省略括號的 `MESSAGE e001.`，前提是程式第一行有 `MESSAGE-ID`；沒有的話系統不知道要去哪個訊息類別找編號（官方文件 `ABAPMESSAGE_MSG`）。
+- Function Group 也是同樣寫法：TOP Include 第一行 `FUNCTION-POOL zfg_xxx MESSAGE-ID zxx.`，群組裡所有 Function Module 共用（講義 15）。
+- 只用一個訊息類別的程式，宣告 `MESSAGE-ID` 比較簡潔；一支程式要用好幾個訊息類別時，每則都寫括號比較清楚，讀程式的人不用回頭找預設是哪個。
+
+> 2026-10-08 用驗證程式 `ZR_TR22_MSGID_CHK` 實測：`MESSAGE s002 ...` 執行後 `sy-msgid` 是 `ZTR22`；`MESSAGE s001(00) ...` 執行後是 `00`。
+
 重點觀念：
 
 - **訊息型別（I/S/W/E/A，講義 10 的表）不屬於訊息本身**，是呼叫端決定的——同一則 001，可以 `e001(ztr22)` 也可以 `i001(ztr22)`，行為依當下型別與所在事件而定。

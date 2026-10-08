@@ -64,3 +64,5 @@ sy-subrc =     0  ／ COUNT =           0  ／ SUM =           0
 ## 答案
 
 見 `zr_tr20a_sql_agg.prog.abap`（SAP 端程式 `ZR_TR20A_SQL_AGG`）。
+
+新式寫法版本見 `zr_tr20a_sql_agg_new.prog.abap`（SAP 端程式 `ZR_TR20A_SQL_AGG_NEW`），輸出跟原版逐行比對相同；新舊寫法的對照說明見講義 20a §7的「新式寫法對照」。

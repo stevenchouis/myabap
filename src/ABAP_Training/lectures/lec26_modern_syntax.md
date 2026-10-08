@@ -8,7 +8,7 @@
 - 字串模板 `|...|`：取代 `CONCATENATE`，並附格式化選項（`WIDTH`／`ALIGN`／`PAD`／`CASE`）
 - New Open SQL：宿主變數（Host Variable）與 `@` 跳脫規則、`@DATA(...)` 行內宣告、`SELECT` 清單裡的 `CASE` 運算式
 - Functional Operator 五件套：`COND`／`SWITCH`／`VALUE`／`REDUCE`／`FILTER`
-- 定位：這些都是 7.40 之後（S/4HANA 常態寫法）的語法，前面 25 講刻意用傳統語法打底、只在少數地方順帶提一句「新語法對照」（講義 18 第 1 節）；這一講回頭把新舊寫法系統性整理起來——**兩種寫法都要看得懂**，新專案/S4 常見新式寫法，維護舊程式仍要認得傳統寫法。
+- 定位：這些都是 7.40 之後（S/4HANA 常態寫法）的語法。各語法點已經在教到它的講義裡，以「新式寫法對照」區塊跟傳統寫法並列說明（位置見第 8 節速查表）；這一講把它們集中起來當**總整理與速查**，並補上 `SELECT` 裡的 `CASE` 運算式、字串模板格式選項、`FILTER` 次要鍵等進階內容——**兩種寫法都要看得懂**，新專案/S4 常見新式寫法，維護舊程式仍要認得傳統寫法。
 
 ## 0. 先備觀念：行內宣告（Inline Declaration）
 
@@ -52,7 +52,7 @@ ENDLOOP.
 1. **型別由右邊決定，字面值容易誤判**：`DATA(lv_n) = 0.` 是 `i`，之後 `lv_n = 7 / 2.` 得 `4`（整數四捨五入）；`DATA(lv_s) = 'abc'.` 推導出的是 **`c LENGTH 3`**，之後 `lv_s = 'abcdefgh'.` 只剩 `abc`（被截斷，講義 1 提過的固定長度文字）；要 `string` 就得用反引號 `` DATA(lv_s) = `abc`. ``。
 2. **作用範圍是整個程式單元**（程式主體／FORM／方法），不是只有 `LOOP` 裡面：兩個 `LOOP` 都寫 `INTO DATA(gv_x)`，第二個會編譯錯誤 `"GV_X" was already declared`——換不同名稱，或第二個 `LOOP` 直接 `INTO gv_x`。
 3. **不是每個位置都能行內宣告**：`CALL FUNCTION ... IMPORTING x = DATA(y)` 不合法（Function Module 的參數一律要事先宣告好的變數），只有方法呼叫等少數位置支援。
-4. **只是少寫一行宣告，效果與傳統寫法完全相同**，不影響執行結果與效能——所以本課程前 25 講一律用傳統寫法教語法本身，行內宣告集中在這一講；讀新專案／S/4HANA 程式碼時兩種都要看得懂。
+4. **只是少寫一行宣告，效果與傳統寫法完全相同**，不影響執行結果與效能；讀新專案／S/4HANA 程式碼時兩種都要看得懂。各講義的「新式寫法對照」都用到行內宣告，第一次介紹在講義 2 §1。
 
 ## 1. 字串模板（String Template）
 
@@ -138,7 +138,7 @@ WRITE: / |成績等級：{ gv_level }|.
 
 - 傳統寫法要先宣告 `gv_level`，再寫一串 `IF ... ELSEIF ... ELSE ... ENDIF`，`COND` 把「條件判斷」跟「賦值」合成一個運算式。
 - `#` 代表型別由賦值目標（這裡是 `DATA(gv_level)` 新宣告的變數）自動推導，也可以寫明確型別如 `COND string( ... )`。
-- 沒有任何 `WHEN` 命中、又沒寫 `ELSE`：**不會報錯**，結果是目標型別的初始值（空字串/0）——這跟 `CASE` 陳述式漏掉 `WHEN OTHERS` 會 `MESSAGE`/dump 的行為不同，容易誤判成「有算到但算錯」，要小心。
+- 沒有任何 `WHEN` 命中、又沒寫 `ELSE`：**不會報錯**，結果是目標型別的初始值（空字串/0），容易誤判成「有算到但算錯」，要小心。`SWITCH` 沒寫 `ELSE` 也一樣回傳初始值；`CASE` 陳述式漏掉 `WHEN OTHERS` 則是比不中就什麼都不做，同樣不會報錯（2026-10-08 實測，`ZR_TR18_DATE_CHK`）。
 
 ## 4. SWITCH：依單一值做多分支對應（取代 CASE 陳述式賦值）
 
@@ -202,17 +202,31 @@ ENDLOOP.
 - 對照傳統寫法：`LOOP AT gt_item INTO DATA(wa) WHERE qty >= 10. APPEND wa TO gt_item_big. ENDLOOP.`
 - **關鍵限制**：`WHERE` 條件用到的欄位必須是**表格鍵值的一部分**（主鍵或用 `USING KEY` 指定的次要鍵），不能任意拿一個非鍵欄位做條件——這裡 `qty` 不是主鍵 `matnr`，所以第 5 節特地多宣告一個 `by_qty` 次要排序鍵給 `FILTER` 用。忘記這條規則、直接對非鍵欄位下 `FILTER` 會在啟用/編譯階段報錯，是這個運算子最容易踩的坑。
 
-## 8. 舊寫法 vs 新寫法對照表
+## 8. 舊寫法 vs 新寫法速查表
 
-| 需求 | 傳統寫法 | 新式寫法 |
-|---|---|---|
-| 字串拼接 | `CONCATENATE a b INTO c` | `` c = \|{ a }{ b }\| `` |
-| 依條件賦值 | `IF ... ELSEIF ... ENDIF` | `COND #( WHEN ... THEN ... )` |
-| 依值對應賦值 | `CASE v. WHEN ... ENDCASE.` | `SWITCH #( v WHEN ... THEN ... )` |
-| 建內表初始資料 | 逐筆 `APPEND VALUE #( ... )` | `VALUE tt( ( ... ) ( ... ) )` |
-| 迴圈累加 | `LOOP` + 累加變數 | `REDUCE type( INIT ... FOR ... NEXT ... )` |
-| 篩選子集合 | `LOOP ... WHERE` + `APPEND` | `FILTER #( itab USING KEY k WHERE ... )` |
-| 撈資料到內表 | `DATA` 先宣告 + `SELECT ... INTO TABLE itab` | `SELECT ... INTO TABLE @DATA(itab)` |
+「詳見」欄是該語法點的「新式寫法對照」所在位置，有語法拆解與實測說明。
+
+| 需求 | 傳統寫法 | 新式寫法 | 詳見 |
+|---|---|---|---|
+| 宣告並賦值 | `DATA v TYPE i.` `v = 3.` | `DATA(v) = 3.` | 講義 2 §1 |
+| 依條件賦值 | `IF ... ELSEIF ... ENDIF` | `COND #( WHEN ... THEN ... ELSE ... )` | 講義 17 §2 |
+| 依值對應賦值 | `CASE v. WHEN ... ENDCASE.` | `SWITCH #( v WHEN ... THEN ... ELSE ... )` | 講義 17 §3 |
+| 字串拼接 | `CONCATENATE a b INTO c` | `` c = \|{ a }{ b }\| `` 或 `c = a && b` | 講義 18 §1 |
+| 取第 n 段 | `SPLIT ... INTO v1 v2 v3` | `segment( val = s index = n sep = ',' )` | 講義 18 §2 |
+| 整理／取代／轉大寫 | `CONDENSE`、`REPLACE`、`TRANSLATE` | `condense( )`、`replace( )`、`to_upper( )` | 講義 18 §3 |
+| 填結構 | 逐欄 `gs-f = ...` | `gs = VALUE #( f1 = ... f2 = ... )` | 講義 3 §4 |
+| 同名欄位對搬 | `MOVE-CORRESPONDING a TO b` | `b = CORRESPONDING #( BASE ( b ) a )` | 講義 3 §5.3 |
+| 建內表 | 填 work area + `APPEND` | `VALUE tt( ( ... ) ( ... ) )`、`APPEND VALUE #( ... ) TO` | 講義 4 §3 |
+| LOOP 的 work area | 先 `DATA` 再 `LOOP ... INTO gs` | `LOOP ... INTO DATA(gs)` | 講義 4 §4 |
+| 讀單筆 | `READ TABLE ... WITH KEY`／`INDEX` | `itab[ key = v ]`、`itab[ n ]`、`line_exists( )` | 講義 4 §5 |
+| 篩選子集合 | `LOOP ... WHERE` + `APPEND` | `FILTER #( itab USING KEY k WHERE ... )` | 講義 5 §3、本講第 7 節 |
+| 迴圈累加 | `LOOP` + 累加變數 | `REDUCE type( INIT ... FOR ... NEXT ... )` | 講義 5 §9 |
+| Field-Symbol | 先 `FIELD-SYMBOLS` 再 `ASSIGNING` | `ASSIGNING FIELD-SYMBOL(<fs>)`、`ASSIGN itab[ ] TO FIELD-SYMBOL(<fs>)` | 講義 16 §7 |
+| 撈資料到內表 | `DATA` 先宣告 + `SELECT ... INTO TABLE itab` | `SELECT ... INTO TABLE @DATA(itab)` | 講義 6 §3.6 |
+| JOIN | 先定義接收結構 + `INTO CORRESPONDING FIELDS OF TABLE` | `INTO TABLE @DATA(itab)` | 講義 11 §2 |
+| 群組小計 | `AT NEW`／`AT END OF`／`SUM` | `LOOP AT ... GROUP BY` + `REDUCE` | 講義 20 §5.1 |
+| 聚合裡算營收 | 不支援，撈明細回來算 | `SUM( price * seatsocc )` | 講義 20a §7 |
+| 寫入資料表 | `INSERT ztab FROM gs` | `INSERT ztab FROM @gs`、`FROM @( VALUE #( ... ) )` | 講義 21 §5 |
 
 ## 9. 常見錯誤與陷阱
 

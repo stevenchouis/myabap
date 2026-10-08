@@ -127,7 +127,7 @@ SELECT SINGLE * FROM ztr23_ordh INTO gs_check WHERE ordno = 'ORD0002'.
 | Search Help Activate 失敗 | Selection Method 欄位沒有 Data Element |
 | 以為 ROLLBACK 只撤銷「最後一個」INSERT | 錯——LUW 整包處理，不分先後 |
 | Header+Detail 中間插了 COMMIT WORK | 一旦 COMMIT 就永久生效，之後 ROLLBACK 救不回來 |
-| ORDER BY 放在 INTO TABLE 後面 | 語法錯誤：要寫在 INTO TABLE **之前** |
+| `INTO TABLE` 寫在 `ORDER BY` 後面（句尾） | 傳統寫法 `INTO` 要在 `WHERE` 之前；放句尾就變新式寫法，欄位要用逗號 |
 | 外鍵設了 Screen Check 還是插入孤兒明細 | 正常——DDIC 外鍵只擋畫面，不擋 Open SQL |
 
 ---

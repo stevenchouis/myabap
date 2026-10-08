@@ -55,7 +55,7 @@ ABAP 基礎教育訓練（進階選修，全課程最後一講，接在講義 23
 - Functional Operator 五件套：`COND`／`SWITCH`／`VALUE`／`REDUCE`／`FILTER`
 
 > 這些是 7.40 之後（S/4HANA 常態）的寫法
-> 前 25 講刻意用傳統語法打底——**兩種寫法都要看得懂**
+> 各講義已在教到的地方並列「新式寫法對照」，本講是總整理與速查——**兩種寫法都要看得懂**
 
 ---
 
@@ -164,7 +164,7 @@ SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
 
 - `@DATA(gt_flight)`：不用先宣告，型別由 SELECT 清單推導；`@` 標記這是要行內宣告的宿主變數
 - `CASE ... END AS alias`：在資料庫層算好分類
-- 位置：`ORDER BY` 在 `INTO` 之前、`UP TO n ROWS` 在 `INTO` 之後
+- 位置（新式、`INTO` 放句尾）：`ORDER BY` 在 `INTO` 之前、`UP TO n ROWS` 在 `INTO` 之後
 - **規則**：欄位清單用逗號分隔 → 句中所有宿主變數都要加 `@`（混用舊式 `INTO CORRESPONDING FIELDS OF TABLE` 也一樣）
 
 ---
@@ -198,7 +198,7 @@ DATA(gv_level) = COND #( WHEN gv_score >= 90 THEN 'A'
 
 - 取代 `IF ... ELSEIF ... ENDIF` 賦值
 - `#` 由賦值目標推導型別，也可明寫 `COND string( ... )`
-- 沒有 `WHEN` 命中又沒寫 `ELSE`：**不報錯**，結果是初始值
+- 沒有 `WHEN` 命中又沒寫 `ELSE`：**不報錯**，結果是初始值（`SWITCH` 相同；`CASE` 少 `WHEN OTHERS` 也不報錯）
 
 ---
 
@@ -282,13 +282,16 @@ DATA(gt_item_big) =
 
 | 需求 | 傳統寫法 | 新式寫法 |
 |---|---|---|
-| 依條件賦值 | `IF ... ELSEIF` | `COND #( WHEN ... THEN ... )` |
-| 依值對應賦值 | `CASE v. WHEN ...` | `SWITCH #( v WHEN ... THEN ... )` |
-| 建內表初始資料 | 逐筆 `APPEND` | `VALUE tt( ( ... ) ( ... ) )` |
-| 迴圈累加 | `LOOP` + 累加變數 | `REDUCE type( INIT ... FOR ... NEXT ... )` |
-| 篩選子集合 | `LOOP ... WHERE` + `APPEND` | `FILTER #( itab USING KEY k WHERE ... )` |
-| 撈資料到內表 | `DATA` 宣告 + `SELECT ... INTO TABLE itab` | `SELECT ... INTO TABLE @DATA(itab)` |
-| 字串拼接 | `CONCATENATE a b INTO c` | 字串模板 `{ a }{ b }` |
+| 宣告並賦值 | `DATA v TYPE i.` `v = 3.` | `DATA(v) = 3.`（講義 2） |
+| 依條件／依值賦值 | `IF`／`CASE` | `COND`／`SWITCH`（講義 17） |
+| 字串拼接、函式 | `CONCATENATE`、`CONDENSE` | 字串模板、`condense( )`（講義 18） |
+| 填結構、對搬 | 逐欄、`MOVE-CORRESPONDING` | `VALUE #( )`、`CORRESPONDING #( )`（講義 3） |
+| 建內表、讀單筆 | `APPEND`、`READ TABLE` | `VALUE tt( ( ) )`、`itab[ ]`（講義 4） |
+| 篩選、累加 | `LOOP ... WHERE`、累加變數 | `FILTER`、`REDUCE`（講義 5） |
+| Field-Symbol | 先 `FIELD-SYMBOLS` | `FIELD-SYMBOL( )`（講義 16） |
+| SELECT／JOIN | 先宣告 + `INTO TABLE itab` | `INTO TABLE @DATA(itab)`（講義 6、11） |
+| 群組小計 | `AT NEW`／`SUM` | `LOOP AT ... GROUP BY`（講義 20） |
+| 寫入資料表 | `INSERT ztab FROM gs` | `FROM @gs`、`FROM @( VALUE #( ) )`（講義 21） |
 
 ---
 
@@ -303,7 +306,7 @@ DATA(gt_item_big) =
 | `COND`／`SWITCH` 結果是空值／0 | 沒寫 `ELSE`，未命中回傳初始值，不報錯 |
 | 字串模板 `{ }` 內方法呼叫錯誤 | 只能單一運算式或 `RETURNING` 方法 |
 | `VALUE` 建 `SORTED TABLE` dump | 資料順序不符主鍵排序 |
-| `ORDER BY`／`UP TO` 位置錯誤 | `ORDER BY` 在 `INTO` 前，`UP TO` 在 `INTO` 後 |
+| `ORDER BY`／`UP TO` 位置錯誤 | 新式 `INTO` 放句尾時：`ORDER BY` 在 `INTO` 前，`UP TO` 在 `INTO` 後 |
 
 ---
 

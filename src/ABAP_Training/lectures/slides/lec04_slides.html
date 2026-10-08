@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="14">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>三個角色的分工：資料庫表、internal table（多筆）、work area（一筆）</li>
@@ -187,7 +187,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="14">
 <h2 id="1-%E4%B8%89%E5%80%8B%E8%A7%92%E8%89%B2">1. 三個角色</h2>
 <table>
 <thead>
@@ -278,7 +278,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="14">
 <h2 id="2-%E5%AE%A3%E5%91%8A-internal-table">2. 宣告 internal table</h2>
 <p>一列的長相（結構）→ 很多列（表格型別）→ DATA 出實體：</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TYPES: BEGIN OF ty_student,
@@ -370,7 +370,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="14">
 <h2 id="3-append%E5%8A%A0%E4%B8%80%E7%AD%86%E5%88%B0%E8%A1%A8%E5%B0%BE">3. APPEND：加一筆到表尾</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">gs_student-id = 'S0001'. gs_student-name = '王小明'.
 gs_student-score = 85.
@@ -387,7 +387,7 @@ APPEND gs_student TO gt_students.
 → 必要時先 <code>CLEAR gs_student.</code></li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -414,7 +414,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="6" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="6" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -441,18 +441,23 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="4-loop-at--into%E9%80%90%E7%AD%86%E8%99%95%E7%90%86">4. LOOP AT ... INTO：逐筆處理</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">LOOP AT gt_students INTO gs_student.
-  WRITE: / sy-tabix, gs_student-id, gs_student-score.
-ENDLOOP.
+;" data-marpit-pagination-total="14">
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7value-%E5%BB%BA%E8%A1%A8">新式寫法對照：<code>VALUE</code> 建表</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統：填 work area，再 APPEND
+gs_student-id = 'S0001'. gs_student-name = '王小明'. gs_student-score = 85.
+APPEND gs_student TO gt_students.
+
+* 新式一：一次建好整張表（原內容被取代）
+gt_students = VALUE #( ( id = 'S0001' name = '王小明' score = 85 )
+                       ( id = 'S0002' name = '李小美' score = 92 ) ).
+
+* 新式二：加一筆到表尾，不需要 work area
+APPEND VALUE #( id = 'S0003' name = '陳大文' score = 67 ) TO gt_students.
 </code></pre>
 <ul>
-<li>每圈把當前列<strong>複製</strong>進 work area<br />
-→ 改 <code>gs_student</code> 不會改到表格（要改用 MODIFY／ASSIGNING）</li>
-<li><code>sy-tabix</code>：目前第幾筆（1 起算）</li>
-<li>可加條件：<code>LOOP AT ... WHERE score &gt;= 60.</code></li>
-<li>一筆都沒迴圈到 → ENDLOOP 後 <code>sy-subrc &lt;&gt; 0</code></li>
+<li><strong>每一列一組小括號</strong>；講義 3 沒有內層括號的是結構</li>
+<li>行內宣告時寫明表格型別：<code>DATA(gt) = VALUE tt_student( ... ).</code></li>
+<li>沒有 work area，就沒有「上一筆殘留值」</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-theme="default" data-style="section {
@@ -509,21 +514,19 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="5-read-table%E8%AE%80%E5%96%AE%E7%AD%86">5. READ TABLE：讀單筆</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 方式一：WITH KEY——找第一筆符合的
-READ TABLE gt_students INTO gs_student WITH KEY id = 'S0002'.
-IF sy-subrc = 0.
-  WRITE: / '找到：', gs_student-name.
-ENDIF.
-
-* 方式二：INDEX——直接讀第 n 筆
-READ TABLE gt_students INTO gs_student INDEX 3.
-
-* 只想知道「有沒有」：不搬資料、較快，位置在 sy-tabix
-READ TABLE gt_students TRANSPORTING NO FIELDS
-     WITH KEY id = 'S0002'.
+;" data-marpit-pagination-total="14">
+<h2 id="4-loop-at--into%E9%80%90%E7%AD%86%E8%99%95%E7%90%86">4. LOOP AT ... INTO：逐筆處理</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">LOOP AT gt_students INTO gs_student.
+  WRITE: / sy-tabix, gs_student-id, gs_student-score.
+ENDLOOP.
 </code></pre>
+<ul>
+<li>每圈把當前列<strong>複製</strong>進 work area<br />
+→ 改 <code>gs_student</code> 不會改到表格（要改用 MODIFY／ASSIGNING）</li>
+<li><code>sy-tabix</code>：目前第幾筆（1 起算）</li>
+<li>可加條件：<code>LOOP AT ... WHERE score &gt;= 60.</code></li>
+<li>一筆都沒迴圈到 → ENDLOOP 後 <code>sy-subrc &lt;&gt; 0</code></li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -579,20 +582,23 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
-<h2 id="6-%E9%90%B5%E5%BE%8B%E6%AA%A2%E6%9F%A5-sy-subrc">6. 鐵律：檢查 sy-subrc</h2>
-<p>READ 找不到時<strong>不報錯、不當掉</strong>，且 <strong>work area 保持原內容</strong>：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">READ TABLE gt_students INTO gs_student
-     WITH KEY id = 'S0002'.   &quot; 找到，gs 是李小美
-READ TABLE gt_students INTO gs_student
-     WITH KEY id = 'S9999'.   &quot; 沒找到！
-WRITE gs_student-name.        &quot; 印出來還是「李小美」——殘留值！
+;" data-marpit-pagination-total="14">
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7into-data">新式寫法對照：<code>INTO DATA( )</code></h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統
+DATA gs_student TYPE ty_student.
+LOOP AT gt_students INTO gs_student.
+  ...
+ENDLOOP.
+
+* 新式：在 LOOP 這裡才宣告
+LOOP AT gt_students INTO DATA(gs_student).
+  ...
+ENDLOOP.
 </code></pre>
-<p>「查無資料卻顯示別人的資料」的標準成因</p>
-<blockquote>
-<p>反射動作：<strong>READ TABLE 下一行永遠是 <code>IF sy-subrc = 0.</code></strong><br />
-同理適用 SELECT、CALL FUNCTION…</p>
-</blockquote>
+<ul>
+<li>型別自動取內表的列型別，效果相同</li>
+<li>同名只能行內宣告一次：第二個 <code>LOOP</code> 換名稱，或直接 <code>INTO gs_student</code></li>
+</ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -648,7 +654,219 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="14">
+<h2 id="5-read-table%E8%AE%80%E5%96%AE%E7%AD%86">5. READ TABLE：讀單筆</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 方式一：WITH KEY——找第一筆符合的
+READ TABLE gt_students INTO gs_student WITH KEY id = 'S0002'.
+IF sy-subrc = 0.
+  WRITE: / '找到：', gs_student-name.
+ENDIF.
+
+* 方式二：INDEX——直接讀第 n 筆
+READ TABLE gt_students INTO gs_student INDEX 3.
+
+* 只想知道「有沒有」：不搬資料、較快，位置在 sy-tabix
+READ TABLE gt_students TRANSPORTING NO FIELDS
+     WITH KEY id = 'S0002'.
+</code></pre>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" class="compact" data-marpit-pagination="10" style="--paginate:true;--class:compact;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="14">
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7%E8%A1%A8%E6%A0%BC%E9%81%8B%E7%AE%97%E5%BC%8F-itab">新式寫法對照：表格運算式 <code>itab[ ]</code></h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統
+READ TABLE gt_students INTO gs_student WITH KEY id = 'S0002'.
+READ TABLE gt_students INTO gs_student INDEX 3.
+READ TABLE gt_students TRANSPORTING NO FIELDS WITH KEY id = 'S0002'.
+
+* 新式
+IF line_exists( gt_students[ id = 'S0002' ] ).    &quot; 先確認有這筆
+  gv_name = gt_students[ id = 'S0002' ]-name.     &quot; 直接取欄位
+ENDIF.
+gs_student = gt_students[ 3 ].                     &quot; 第 3 列
+gs_student = VALUE #( gt_students[ id = 'S9999' ] OPTIONAL ).
+</code></pre>
+<ul>
+<li><strong>找不到不設 <code>sy-subrc</code>，而是例外 <code>CX_SY_ITAB_LINE_NOT_FOUND</code></strong>（沒處理就 dump）</li>
+<li>先用 <code>line_exists( )</code> 判斷，或用 <code>VALUE #( ... OPTIONAL )</code> 找不到回空列</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="11" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="14">
+<h2 id="6-%E9%90%B5%E5%BE%8B%E6%AA%A2%E6%9F%A5-sy-subrc">6. 鐵律：檢查 sy-subrc</h2>
+<p>READ 找不到時<strong>不報錯、不當掉</strong>，且 <strong>work area 保持原內容</strong>：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">READ TABLE gt_students INTO gs_student
+     WITH KEY id = 'S0002'.   &quot; 找到，gs 是李小美
+READ TABLE gt_students INTO gs_student
+     WITH KEY id = 'S9999'.   &quot; 沒找到！
+WRITE gs_student-name.        &quot; 印出來還是「李小美」——殘留值！
+</code></pre>
+<p>「查無資料卻顯示別人的資料」的標準成因</p>
+<blockquote>
+<p>反射動作：<strong>READ TABLE 下一行永遠是 <code>IF sy-subrc = 0.</code></strong><br />
+同理適用 SELECT、CALL FUNCTION…</p>
+</blockquote>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="12" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="14">
 <h2 id="7-clear--refresh--free">7. CLEAR / REFRESH / FREE</h2>
 <table>
 <thead>
@@ -679,7 +897,7 @@ footer { color: #999; }
 <p>日常用 <code>CLEAR</code> 就夠<br />
 <code>REFRESH</code> 是舊寫法，讀舊程式會遇到，效果同 <code>CLEAR gt.</code></p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -706,7 +924,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="10" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" data-marpit-pagination="13" style="--paginate:true;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -733,7 +951,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="14">
 <h2 id="8-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">8. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -766,7 +984,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -793,7 +1011,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="11" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="14" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -820,7 +1038,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="11">
+;" data-marpit-pagination-total="14">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex04</strong>：</p>
 <p>建學生內表、APPEND 三筆、LOOP 輸出、<br />

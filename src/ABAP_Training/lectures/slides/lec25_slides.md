@@ -273,6 +273,19 @@ key carrid : s_carr_id not null
 
 ---
 
+## 每張 Z 表第一欄：`MANDT`
+
+- 型別用標準 Data Element **`MANDT`**（Domain `MANDT`、`CLNT` 長度 3、Value Table `T000`）
+- 第一個 Key 欄位是 `CLNT` → **client 相關表**：Open SQL、SE16N、SM30 自動只處理登入的 client
+- 沒放：表變成跨 client 共用，別的 client 也看得到、改得到你的資料
+- 一定要放在**第一欄**，放到後面系統不認
+
+```abap
+key mandt  : mandt not null;
+```
+
+---
+
 ## 6.4 SM30 驗證：免費拿到三樣東西
 
 **先在 SE80 建 Function Group `ZFG_TR25`**（TMG 要放進已存在的 FG）

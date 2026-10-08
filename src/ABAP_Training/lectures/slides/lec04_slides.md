@@ -118,6 +118,29 @@ APPEND 是**複製**進表尾：
 
 ---
 
+<!-- _class: compact -->
+
+## 新式寫法對照：`VALUE` 建表
+
+```abap
+* 傳統：填 work area，再 APPEND
+gs_student-id = 'S0001'. gs_student-name = '王小明'. gs_student-score = 85.
+APPEND gs_student TO gt_students.
+
+* 新式一：一次建好整張表（原內容被取代）
+gt_students = VALUE #( ( id = 'S0001' name = '王小明' score = 85 )
+                       ( id = 'S0002' name = '李小美' score = 92 ) ).
+
+* 新式二：加一筆到表尾，不需要 work area
+APPEND VALUE #( id = 'S0003' name = '陳大文' score = 67 ) TO gt_students.
+```
+
+- **每一列一組小括號**；講義 3 沒有內層括號的是結構
+- 行內宣告時寫明表格型別：`DATA(gt) = VALUE tt_student( ... ).`
+- 沒有 work area，就沒有「上一筆殘留值」
+
+---
+
 ## 4. LOOP AT ... INTO：逐筆處理
 
 ```abap
@@ -131,6 +154,26 @@ ENDLOOP.
 - `sy-tabix`：目前第幾筆（1 起算）
 - 可加條件：`LOOP AT ... WHERE score >= 60.`
 - 一筆都沒迴圈到 → ENDLOOP 後 `sy-subrc <> 0`
+
+---
+
+## 新式寫法對照：`INTO DATA( )`
+
+```abap
+* 傳統
+DATA gs_student TYPE ty_student.
+LOOP AT gt_students INTO gs_student.
+  ...
+ENDLOOP.
+
+* 新式：在 LOOP 這裡才宣告
+LOOP AT gt_students INTO DATA(gs_student).
+  ...
+ENDLOOP.
+```
+
+- 型別自動取內表的列型別，效果相同
+- 同名只能行內宣告一次：第二個 `LOOP` 換名稱，或直接 `INTO gs_student`
 
 ---
 
@@ -150,6 +193,29 @@ READ TABLE gt_students INTO gs_student INDEX 3.
 READ TABLE gt_students TRANSPORTING NO FIELDS
      WITH KEY id = 'S0002'.
 ```
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：表格運算式 `itab[ ]`
+
+```abap
+* 傳統
+READ TABLE gt_students INTO gs_student WITH KEY id = 'S0002'.
+READ TABLE gt_students INTO gs_student INDEX 3.
+READ TABLE gt_students TRANSPORTING NO FIELDS WITH KEY id = 'S0002'.
+
+* 新式
+IF line_exists( gt_students[ id = 'S0002' ] ).    " 先確認有這筆
+  gv_name = gt_students[ id = 'S0002' ]-name.     " 直接取欄位
+ENDIF.
+gs_student = gt_students[ 3 ].                     " 第 3 列
+gs_student = VALUE #( gt_students[ id = 'S9999' ] OPTIONAL ).
+```
+
+- **找不到不設 `sy-subrc`，而是例外 `CX_SY_ITAB_LINE_NOT_FOUND`**（沒處理就 dump）
+- 先用 `line_exists( )` 判斷，或用 `VALUE #( ... OPTIONAL )` 找不到回空列
 
 ---
 

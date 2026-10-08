@@ -133,7 +133,7 @@ footer { color: #999; }
 </ul>
 <blockquote>
 <p>這些是 7.40 之後（S/4HANA 常態）的寫法<br />
-前 25 講刻意用傳統語法打底——<strong>兩種寫法都要看得懂</strong></p>
+各講義已在教到的地方並列「新式寫法對照」，本講是總整理與速查——<strong>兩種寫法都要看得懂</strong></p>
 </blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="3" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
@@ -585,7 +585,7 @@ footer { color: #999; }
 <ul>
 <li><code>@DATA(gt_flight)</code>：不用先宣告，型別由 SELECT 清單推導；<code>@</code> 標記這是要行內宣告的宿主變數</li>
 <li><code>CASE ... END AS alias</code>：在資料庫層算好分類</li>
-<li>位置：<code>ORDER BY</code> 在 <code>INTO</code> 之前、<code>UP TO n ROWS</code> 在 <code>INTO</code> 之後</li>
+<li>位置（新式、<code>INTO</code> 放句尾）：<code>ORDER BY</code> 在 <code>INTO</code> 之前、<code>UP TO n ROWS</code> 在 <code>INTO</code> 之後</li>
 <li><strong>規則</strong>：欄位清單用逗號分隔 → 句中所有宿主變數都要加 <code>@</code>（混用舊式 <code>INTO CORRESPONDING FIELDS OF TABLE</code> 也一樣）</li>
 </ul>
 </section>
@@ -720,7 +720,7 @@ footer { color: #999; }
 <ul>
 <li>取代 <code>IF ... ELSEIF ... ENDIF</code> 賦值</li>
 <li><code>#</code> 由賦值目標推導型別，也可明寫 <code>COND string( ... )</code></li>
-<li>沒有 <code>WHEN</code> 命中又沒寫 <code>ELSE</code>：<strong>不報錯</strong>，結果是初始值</li>
+<li>沒有 <code>WHEN</code> 命中又沒寫 <code>ELSE</code>：<strong>不報錯</strong>，結果是初始值（<code>SWITCH</code> 相同；<code>CASE</code> 少 <code>WHEN OTHERS</code> 也不報錯）</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
@@ -1079,39 +1079,54 @@ footer { color: #999; }
 </thead>
 <tbody>
 <tr>
-<td>依條件賦值</td>
-<td><code>IF ... ELSEIF</code></td>
-<td><code>COND #( WHEN ... THEN ... )</code></td>
+<td>宣告並賦值</td>
+<td><code>DATA v TYPE i.</code> <code>v = 3.</code></td>
+<td><code>DATA(v) = 3.</code>（講義 2）</td>
 </tr>
 <tr>
-<td>依值對應賦值</td>
-<td><code>CASE v. WHEN ...</code></td>
-<td><code>SWITCH #( v WHEN ... THEN ... )</code></td>
+<td>依條件／依值賦值</td>
+<td><code>IF</code>／<code>CASE</code></td>
+<td><code>COND</code>／<code>SWITCH</code>（講義 17）</td>
 </tr>
 <tr>
-<td>建內表初始資料</td>
-<td>逐筆 <code>APPEND</code></td>
-<td><code>VALUE tt( ( ... ) ( ... ) )</code></td>
+<td>字串拼接、函式</td>
+<td><code>CONCATENATE</code>、<code>CONDENSE</code></td>
+<td>字串模板、<code>condense( )</code>（講義 18）</td>
 </tr>
 <tr>
-<td>迴圈累加</td>
-<td><code>LOOP</code> + 累加變數</td>
-<td><code>REDUCE type( INIT ... FOR ... NEXT ... )</code></td>
+<td>填結構、對搬</td>
+<td>逐欄、<code>MOVE-CORRESPONDING</code></td>
+<td><code>VALUE #( )</code>、<code>CORRESPONDING #( )</code>（講義 3）</td>
 </tr>
 <tr>
-<td>篩選子集合</td>
-<td><code>LOOP ... WHERE</code> + <code>APPEND</code></td>
-<td><code>FILTER #( itab USING KEY k WHERE ... )</code></td>
+<td>建內表、讀單筆</td>
+<td><code>APPEND</code>、<code>READ TABLE</code></td>
+<td><code>VALUE tt( ( ) )</code>、<code>itab[ ]</code>（講義 4）</td>
 </tr>
 <tr>
-<td>撈資料到內表</td>
-<td><code>DATA</code> 宣告 + <code>SELECT ... INTO TABLE itab</code></td>
-<td><code>SELECT ... INTO TABLE @DATA(itab)</code></td>
+<td>篩選、累加</td>
+<td><code>LOOP ... WHERE</code>、累加變數</td>
+<td><code>FILTER</code>、<code>REDUCE</code>（講義 5）</td>
 </tr>
 <tr>
-<td>字串拼接</td>
-<td><code>CONCATENATE a b INTO c</code></td>
-<td>字串模板 <code>{ a }{ b }</code></td>
+<td>Field-Symbol</td>
+<td>先 <code>FIELD-SYMBOLS</code></td>
+<td><code>FIELD-SYMBOL( )</code>（講義 16）</td>
+</tr>
+<tr>
+<td>SELECT／JOIN</td>
+<td>先宣告 + <code>INTO TABLE itab</code></td>
+<td><code>INTO TABLE @DATA(itab)</code>（講義 6、11）</td>
+</tr>
+<tr>
+<td>群組小計</td>
+<td><code>AT NEW</code>／<code>SUM</code></td>
+<td><code>LOOP AT ... GROUP BY</code>（講義 20）</td>
+</tr>
+<tr>
+<td>寫入資料表</td>
+<td><code>INSERT ztab FROM gs</code></td>
+<td><code>FROM @gs</code>、<code>FROM @( VALUE #( ) )</code>（講義 21）</td>
 </tr>
 </tbody>
 </table>
@@ -1202,7 +1217,7 @@ footer { color: #999; }
 </tr>
 <tr>
 <td><code>ORDER BY</code>／<code>UP TO</code> 位置錯誤</td>
-<td><code>ORDER BY</code> 在 <code>INTO</code> 前，<code>UP TO</code> 在 <code>INTO</code> 後</td>
+<td>新式 <code>INTO</code> 放句尾時：<code>ORDER BY</code> 在 <code>INTO</code> 前，<code>UP TO</code> 在 <code>INTO</code> 後</td>
 </tr>
 </tbody>
 </table>

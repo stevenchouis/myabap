@@ -75,6 +75,22 @@ DELETE ADJACENT DUPLICATES FROM gt_students COMPARING id.
 
 不加 COMPARING 則比整列。忘記先 SORT 是經典錯誤：不相鄰的重複不會被刪。
 
+**新式寫法對照（7.40 之後）：`FILTER`，篩出一張新表**
+
+`DELETE ... WHERE` 是把原表裡不要的刪掉；如果原表要保留、只想**另外得到一張符合條件的新表**，傳統寫法是 `LOOP ... WHERE` 再逐筆 `APPEND`，新式寫法是 `FILTER`：
+
+```abap
+* 傳統寫法
+LOOP AT gt_item INTO gs_item WHERE qty >= 10.
+  APPEND gs_item TO gt_item_big.
+ENDLOOP.
+
+* 新式寫法
+gt_item_big = FILTER #( gt_item USING KEY by_qty WHERE qty >= 10 ).
+```
+
+`FILTER` 有一個關鍵限制：`WHERE` 用到的欄位**必須是表格鍵**（SORTED／HASHED 表的主鍵，或用 `USING KEY` 指定的次要鍵），不能拿任意欄位當條件，否則編譯錯誤。上例的 `by_qty` 是額外宣告的次要鍵，宣告方式與完整範例見講義 26 第 7 節。條件欄位不是鍵時，傳統的 `LOOP ... WHERE` 反而比較單純。
+
 > 注意：LOOP 進行中 DELETE 同一張表雖然合法（刪目前列可用 `DELETE gt_students.` 搭配隱含 index），但容易寫出難懂的邏輯——初學建議「先 LOOP 蒐集、迴圈外再刪」或直接用 `DELETE ... WHERE`。
 
 ## 4. INSERT：插在指定位置
@@ -236,9 +252,32 @@ LOOP AT gs_order-items INTO gs_item.
 ENDLOOP.
 ```
 
-> **補充：行內宣告（Inline Declaration）新寫法**：7.40 之後，`LOOP AT ... INTO` 的 work area 可以在使用處直接宣告，寫成 `LOOP AT gs_order-items INTO DATA(gs_item).`——省掉上面 `gs_item TYPE ty_item` 那一行，型別由內表的列自動推導，效果完全相同。本課程前半段一律用「先宣告再使用」的傳統寫法，行內宣告留到講義 26 系統性教；讀到 `INTO DATA(...)` 時，知道它等於「宣告＋LOOP」合在一起即可。
+**新式寫法對照（7.40 之後）：巢狀 `VALUE`、`INTO DATA( )`、`REDUCE`**
 
-> **補充：`VALUE #( ... )` 新寫法**：7.40 之後，塞資料進內表可以不用先填 work area，直接寫 `APPEND VALUE #( posnr = 10 matnr = 'MAT-A' qty = 5 ) TO gs_order-items.`——一句話同時「建出一列＋APPEND」，`#` 表示型別由目標（`gs_order-items` 的列）自動推導，效果與上面兩行（填欄位＋APPEND）完全相同。`VALUE` 的完整用法留到講義 26。
+```abap
+* 新式寫法：VALUE 可以巢狀，連內層的 items 一起建好
+gs_order = VALUE #( ordno    = 'SO0001'
+                    customer = 'ACME'
+                    items    = VALUE #( ( posnr = 10 matnr = 'MAT-A' qty = 5 )
+                                        ( posnr = 20 matnr = 'MAT-B' qty = 3 ) ) ).
+
+LOOP AT gs_order-items INTO DATA(gs_item).      " work area 在這裡才宣告
+  WRITE: / gs_order-ordno, gs_item-posnr, gs_item-matnr, gs_item-qty.
+ENDLOOP.
+
+* REDUCE：把整張表濃縮成一個值，例如加總數量
+DATA(gv_total_qty) = REDUCE i( INIT sum = 0
+                               FOR item IN gs_order-items
+                               NEXT sum = sum + item-qty ).
+```
+
+語法拆解：
+
+- 巢狀 `VALUE`：外層填結構的欄位（講義 3），其中 `items` 欄位是一張表，所以它的值又是一個 `VALUE #( ( 一列 ) ( 一列 ) )`（講義 4）。
+- `REDUCE 型別( INIT 累加變數 = 初始值 FOR 變數 IN 內表 NEXT 累加變數 = 新值 )`：`INIT` 宣告累加用的變數並給初始值；`FOR ... IN` 相當於 `LOOP AT`，每一列放進 `item`；`NEXT` 是每一列要怎麼更新累加變數；最後回傳累加變數的值。
+- 傳統寫法要「宣告累加變數、`LOOP`、在迴圈裡加」三段；`REDUCE` 寫成一個運算式。邏輯複雜（中途 `EXIT`、多層判斷）時，傳統 `LOOP` 比較好讀，不必硬用。
+
+練習 5 的新式寫法版本見答案程式 `ZR_TR05_ITAB_ADVANCED_NEW`（輸出跟原版逐行比對相同），Deep Structure 那段就是用巢狀 `VALUE` 建資料、`REDUCE` 算小考總分。
 
 **跟講義 3 巢狀結構的差別**：巢狀結構是「欄位裡包一個結構」（1 對 1）；Deep Structure 是「欄位裡包一整張表」（1 對多）——正好對應「訂單主檔對明細是 1 對多」的業務關係，不用拆成兩張表也能表達完整的階層關係。
 

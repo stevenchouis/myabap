@@ -42,3 +42,5 @@ INDEX 3 讀到的是： 陳大文
 ## 答案
 
 見 `zr_tr04_itab_basics.prog.abap`（SAP 端程式 `ZR_TR04_ITAB_BASICS`）。
+
+新式寫法版本見 `zr_tr04_itab_basics_new.prog.abap`（SAP 端程式 `ZR_TR04_ITAB_BASICS_NEW`），只有最後一行不同（表格運算式不設 `sy-subrc`，見講義 4 §5）；新舊寫法的對照說明見講義 4 §3～§5的「新式寫法對照」。

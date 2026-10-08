@@ -79,6 +79,32 @@ DATA: gv_qty   TYPE i,
 
 <!-- _class: compact -->
 
+## 新式寫法對照：行內宣告 `DATA( )`
+
+```abap
+* 傳統：先宣告，再賦值
+DATA gv_count TYPE i.
+gv_count = 3.
+
+* 新式（7.40 之後）：第一次賦值時順便宣告
+DATA(gv_count) = 3.
+```
+
+型別**照抄右邊的值**：
+
+| 寫法 | 推導出的型別 |
+|---|---|
+| `DATA(gv_n) = 3.` | `i` |
+| `DATA(gv_s) = 'TR02'.` | `c LENGTH 4`（之後放更長會被截斷） |
+| `` DATA(gv_s) = `ABAP`. `` | `string` |
+| `DATA(gv_d) = sy-datum.` | 字典型別 `SYDATUM`，`WRITE` 印 `2026/10/08` |
+
+金額（`p` 帶小數）仍要先宣告；同名只能行內宣告一次
+
+---
+
+<!-- _class: compact -->
+
 ## 2. 內建資料型別總表
 
 | 型別 | 名稱 | 初始值 | 用途與注意 |

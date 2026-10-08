@@ -180,7 +180,27 @@ The elements in the "SELECT LIST" list must be separated using commas.
 - 只聚合單一欄位（如 `SUM( seatsocc )`、`SUM( paymentsum )`）
 - 撈回明細內表，用講義 20 的 Control Break 算
 
-新式寫法怎麼在資料庫內直接算營收，留到講義 26 對照。
+**新式寫法對照（7.40 之後）：聚合裡放算式**
+
+改成新式寫法（講義 6 §3.6），聚合函數裡就能放算式，營收直接在資料庫算好：
+
+```abap
+SELECT carrid,
+       SUM( price * seatsocc ) AS revenue
+  FROM sflight
+  GROUP BY carrid
+  ORDER BY carrid
+  INTO TABLE @DATA(gt_rev).
+```
+
+本講其他寫法換成新式語法時的規則：
+
+- `GROUP BY`、`ORDER BY` 的多個欄位用逗號：`GROUP BY c~carrid, c~carrname`。
+- `INTO` 放在 `ORDER BY` 之後；`HAVING` 在 `GROUP BY` 之後、`ORDER BY` 之前。
+- 一次接進多個變數：`INTO ( @gv_cnt, @gv_sum )`，括號裡每個變數都要加 `@`。
+- 子查詢的寫法不變，只有外層 `SELECT` 要照新式規則。
+
+練習 20a 的新式寫法版本見答案程式 `ZR_TR20A_SQL_AGG_NEW`（輸出跟原版逐行比對相同），第 5 段「內表累加」順便改用 `REDUCE ... FOR d IN gt_det WHERE ( carrid = ... )`，只加符合條件的列。
 
 ## 8. 選擇準則：資料庫算 vs 內表算
 

@@ -191,7 +191,25 @@ The elements in the "SELECT LIST" list must be separated using commas.
 算式屬於**新式 Open SQL**，整句要改新式寫法
 
 - 傳統寫法：只聚合單一欄位，或撈明細用 Control Break
-- 新式寫法留到講義 26
+- 新式寫法見下一頁
+
+---
+
+## 新式寫法對照：聚合裡放算式
+
+```abap
+SELECT carrid,
+       SUM( price * seatsocc ) AS revenue
+  FROM sflight
+  GROUP BY carrid
+  ORDER BY carrid
+  INTO TABLE @DATA(gt_rev).
+```
+
+- `GROUP BY`、`ORDER BY` 多欄用逗號
+- 順序：`GROUP BY` → `HAVING` → `ORDER BY` → `INTO`
+- 多個變數：`INTO ( @gv_cnt, @gv_sum )`
+- 子查詢寫法不變，只有外層照新式規則
 
 ---
 

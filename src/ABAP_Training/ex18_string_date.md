@@ -53,3 +53,5 @@ NO-GAPS 後：[ABAPisfun]
 ## 答案
 
 見 `zr_tr18_string_date.prog.abap`（SAP 端程式 `ZR_TR18_STRING_DATE`）。
+
+新式寫法版本見 `zr_tr18_string_date_new.prog.abap`（SAP 端程式 `ZR_TR18_STRING_DATE_NEW`），輸出跟原版逐行比對相同；新舊寫法的對照說明見講義 18 §1～§3的「新式寫法對照」。

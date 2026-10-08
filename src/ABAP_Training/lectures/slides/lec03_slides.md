@@ -130,6 +130,24 @@ WRITE: / gs_student-id, gs_student-name, gs_student-score.
 
 ---
 
+## 新式寫法對照：`VALUE #( )` 填結構
+
+```abap
+* 傳統：一個欄位一行
+gs_student-id    = 'S0001'.
+gs_student-name  = '王小明'.
+gs_student-score = 85.
+
+* 新式：一次填好整個結構
+gs_student = VALUE #( id = 'S0001' name = '王小明' score = 85 ).
+```
+
+- 欄位之間用空白，不用逗號；`#` 型別取自左邊
+- **沒寫到的欄位是初始值**：等於先 `CLEAR` 再逐欄賦值
+- 只改一個欄位、其他保留 → 還是用 `gs_student-score = 90.`
+
+---
+
 ## 5. 結構的整體操作
 
 ```abap
@@ -166,6 +184,28 @@ MOVE-CORRESPONDING gs_full TO gs_lite.   " 只搬同名欄位 id、name
 - 目的端沒有的欄位 → 丟掉
 - 目的端多的欄位 → 不動
 - 欄位名拼錯 → **默默不搬、不報錯**，要自己核對
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：`CORRESPONDING #( )`
+
+```abap
+MOVE-CORRESPONDING gs_full TO gs_lite.                    " 傳統
+gs_lite = CORRESPONDING #( gs_full ).                     " 新式
+gs_lite = CORRESPONDING #( BASE ( gs_lite ) gs_full ).    " 新式＋保留原值
+```
+
+**兩者不完全相同**：目的端多一個 `memo` 欄位、原值 `KEEP`（實測）
+
+| 寫法 | `memo` |
+|---|---|
+| `MOVE-CORRESPONDING` | 保留 `KEEP` |
+| `CORRESPONDING #( )` | **被清成空白** |
+| `CORRESPONDING #( BASE ( gs_lite ) ... )` | 保留 `KEEP` |
+
+`CORRESPONDING #( )` 是先建一筆新的再整筆賦值；舊程式改寫時要注意
 
 ---
 

@@ -45,3 +45,5 @@ SELECT SINGLE 找到航空公司： AA
 ## 答案
 
 見 `zr_tr06_sap_table.prog.abap`（SAP 端程式 `ZR_TR06_SAP_TABLE`）。
+
+新式寫法版本見 `zr_tr06_sap_table_new.prog.abap`（SAP 端程式 `ZR_TR06_SAP_TABLE_NEW`），輸出跟原版逐行比對相同；新舊寫法的對照說明見講義 6 §3.6的「新式寫法對照」。

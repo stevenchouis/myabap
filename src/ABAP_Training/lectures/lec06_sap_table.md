@@ -283,7 +283,46 @@ ENDSELECT.
 
 **`ORDER BY` 還是講義 5 的 `SORT`**：資料撈回來就要照這個順序用，直接 `ORDER BY`；撈回來之後還要依不同欄位重排好幾次，或要排序的欄位是 ABAP 算出來的，就撈回內表再 `SORT`。
 
-> 以上四種寫法 2026-09-30 用驗證程式 `ZR_TR06_ORDERBY_CHK` 實跑確認。多個排序欄位用空格分隔是傳統寫法；講義 26 的新式寫法改用逗號分隔。
+> 以上四種寫法 2026-09-30 用驗證程式 `ZR_TR06_ORDERBY_CHK` 實跑確認。多個排序欄位用空格分隔是傳統寫法；新式寫法改用逗號分隔（下一節）。
+
+### 3.6 新式寫法對照（7.40 之後）：New Open SQL
+
+本節前面都是傳統寫法。7.40 之後的 SELECT 有一套新寫法，新專案與 S/4HANA 程式幾乎都用它：
+
+```abap
+* 傳統寫法
+DATA gt_carriers TYPE STANDARD TABLE OF scarr.
+SELECT * FROM scarr
+  INTO TABLE gt_carriers
+  UP TO 10 ROWS
+  WHERE currcode = gv_curr
+  ORDER BY carrid.
+
+DATA gv_carrid TYPE scarr-carrid.
+SELECT SINGLE carrid FROM scarr INTO gv_carrid WHERE carrid = 'AA'.
+
+* 新式寫法
+SELECT * FROM scarr
+  WHERE currcode = @gv_curr
+  ORDER BY carrid
+  INTO TABLE @DATA(gt_carriers)
+  UP TO 10 ROWS.
+
+SELECT SINGLE carrid FROM scarr
+  WHERE carrid = 'AA'
+  INTO @DATA(gv_carrid).
+```
+
+差別有四個：
+
+1. **程式變數前面加 `@`**。一句 SELECT 裡同時有兩種名稱：資料庫欄位（如 `currcode`）和程式變數（如 `gv_curr`）。從 ABAP 程式傳進 SQL 的變數叫**宿主變數（Host Variable）**；傳統寫法靠位置猜誰是誰，新式寫法一律在宿主變數前加 `@`，沒有 `@` 的就是資料庫欄位。`WHERE`、`INTO` 用到的變數、`SELECT-OPTIONS`（`IN @s_carrid`）都算宿主變數。
+2. **欄位清單用逗號分隔**：`SELECT carrid, carrname FROM ...`，`ORDER BY carrid, connid` 也一樣。
+3. **`INTO` 放在最後**：順序是 `SELECT ... FROM ... WHERE ... ORDER BY ... INTO ... UP TO n ROWS`。傳統寫法的 `INTO` 則放在 `FROM` 前後、`WHERE` 之前（§3.5）。
+4. **`INTO TABLE @DATA(gt_carriers)` 可以行內宣告**：內表在這裡才誕生，型別由 SELECT 清單推導，`SELECT *` 就是整列 `SCARR`；選幾個欄位就是那幾個欄位組成的結構，欄位名取自 SELECT 清單。
+
+**一句裡不能混用**：只要用了任何一個新式特徵（逗號、`@`、`INTO` 放最後），整句都要照新式規則寫，否則編譯錯誤。例如欄位清單用逗號、`INTO` 的變數卻沒加 `@`，會報 `all host variables must be escaped using @`；空格分隔的欄位清單配上放在最後的 `INTO`，會報 `must be separated using commas`（2026-09-24 實測）。
+
+練習 6 的新式寫法版本見答案程式 `ZR_TR06_SAP_TABLE_NEW`（輸出跟原版逐行比對相同）。
 
 ## 4. SELECT ... ENDSELECT（看得懂即可）
 

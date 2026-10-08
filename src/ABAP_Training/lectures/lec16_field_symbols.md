@@ -74,7 +74,7 @@ LOOP AT gt_students ASSIGNING <ls_student>.
 ENDLOOP.
 ```
 
-本講一律用傳統寫法：**先用 `FIELD-SYMBOLS` 宣告，再 `ASSIGNING <ls_student>`**。7.40 之後另有「行內宣告」的寫法 `ASSIGNING FIELD-SYMBOL(<ls_student>)`（在使用處直接宣告、省掉獨立那一行），講義 26 會系統性教；讀到用這種寫法的新程式時，知道它等於「宣告＋ASSIGNING」合在一起即可。
+上面是傳統寫法：**先用 `FIELD-SYMBOLS` 宣告，再 `ASSIGNING <ls_student>`**。7.40 之後的行內宣告寫法 `ASSIGNING FIELD-SYMBOL(<ls_student>)`，跟本講其他用法的新寫法一起整理在第 7 節。
 
 READ TABLE 也有對應版本，單筆就地修改：
 
@@ -133,15 +133,18 @@ ENDDO.
 | 迴圈外繼續用 `<ls_student>` | 迴圈結束後仍指向最後一列，語意易錯——迴圈外別再用 |
 | 對 field-symbol 宣告 VALUE | field-symbol 不是變數，不能有初始值 |
 
-## 7. 補充：行內宣告（Inline Declaration）新寫法
+## 7. 新式寫法對照（7.40 之後）：`FIELD-SYMBOL( )` 與 `ASSIGN itab[ ]`
 
-前面全部用傳統寫法：**先 `FIELD-SYMBOLS` 宣告、再 `ASSIGNING`**。7.40 之後，ABAP 允許在「第一次使用的地方」直接宣告，寫成 `FIELD-SYMBOL(<名稱>)`（變數則是 `DATA(名稱)`），這叫**行內宣告（Inline Declaration）**。讀新專案程式碼幾乎一定會遇到，這裡把本講三種用法的新舊寫法並排對照：
+前面全部用傳統寫法：**先 `FIELD-SYMBOLS` 宣告、再 `ASSIGNING`**。7.40 之後，field-symbol 也能在「第一次使用的地方」直接宣告，寫成 `FIELD-SYMBOL(<名稱>)`，跟變數的 `DATA(名稱)`（講義 2）是同一種**行內宣告**。本講各種用法的新舊寫法並排對照：
 
 | 用法 | 傳統寫法（本課程先用這個） | 行內宣告新寫法 |
 |---|---|---|
 | LOOP ASSIGNING | `FIELD-SYMBOLS <ls_student> TYPE ty_student.`<br>`LOOP AT gt_students ASSIGNING <ls_student>.` | `LOOP AT gt_students ASSIGNING FIELD-SYMBOL(<ls_student>).` |
 | READ TABLE ASSIGNING | `FIELD-SYMBOLS <ls_hit> TYPE ty_student.`<br>`READ TABLE gt_students ASSIGNING <ls_hit> WITH KEY id = 'S0004'.` | `READ TABLE gt_students ASSIGNING FIELD-SYMBOL(<ls_hit>) WITH KEY id = 'S0004'.` |
 | ASSIGN COMPONENT | `FIELD-SYMBOLS <fs_comp> TYPE any.`<br>`ASSIGN COMPONENT sy-index OF STRUCTURE gs_student TO <fs_comp>.` | `ASSIGN COMPONENT sy-index OF STRUCTURE gs_student TO FIELD-SYMBOL(<fs_comp>).` |
+| 指向表格的某一列 | `READ TABLE gt_students ASSIGNING <ls_hit> WITH KEY id = 'S0004'.` | `ASSIGN gt_students[ id = 'S0004' ] TO FIELD-SYMBOL(<ls_hit>).` |
+
+最後一列用的是講義 4 的表格運算式 `itab[ ]`。跟直接取值不同的是：**`ASSIGN` 一個找不到的列不會發生例外，而是設定 `sy-subrc = 4`**，所以後面照樣用 `IF sy-subrc = 0.` 判斷即可（`ZR_TR16_FIELD_SYMBOLS_NEW` 實測）。
 
 ```abap
 * 行內宣告版的完整範例：少了獨立的 FIELD-SYMBOLS 宣告，其餘邏輯完全相同
@@ -156,7 +159,9 @@ ENDLOOP.
 
 - **型別自動推導**：`LOOP`／`READ TABLE` 的 `<ls_...>` 型別由內表的列決定，不用自己寫 `TYPE ty_student`；`ASSIGN COMPONENT` 因為每圈指到的欄位型別都不同，推導出來的是 `any`，跟傳統寫法宣告的 `TYPE any` 一致。
 - **作用範圍是整個程式單元，不是只有 LOOP 裡面**：行內宣告出來的 field-symbol，在同一個 FORM／方法／程式主體內都看得到；因此**同一個程式單元裡，同一個名稱不能行內宣告兩次**（例如兩個 LOOP 都寫 `ASSIGNING FIELD-SYMBOL(<ls_row>)` 會編譯錯誤「已經宣告過」），要嘛換不同名稱，要嘛改成先宣告一次、後面的 LOOP 直接 `ASSIGNING <ls_row>`。
-- **兩種寫法效果完全相同**，不影響執行結果與效能；差別只是少寫一行宣告。新專案／S/4HANA 程式碼常見行內宣告，維護舊程式則要認得傳統寫法——所以本課程先教傳統寫法，行內宣告在講義 26 有系統地整理（`DATA(...)`、`INTO DATA(...)`、`@DATA(...)` 一起講）。
+- **兩種寫法效果完全相同**，不影響執行結果與效能；差別只是少寫一行宣告。新專案／S/4HANA 程式碼常見行內宣告，維護舊程式則要認得傳統寫法，兩種都要看得懂。
+
+練習 16 的新式寫法版本見答案程式 `ZR_TR16_FIELD_SYMBOLS_NEW`（輸出跟原版逐行比對相同）：用 `FIELD-SYMBOL( )` 行內宣告、`ASSIGN itab[ ]` 取代 `READ TABLE ... ASSIGNING`、`COND` 打等第（講義 17）、`VALUE` 建資料（講義 4）。
 
 ## 8. 課堂練習
 

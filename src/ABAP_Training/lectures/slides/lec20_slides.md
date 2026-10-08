@@ -129,6 +129,23 @@ ENDLOOP.
 
 ---
 
+<!-- _class: compact -->
+
+## SUM：為什麼可以直接用 work area？
+
+進出 `AT ... ENDAT` 時，系統會暫時改寫 `gs_rev`，離開再還原（實測，AA 兩筆 10、20）：
+
+| 時間點 | `gs_rev` | 輸出 |
+|---|---|---|
+| 進 `AT END OF carrid` 前 | 這組最後一筆 | `AA American 0064 20` |
+| 一進入 | 鍵保留、右邊字元欄 `*`、數值清 0 | `AA ******** **** 0` |
+| `SUM` 之後 | 數值欄填入**整組合計** | `AA ******** **** 30` |
+| 離開 `ENDAT` | 還原成目前這一列 | `AA American 0064 20` |
+
+- `SUM` 只能配 `LOOP AT ... INTO`；用 `ASSIGNING` 會 dump（`SUM_NO_ASSIGNING`）
+
+---
+
 ## 3. 鐵則一：先 SORT
 
 Control Break 只認「**相鄰列**」：
@@ -183,12 +200,37 @@ ENDAT.
 
 ## 4. 適用邊界
 
-- Control Break 專屬 `LOOP AT ... INTO`
-  → 搭配 `ASSIGNING` **不能用** AT 區塊
+- `AT` 區塊配 `INTO` 或 `ASSIGNING` 都可以
+  → 但**要用 `SUM` 就一定要 `INTO`**
 - 迴圈加 `WHERE` 或中途 DELETE，群組判斷可能失真
   → 要過濾就**先整理成乾淨的內表**再 LOOP
 - 只要總計不要明細 → 直接 `SELECT SUM( ) GROUP BY`
   或 `COLLECT` 更省（課後自行延伸）
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：`LOOP AT ... GROUP BY`
+
+```abap
+LOOP AT gt_rev INTO DATA(gs_rev)
+     GROUP BY ( carrid = gs_rev-carrid carrname = gs_rev-carrname )
+     INTO DATA(gs_grp).
+  WRITE: / gs_grp-carrid, gs_grp-carrname.             " 組頭：每組一次
+  LOOP AT GROUP gs_grp INTO DATA(gs_mem).              " 這一組的每一筆
+    WRITE: /5 gs_mem-connid, gs_mem-seatsocc.
+  ENDLOOP.
+  gv_seats = REDUCE i( INIT s = 0 FOR m IN GROUP gs_grp NEXT s = s + m-seatsocc ).
+  WRITE: /5 '小計', 20 gv_seats.                       " 小計自己算
+ENDLOOP.
+```
+
+| | `AT NEW`／`SUM` | `GROUP BY` |
+|---|---|---|
+| 先排序／群組欄位放最前 | 要 | 不用 |
+| 組頭讀群組欄位 | 右邊被遮成 `*` | 完整可讀 |
+| 小計 | `SUM` 加所有數值欄 | `REDUCE` 只加需要的 |
 
 ---
 
@@ -200,7 +242,7 @@ ENDAT.
 | 組頭/小計印出 `*****` | 遮蔽規則——改用右側欄位當斷點或別印 |
 | 小計數字大得離譜 | SUM 總了不該總的欄位（單價）還印出來 |
 | AT NEW 太常觸發 | 群組欄位左邊還有變動欄位——移到最前 |
-| ASSIGNING 迴圈 AT 區塊報錯 | Control Break 只支援 INTO |
+| ASSIGNING 迴圈執行到 `SUM` 就 dump | `SUM` 只支援 `LOOP AT ... INTO` |
 
 ---
 

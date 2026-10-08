@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="11">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>為什麼文字不能寫死在程式裡：多語言與集中維護</li>
@@ -186,7 +186,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="11">
 <h2 id="1-%E7%82%BA%E4%BB%80%E9%BA%BC%E6%96%87%E5%AD%97%E4%B8%8D%E8%83%BD%E5%AF%AB%E6%AD%BB">1. 為什麼文字不能寫死</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">WRITE / '學生成績清單'.
 MESSAGE '成績範圍請輸入 0～999' TYPE 'E'.
@@ -255,7 +255,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="11">
 <h2 id="2-text-symbol">2. Text Symbol</h2>
 <p>維護：SE38 → Goto → Text Elements → <strong>Text Symbols</strong><br />
 （三碼編號＋文字，每支程式自己一套）</p>
@@ -340,7 +340,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="11">
 <h2 id="3-selection-texts">3. Selection Texts</h2>
 <p>沒維護時，選擇畫面顯示變數名（<code>P_NAME</code>）——使用者看不懂</p>
 <p>維護：SE38 → Goto → Text Elements → <strong>Selection Texts</strong></p>
@@ -407,7 +407,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="11">
 <h2 id="4-message-classse91">4. Message Class（SE91）</h2>
 <p>訊息收進 Message Class（<code>Z</code> 開頭，如 <code>ZTR22</code>）<br />
 三碼編號、<code>&amp;1</code>～<code>&amp;4</code> 佔位符：</p>
@@ -482,7 +482,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="11">
 <h2 id="%E8%A8%8A%E6%81%AF%E6%A9%9F%E5%88%B6%E7%9A%84%E9%87%8D%E9%BB%9E%E8%A7%80%E5%BF%B5">訊息機制的重點觀念</h2>
 <p><strong>型別（I/S/W/E/A）不屬於訊息本身，是呼叫端決定的</strong><br />
 同一則 001：<code>e001(ztr22)</code> 擋人、<code>i001(ztr22)</code> 只是彈窗</p>
@@ -570,20 +570,19 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
-<h2 id="5-%E7%BF%BB%E8%AD%AF%E8%88%87%E7%99%BB%E5%85%A5%E8%AA%9E%E8%A8%80">5. 翻譯與登入語言</h2>
+;" data-marpit-pagination-total="11">
+<h2 id="%E5%9C%A8-report-%E5%AE%A3%E5%91%8A%E9%A0%90%E8%A8%AD%E8%A8%8A%E6%81%AF%E9%A1%9E%E5%88%A5message-id">在 REPORT 宣告預設訊息類別：<code>MESSAGE-ID</code></h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">REPORT zr_tr22_texts MESSAGE-ID ztr22.
+
+MESSAGE e001.                              &quot; 等於 MESSAGE e001(ztr22).
+MESSAGE s002 WITH lv_count sy-uname sy-datum.
+MESSAGE s001(00) WITH '...'.               &quot; 括號寫了別的類別，以括號為準
+</code></pre>
 <ul>
-<li>文字元素有「<strong>原始語言</strong>」（程式屬性 Original Language）<br />
-其他語言：SE38 → Goto → Translation，或集中在 <strong>SE63</strong></li>
-<li>執行時依<strong>登入語言</strong>取文字：EN 拿英文、ZF 拿繁中<br />
-→ 練習時兩種語言各登入一次，理解最快</li>
-<li>翻譯缺漏行為：<code>text-nnn</code> 開天窗、<code>'文字'(nnn)</code> 有 fallback、<br />
-訊息類別顯示原始語言（不會空白）</li>
+<li>省略括號的前提：程式第一行有 <code>MESSAGE-ID</code></li>
+<li>Function Group 同樣寫法：<code>FUNCTION-POOL zfg_xxx MESSAGE-ID zxx.</code></li>
+<li>只用一個訊息類別 → 宣告較簡潔；用好幾個 → 每則寫括號較清楚</li>
 </ul>
-<blockquote>
-<p>正式專案先跟團隊確認：原始語言 EN 還是 ZF、翻譯誰維護<br />
-——事後改原始語言很麻煩</p>
-</blockquote>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -639,7 +638,76 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="11">
+<h2 id="5-%E7%BF%BB%E8%AD%AF%E8%88%87%E7%99%BB%E5%85%A5%E8%AA%9E%E8%A8%80">5. 翻譯與登入語言</h2>
+<ul>
+<li>文字元素有「<strong>原始語言</strong>」（程式屬性 Original Language）<br />
+其他語言：SE38 → Goto → Translation，或集中在 <strong>SE63</strong></li>
+<li>執行時依<strong>登入語言</strong>取文字：EN 拿英文、ZF 拿繁中<br />
+→ 練習時兩種語言各登入一次，理解最快</li>
+<li>翻譯缺漏行為：<code>text-nnn</code> 開天窗、<code>'文字'(nnn)</code> 有 fallback、<br />
+訊息類別顯示原始語言（不會空白）</li>
+</ul>
+<blockquote>
+<p>正式專案先跟團隊確認：原始語言 EN 還是 ZF、翻譯誰維護<br />
+——事後改原始語言很麻煩</p>
+</blockquote>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="10" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="11">
 <h2 id="6-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">6. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -676,7 +744,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -703,7 +771,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="10" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="11" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -730,7 +798,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="10">
+;" data-marpit-pagination-total="11">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex22</strong>：</p>
 <p>建訊息類別 <code>ZTR22</code>、維護 Text Symbols 與 Selection Texts</p>

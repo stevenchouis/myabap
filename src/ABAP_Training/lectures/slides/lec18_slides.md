@@ -69,8 +69,28 @@ CONCATENATE 'A' 'B' 'C' INTO gv_path SEPARATED BY '-'.
 ```
 
 - 真的要保留尾端空白 → `RESPECTING BLANKS`（少用）
-- 7.40 新語法對照：`gv_full = |{ gv_last }{ gv_first }|.`
   （字串模板，新程式常見，先認得）
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：字串模板 `|...|` 與 `&&`
+
+```abap
+* 傳統
+CONCATENATE gv_last gv_first INTO gv_full.
+CONCATENATE 'A' 'B' 'C' INTO gv_path SEPARATED BY '-'.
+
+* 新式
+gv_full = |{ gv_last }{ gv_first }|.
+gv_path = `A` && `-` && `B` && `-` && `C`.
+WRITE |全名：{ gv_last }{ gv_first }|.
+```
+
+- `|...|` 是一段字串，`{ }` 裡放變數或運算式；`c` 的尾端空白一樣被忽略
+- `&&` 把左右兩段接起來
+- 格式選項：`{ v WIDTH = 5 ALIGN = RIGHT PAD = '0' }` → `00085`、`{ d DATE = ISO }` → `2026-10-08`
 
 ---
 
@@ -106,6 +126,31 @@ TRANSLATE gv_text TO UPPER CASE.   " 轉大寫
 
 > 實務：使用者輸入拿去跟資料庫比對前的標準前處理
 > = `CONDENSE` + `TRANSLATE TO UPPER CASE`（DB 多存大寫）
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：字串函式
+
+```abap
+* 傳統：直接改掉變數本身
+SPLIT gv_csv AT ',' INTO gv_id gv_name gv_score.
+CONDENSE gv_text.
+CONDENSE gv_text NO-GAPS.
+REPLACE 'fun' WITH 'great' INTO gv_text.
+TRANSLATE gv_text TO UPPER CASE.
+
+* 新式：回傳結果，要自己賦值回去
+gv_name = segment( val = gv_csv index = 2 sep = ',' ).
+gv_text = condense( gv_text ).
+gv_text = condense( val = gv_text del = ` ` from = ` ` to = `` ).
+gv_text = replace( val = gv_text sub = `fun` with = `great` ).
+gv_text = to_upper( gv_text ).
+```
+
+- 多個參數一律 `參數名 = 值`；`replace( )` 加 `occ = 0` 全部取代
+- 函式可巢狀：`to_upper( replace( ... ) )` 一行完成
 
 ---
 
@@ -170,8 +215,9 @@ gv_last = gv_last - 1.
 ## 日期補充
 
 - 拆年月日：`+0(4)` 年、`+4(2)` 月、`+6(2)` 日
-- `WRITE gv_today.` 依使用者設定格式化（如 05.07.2026）
-  要固定格式就自己用位移拼
+- `WRITE gv_today.`：`TYPE d` 只佔 8 格，印 `20261008`
+  給 10 格 `WRITE (10) gv_today.` 或用字典型別（`sydatum`）才印 `2026/10/08`
+- 固定格式：自己用位移拼，或 `|{ gv_today DATE = ISO }|` → `2026-10-08`
 - 時間 `t`（HHMMSS）同理可加減秒數；`sy-uzeit` 現在時間
 - 星期幾、工作日、民國年轉換 → **標準 FM 都有**
   （如 `DATE_COMPUTE_DAY`）——日期難題先找標準 FM

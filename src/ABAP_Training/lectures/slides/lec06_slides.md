@@ -123,6 +123,22 @@ DATA lv_matnr TYPE c LENGTH 18.   " 升級後資料默默截斷，也不報錯
 
 ---
 
+<!-- _class: compact -->
+
+## S/4HANA 的資料表變化：舊表的四種狀態
+
+| 狀態 | 例子（本系統實測） | 程式該怎麼做 |
+|---|---|---|
+| 舊表名變成 CDS View | `BSIS`／`BSAS`、`GLT0`、`FAGLFLEXT`、`COSP` | 讀取可用；新程式讀新表 |
+| 透明表掛 Proxy | `MKPF`／`MSEG`（→`MATDOC`）、`MARD`、`FAGLFLEXA`、`COEP` | 只讀不寫；新程式讀新表 |
+| 表還在、不再寫資料 | `VBUK`／`VBUP`、`KONV`（**0 筆**） | 讀了是空的，一定要改讀新位置 |
+| 沒變 | `BKPF`、`BSEG`、`VBAK`／`VBAP`、`KNA1` | 照舊 |
+
+- 新表：`ACDOCA`（總帳行項目）、`MATDOC`（物料憑證）、`PRCD_ELEMENTS`（定價條件）、`BUT000`（業務夥伴）
+- Proxy＝替代物件：`SELECT` 舊表時系統自動改讀一個 CDS View，資料從新表即時算出
+
+---
+
 ## 3. SELECT：撈多筆進內表（最常用）
 
 ```abap
@@ -180,6 +196,51 @@ SELECT * FROM sflight
 
 WHERE 可用 `= <> > >= < <=`、`BETWEEN`、`LIKE`、`IN`（講義 7）
 字元比對**區分大小寫**——資料庫存大寫就用大寫比
+
+---
+
+<!-- _class: compact -->
+
+## ORDER BY：讓資料庫排好序再回傳
+
+```abap
+SELECT * FROM sflight
+  INTO TABLE gt_flights
+  UP TO 3 ROWS
+  WHERE carrid = 'LH'
+  ORDER BY fldate DESCENDING.      " 傳統寫法：ORDER BY 接在 WHERE 之後
+```
+
+- **不寫 `ORDER BY`，回傳順序不確定**
+- `ORDER BY carrid price DESCENDING`：多欄空格分隔，方向各欄自己管；`ORDER BY PRIMARY KEY`
+- 先排序再取 `UP TO n ROWS` → 前 n 名；沒 `ORDER BY` 只是任意 n 筆
+- `SELECT SINGLE` 不能加 `ORDER BY` → 用 `SELECT ... ENDSELECT` 讀到第一筆就 `EXIT`
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：New Open SQL
+
+```abap
+* 傳統
+SELECT * FROM scarr INTO TABLE gt_carriers
+  UP TO 10 ROWS WHERE currcode = gv_curr ORDER BY carrid.
+
+* 新式
+SELECT * FROM scarr
+  WHERE currcode = @gv_curr
+  ORDER BY carrid
+  INTO TABLE @DATA(gt_carriers)
+  UP TO 10 ROWS.
+```
+
+1. **程式變數（宿主變數）加 `@`**：`@gv_curr`、`IN @s_carrid`；沒 `@` 的是資料庫欄位
+2. 欄位清單、`ORDER BY` 用**逗號**分隔
+3. **`INTO` 放最後**，`UP TO n ROWS` 接在 `INTO` 之後
+4. `@DATA(gt)` 行內宣告，型別由 SELECT 清單推導
+
+**一句裡不能混用**新舊特徵，否則編譯錯誤
 
 ---
 

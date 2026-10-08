@@ -46,3 +46,5 @@
 ## 答案
 
 見 `zr_tr03_structures.prog.abap`（SAP 端程式 `ZR_TR03_STRUCTURES`）。
+
+新式寫法版本見 `zr_tr03_structures_new.prog.abap`（SAP 端程式 `ZR_TR03_STRUCTURES_NEW`），輸出跟原版逐行比對相同；新舊寫法的對照說明見講義 3 §4、§5.3的「新式寫法對照」。

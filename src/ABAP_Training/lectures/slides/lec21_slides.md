@@ -265,6 +265,24 @@ SELECT SINGLE maktx FROM makt INTO gv_maktx
 
 ---
 
+<!-- _class: compact -->
+
+## Search Help 的 Definition 頁籤
+
+| 欄位 | 意思 |
+|---|---|
+| Dialog type | `D` 立刻列出、`C` 先跳條件畫面、`A` 依筆數決定 |
+| **IMP** | 按 F4 時，把畫面欄位**已輸入的值帶進來**當條件 |
+| **EXP** | 選好之後，把值**帶回畫面** |
+| **LPos**／**SPos** | 在結果清單／條件區排第幾個 |
+| **SDis** | 條件區這欄只能看不能改（搭配 IMP：亮出條件但鎖住） |
+
+- 欄位標題取自 Data Element 的 Field Label → 欄位一定要引用 DE
+- **多個 IMP**：先填工廠 `1010` 再按倉別 F4，只列 `1010` 的倉別（`H_T001L_OLD` 的 `WERKS`、`LGORT` 都勾 IMP）
+- 多個 IMP 要掛在 Check Table（如 `T001L`）才有效；掛 Data Element 只對應一個參數
+
+---
+
 ## 4. SM30 維護畫面
 
 讓使用者不寫程式就能維護表內容：
@@ -329,6 +347,30 @@ DELETE FROM ztr21_stud WHERE id = 'S0001'.
 - MANDT 一樣**不要**自己塞——系統自動帶當前 client
 - 寫入帶齊**稽核欄**（`sy-uname` 異動者、`sy-datum` 異動日）
   查問題時會感謝自己
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：寫入的來源加 `@`
+
+```abap
+MODIFY ztr21_stud FROM @gs_stud.                          " 來源是變數
+
+INSERT ztr21_stud FROM @( VALUE #( id = 'S0001' name = '王小明'
+                                   score = 85 ) ).        " 來源是運算式
+
+INSERT ztr21_stud FROM TABLE @( VALUE #( ( id = 'S0002' name = '李小美' )
+                                         ( id = 'S0003' name = '陳大文' ) ) )
+  ACCEPTING DUPLICATE KEYS.
+
+UPDATE ztr21_stud SET score   = 90,
+                      upduser = @sy-uname
+  WHERE id = 'S0001'.                                      " SET 用逗號
+```
+
+- 運算式要用 `@( )` 包起來，不必先填 work area
+- `DELETE FROM ... WHERE`、`COMMIT WORK` 沒有新舊之分
 
 ---
 

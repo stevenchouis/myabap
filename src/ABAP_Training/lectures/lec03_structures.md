@@ -73,6 +73,26 @@ WRITE: / gs_student-id, gs_student-name, gs_student-score.
 
 `結構-欄位` 是 ABAP 最高頻的寫法之一。也因此**變數命名不要含連字號**，避免與欄位存取混淆。
 
+**新式寫法對照（7.40 之後）：`VALUE #( )` 填結構**
+
+```abap
+* 傳統寫法：一個欄位一行
+gs_student-id    = 'S0001'.
+gs_student-name  = '王小明'.
+gs_student-score = 85.
+
+* 新式寫法：一次填好整個結構
+gs_student = VALUE #( id = 'S0001' name = '王小明' score = 85 ).
+```
+
+語法拆解：
+
+- `VALUE 型別( 欄位 = 值 欄位 = 值 ... )`：建出一個「填好值的結構」，再整筆賦值給左邊。欄位之間用空白分隔，不用逗號。
+- `#`：型別由左邊的目標決定，這裡就是 `gs_student` 的型別 `ty_student`。
+- **沒寫到的欄位是初始值**：`VALUE #( )` 是重新建一整筆，不是只改那幾個欄位。所以它等於「先 `CLEAR gs_student`，再逐欄賦值」；如果只想改其中一個欄位、其他欄位保留原值，還是用 `gs_student-score = 90.`。
+
+練習 3 的新式寫法版本見答案程式 `ZR_TR03_STRUCTURES_NEW`（輸出跟原版逐行比對相同）。
+
 ## 5. 結構的整體操作
 
 ### 5.1 同型別結構：直接賦值
@@ -109,6 +129,31 @@ MOVE-CORRESPONDING gs_full TO gs_lite.   " 只搬同名欄位 id、name
 ```
 
 規則：**欄位名相同**就搬（逐欄轉換），目的端沒有的欄位丟掉，目的端多的欄位不動。欄位名拼錯就默默不搬——不會報錯，要自己核對。
+
+**新式寫法對照（7.40 之後）：`CORRESPONDING #( )`**
+
+```abap
+* 傳統寫法
+MOVE-CORRESPONDING gs_full TO gs_lite.
+
+* 新式寫法
+gs_lite = CORRESPONDING #( gs_full ).
+
+* 新式寫法，保留目的端原本的值
+gs_lite = CORRESPONDING #( BASE ( gs_lite ) gs_full ).
+```
+
+語法拆解：`CORRESPONDING 型別( 來源 )` 依欄位名稱對搬，結果整筆賦值給左邊；`#` 一樣是型別取自左邊的目標。
+
+**兩者不完全相同**，差在目的端「多出來、來源沒有」的欄位（2026-10-08 實測，`ZR_TR04_NEW_CHK`，目的端多一個 `memo` 欄位、原值 `KEEP`）：
+
+| 寫法 | `memo` 的結果 |
+|---|---|
+| `MOVE-CORRESPONDING gs_full TO gs_lite.` | 保留 `KEEP` |
+| `gs_lite = CORRESPONDING #( gs_full ).` | **被清成空白** |
+| `gs_lite = CORRESPONDING #( BASE ( gs_lite ) gs_full ).` | 保留 `KEEP` |
+
+原因：`CORRESPONDING #( )` 是先建一個全新的結構、只填同名欄位，再整筆賦值，所以其他欄位都是初始值。加 `BASE ( gs_lite )` 表示「以 `gs_lite` 現在的內容為底」再覆蓋同名欄位，效果才跟 `MOVE-CORRESPONDING` 一樣。把舊程式的 `MOVE-CORRESPONDING` 改成新寫法時，要注意目的端是否有需要保留的欄位。
 
 ## 6. 巢狀結構（Nested Structure，先看得懂）
 

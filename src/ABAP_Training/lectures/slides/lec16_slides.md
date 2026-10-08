@@ -125,8 +125,8 @@ ENDLOOP.
 ```
 
 本講一律：**先 `FIELD-SYMBOLS` 宣告，再 `ASSIGNING <fs>`**
-7.40 之後有行內宣告 `ASSIGNING FIELD-SYMBOL(<fs>)`（宣告＋指派合一）
-講義 26 才教；讀到時知道它等於兩步合併即可
+7.40 之後的行內宣告 `ASSIGNING FIELD-SYMBOL(<fs>)`（宣告＋指派合一）
+見本講最後的「新式寫法對照」
 
 ---
 
@@ -176,7 +176,7 @@ ENDDO.
 
 <!-- _class: compact -->
 
-## 補充：行內宣告（Inline Declaration）新寫法
+## 新式寫法對照：`FIELD-SYMBOL( )` 與 `ASSIGN itab[ ]`
 
 7.40 之後可在「第一次使用處」直接宣告：`FIELD-SYMBOL(<名稱>)`
 
@@ -188,7 +188,9 @@ ENDDO.
 
 - 型別自動推導（`ASSIGN COMPONENT` 推導出 `any`）
 - 作用範圍是**整個程式單元**：同一個 FORM／方法內，同名不能行內宣告兩次
-- 效果完全相同，只是少寫一行；講義 26 系統性整理
+- 指向某一列：`ASSIGN gt_students[ id = 'S0004' ] TO FIELD-SYMBOL(<ls_hit>).`
+  **找不到不會例外，而是 `sy-subrc = 4`**，照樣用 `IF sy-subrc = 0.` 判斷
+- 效果完全相同，只是少寫一行
 
 ---
 

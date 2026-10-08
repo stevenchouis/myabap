@@ -122,3 +122,5 @@ INSERT S0006（KLASSE=ZZZZ，班級不存在）：sy-subrc = 0
 
 見 `zr_tr21_ztable.prog.abap`（SAP 端程式 `ZR_TR21_ZTABLE`）；資料表定義以本題目第一、二部分為準，快照見 `ztr21_stud.tabl.abap`、`ztr21_class.tabl.abap`。Domain／Data Element／Search Help 無程式碼快照（DDIC metadata 物件，非 source-based）。
 
+新式寫法版本見 `zr_tr21_ztable_new.prog.abap`（SAP 端程式 `ZR_TR21_ZTABLE_NEW`），輸出跟原版逐行比對相同；新舊寫法的對照說明見講義 21 §5的「新式寫法對照」。
+

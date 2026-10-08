@@ -49,6 +49,23 @@ SELECT f~carrid f~connid f~fldate c~carrname
 - `ON` 是**串表條件**（兩表怎麼對上），`WHERE` 是**過濾條件**——語意不同，別混在一起。ON 可以多條件：`ON f~carrid = c~carrid AND f~connid = c~connid`。
 - INNER JOIN 的語意：**兩邊都對得上才輸出**。SFLIGHT 有但 SCARR 沒有的公司代碼，那些航班整筆消失。
 
+**新式寫法對照（7.40 之後）：JOIN 加行內宣告**
+
+```abap
+* 新式寫法：不用先寫 TYPES／DATA
+SELECT f~carrid, f~connid, f~fldate, c~carrname
+  FROM sflight AS f
+  INNER JOIN scarr AS c ON f~carrid = c~carrid
+  WHERE f~fldate >= '20260101'
+  INTO TABLE @DATA(gt_flights).
+```
+
+- 規則跟講義 6 §3.6 一樣：欄位用逗號、`INTO` 放最後、宿主變數加 `@`（例如 `WHERE f~carrid IN @s_carrid`）。
+- 最大的好處在 JOIN：傳統寫法要先定義一個「東拼西湊」的結構 `ty_flight`，新式寫法用 `@DATA(gt_flights)` 讓系統依 SELECT 清單自動產生結構，欄位名就是 `carrid`、`connid`、`fldate`、`carrname`（不含別名前綴），後面照樣寫 `gs_flight-carrname`。
+- 結果要放進既有的內表時，照樣可以寫 `INTO CORRESPONDING FIELDS OF TABLE @gt_flights`。
+
+練習 11 的新式寫法版本見答案程式 `ZR_TR11_JOIN_NEW`（INNER JOIN、LEFT OUTER JOIN 都改用 `@DATA( )`，輸出跟原版逐行比對相同）。
+
 ### 2.1 另一種寫法：Database View（把 JOIN 定義在 DDIC）
 
 同一組 JOIN 如果很多支程式都要用，可以在 SE11 建一個 **Database View**，把「哪幾張表、怎麼連、要哪些欄位」定義一次，程式就像讀一張表一樣讀它。系統標準的 `SFLIGHTS` 就是這種 View（2026-09-29 查系統定義表 `DD26S`／`DD28S`）：
