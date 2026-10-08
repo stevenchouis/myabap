@@ -5,7 +5,7 @@
 - 會依**輸出印表機**決定 `LINE-SIZE` 與 `LINE-COUNT`
 - 會用 `NO STANDARD PAGE HEADING` + 自製頁首（`TOP-OF-PAGE`）與頁尾（`END-OF-PAGE`）
 - 會 WRITE 精確排版：`AT` 欄位位置、`(寬度)`、`CENTERED`、`NO-GAP`、`CURRENCY`、`ULINE AT /1(n)`
-- 認識系統欄位：`sy-repid`（程式名）、`sy-uname`（使用者）、`sy-pagno`（頁次）
+- 認識系統欄位（System Field）：`sy-repid`（程式名）、`sy-uname`（使用者）、`sy-pagno`（頁次）
 
 ## 印表機與 LINE-SIZE / LINE-COUNT 選型（點矩陣）
 
@@ -32,7 +32,7 @@
 
 ## 事前準備
 
-建立程式 `ZR_TR12_<你的姓名縮寫>`，套件 `$TMP`。本題假設輸出到「寬機點矩陣、11 吋連續紙」→ `LINE-SIZE 132 LINE-COUNT 65(3)`。
+建立程式 `ZR_TR12_<你的姓名縮寫>`，套件（Package） `$TMP`。本題假設輸出到「寬機點矩陣、11 吋連續紙」→ `LINE-SIZE 132 LINE-COUNT 65(3)`。
 
 ## 題目需求
 

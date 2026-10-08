@@ -11,12 +11,12 @@
 
 ## 事前準備
 
-建立程式 `ZR_TR20_<你的姓名縮寫>`，套件 `$TMP`。需要航班測試資料（`SAPBC_DATA_GENERATOR`，練習 6 應已跑過）。
+建立程式 `ZR_TR20_<你的姓名縮寫>`，套件（Package） `$TMP`。需要航班測試資料（`SAPBC_DATA_GENERATOR`，練習 6 應已跑過）。
 
 ## 題目需求
 
 1. 定義結果結構（**欄位順序就是考點**）：`carrid`、`carrname`、`connid`、`fldate`、`seatsocc`、`price`、`revenue`（`p LENGTH 12 DECIMALS 2`），前兩欄是群組欄位
-2. `INNER JOIN` SFLIGHT＋SCARR 撈進內表（沿用練習 11 技能），`LOOP ASSIGNING` 算 `revenue = price * seatsocc`
+2. `INNER JOIN` SFLIGHT＋SCARR 撈進內表（Internal Table）（沿用練習 11 技能），`LOOP ASSIGNING` 算 `revenue = price * seatsocc`
 3. 依 `carrid connid fldate` 排序
 4. 用一個 `LOOP ... INTO` 完成整份報表：
    - `AT FIRST`：印報表標題

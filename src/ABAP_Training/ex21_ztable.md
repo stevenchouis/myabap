@@ -14,7 +14,7 @@
 
 ## 事前準備
 
-物件都建在套件 `$TMP`。名稱請照下表（多人共用系統時，照課程慣例把 `TR21` 換成 `TR21_<縮寫>`，並同步調整程式中的表名）。
+物件都建在套件（Package） `$TMP`。名稱請照下表（多人共用系統時，照課程慣例把 `TR21` 換成 `TR21_<縮寫>`，並同步調整程式中的表名）。
 
 ## 第一部分：SE11 建 DDIC 物件
 
@@ -57,7 +57,7 @@
    - Delivery Class `A`；Technical Settings 同 `ZTR21_STUD`（Data Class `APPL0`、Size Category `0`）→ 啟用
    - **注意**：`KLNAME` 一定要引用 Data Element（不能直接用內建型別 `CHAR(40)`）——Search Help 的 Parameter 要對應到有 Data Element 的欄位才能正確解析語意，欄位只有內建型別會導致 Search Help **無法 Activate**（實測踩過這個坑，見第 6 點）
 6. **`ZTR21_STUD` 加一個欄位 `KLASSE`**（型別 Data Element `ZTR21_KLASSE`，放在 SCORE 之後、UPDUSER 之前）：
-   - 在 Fields 頁籤該欄位的 **Foreign Key** 對話框：Check Table 填 `ZTR21_CLASS`，基數（Cardinality）填 `1 : CN`（每個學生一個班級、每個班級任意多個學生，見講義 21 §3.1）；Foreign key field type 選 **Non-key fields/candidates**（`KLASSE` 不是學生表的主鍵，文件用途），Foreign Key Fields 讓系統自動帶出 `KLASSE = KLASSE`
+   - 在 Fields 頁籤該欄位的 **Foreign Key** 對話框：Check Table 填 `ZTR21_CLASS`，基數（Cardinality）填 `1 : CN`（每個學生一個班級、每個班級任意多個學生，見講義 21 §3.1）；Foreign key field type 選 **Non-key fields/candidates**（`KLASSE` 不是學生表的主鍵（Primary Key），文件用途），Foreign Key Fields 讓系統自動帶出 `KLASSE = KLASSE`
    - 打開 **Screen Check** 開關（讓畫面輸入時真的會擋不存在的班級代碼）
    - 存檔啟用
 7. **Search Help** `ZTR21_CLASSH`（SE11 → Search Help → Elementary Search Help）：

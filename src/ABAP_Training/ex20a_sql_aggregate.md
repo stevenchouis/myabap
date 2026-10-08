@@ -1,6 +1,6 @@
 # 練習 20a：SQL 聚合與子查詢
 
-> 授課順序：接在練習 13（第一階段總整理）之後、練習 14（INCLUDE 拆檔）之前；延續練習 20 的群組小計，改在資料庫端彙總。講義見 [lec20a](lectures/lec20a_sql_aggregate.md)。
+> 授課順序：接在練習 13（第一階段總整理）之後、練習 14（INCLUDE 拆檔）之前；延續練習 20 的群組小計（Control Break），改在資料庫端彙總。講義見 [lec20a](lectures/lec20a_sql_aggregate.md)。
 
 ## 學習目標
 
@@ -12,9 +12,9 @@
 
 ## 事前準備
 
-建立程式 `ZR_TR20A_<你的姓名縮寫>`，套件 `$TMP`。需要航班測試資料（`SAPBC_DATA_GENERATOR`，練習 6 應已跑過）。
+建立程式 `ZR_TR20A_<你的姓名縮寫>`，套件（Package） `$TMP`。需要航班測試資料（`SAPBC_DATA_GENERATOR`，練習 6 應已跑過）。
 
-全程使用**傳統寫法**：先宣告結構與內表，`SELECT` 用 `INTO CORRESPONDING FIELDS OF TABLE`，不使用 `@DATA(...)` 行內宣告（那是練習 26 的內容）。
+全程使用**傳統寫法**：先宣告結構與內表（Internal Table），`SELECT` 用 `INTO CORRESPONDING FIELDS OF TABLE`，不使用 `@DATA(...)` 行內宣告（Inline Declaration）（那是練習 26 的內容）。
 
 ## 題目需求
 

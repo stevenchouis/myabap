@@ -198,7 +198,7 @@ READ TABLE gt_students TRANSPORTING NO FIELDS
 
 <!-- _class: compact -->
 
-## 新式寫法對照：表格運算式 `itab[ ]`
+## 新式寫法對照：表格運算式（Table Expression）`itab[ ]`
 
 ```abap
 * 傳統

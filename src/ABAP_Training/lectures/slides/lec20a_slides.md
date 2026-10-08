@@ -213,6 +213,30 @@ SELECT carrid,
 
 ---
 
+<!-- _class: compact -->
+
+## 進階補充：CTE（Common Table Expression）、`FROM @itab`、視窗函數（Window Function）
+
+```abap
+* CTE：先算暫存結果（名稱 + 開頭），再拿來查
+WITH +lh AS ( SELECT carrid, connid, seatsocc FROM sflight WHERE carrid = 'LH' )
+SELECT connid, SUM( seatsocc ) AS seats FROM +lh
+  GROUP BY connid INTO TABLE @DATA(gt_seats).
+
+* FROM @itab：把內表當資料來源
+SELECT carrid, connid FROM @gt_keys AS k
+  WHERE connid > '0400' INTO TABLE @DATA(gt_sel).
+
+* 視窗函數：保留明細，每列旁邊放「該公司合計」
+SELECT carrid, connid, seatsocc,
+       SUM( seatsocc ) OVER( PARTITION BY carrid ) AS carr_total
+  FROM sflight INTO TABLE @DATA(gt_detail).
+```
+
+本系統 7.54 實測都能用；讀到時看得懂即可
+
+---
+
 ## 8. 資料庫算 vs 內表算
 
 | 情境 | 建議 |

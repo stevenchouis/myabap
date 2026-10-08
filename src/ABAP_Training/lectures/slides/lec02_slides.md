@@ -79,7 +79,7 @@ DATA: gv_qty   TYPE i,
 
 <!-- _class: compact -->
 
-## 新式寫法對照：行內宣告 `DATA( )`
+## 新式寫法對照：行內宣告（Inline Declaration）`DATA( )`
 
 ```abap
 * 傳統：先宣告，再賦值

@@ -1,4 +1,4 @@
-# 講義 23：期末整合練習——訂單 Header/Detail（授課順序：接在講義 28 之後，全課程最後一講；需要講義 21 的外鍵／Search Help）
+# 講義 23：期末整合練習——訂單 Header/Detail（授課順序：接在講義 28 之後，全課程最後一講；需要講義 21 的外鍵（Foreign Key）／Search Help）
 
 > 對應練習：[ex23](../ex23_orders.md)｜答案物件：資料表 `ZTR23_ORDH` + `ZTR23_ORDI`＋程式 `ZR_TR23_ORDERS`
 
@@ -11,7 +11,7 @@
 
 ## 1. 為什麼要有這一講：ex21 vs ex23 的差異
 
-講義 21 已經教過 DDIC 外鍵、Check Table、Search Help，但那個「班級－學生」的關聯本質上是**分類查詢**：學生查自己屬於哪個班級，比較像「下拉選單」的性質。
+講義 21 已經教過 DDIC 外鍵、Check Table、Search Help，但那個「班級－學生」的關聯本質上是**分類查詢**：學生查自己屬於哪個班級，比較像「下拉選單（Dropdown List）」的性質。
 
 本講的「訂單－明細」是**真正的單頭/單身（Header/Detail）交易資料**：一張訂單開出去，Header（訂單號、客戶、日期、狀態）跟 Detail（每一行買了什麼、數量、單價）**必須同時存在，缺一不可**——沒有明細的訂單頭沒有意義，沒有訂單頭的明細更是無效資料。這種「一組資料必須一起成功或一起失敗」的情境，才是 **LUW（Logical Unit of Work）**概念真正要解決的問題，講義 21 只講了觀念，這一講讓學生親眼看到。
 
@@ -41,7 +41,7 @@ key ordno  : ztr23_ordno not null
       and ordno = ztr23_ordi.ordno;
 ```
 
-`ordno` 前面多了 `key`——外鍵欄位本身就是 Detail 表複合主鍵的一部分，這是 SAP 官方文件 `SPFLI` 外鍵到 `SCARR` 範例的原版寫法，比講義 21 的 `KLASSE`（非 Key 外鍵）更貼近教科書。
+`ordno` 前面多了 `key`——外鍵欄位本身就是 Detail 表複合主鍵（Primary Key）的一部分，這是 SAP 官方文件 `SPFLI` 外鍵到 `SCARR` 範例的原版寫法，比講義 21 的 `KLASSE`（非 Key 外鍵）更貼近教科書。
 
 ## 3. Domain 固定值清單：跟講義 21 的區間是不同工具
 

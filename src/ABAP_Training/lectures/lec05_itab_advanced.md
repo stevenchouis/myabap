@@ -24,7 +24,7 @@ SORT gt_students BY grade ASCENDING
 - 排序會改變 INDEX：排序前記下的「第 n 筆」排序後就不算數了。
 - 同值想保持原本相對順序，加 `STABLE`：`SORT gt BY score DESCENDING STABLE.`
 
-排序後可以用二分搜尋加速 READ（大表差很多）：
+排序後可以用二分搜尋（Binary Search）加速 READ（大表差很多）：
 
 ```abap
 SORT gt_students BY id.
@@ -75,7 +75,7 @@ DELETE ADJACENT DUPLICATES FROM gt_students COMPARING id.
 
 不加 COMPARING 則比整列。忘記先 SORT 是經典錯誤：不相鄰的重複不會被刪。
 
-**新式寫法對照（7.40 之後）：`FILTER`，篩出一張新表**
+**新式寫法對照（7.40 之後）：`FILTER`（篩選運算子，Filter Operator），篩出一張新表**
 
 `DELETE ... WHERE` 是把原表裡不要的刪掉；如果原表要保留、只想**另外得到一張符合條件的新表**，傳統寫法是 `LOOP ... WHERE` 再逐筆 `APPEND`，新式寫法是 `FILTER`：
 
@@ -89,7 +89,7 @@ ENDLOOP.
 gt_item_big = FILTER #( gt_item USING KEY by_qty WHERE qty >= 10 ).
 ```
 
-`FILTER` 有一個關鍵限制：`WHERE` 用到的欄位**必須是表格鍵**（SORTED／HASHED 表的主鍵，或用 `USING KEY` 指定的次要鍵），不能拿任意欄位當條件，否則編譯錯誤。上例的 `by_qty` 是額外宣告的次要鍵，宣告方式與完整範例見講義 26 第 7 節。條件欄位不是鍵時，傳統的 `LOOP ... WHERE` 反而比較單純。
+`FILTER` 有一個關鍵限制：`WHERE` 用到的欄位**必須是表格鍵（Table Key）**（SORTED／HASHED 表的主鍵（Primary Key），或用 `USING KEY` 指定的次要鍵（Secondary Key）），不能拿任意欄位當條件，否則編譯錯誤。上例的 `by_qty` 是額外宣告的次要鍵，宣告方式與完整範例見講義 26 第 7 節。條件欄位不是鍵時，傳統的 `LOOP ... WHERE` 反而比較單純。
 
 > 注意：LOOP 進行中 DELETE 同一張表雖然合法（刪目前列可用 `DELETE gt_students.` 搭配隱含 index），但容易寫出難懂的邏輯——初學建議「先 LOOP 蒐集、迴圈外再刪」或直接用 `DELETE ... WHERE`。
 
@@ -214,11 +214,11 @@ ENDLOOP.
 
 看得懂舊程式在幹嘛就好，自己寫一律用上面這種「itab + 獨立 work area」的寫法——這也是為什麼**Function Module 的 `TABLES` 參數**（本質就是「帶 Header Line 的內部表」）在 SE37 介面裡也被列為過時語法，細節見講義 15 第 3.1 節。
 
-**為什麼 SAP 不乾脆把這種語法整個拿掉、逼大家改寫**：官方文件對「obsolete」語法的統一定位（`ABENABAP_OBSOLETE`）講得很直白——這些語法「僅為了與舊版本相容而保留（only available for reasons of compatibility with older releases）」，**舊程式裡可能還看得到，但新程式不應該再用**。SAP 的系統一升級就是幾十年的既有客戶程式碼庫，不能因為語言演進就讓舊程式全部編譯失敗，所以策略是「新寫法優先教、舊寫法保留但不推薦、Class 裡直接禁用倒逼新程式碼走新路」——`WITH HEADER LINE`／`TABLES` 參數會在 Class／Method 裡完全編譯不過（本檔第 39 節、第 9 節都印證過這點），就是這個策略在語法層級的具體落實：舊寫法留給看得懂 Report/FM 舊碼的人，新的物件導向程式碼從語言設計上直接杜絕重蹈覆轍。
+**為什麼 SAP 不乾脆把這種語法整個拿掉、逼大家改寫**：官方文件對「obsolete」語法的統一定位（`ABENABAP_OBSOLETE`）講得很直白——這些語法「僅為了與舊版本相容而保留（only available for reasons of compatibility with older releases）」，**舊程式裡可能還看得到，但新程式不應該再用**。SAP 的系統一升級就是幾十年的既有客戶程式碼庫，不能因為語言演進就讓舊程式全部編譯失敗，所以策略是「新寫法優先教、舊寫法保留但不推薦、Class 裡直接禁用倒逼新程式碼走新路」——`WITH HEADER LINE`／`TABLES` 參數會在 Class／Method 裡完全編譯不過（本檔第 39 節、第 9 節都印證過這點），就是這個策略在語法層級的具體落實：舊寫法留給看得懂 Report/FM 舊碼的人，新的物件導向（Object-Oriented）程式碼從語言設計上直接杜絕重蹈覆轍。
 
 ## 9. 補充：Deep Structure／Deep Table（結構裡包一個 Internal Table）
 
-講義 3 第 6 節學過「巢狀結構」——結構的欄位是**另一個結構**（1 對 1）。ABAP 還允許結構的欄位是**Internal Table**（1 對多），這種結構叫 **Deep Structure（深層結構）**；如果表格的每一列本身又是一個 Deep Structure，這種表就叫 **Deep Table（深層表格）**——業界也常用「Nested Table／巢狀內部表」稱呼同一件事。
+講義 3 第 6 節學過「巢狀結構（Nested Structure）」——結構的欄位是**另一個結構**（1 對 1）。ABAP 還允許結構的欄位是**Internal Table**（1 對多），這種結構叫 **Deep Structure（深層結構）**；如果表格的每一列本身又是一個 Deep Structure，這種表就叫 **Deep Table（深層表格）**——業界也常用「Nested Table／巢狀內部表」稱呼同一件事。
 
 典型場景：講義 21／23 教的「訂單主檔＋明細」，之前是用兩張獨立的 DB 表（`ZTR23_ORDH`／`ZTR23_ORDI`）+ JOIN 做關聯——這是**存進資料庫**的正規做法。但如果只是要在**記憶體裡**把「一張訂單的主檔 + 它底下所有明細」當成一個整體處理（例如要傳給一支 FM、或組一份要輸出的 JSON），Deep Structure 更直覺：
 
@@ -252,7 +252,7 @@ LOOP AT gs_order-items INTO gs_item.
 ENDLOOP.
 ```
 
-**新式寫法對照（7.40 之後）：巢狀 `VALUE`、`INTO DATA( )`、`REDUCE`**
+**新式寫法對照（7.40 之後）：巢狀 `VALUE`、`INTO DATA( )`、`REDUCE`（歸約運算子，Reduction Operator）**
 
 ```abap
 * 新式寫法：VALUE 可以巢狀，連內層的 items 一起建好

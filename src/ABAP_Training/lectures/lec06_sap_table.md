@@ -13,7 +13,7 @@
 
 ## 1. 資料字典（Data Dictionary）與透明表（Transparent Table）
 
-SAP 的資料表定義集中在**資料字典（Data Dictionary，DDIC）**，用 SE11 檢視：欄位、型別（Data Element）、鍵、外鍵關係都在這裡。透明表（transparent table）就是資料庫裡真實存在的表。
+SAP 的資料表定義集中在**資料字典（Data Dictionary，DDIC）**，用 SE11 檢視：欄位、型別（Data Element）、鍵、外鍵（Foreign Key）關係都在這裡。透明表（transparent table）就是資料庫裡真實存在的表。
 
 | 交易代碼 | 用途 |
 |---|---|
@@ -86,8 +86,8 @@ SAP 內建一組練習用資料表，本課程到期末都用它：
 |---|---|---|
 | 組織／共用 | `T001` | 公司代碼 |
 | | `T001W`、`T001L` | 廠別、儲存地點 |
-| | `TCURR`、`TCURX` | 匯率、幣別小數位（講義 21 §2.2） |
-| | `T006` | 計量單位 |
+| | `TCURR`、`TCURX` | 匯率、幣別（Currency）小數位（講義 21 §2.2） |
+| | `T006` | 計量單位（Unit of Measure） |
 | 物料（MM） | `MARA`、`MAKT` | 物料主檔一般資料、物料說明（依語言） |
 | | `MARC`、`MARD`、`MBEW` | 物料的廠別資料、儲存地點資料、評價資料 |
 | | `EKKO`、`EKPO` | 採購單表頭、明細 |
@@ -154,7 +154,7 @@ S/4HANA 跑在 HANA 記憶體資料庫上，SAP 趁機把 R/3 時代很多「為
 | `VBUK`、`VBUP`（單據狀態） | 狀態欄位搬回各單據：銷售單 → `VBAK`／`VBAP`，交貨單 → `LIKP`／`LIPS`，發票 → `VBRK` |
 | `KONV`（單據定價條件） | **`PRCD_ELEMENTS`**（本系統 134,115 筆）；也可以讀 SAP 提供的 CDS View `V_KONV`（欄位排列沿用 `KONV`） |
 
-**D. 沒有改變**：`BKPF`（憑證表頭）、`BSEG`（原始憑證與未清項管理）、`VBAK`／`VBAP` 等單據表照舊。`KNA1`、`LFA1` 也還是透明表，只是客戶／供應商一律透過 Business Partner（交易碼 `BP`）建立，主資料在 **`BUT000`** 等表，`KNA1`／`LFA1` 會同步寫入，舊程式照樣讀得到。
+**D. 沒有改變**：`BKPF`（憑證表頭）、`BSEG`（原始憑證與未清項管理）、`VBAK`／`VBAP` 等單據表照舊。`KNA1`、`LFA1` 也還是透明表，只是客戶／供應商一律透過 Business Partner（交易碼（Transaction Code） `BP`）建立，主資料在 **`BUT000`** 等表，`KNA1`／`LFA1` 會同步寫入，舊程式照樣讀得到。
 
 自己判斷一張表屬於哪一種：SE11 打開看它是 Table 還是 View；是 Table 就再看有沒有 Proxy（替代物件）；或像本講一樣查 `DD02L` 的 `TABCLASS` 與 `VIEWREF`。最後一定要實際看一下筆數，C 類這種「表在、沒資料、不報錯」最容易誤判。
 
@@ -179,7 +179,7 @@ SELECT 欄位清單
   [ORDER BY 排序欄位].
 ```
 
-### 3.1 撈多筆進內表（最常用）
+### 3.1 撈多筆進內表（Internal Table）（最常用）
 
 ```abap
 DATA gt_carriers TYPE STANDARD TABLE OF scarr.
@@ -318,11 +318,55 @@ SELECT SINGLE carrid FROM scarr
 1. **程式變數前面加 `@`**。一句 SELECT 裡同時有兩種名稱：資料庫欄位（如 `currcode`）和程式變數（如 `gv_curr`）。從 ABAP 程式傳進 SQL 的變數叫**宿主變數（Host Variable）**；傳統寫法靠位置猜誰是誰，新式寫法一律在宿主變數前加 `@`，沒有 `@` 的就是資料庫欄位。`WHERE`、`INTO` 用到的變數、`SELECT-OPTIONS`（`IN @s_carrid`）都算宿主變數。
 2. **欄位清單用逗號分隔**：`SELECT carrid, carrname FROM ...`，`ORDER BY carrid, connid` 也一樣。
 3. **`INTO` 放在最後**：順序是 `SELECT ... FROM ... WHERE ... ORDER BY ... INTO ... UP TO n ROWS`。傳統寫法的 `INTO` 則放在 `FROM` 前後、`WHERE` 之前（§3.5）。
-4. **`INTO TABLE @DATA(gt_carriers)` 可以行內宣告**：內表在這裡才誕生，型別由 SELECT 清單推導，`SELECT *` 就是整列 `SCARR`；選幾個欄位就是那幾個欄位組成的結構，欄位名取自 SELECT 清單。
+4. **`INTO TABLE @DATA(gt_carriers)` 可以行內宣告（Inline Declaration）**：內表在這裡才誕生，型別由 SELECT 清單推導，`SELECT *` 就是整列 `SCARR`；選幾個欄位就是那幾個欄位組成的結構，欄位名取自 SELECT 清單。
 
 **一句裡不能混用**：只要用了任何一個新式特徵（逗號、`@`、`INTO` 放最後），整句都要照新式規則寫，否則編譯錯誤。例如欄位清單用逗號、`INTO` 的變數卻沒加 `@`，會報 `all host variables must be escaped using @`；空格分隔的欄位清單配上放在最後的 `INTO`，會報 `must be separated using commas`（2026-09-24 實測）。
 
 練習 6 的新式寫法版本見答案程式 `ZR_TR06_SAP_TABLE_NEW`（輸出跟原版逐行比對相同）。
+
+### 3.7 新式寫法對照（7.40 之後）：SELECT 清單裡的運算式（SQL Expression）
+
+傳統寫法的 SELECT 清單只能放欄位名稱，要計算就得撈回內表再 `LOOP` 算。新式寫法可以在 SELECT 清單裡直接放運算式，資料庫算好再回傳，結果欄位用 `AS` 取名（2026-10-08 用驗證程式 `ZR_TR06_OSQL_CHK` 在本系統 7.54 實測）：
+
+```abap
+SELECT carrid, connid, price, seatsocc,
+       price * seatsocc AS revenue,                     " 四則運算
+       'X' AS flag,                                     " 字面值
+       concat( carrid, connid ) AS code,                " 字串函式：串接
+       CASE WHEN price < 500  THEN 'LOW'
+            WHEN price < 1000 THEN 'MID'
+            ELSE 'HIGH' END AS level,                   " CASE 運算式
+       CAST( seatsocc AS DEC( 15, 2 ) ) AS seats_dec     " 型別轉換
+  FROM sflight
+  WHERE carrid = 'LH'
+  INTO TABLE @DATA(gt_flight).
+```
+
+| 運算式 | 用途 | 實測結果 |
+|---|---|---|
+| `price * seatsocc AS revenue` | 四則運算 | `666.00 × 455 = 303,030.00` |
+| `'X' AS flag` | 每一列固定放一個值 | `X` |
+| `concat( carrid, connid )` | 串接（SQL 字串函式，SQL String Function） | `LH0400` |
+| `substring( cityfrom, 1, 3 )` | 取子字串（從第 1 個字元起取 3 個） | `FRANKFURT` → `FRA` |
+| `length( cityfrom )`、`upper( cityto )` | 長度、轉大寫 | `9`、`NEW YORK` |
+| `CASE WHEN ... THEN ... ELSE ... END` | 依條件給值，叫 Searched CASE（同講義 17 的 `COND`） | `LOW`／`MID`／`HIGH` |
+| `CASE carrid WHEN 'LH' THEN ... END` | 依值對應，叫 Simple CASE（同講義 17 的 `SWITCH`） | `Lufthansa` |
+| `CAST( seatsocc AS DEC( 15, 2 ) )` | 型別轉換（Cast Expression），轉成指定的資料庫型別 | `318` → `318.00` |
+
+- 這些運算式**只能用在新式寫法**（逗號分隔、`@`、`INTO` 放最後）；傳統寫法裡放算式會報 `must be separated using commas`。
+- 結果欄位的名稱就是 `AS` 後面的別名，用 `@DATA( )` 接收時直接寫 `gs_flight-revenue`、`gs_flight-level`。
+- `CASE` 在資料庫端分好類，比撈回來再用 `IF` 判斷少一次資料搬移。
+
+**進階補充：`UP TO n ROWS OFFSET m`（分頁查詢，Pagination）**
+
+```abap
+SELECT carrid, connid FROM spfli
+  ORDER BY carrid, connid
+  INTO TABLE @DATA(gt_page)
+  UP TO 3 ROWS OFFSET 2.          " 跳過前 2 筆，取接下來的 3 筆
+```
+
+`OFFSET m` 表示先跳過 m 筆，常用在「一頁 3 筆，第 2 頁從第 4 筆開始」這種分頁顯示。一定要搭配 `ORDER BY`，否則每次跳過的是哪幾筆不固定。
 
 ## 4. SELECT ... ENDSELECT（看得懂即可）
 

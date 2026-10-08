@@ -28,11 +28,11 @@
 
 ## 2. Enqueue Server（負責管理鎖定的服務）與 Lock Table（目前所有鎖定的清單）（觀念，不用深究底層）
 
-SAP 系統有一個獨立的**鎖定管理員（Enqueue Server）**，維護一張**鎖定表（Lock Table）**，記錄「誰、鎖了哪張表的哪一筆、什麼模式」。這張表**不是資料庫表**，是 SAP Kernel 在記憶體裡管理的（可以用 **SM12** 交易碼查看目前所有鎖定紀錄）。
+SAP 系統有一個獨立的**鎖定管理員（Enqueue Server）**，維護一張**鎖定表（Lock Table）**，記錄「誰、鎖了哪張表的哪一筆、什麼模式」。這張表**不是資料庫表**，是 SAP Kernel 在記憶體裡管理的（可以用 **SM12** 交易碼（Transaction Code）查看目前所有鎖定紀錄）。
 
 關鍵特性：
 - 鎖定跟**資料庫交易（COMMIT/ROLLBACK）沒有直接關係**——鎖定要靠程式明確呼叫 DEQUEUE 解除，或整個使用者對話（Session）結束時系統自動清掉殘留的鎖
-- 鎖定檢查**只在程式主動呼叫 ENQUEUE 時才生效**，不會自動阻止 Open SQL 的 `UPDATE`／`MODIFY`——這點跟講義 21 學過的「外鍵只擋畫面輸入、不擋 Open SQL」是同一種概念：**Lock Object 是一個要靠程式主動配合的機制，不是資料庫層的強制鎖**
+- 鎖定檢查**只在程式主動呼叫 ENQUEUE 時才生效**，不會自動阻止 Open SQL 的 `UPDATE`／`MODIFY`——這點跟講義 21 學過的「外鍵（Foreign Key）只擋畫面輸入、不擋 Open SQL」是同一種概念：**Lock Object 是一個要靠程式主動配合的機制，不是資料庫層的強制鎖**
 
 ## 3. SE11 建立自訂 Lock Object
 
@@ -117,7 +117,7 @@ CALL FUNCTION 'DEQUEUE_EZTR21_STUD'
 `FOREIGN_LOCK` 這個例外只有在**另一個使用者**（或另一個沒有 DEQUEUE 就結束的 Session）已經持有鎖時才會發生。單一程式跑一次 `programrun` 看不到這個效果（一次執行結束後鎖就釋放了）。實際上課測試方式：
 
 1. 開兩個 SAP GUI 視窗（或兩個不同帳號登入）
-2. 視窗 A 執行練習程式，在 `ENQUEUE` 成功、還沒 `DEQUEUE` 之前，用中斷點或 `WAIT UP TO 30 SECONDS` 讓程式停在那裡
+2. 視窗 A 執行練習程式，在 `ENQUEUE` 成功、還沒 `DEQUEUE` 之前，用中斷點（Breakpoint）或 `WAIT UP TO 30 SECONDS` 讓程式停在那裡
 3. 視窗 B 對**同一個學號**執行同一支程式——應該會在 `ENQUEUE` 那一步收到 `FOREIGN_LOCK`（`sy-subrc = 1`）
 4. **SM12** 交易碼：輸入 Table Name 或 User，可以看到目前系統裡所有鎖定紀錄（誰、鎖了哪個 Lock Object、哪些參數值）——視窗 A 還沒 DEQUEUE 前，這裡應該看得到一筆
 5. 視窗 A 執行 `DEQUEUE` 或結束程式後，SM12 那筆記錄應該消失，視窗 B 再試一次就會成功
@@ -126,7 +126,7 @@ CALL FUNCTION 'DEQUEUE_EZTR21_STUD'
 
 正常情況下鎖定都是程式自己成對呼叫 `ENQUEUE`／`DEQUEUE` 來管理，不需要人工介入。但以下情況會讓鎖**沒有機會被正常 `DEQUEUE`**，變成殘留在鎖定表裡：
 
-- 程式在 `ENQUEUE` 成功之後、`DEQUEUE` 之前發生 Dump（未預期的執行期錯誤）
+- 程式在 `ENQUEUE` 成功之後、`DEQUEUE` 之前發生 Dump（未預期的執行期錯誤（Runtime Error））
 - 使用者在維護畫面卡住不動、放著不管，或直接關掉 SAP GUI 視窗（沒有走正常的「離開/取消」流程）
 - **無頭測試工具呼叫到需要畫面互動的功能，卡住等待、最終被強制斷線**（例如 `programrun` 呼叫到 `VIEW_MAINTENANCE_CALL` 這種會開整個維護畫面的呼叫，`programrun` 沒有畫面可以操作，最終連線逾時中斷——這種「非正常結束」的呼叫路徑，理論上也不會執行到後面的 `DEQUEUE` 那一行）
 

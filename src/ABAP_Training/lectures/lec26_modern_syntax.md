@@ -49,7 +49,7 @@ ENDLOOP.
 
 **四個要注意的地方**（都已在 SAP 系統實測）：
 
-1. **型別由右邊決定，字面值容易誤判**：`DATA(lv_n) = 0.` 是 `i`，之後 `lv_n = 7 / 2.` 得 `4`（整數四捨五入）；`DATA(lv_s) = 'abc'.` 推導出的是 **`c LENGTH 3`**，之後 `lv_s = 'abcdefgh'.` 只剩 `abc`（被截斷，講義 1 提過的固定長度文字）；要 `string` 就得用反引號 `` DATA(lv_s) = `abc`. ``。
+1. **型別由右邊決定，字面值（Literal）容易誤判**：`DATA(lv_n) = 0.` 是 `i`，之後 `lv_n = 7 / 2.` 得 `4`（整數四捨五入）；`DATA(lv_s) = 'abc'.` 推導出的是 **`c LENGTH 3`**，之後 `lv_s = 'abcdefgh'.` 只剩 `abc`（被截斷，講義 1 提過的固定長度文字）；要 `string` 就得用反引號 `` DATA(lv_s) = `abc`. ``。
 2. **作用範圍是整個程式單元**（程式主體／FORM／方法），不是只有 `LOOP` 裡面：兩個 `LOOP` 都寫 `INTO DATA(gv_x)`，第二個會編譯錯誤 `"GV_X" was already declared`——換不同名稱，或第二個 `LOOP` 直接 `INTO gv_x`。
 3. **不是每個位置都能行內宣告**：`CALL FUNCTION ... IMPORTING x = DATA(y)` 不合法（Function Module 的參數一律要事先宣告好的變數），只有方法呼叫等少數位置支援。
 4. **只是少寫一行宣告，效果與傳統寫法完全相同**，不影響執行結果與效能；讀新專案／S/4HANA 程式碼時兩種都要看得懂。各講義的「新式寫法對照」都用到行內宣告，第一次介紹在講義 2 §1。
@@ -93,7 +93,7 @@ WRITE: / |代碼轉大寫：{ gv_code CASE = UPPER }|.
 
 講義 6～25 一路用的舊式 Open SQL，並沒有強制標記宿主變數，編譯器靠**位置**猜：`WHERE carrid = gv_carrid` 裡，等號左邊照慣例是資料庫欄位、右邊是程式變數，位置關係單純，猜得準。但只靠位置猜，遇到下面兩種情況就會出問題：
 
-- **欄位清單裡放算式、`CASE WHEN`、子查詢**：資料庫欄位跟程式變數可能混在同一個運算式裡（例如 `SUM( price * @lv_rate )`），編譯器無法只靠位置分辨誰是誰。
+- **欄位清單裡放算式、`CASE WHEN`、子查詢（Subquery）**：資料庫欄位跟程式變數可能混在同一個運算式裡（例如 `SUM( price * @lv_rate )`），編譯器無法只靠位置分辨誰是誰。
 - **行內宣告 `@DATA(gt_x)`**：這個變數在陳述式當下才「憑空」誕生，編譯器更需要明確標記才知道「這是要宣告的宿主變數」，不是資料庫物件。
 
 **新式 Open SQL 的解法：宿主變數一律要加 `@` 前綴**（`@gv_carrid`、`@p_carrid`、`@DATA(gt_x)`）。`@` 讓編譯器不用再猜——看到 `@` 就知道「這是 ABAP 那邊來的」，沒有 `@` 的識別字就是資料庫欄位，語意完全消歧義，也才撐得起算式、`CASE`、子查詢、行內宣告這些更複雜的語法。這是一次性的規則轉換：只要 `SELECT` 欄位清單用逗號分隔的新式寫法，句子裡**所有**宿主變數（含 `WHERE`／`INTO` 用到的）都要加 `@`，混用舊式 `INTO CORRESPONDING FIELDS OF TABLE itab`（不帶 `@`）也一樣要遵守——這是 `.claude/rules/sap-adt-mcp.md` 第 13 節記錄過的實測踩坑點。
@@ -112,10 +112,10 @@ SELECT scarr~carrid, scarr~carrname, sflight~connid, sflight~price,
 ```
 
 - `@DATA(gt_flight)`：不用先 `TYPES`/`DATA` 宣告內表，型別由 `SELECT` 清單自動推導——對照講義 11 的 JOIN 寫法，少了一段結構宣告；`@` 標記這是「要行內宣告的宿主變數」。
-- `CASE WHEN ... THEN ... END AS alias`：在資料庫層就把分類算好，比撈回 ABAP 再用 `LOOP` + `IF` 判斷少一次資料搬移；`END AS` 給的別名會成為推導出結構的欄位名（`PRICE_LEVEL`）。
+- `CASE WHEN ... THEN ... END AS alias`（講義 6 §3.7 有其他 SELECT 運算式）：在資料庫層就把分類算好，比撈回 ABAP 再用 `LOOP` + `IF` 判斷少一次資料搬移；`END AS` 給的別名會成為推導出結構的欄位名（`PRICE_LEVEL`）。
 - 位置規則：新式寫法把 `INTO` 放到句尾時，`ORDER BY` 要寫在 `INTO` 之前，`UP TO n ROWS` 要接在 `INTO` 之後。傳統寫法則是 `INTO` 在 `WHERE` 之前、`ORDER BY` 在 `WHERE` 之後（講義 6 §3.5）。
 - **`INTO` 放在整句最後，本身就是新式寫法的標誌**：傳統寫法的 `INTO` 只能放在「`SELECT` 欄位清單之後」或「`FROM`／`JOIN` 之後、`WHERE` 之前」；一旦像上面範例把 `INTO TABLE @DATA(...)` 放到 `ORDER BY` 後面，編譯器就進入新式模式，強制要求欄位清單用逗號分隔、宿主變數加 `@`（實測：傳統空格分隔的欄位清單搭配句尾 `INTO`，會報 `The elements in the "SELECT LIST" list must be separated using commas`）。所以講義 6～25 的傳統寫法，`INTO` 一律寫在 `FROM` 前面或緊接 `FROM` 之後。
-- **聚合函數裡可以直接放算式（呼應講義 20a 第 7 節）**：講義 20a 用傳統寫法時，`SUM( price * seatsocc )` 會報「must be separated using commas」，因為算式屬於新式語法；改成新式寫法就能在資料庫內直接算出講義 20 的各公司營收，不必撈明細再 `LOOP` 累加：
+- **聚合函數（Aggregate Function）裡可以直接放算式（呼應講義 20a 第 7 節）**：講義 20a 用傳統寫法時，`SUM( price * seatsocc )` 會報「must be separated using commas」，因為算式屬於新式語法；改成新式寫法就能在資料庫內直接算出講義 20 的各公司營收，不必撈明細再 `LOOP` 累加：
 
 ```abap
 SELECT carrid,
@@ -174,7 +174,7 @@ DATA(gt_item) = VALUE tt_item( ( matnr = 'M001' qty = 10 )
 
 - 傳統寫法要宣告內表變數，再一筆一筆 `APPEND VALUE #( ... ) TO gt_item.`；`VALUE` 運算式可以整批用一句話建好初始內容，適合測試資料、固定清單。
 - 這裡額外示範**次要索引（Secondary Key）**：`WITH NON-UNIQUE SORTED KEY by_qty COMPONENTS qty` 是給第 7 節 `FILTER` 用的，先在這裡跟主索引一起宣告。
-- 用 `SORTED TABLE` 時，`VALUE` 給的資料順序要**符合主鍵排序**（這裡 `matnr` 已經是 `M001 < M002 < M003` 遞增），不符合排序會執行期出錯。
+- 用 `SORTED TABLE` 時，`VALUE` 給的資料順序要**符合主鍵（Primary Key）排序**（這裡 `matnr` 已經是 `M001 < M002 < M003` 遞增），不符合排序會執行期出錯。
 
 ## 6. REDUCE：迴圈累加成單一運算式（取代 LOOP + 累加變數）
 
@@ -224,7 +224,7 @@ ENDLOOP.
 | Field-Symbol | 先 `FIELD-SYMBOLS` 再 `ASSIGNING` | `ASSIGNING FIELD-SYMBOL(<fs>)`、`ASSIGN itab[ ] TO FIELD-SYMBOL(<fs>)` | 講義 16 §7 |
 | 撈資料到內表 | `DATA` 先宣告 + `SELECT ... INTO TABLE itab` | `SELECT ... INTO TABLE @DATA(itab)` | 講義 6 §3.6 |
 | JOIN | 先定義接收結構 + `INTO CORRESPONDING FIELDS OF TABLE` | `INTO TABLE @DATA(itab)` | 講義 11 §2 |
-| 群組小計 | `AT NEW`／`AT END OF`／`SUM` | `LOOP AT ... GROUP BY` + `REDUCE` | 講義 20 §5.1 |
+| 群組小計（Control Break） | `AT NEW`／`AT END OF`／`SUM` | `LOOP AT ... GROUP BY` + `REDUCE` | 講義 20 §5.1 |
 | 聚合裡算營收 | 不支援，撈明細回來算 | `SUM( price * seatsocc )` | 講義 20a §7 |
 | 寫入資料表 | `INSERT ztab FROM gs` | `INSERT ztab FROM @gs`、`FROM @( VALUE #( ... ) )` | 講義 21 §5 |
 

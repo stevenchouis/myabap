@@ -13,7 +13,7 @@
 
 ## 1. 總整理目標
 
-做一張「航班營收報表」：選擇畫面過濾 → JOIN 取數 → 計算營收 → 132 欄分頁排版 → 頁首頁尾 → 頁次「n / 總頁數」。這正是實務傳統報表的完整形狀——完成它，就具備獨立接報表需求的能力。
+做一張「航班營收報表」：選擇畫面（Selection Screen）過濾 → JOIN 取數 → 計算營收 → 132 欄分頁排版 → 頁首（Page Header）頁尾（Page Footer） → 頁次「n / 總頁數」。這正是實務傳統報表的完整形狀——完成它，就具備獨立接報表需求的能力。
 
 ## 2. 完整報表架構（技能總地圖）
 
@@ -80,12 +80,12 @@ ENDFORM.
 
 - `READ LINE n OF PAGE p`：把清單第 p 頁第 n 行的內容讀進 `sy-lisel`；讀得到 `sy-subrc = 0`，那一頁沒有第 n 行則不等於 0。
 - **`sy-lisel` 是什麼**：系統欄位（跟 `sy-subrc`、`sy-pagno` 一樣屬於系統結構 `SYST`），型別是 `c` 長度 255（2026-09-30 查 `DD03L`），放的是**清單上一整行的畫面文字**，也就是 `WRITE` 排好版之後、螢幕上看到的那串字。系統在兩個時機填它：
-  - 互動清單使用者雙擊某一行時（講義 10 第 4.5 節），放被雙擊那一行的文字。
+  - 互動清單（Interactive List）使用者雙擊某一行時（講義 10 第 4.5 節），放被雙擊那一行的文字。
   - 程式執行 `READ LINE` 時（本節），放讀到那一行的文字（官方文件 `ABAPREAD_LINE`）。
 
   它是一般的字元欄位，所以可以直接對它做 `REPLACE`；改好之後，`MODIFY LINE` 預設就是拿 `sy-lisel` 的內容寫回那一行。一般系統欄位不建議自己改（第 6 節會看到改 `sy-pagno` 的副作用），`sy-lisel` 是例外：它本來就是設計給 `READ LINE` → 修改 → `MODIFY LINE` 這個流程當暫存區用的。
 - `MODIFY LINE`：把改好的 `sy-lisel` 寫回同一行。
-- 佔位符（`###`）要選**內容裡不會自然出現**的字串，行號要跟頁首版型一致（範例中「頁次」在頁首第 2 行）。
+- 佔位符（Placeholder）（`###`）要選**內容裡不會自然出現**的字串，行號要跟頁首版型一致（範例中「頁次」在頁首第 2 行）。
 - `MODIFY CURRENT LINE`：改寫「最近一次 `READ LINE` 讀到的那一行」，效果等於 `MODIFY LINE n OF PAGE p`，舊程式常見（第 6 節案例就是這樣寫）。
 
 ### 3.1 延伸：一份清單印多張文件，每張各自「頁次 n / 總頁數」
@@ -165,7 +165,7 @@ ENDLOOP.
 
 - [ ] 選擇畫面有 BLOCK 框與標題，條件全部生效（含空條件＝查全部）
 - [ ] JOIN 一次取數，沒有迴圈內 SELECT
-- [ ] 營收計算正確（票價 × 已售座位，金額欄含幣別格式）
+- [ ] 營收計算正確（票價 × 已售座位，金額欄含幣別（Currency）格式）
 - [ ] 每頁頁首（含頁次）、頁尾齊全，直欄筆直，跨頁正常
 - [ ] 總頁數回填正確（每一頁都顯示相同總頁數）
 - [ ] 主流程只有 PERFORM，邏輯都在 FORM；命名符合 gv_/gs_/gt_ 慣例
@@ -196,13 +196,13 @@ ENDLOOP.
 | 區塊 | 內容 | 講義 |
 |---|---|---|
 | `REPORT ... LINE-SIZE 203 LINE-COUNT 65(0)` | 寬報表、不保留頁尾（原因見下方分頁設計） | 12 |
-| `TABLES`、`LIKE`、`BEGIN OF ... OCCURS 0`、`OCCURS 0 WITH HEADER LINE` | 舊式宣告，全部內表都帶 Header Line | 2、5 §8、7 |
+| `TABLES`、`LIKE`、`BEGIN OF ... OCCURS 0`、`OCCURS 0 WITH HEADER LINE` | 舊式宣告，全部內表（Internal Table）都帶 Header Line | 2、5 §8、7 |
 | `DEFINE cls` | macro，一次做 `CLEAR` 加 `REFRESH` | 9（後面才教，先看懂） |
 | 選擇畫面：`BLOCK`、`OBLIGATORY`、`DEFAULT`、`AS CHECKBOX`、`MATCHCODE OBJECT`、`NO-DISPLAY` | | 7 |
 | `INITIALIZATION` 裡的 `SELECTION-SCREEN FUNCTION KEY`、`AT SELECTION-SCREEN` 的 `CALL TRANSACTION` | 選擇畫面工具列（App bar）上的兩顆按鈕，跳到 SM30 維護／查詢會計主管表 `ZFI0037`（見下方說明） | 28 §7（選修，先看懂） |
 | `TYPE-POOLS: icon`、`functxt-icon_id = icon_tools` | 按鈕上的 SAP 圖示（ICON） | 28 §7.1 |
 | `check_auth_object`：`AUTHORITY-CHECK` 依序試 `ACTVT` 01／02／03 | 有新增、修改、顯示任一權限就放行 | 28 |
-| `initial_document_status_range`：呼叫 `GET_DOMAIN_VALUES` 取 Domain 固定值，**在程式裡自己填 `NO-DISPLAY` 的 `s_bstat`** | 把三個勾選框轉成 range 表，再用 `IN` 查詢 | 7、15、25 |
+| `initial_document_status_range`：呼叫 `GET_DOMAIN_VALUES` 取 Domain 固定值（Fixed Value），**在程式裡自己填 `NO-DISPLAY` 的 `s_bstat`** | 把三個勾選框轉成 range 表，再用 `IN` 查詢 | 7、15、25 |
 | `extract_acct_doc_header_data`：`SELECT ... IN`、查無資料 `MESSAGE ... STOP` | | 6、7、10 |
 | 同一個 FORM 後半：`SELECT ... ENDSELECT` 加 `ORDER BY ... DESCENDING`、抓到第一筆就 `EXIT` | 找「生效日不晚於暫存文件建立日的最近一任會計主管」（規則見 6.2 步驟 1） | 6 §3.5、§4 |
 | `extract_acct_doc_item_data`：`FOR ALL ENTRIES`、`APPENDING CORRESPONDING FIELDS`、欄位別名 `saknr AS hkont`、`MOVE-CORRESPONDING` | 過帳文件讀 BSEG；暫存文件讀四張 VBSEG* 後合併 | 3、11 |
@@ -239,7 +239,7 @@ INITIALIZATION.
 
 - `SSCRFIELDS` 是 Structure，不是資料表。一定要用 `TABLES sscrfields.` 宣告（不能改用 `DATA`），程式才能跟選擇畫面交換按鈕文字與按下的代碼，原因見講義 7 第 3.0 節。
 - 只要文字、不要圖示時，直接寫 `sscrfields-functxt_01 = '維護會計主管名稱'.` 就好。
-- 要圖示＋文字時，才用 `smp_dyntxt` 結構：`icon_id` 放圖示常數，`icon_text` 放文字。
+- 要圖示＋文字時，才用 `smp_dyntxt` 結構：`icon_id` 放圖示常數（Constant），`icon_text` 放文字。
 - **`icon_tools` 是什麼**：SAP 內建的圖示常數，代表「工具（扳手）」圖示，值是 `'@45@'`。畫面看到 `@代碼@` 這種格式，就會顯示成對應的圖示。這些常數定義在 Type Group `ICON`，原程式第 29 行的 `TYPE-POOLS: icon.` 就是載入它；新版系統會自動載入，不寫也能用。程式裡用常數名稱，不要直接寫 `'@45@'`，比較看得懂。
 - 要換別的圖示，SE38 執行報表 `SHOWICON` 可以看到全部圖示和常數名稱。常用圖示對照與其他用法（清單、ALV 裡放圖示）見講義 28 第 7.1 節。
 - 原程式把 `SELECTION-SCREEN FUNCTION KEY` 寫在 `INITIALIZATION` 事件裡面。它是**宣告**，不是執行時才跑的指令，寫在哪裡都會生效，但容易讓人誤以為它是事件裡的邏輯。自己寫時放在 `PARAMETERS`／`SELECT-OPTIONS` 那一區比較清楚；`INITIALIZATION` 裡只留設定按鈕文字的程式。
@@ -334,10 +334,10 @@ SM30 維護畫面的工具列有一顆「Display ↔ Change」切換按鈕。就
 
 | 規格書章節 | 內容 | 對應到程式 | 講義 |
 |---|---|---|---|
-| 1. 程式功能說明 | 列示暫存／過帳／被刪除暫存文件的分錄；簽核欄；權限物件 `F_BKPF_BUK`（作業 01／02／03）；T-code `ZFI0007` | `check_authority`；報表 T-code 用 SE93 建立 | 28 |
+| 1. 程式功能說明 | 列示暫存／過帳／被刪除暫存文件的分錄；簽核欄；權限物件（Authorization Object） `F_BKPF_BUK`（作業 01／02／03）；T-code `ZFI0007` | `check_authority`；報表 T-code 用 SE93 建立 | 28 |
 | 2. 相關 SAP 標準 Table | `BKPF`／`BSEG`、會計科目 `SKA1`／`SKB1`／`SKAT`、公司 `T001` | 讀哪些表、怎麼串 | 6、11 |
 | 3. Selection-Screen | 每個欄位的 Type（P／S／C）、是否有預設值、參考欄位、No Display | `PARAMETERS`、`SELECT-OPTIONS`、勾選框轉成 `s_bstat` range | 7 |
-| 4. 欄位說明 | 表頭／表身／表尾各欄位的來源與輸出長度 | 欄位座標表、`WRITE AT` | 12 |
+| 4. 欄位說明 | 表頭／表身／表尾各欄位的來源與輸出長度（Output Length） | 欄位座標表、`WRITE AT` | 12 |
 | 4. Note1 | 依公司代碼、會計文件、會計年度排序、跳頁；每頁都有簽核欄 | `SORT`、每張文件 `NEW-PAGE`、固定行號印簽核欄 | 20、12 |
 | 6. 報表格式 | 版面範例 | 步驟 2 的版面規劃 | 12 |
 | 8. 2023/8/1 需求 | 會計主管表、簽核欄要印誰、印哪一天 | `ZFI0037`（步驟 1a）、簽核欄邏輯 | 21、21a |
@@ -384,7 +384,7 @@ SM30 維護畫面的工具列有一顆「Display ↔ Change」切換按鈕。就
 | 欄位 | Key | 型別（Data Element） | 說明 |
 |---|---|---|---|
 | `MANDT` | ✓ | `MANDT` | Client |
-| `BUKRS` | ✓ | `BUKRS` | 公司代碼，外鍵指向 `T001`（講義 21 外鍵／Check Table） |
+| `BUKRS` | ✓ | `BUKRS` | 公司代碼，外鍵（Foreign Key）指向 `T001`（講義 21 外鍵／Check Table） |
 | `INAUGURATION` | ✓ | `ZINAUGURATION`（自建） | 生效日 |
 | `ACCTNAME` | | `ZACCTNAME`（自建） | 會計主管姓名 |
 
@@ -603,7 +603,7 @@ gv_page_line = sy-linno.                      " 記下頁碼在第幾行
 | 2022 年、文件 4900000000～040 | 12～18 筆明細（跨 2 頁） | 3,120 | 相同 |
 | 2021 年、文件 5000000094～100 | 26 筆明細（跨 3 頁） | 650 | 相同 |
 
-唯一的差異是**沒有明細的傳票的匯率**：原程式只在「有明細」的頁首把 0 匯率改成 1，沒有明細的傳票沒改到，而匯率欄位的 Domain 有轉換常式 `EXCRT`，會把 0 顯示成空白。於是同一支程式裡，有明細的傳票印 `1.00000`，沒有明細的印空白。範例程式統一印 `1.00000`。
+唯一的差異是**沒有明細的傳票的匯率**：原程式只在「有明細」的頁首把 0 匯率改成 1，沒有明細的傳票沒改到，而匯率欄位的 Domain 有轉換常式（Conversion Routine） `EXCRT`，會把 0 顯示成空白。於是同一支程式裡，有明細的傳票印 `1.00000`，沒有明細的印空白。範例程式統一印 `1.00000`。
 
 驗證的心得：
 
@@ -613,7 +613,7 @@ gv_page_line = sy-linno.                      " 記下頁碼在第幾行
 #### 自我檢查：這支程式好在哪裡
 
 - [ ] 主流程只有 PERFORM，每個 FORM 做一件事，名稱看得出用途
-- [ ] 命名照慣例，沒有 Header Line，沒有 `TABLES` 表工作區存資料
+- [ ] 命名照慣例，沒有 Header Line，沒有 `TABLES` 表工作區（Work Area）存資料
 - [ ] 迴圈裡沒有 SELECT；`FOR ALL ENTRIES` 前面有空表防呆
 - [ ] 每個 SELECT／READ TABLE 後面都檢查 `sy-subrc`，查詢前先清空目標變數
 - [ ] 版面寫在一個地方（欄寬結構、頁碼行號用 `sy-linno` 記錄），沒有到處寫死的數字

@@ -244,6 +244,28 @@ SELECT * FROM scarr
 
 ---
 
+<!-- _class: compact -->
+
+## 新式寫法對照：SELECT 清單裡的運算式（SQL Expression）
+
+```abap
+SELECT carrid, connid,
+       price * seatsocc AS revenue,                 " 四則運算
+       'X' AS flag,                                 " 字面值
+       concat( carrid, connid ) AS code,            " 字串函式
+       CASE WHEN price < 500 THEN 'LOW'
+            ELSE 'HIGH' END AS level,               " CASE
+       CAST( seatsocc AS DEC( 15, 2 ) ) AS seats_dec " 型別轉換
+  FROM sflight
+  INTO TABLE @DATA(gt_flight).
+```
+
+- 字串函式還有 `substring( )`、`length( )`、`upper( )`
+- 只能用在新式寫法；結果欄位名就是 `AS` 的別名
+- 進階：`UP TO 3 ROWS OFFSET 2` 跳過 2 筆再取 3 筆（分頁，要配 `ORDER BY`）
+
+---
+
 ## 4. SELECT ... ENDSELECT（看得懂即可）
 
 舊程式常見的逐筆撈取：

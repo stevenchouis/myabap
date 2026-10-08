@@ -5,9 +5,9 @@
 ## 學習目標
 
 - 理解 `INCLUDE` 的本質：**原地展開的程式碼片段**，跟寫在主程式裡完全等價，拆檔是為了「人」好維護
-- 分清楚**拆檔不是模組化**：INCLUDE 不能被呼叫、沒有自己的變數與介面，跟 FORM／FM 是兩回事
+- 分清楚**拆檔不是模組化（Modularization）**：INCLUDE 不能被呼叫、沒有自己的變數與介面，跟 FORM／FM 是兩回事
 - 掌握實務拆檔慣例：
-  - `<程式名>_TOP`：全域宣告（TYPES / DATA / 選擇畫面）
+  - `<程式名>_TOP`：全域宣告（TYPES / DATA / 選擇畫面（Selection Screen））
   - `<程式名>_F01`：FORM 副程式（量大再拆 F02、F03…）
   - 主程式：只剩 INCLUDE 兩行 + 事件流程，一眼看懂骨架
 - 知道 FORM 的 INCLUDE 要放**最後**（FORM 插在事件中間會造成後續事件碼進不到）
@@ -15,7 +15,7 @@
 
 ## 事前準備
 
-建立三個物件（套件 `$TMP`）：
+建立三個物件（套件（Package） `$TMP`）：
 1. `ZR_TR14_<縮寫>`：Executable Program（主程式）
 2. `ZR_TR14_<縮寫>_TOP`：Include Program
 3. `ZR_TR14_<縮寫>_F01`：Include Program

@@ -6,7 +6,7 @@
 
 - 為什麼 SM30 原生的權限檢查不夠用——業務維度（如「只能改自己負責的航空公司」）要自己包一層
 - 自訂**權限物件**（Authorization Object）：`ACTVT`＋業務欄位（本例 `CARRID`）
-- Lock Object 的鎖定範圍可以比表格主鍵**更粗**——鎖「一家航空公司」而不是「一筆資料」
+- Lock Object 的鎖定範圍可以比表格主鍵（Primary Key）**更粗**——鎖「一家航空公司」而不是「一筆資料」
 - `VIEW_MAINTENANCE_CALL`：從程式呼叫標準 Table Maintenance 的正規做法
 - T-code 應該指到「包裝程式」，不是直接指到裸的維護畫面
 - Report 選取畫面上的按鈕怎麼呼叫另一個 Transaction：`SELECTION-SCREEN FUNCTION KEY` + SE93 Parameter Transaction
@@ -46,7 +46,7 @@
 5. 存檔（跳出的 Transport 對話框選 **Local Object**，練習用途不用建正式傳輸單）
 6. 工具列 **Activate**（或 Ctrl+F3）——存檔時如果看到「Permissible activities not maintained for field ACTVT」這種**黃色警告**（不是紅色錯誤）可以先忽略，那是提醒「還沒設定這個物件允許哪些 `ACTVT` 值」，不影響本題後續使用；如果是紅色的「Object class ... does not exist」就要回頭檢查 Class 代碼有沒有打對
 
-> **`ACTVT` 幾乎是所有自訂權限物件的標配**：光看「使用者對某張表有沒有權限」不夠，還要分「只能看」還是「可以改」。標準活動代碼 `01`/`02`/`03`/`06`（刪除）／`08` (顯示變更文件)…可以查 `SU21` 或 `SE11` 顯示 Data Element `ACTVT` 的固定值清單。
+> **`ACTVT` 幾乎是所有自訂權限物件的標配**：光看「使用者對某張表有沒有權限」不夠，還要分「只能看」還是「可以改」。標準活動代碼 `01`/`02`/`03`/`06`（刪除）／`08` (顯示變更文件)…可以查 `SU21` 或 `SE11` 顯示 Data Element `ACTVT` 的固定值（Fixed Value）清單。
 
 > ⚠️ **本例的權限物件 `ZTR28_CARR`（無 `S`）跟 Lock Object `EZTR28_CARR`（有 `S`，且 `E` 開頭）拼法相近但不同，不要看錯**——兩者只差開頭的 `E`，操作時務必看清楚。
 
@@ -93,20 +93,20 @@ ENDIF.
 
 講義 27 的 `EZTR21_STUD` 鎖 `MANDT`+`ID`（表格完整主鍵），意思是「鎖一筆學生資料」。本題的表 `ZTR28_CDISC` 主鍵是 `MANDT`+`CARRID`（兩個欄位），Lock Object `EZTR28_CARR` 的 Lock Parameters 剛好就是這兩個欄位——因為本題的業務需求本來就是「同一家航空公司不能有兩人同時維護折扣」，鎖定範圍跟主鍵一致，不需要像講義 27 或 ex28 舊版那樣刻意鎖得比主鍵粗。
 
-**鎖定範圍要對應到「使用者實際上在爭搶的資源邊界」，不是機械式地照抄表格主鍵，也不是為了跟前一題不一樣而刻意設計得更粗**——本題剛好主鍵範圍跟業務邊界一致，就直接鎖整個主鍵；如果之後表格多了第三個 Key 欄位（例如「幣別」），要重新思考鎖定範圍該不該涵蓋它。
+**鎖定範圍要對應到「使用者實際上在爭搶的資源邊界」，不是機械式地照抄表格主鍵，也不是為了跟前一題不一樣而刻意設計得更粗**——本題剛好主鍵範圍跟業務邊界一致，就直接鎖整個主鍵；如果之後表格多了第三個 Key 欄位（例如「幣別（Currency）」），要重新思考鎖定範圍該不該涵蓋它。
 
 SE11 建立步驟（跟講義 27 相同流程，範圍不同）：
 
 1. 交易碼輸入 **SE11** → 左側選 **Lock Object** → 輸入 `EZTR28_CARR`（**系統強制規定要 `E` 開頭**，不是單純的命名慣例——打別的字首存檔會直接跳出警告「Start the lock object names with the prefix 'E'」。⚠️ 這裡容易跟第 3 節建的權限物件 `ZTR28_CARR` 搞混，兩者外觀相似但拼法不同（`ZTR28_CARR` 無 `S`／`EZTR28_CARR` 有 `S`），輸入時務必看清楚）→ **Create**
 2. **Tables** 頁籤：Primary Table 填 `ZTR28_CDISC` → Enter（系統會自動帶出這張表的完整欄位清單）
-3. **Lock Parameters** 頁籤：勾選 `MANDT`、`CARRID` 兩個欄位的 **Lock parameter** 核取方塊
+3. **Lock Parameters** 頁籤：勾選 `MANDT`、`CARRID` 兩個欄位的 **Lock parameter** 核取方塊（Checkbox）
 4. **Lock Mode** 欄位選 `E`（Exclusive/Write Lock）
 5. 存檔（Local Object）、工具列 **Activate**
 6. **查詢系統自動產生的 FM**：該畫面 → Utilities → Generated Objects，應該看到 `ENQUEUE_EZTR28_CARR`／`DEQUEUE_EZTR28_CARR`；也可以 SE37 直接 Display 這兩個 FM，確認 Import 參數是 `MANDT`／`CARRID`
 
 ## 5. `VIEW_MAINTENANCE_CALL`：從程式呼叫標準 Table Maintenance
 
-土法煉鋼的做法是在程式裡 `CALL TRANSACTION 'SM30'`，但這樣沒辦法乾淨地指定要維護哪個 View、也繞不過 SM30 自己的初始畫面。SAP 提供了正規的函式模組：
+土法煉鋼的做法是在程式裡 `CALL TRANSACTION 'SM30'`，但這樣沒辦法乾淨地指定要維護哪個 View、也繞不過 SM30 自己的初始畫面。SAP 提供了正規的函式模組（Function Module）：
 
 ```abap
 CALL FUNCTION 'VIEW_MAINTENANCE_CALL'
@@ -210,7 +210,7 @@ AT SELECTION-SCREEN.
 
 `VIEWNAME` 是 SM30 初始畫面「Table/View」欄位的實際技術欄位名稱，`UPDATE = X` 讓畫面直接進入維護（更新）模式而不是唯讀顯示——兩者都是**直接指定 SM30 那張畫面上的欄位值**，跟「Values for SPA/GPA Parameters」（先把值塞進 SPA/GPA 記憶體、由畫面自己讀取）是兩種不同機制，SM30 這個情境要用前者才會生效。
 
-講義 13 的傳票清單 ZRFI0004 也是這個寫法：選擇畫面的兩顆按鈕 `CALL TRANSACTION 'ZFI0037'`／`'ZFI0037Q'`，就是用 Parameter Transaction 開啟會計主管表 `ZFI0037` 的 SM30 維護／查詢畫面。當時只要求看懂，到這裡才實際建立。它的查詢版還多做一步：`ZFI0037Q` 開的不是表本身，而是 Maint. Status 設成 `Read only` 的 Maintenance View。原因是 `UPDATE` 留空讓 SM30 以顯示模式開啟，有維護權限的使用者還是能按 Change／Display 切換去改資料；唯讀 View 根本沒有這顆切換按鈕。
+講義 13 的傳票清單 ZRFI0004 也是這個寫法：選擇畫面（Selection Screen）的兩顆按鈕 `CALL TRANSACTION 'ZFI0037'`／`'ZFI0037Q'`，就是用 Parameter Transaction 開啟會計主管表 `ZFI0037` 的 SM30 維護／查詢畫面。當時只要求看懂，到這裡才實際建立。它的查詢版還多做一步：`ZFI0037Q` 開的不是表本身，而是 Maint. Status 設成 `Read only` 的 Maintenance View。原因是 `UPDATE` 留空讓 SM30 以顯示模式開啟，有維護權限的使用者還是能按 Change／Display 切換去改資料；唯讀 View 根本沒有這顆切換按鈕。
 
 ### ⚠️ 這顆按鈕故意示範「沒有保護」的做法，跟 `ZR_TR28_PARAM_MAINT` 對照
 
@@ -243,7 +243,7 @@ INITIALIZATION.
 
 SAP 的每個圖示都有一個 **4 個字元的內部代碼**，格式是 `@xx@`。SAP GUI 在畫面上遇到這種代碼，就把它畫成對應的圖案。系統裡的圖示登記在表 **`ICON`**，本系統共 1,230 個。實際查到的幾個例子：
 
-| 常數名稱 | 代碼 | 圖示 |
+| 常數（Constant）名稱 | 代碼 | 圖示 |
 |---|---|---|
 | `icon_green_light` | `@08@` | 綠燈 |
 | `icon_yellow_light` | `@09@` | 黃燈 |
@@ -406,7 +406,7 @@ gs_result-final_price = ls_sflight-price * ( 1 - lv_discount_pct / 100 ).
 
 ### 9.1 `REUSE_ALV_GRID_DISPLAY` 在無頭環境的意外行為（以及它的限制）
 
-`ZR_TR28_PRICE_CALC` 的輸出改用 `REUSE_ALV_GRID_DISPLAY`（Functional ALV，跟講義 9 同一套寫法）。原本预期這種會開 ALV Grid 畫面的呼叫，會跟 `VIEW_MAINTENANCE_CALL` 一樣沒辦法用 ADT 的 `programrun` 無頭驗證；**實測發現剛好相反**——`programrun` 呼叫時沒有真正的 GUI 對話框環境，`REUSE_ALV_GRID_DISPLAY` 會自動退化成傳統文字清單輸出（欄位標題、資料逐列排開），可以直接在無頭環境驗證欄位/資料是否正確，不需要等使用者到 SAP GUI 才能確認邏輯對不對。**這跟 OOP 課程教的 `cl_salv_table`（物件導向 ALV）行為不同**——`cl_salv_table` 在無頭環境會直接卡住等畫面回應，最終逾時斷線（`RFC_CLOSED`），這也是為什麼基礎課選用 Functional ALV（`REUSE_ALV_GRID_DISPLAY`）而不是 OO ALV：除了跟課程進度一致，還多了「可以無頭驗證」的實用好處。
+`ZR_TR28_PRICE_CALC` 的輸出改用 `REUSE_ALV_GRID_DISPLAY`（Functional ALV，跟講義 9 同一套寫法）。原本预期這種會開 ALV Grid 畫面的呼叫，會跟 `VIEW_MAINTENANCE_CALL` 一樣沒辦法用 ADT 的 `programrun` 無頭驗證；**實測發現剛好相反**——`programrun` 呼叫時沒有真正的 GUI 對話框環境，`REUSE_ALV_GRID_DISPLAY` 會自動退化成傳統文字清單輸出（欄位標題、資料逐列排開），可以直接在無頭環境驗證欄位/資料是否正確，不需要等使用者到 SAP GUI 才能確認邏輯對不對。**這跟 OOP 課程教的 `cl_salv_table`（物件導向（Object-Oriented） ALV）行為不同**——`cl_salv_table` 在無頭環境會直接卡住等畫面回應，最終逾時斷線（`RFC_CLOSED`），這也是為什麼基礎課選用 Functional ALV（`REUSE_ALV_GRID_DISPLAY`）而不是 OO ALV：除了跟課程進度一致，還多了「可以無頭驗證」的實用好處。
 
 ⚠️ **但這個好處不是絕對可靠**：後續排錯發現，`ZR_TR28_PRICE_CALC`／`ZR_TR28_PARAM_MAINT` 都遇過某次呼叫卡住之後、之後不管怎麼改程式碼都持續卡住的情況——確認跟程式碼無關（另建全新測試物件驗證同樣邏輯可正常執行），是 ADT `programrun` 對「這個特定物件」的無頭執行 Session 被卡死，不會自己恢復。詳細診斷過程與方法論見 `.claude/rules/sap-adt-mcp.md` 第 38 節。實務上遇到某支程式的 `programrun` 持續 `RFC_CLOSED`，先用一個全新物件重現同樣呼叫方式排除「程式碼問題」，如果新物件正常，就直接請使用者到 SAP GUI 測試，不用繼續在 ADT 這邊除錯。
 

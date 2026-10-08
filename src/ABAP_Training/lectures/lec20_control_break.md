@@ -88,7 +88,7 @@ ENDLOOP.
 - 小計行 `WRITE gs_rev-seatsocc` 印的是合計 30，不是最後一筆的 20。
 - `SUM` 不是把合計加到最後一筆上：第 2 步已經清成 0，第 3 步才填入全組合計。
 - `ENDAT` 之後的程式碼再用 `gs_rev`，拿到的又是正常的明細資料，不會被合計污染。
-- `SUM` 只能搭配 `LOOP AT ... INTO gs_rev`：用 `LOOP AT ... ASSIGNING`（講義 16）執行到 `SUM` 會 dump（執行期錯誤 `SUM_NO_ASSIGNING`）。
+- `SUM` 只能搭配 `LOOP AT ... INTO gs_rev`：用 `LOOP AT ... ASSIGNING`（講義 16）執行到 `SUM` 會 dump（執行期錯誤（Runtime Error） `SUM_NO_ASSIGNING`）。
 
 ## 4. 兩條鐵則與遮蔽規則
 
@@ -128,10 +128,10 @@ ENDAT.
 ## 5. 適用邊界
 
 - `AT` 區塊搭配 `LOOP AT ... INTO` 或 `ASSIGNING` 都可以用，但**要用 `SUM` 就一定要 `INTO` work area**（見第 3 節）；用 `ASSIGNING` 時進出 `AT` 區塊不會遮蔽或還原資料，那一列維持原樣。
-- 迴圈若加了 `WHERE` 條件或中途 DELETE，群組判斷可能失真——要過濾就**先把資料整理成乾淨的內表**再 LOOP。
+- 迴圈若加了 `WHERE` 條件或中途 DELETE，群組判斷可能失真——要過濾就**先把資料整理成乾淨的內表（Internal Table）**再 LOOP。
 - 只要「總計」不要明細時，別用 LOOP+AT LAST，直接 `SELECT SUM( ... ) GROUP BY`（資料庫端彙總）或 `COLLECT` 更省——資料庫端彙總的完整寫法見[講義 20a](lec20a_sql_aggregate.md)。
 
-## 5.1 新式寫法對照（7.40 之後）：`LOOP AT ... GROUP BY`
+## 5.1 新式寫法對照（7.40 之後）：`LOOP AT ... GROUP BY`（內表分組，Grouping）
 
 `AT NEW`／`AT END OF` 依賴「先排序、群組欄位放最前面、右邊欄位被遮成 `*`」這些規則。7.40 之後可以改用 `LOOP AT ... GROUP BY`，直接指定「依什麼分組」：
 
@@ -155,7 +155,7 @@ ENDLOOP.
 
 語法拆解：
 
-- `GROUP BY ( 名稱 = 值 ... )`：括號裡定義群組鍵，值相同的列歸成一組；可以放多個欄位。
+- `GROUP BY ( 名稱 = 值 ... )`：括號裡定義群組鍵（Group Key），值相同的列歸成一組；可以放多個欄位。
 - `INTO DATA(gs_grp)`：`gs_grp` 代表「群組本身」，可以讀群組鍵 `gs_grp-carrid`、`gs_grp-carrname`。
 - 外層 `LOOP` **每組只跑一次**；要讀組裡的每一筆，用內層 `LOOP AT GROUP gs_grp`。
 - 沒有 `SUM`：小計用 `REDUCE ... FOR m IN GROUP gs_grp` 自己加，只加需要的欄位，不會像 `SUM` 把單價也加起來。累加的是金額時，`INIT` 要寫 `INIT r TYPE 金額型別`，寫 `INIT r = 0` 會讓累加變數變成整數，小數被截掉。

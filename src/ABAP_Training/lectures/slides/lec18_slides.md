@@ -75,7 +75,7 @@ CONCATENATE 'A' 'B' 'C' INTO gv_path SEPARATED BY '-'.
 
 <!-- _class: compact -->
 
-## 新式寫法對照：字串模板 `|...|` 與 `&&`
+## 新式寫法對照：字串模板（String Template）`|...|` 與 `&&`
 
 ```abap
 * 傳統
@@ -132,7 +132,7 @@ TRANSLATE gv_text TO UPPER CASE.   " 轉大寫
 
 <!-- _class: compact -->
 
-## 新式寫法對照：字串函式
+## 新式寫法對照：字串函式（String Function）
 
 ```abap
 * 傳統：直接改掉變數本身

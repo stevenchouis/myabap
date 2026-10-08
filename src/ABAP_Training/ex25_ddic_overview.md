@@ -1,12 +1,12 @@
 # 練習 25：Data Dictionary 總覽與 Global Type
 
-> 授課順序：接在練習 7（選擇畫面）之後、練習 21（Z 資料表）之前——先學會建 DDIC 型別，後面的 FORM（ex08）與 FM（ex15）參數才能直接引用。本題還沒學 FORM 與 JOIN，程式全部寫在 `START-OF-SELECTION`。講義見 [lec25](lectures/lec25_ddic_overview.md)。
+> 授課順序：接在練習 7（選擇畫面（Selection Screen））之後、練習 21（Z 資料表）之前——先學會建 DDIC 型別，後面的 FORM（ex08）與 FM（ex15）參數才能直接引用。本題還沒學 FORM 與 JOIN，程式全部寫在 `START-OF-SELECTION`。講義見 [lec25](lectures/lec25_ddic_overview.md)。
 
 ## 學習目標
 
 - 理解 **Global Type**：引用 DDIC 型別（而非寫死長度）能讓程式在標準系統升級時自動跟著調整
 - 會判斷「重用標準 Data Element」vs「自建 Domain/Data Element」的時機
-- 會建立 Check Table **指向標準表**（而非自建表）的外鍵
+- 會建立 Check Table **指向標準表**（而非自建表）的外鍵（Foreign Key）
 - 體會「重用已掛 Search Help 的標準 Data Element」可以**完全不用自己建** Search Help
 - 會在程式中用三種寫法引用 DDIC 物件：`TYPE ztable`、`TYPE ztable-field`、`TYPE STANDARD TABLE OF ztable`
 - 會建 **DDIC Table Type**：把講義 4 的區域表格型別升級成可跨程式共用的 SE11 物件
@@ -14,14 +14,14 @@
 
 ## 事前準備
 
-物件都建在套件 `$TMP`。名稱請照下表（多人共用系統時，照課程慣例把 `TR25` 換成 `TR25_<縮寫>`，並同步調整程式中的表名）。SFLIGHT/SCARR 要有資料（`SAPBC_DATA_GENERATOR`，練習 6 應已跑過）。
+物件都建在套件（Package） `$TMP`。名稱請照下表（多人共用系統時，照課程慣例把 `TR25` 換成 `TR25_<縮寫>`，並同步調整程式中的表名）。SFLIGHT/SCARR 要有資料（`SAPBC_DATA_GENERATOR`，練習 6 應已跑過）。
 
 ## 第一部分：SE11 建 DDIC 物件
 
-1. **Domain** `ZTR25_SURPCT`：Data Type `DEC`，Length `6`、Decimals `2`；Value Range 頁籤設 Interval `0`～`100`（**注意：固定值上下限要填整數，DEC 型別的值域邊界不接受小數點**）→ 啟用
+1. **Domain** `ZTR25_SURPCT`：Data Type `DEC`，Length `6`、Decimals `2`；Value Range 頁籤設 Interval `0`～`100`（**注意：固定值（Fixed Value）上下限要填整數，DEC 型別的值域（Value Range）邊界不接受小數點**）→ 啟用
 2. **Data Element** `ZTR25_SURPCT`：參考上面的 Domain；Field Label 填「旺季加成百分比」（Short/Medium/Long 都填）→ 啟用
 3. **Data Element** `ZTR25_ACTIVE`（**第三種 Global Type 模式**：重用標準 Domain，但自己補標籤）：Domain 填標準的 **`XFELD`**（SE11 F4 搜尋，這是 SAP 內建的通用「是/否」旗標值域，本身已經有 `X`＝是／空白＝否 兩個固定值，F4 選單免費附送）；Field Label 自己填「加成啟用」（Short/Medium/Long 都填，`XFELD` 這個標準 Data Element 本身故意不帶標籤，就是留給每張表自己命名）→ 啟用
-4. **透明表** `ZTR25_SURCHG`：
+4. **透明表（Transparent Table）** `ZTR25_SURCHG`：
 
 | 欄位 | Key | 型別來源 | 說明 |
 |---|---|---|---|
@@ -55,7 +55,7 @@
 依序完成：
 
 1. 宣告示範用的 Global Type 變數：`gv_carrid_global TYPE s_carr_id`（直接引用標準 Data Element）與 `gv_carrid_hard TYPE c LENGTH 3`（反面教材：寫死長度）；各自填入 `'LH'` 後 WRITE 輸出，並用註解說明兩者的差異（見講義 25 第 2.1 節）
-2. 用第一部分建的 **DDIC Table Type** 宣告內表：`DATA gt_surchg TYPE ztr25_tt_surchg.`，`SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.`，再 `DESCRIBE TABLE ... LINES` 輸出讀到的筆數
+2. 用第一部分建的 **DDIC Table Type** 宣告內表（Internal Table）：`DATA gt_surchg TYPE ztr25_tt_surchg.`，`SELECT * FROM ztr25_surchg INTO TABLE gt_surchg.`，再 `DESCRIBE TABLE ... LINES` 輸出讀到的筆數
 3. SFLIGHT（`WHERE seatsocc > 0`）與 SCARR 各自 `SELECT ... INTO TABLE` 讀進內表；`LOOP` 航班，每筆用 `READ TABLE ... WITH KEY carrid = ...` 找航空公司名稱與加成設定——**找不到加成設定時不要跳過**，`ACTIVE`／`SURCHARGE_PCT` 維持初始值，照樣放進結果表
 4. 逐筆計算：`revenue = price * seatsocc`；`active = 'X'` 時 `revenue_adj = revenue * (1 + surcharge_pct / 100)`，否則 `revenue_adj = revenue`
 5. 輸出清單：航空公司、航線、日期、原始營收、加成後營收、幣別，並標明是否套用加成。金額用 `WRITE ... CURRENCY` 依**該航班自己的幣別**（`SFLIGHT-CURRENCY`）格式化，不要寫死 `'USD'`（航班幣別有 USD、EUR、JPY……）

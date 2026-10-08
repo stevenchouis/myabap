@@ -5,7 +5,7 @@
 ## 學習目標
 
 - 理解 Field-Symbol 是**別名不是複本**：`ASSIGN` 之後改 `<fs>` 等於改本尊
-- 會宣告與指派：`FIELD-SYMBOLS <fs> TYPE ...`、`ASSIGN ... TO <fs>`（行內宣告 `FIELD-SYMBOL(<fs>)` 是 7.40 之後的新寫法，留到 ex26）
+- 會宣告與指派：`FIELD-SYMBOLS <fs> TYPE ...`、`ASSIGN ... TO <fs>`（行內宣告（Inline Declaration） `FIELD-SYMBOL(<fs>)` 是 7.40 之後的新寫法，留到 ex26）
 - 會用 `LOOP AT ... ASSIGNING` 直接修改表格內容——不用 work area、不用 `MODIFY`
 - 會用 `READ TABLE ... ASSIGNING` 單筆就地修改
 - 會防呆：`IS ASSIGNED`、`sy-subrc`；知道 `UNASSIGN` 後亂用會 dump
@@ -13,7 +13,7 @@
 
 ## 事前準備
 
-建立程式 `ZR_TR16_<你的姓名縮寫>`，套件 `$TMP`。
+建立程式 `ZR_TR16_<你的姓名縮寫>`，套件（Package） `$TMP`。
 
 ## 題目需求
 

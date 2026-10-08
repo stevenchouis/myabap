@@ -4,15 +4,15 @@
 
 ## 學習目標
 
-- 會在 SE91 建 Message Class，會用 `&1`～`&4` 佔位符
+- 會在 SE91 建 Message Class，會用 `&1`～`&4` 佔位符（Placeholder）
 - 會維護 Text Symbols 與 Selection Texts，理解 `text-nnn` 與 `'文字'(nnn)` 的 fallback 差異
 - 會寫 `MESSAGE 型別+編號(類別) WITH ...`，理解型別是呼叫端決定的
-- 理解登入語言與翻譯（Goto → Translation）的關係
+- 理解登入語言（Logon Language）與翻譯（Goto → Translation）的關係
 
 ## 事前準備
 
-- 建立程式 `ZR_TR22_<你的姓名縮寫>`，套件 `$TMP`
-- SE91 建立訊息類別 `ZTR22_<你的姓名縮寫>`（示範解答用 `ZTR22`），維護三則訊息：
+- 建立程式 `ZR_TR22_<你的姓名縮寫>`，套件（Package） `$TMP`
+- SE91 建立訊息類別（Message Class） `ZTR22_<你的姓名縮寫>`（示範解答用 `ZTR22`），維護三則訊息：
 
 | 編號 | 訊息文字 |
 |---|---|

@@ -80,7 +80,7 @@ FORM show_list USING it_students TYPE tt_student.
 ENDFORM.
 ```
 
-（`tt_student` 是講義 4 用 TYPES 定義的表格型別——這就是表格型別的另一個好處：能拿來宣告參數。）
+（`tt_student` 是講義 4 用 TYPES 定義的表格型別（Table Type）——這就是表格型別的另一個好處：能拿來宣告參數。）
 
 參數型別也可以直接用講義 25 在 SE11 建的 **DDIC Table Type**。例如讀取旺季加成設定的 FORM：
 
@@ -167,7 +167,7 @@ FORM calc_grade USING    iv_score TYPE i
 ENDFORM.
 ```
 
-- 只放 FORM：沒有選擇畫面、沒有事件、**不能 F8 直接執行**，只能被別的程式呼叫。
+- 只放 FORM：沒有選擇畫面（Selection Screen）、沒有事件、**不能 F8 直接執行**，只能被別的程式呼叫。
 - 被呼叫時才載入記憶體（載入當下會觸發 `LOAD-OF-PROGRAM` 事件）。
 - 技術上，可執行程式、Module Pool、Function Pool 裡的 FORM 也能被外部呼叫；Subroutine Pool 只是「最乾淨、專門為此設計」的容器。Include 裡的 FORM 不能用 Include 名稱直接呼叫。
 - **建立方式是 GUI-only**：ADT 無法設定程式類型，要在 SE38 建立時選 Subroutine Pool（已建好的程式可用 Goto → Attributes 改 Type）。

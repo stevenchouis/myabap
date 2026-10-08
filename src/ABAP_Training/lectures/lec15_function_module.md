@@ -15,7 +15,7 @@
 
 ## 1. FM 是什麼、跟 FORM 差在哪
 
-FORM 只能在同一支程式（含 INCLUDE）裡呼叫；FM 是**全系統共用**的邏輯單位——任何程式都能 `CALL FUNCTION` 呼叫，還能在 SE37 **單獨測試**（不用寫測試程式）。講義 8 的 FORM 是「同一支程式內」的模組化，FM 則把同樣的想法擴大到「全系統」。SAP 本身就提供大量標準 FM，之後講義 9 的 ALV（`REUSE_ALV_GRID_DISPLAY`）就是其中一支——學完本講，你呼叫它時就能讀懂每一段參數。
+FORM 只能在同一支程式（含 INCLUDE）裡呼叫；FM 是**全系統共用**的邏輯單位——任何程式都能 `CALL FUNCTION` 呼叫，還能在 SE37 **單獨測試**（不用寫測試程式）。講義 8 的 FORM 是「同一支程式內」的模組化（Modularization），FM 則把同樣的想法擴大到「全系統」。SAP 本身就提供大量標準 FM，之後講義 9 的 ALV（`REUSE_ALV_GRID_DISPLAY`）就是其中一支——學完本講，你呼叫它時就能讀懂每一段參數。
 
 | | FORM | Function Module |
 |---|---|---|
@@ -129,7 +129,7 @@ ENDFUNCTION.
 | IMPORTING | 呼叫端 → FM（輸入） | `iv_` / `is_` / `it_` |
 | EXPORTING | FM → 呼叫端（輸出） | `ev_` / `es_` / `et_` |
 | CHANGING | 雙向 | `cv_` / `cs_` / `ct_` |
-| TABLES | 內表（**官方標記 obsolete**，維護舊 FM 會遇到；新介面用 CHANGING 或 IMPORTING/EXPORTING 傳表格型別，原因見下方 3.1 節） | `t_` |
+| TABLES | 內表（Internal Table）（**官方標記 obsolete**，維護舊 FM 會遇到；新介面用 CHANGING 或 IMPORTING/EXPORTING 傳表格型別（Table Type），原因見下方 3.1 節） | `t_` |
 | EXCEPTIONS | 具名的錯誤情況，用 `RAISE 名稱.` 觸發 | 小寫底線命名 |
 
 參數型別**一定要用 DDIC 型別**（如 `s_price`、講義 25 建的 Table Type），不能用程式裡自己宣告的 `TYPES`——FM 是跨程式介面，型別要全系統看得到，語意也才一致。
@@ -142,7 +142,7 @@ ENDFUNCTION.
 
 1. **繼承 Header Line 的雙義問題**：`TABLES` 參數在 FM 內部會自動生成一個同名 work area，容易搞混存取的是整張表還是單筆。
 2. **只能傳址，不能傳值**：官方文件明講「Pass by value is not possible in formal parameters defined using `TABLES`」——限制比 `CHANGING`／`IMPORTING`／`EXPORTING` 都嚴格。
-3. **型別受限**：只能是 DDIC Table Type（flat line type 的 Standard Table）或泛型 `STANDARD TABLE`，不能用 Sorted/Hashed Table 或深層結構。
+3. **型別受限**：只能是 DDIC Table Type（flat line type 的 Standard Table）或泛型 `STANDARD TABLE`，不能用 Sorted/Hashed Table 或深層結構（Deep Structure）。
 4. **Class 裡完全禁用**：這也是為什麼 Method（OOP 課程會學到）從來沒有 `TABLES` 這個選項——OO ABAP 設計時直接排除了整套有問題的機制，只留 `IMPORTING`/`EXPORTING`/`CHANGING`/`RETURNING`。
 
 **新 FM 的建議寫法**：把 `TABLES it_xxx` 換成 `CHANGING it_xxx TYPE <table_type>`；如果表格資料其實是單向的（只進不出、或只出不進），用 `IMPORTING`／`EXPORTING` 搭配表格型別更精確，比一律用 `CHANGING` 更清楚表達方向。
@@ -259,7 +259,7 @@ ENDIF.
 **EXCEPTIONS 的數字**——「發生該例外時，我的 sy-subrc 要變成幾」：FM 裡 `RAISE invalid_input.` → 呼叫端 sy-subrc = 1；`OTHERS = 2` 接住沒列名的例外。**沒列 EXCEPTIONS 又沒 OTHERS 時，例外直接讓程式 dump**——CALL FUNCTION 之後檢查 sy-subrc 跟 READ TABLE 之後一樣是鐵律。
 
 - FM 名稱是**字串**（大寫、加引號）；參數名不加引號。
-- 常數/字面值可以直接餵 EXPORTING（如 `'1500.00'`），IMPORTING 必須接變數。
+- 常數（Constant）/字面值（Literal）可以直接餵 EXPORTING（如 `'1500.00'`），IMPORTING 必須接變數。
 
 ## 6. 什麼時候用 FM
 

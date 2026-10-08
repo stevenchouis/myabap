@@ -6,11 +6,11 @@
 - 理解 `TYPE`（參照**型別**）與 `LIKE`（參照**既有變數**）的差異與使用時機
 - 會用 `CONSTANTS` 宣告常數
 - 會用 `=` 指定值、做簡單四則運算
-- 認識第一個系統欄位 `sy-datum`
+- 認識第一個系統欄位（System Field） `sy-datum`
 
 ## 事前準備
 
-建立程式 `ZR_TR02_<你的姓名縮寫>`，套件 `$TMP`。
+建立程式 `ZR_TR02_<你的姓名縮寫>`，套件（Package） `$TMP`。
 
 ## 題目需求
 
@@ -40,10 +40,10 @@
 ## 提示
 
 - `TYPE` 用在「我知道要什麼型別」；`LIKE` 用在「我要跟某個變數一模一樣」——來源改了會自動跟著改，這就是思考題 1 的答案方向
-- 數值字面值帶小數時要用引號：`gv_price = '1250.50'.`
+- 數值字面值（Literal）帶小數時要用引號：`gv_price = '1250.50'.`
 
 ## 答案
 
 見 `zr_tr02_type_like.prog.abap`（SAP 端程式 `ZR_TR02_TYPE_LIKE`）。
 
-新式寫法版本見 `zr_tr02_type_like_new.prog.abap`（SAP 端程式 `ZR_TR02_TYPE_LIKE_NEW`），只有日期一行格式不同（行內宣告抄到字典型別 `SYDATUM`，見講義 2）；新舊寫法的對照說明見講義 2 §1的「新式寫法對照」。
+新式寫法版本見 `zr_tr02_type_like_new.prog.abap`（SAP 端程式 `ZR_TR02_TYPE_LIKE_NEW`），只有日期一行格式不同（行內宣告（Inline Declaration）抄到字典型別 `SYDATUM`，見講義 2）；新舊寫法的對照說明見講義 2 §1的「新式寫法對照」。

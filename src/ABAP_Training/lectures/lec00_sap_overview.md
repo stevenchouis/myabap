@@ -48,13 +48,13 @@ SAP 系統分三層，這是理解「程式跑在哪裡」的基礎：
 資料庫     Database Layer       所有資料集中一套 DB（HANA/Oracle/...）
 ```
 
-- **SAP GUI** 是安裝在使用者電腦上的用戶端程式，只負責顯示畫面與收鍵盤滑鼠；你寫的 ABAP 全部在 Application Server 上跑。所以除錯、效能問題都發生在伺服器端，跟使用者的電腦快慢基本無關。
+- **SAP GUI** 是安裝在使用者電腦上的用戶端（Client）程式，只負責顯示畫面與收鍵盤滑鼠；你寫的 ABAP 全部在 Application Server 上跑。所以除錯、效能問題都發生在伺服器端，跟使用者的電腦快慢基本無關。
 - **交易代碼（Transaction Code, T-code）**：SAP 功能的入口代號，在 GUI 的命令欄輸入。使用者用業務 T-code（如 `VA01` 建立銷售訂單），我們開發者常用的是工具類：
 
 | T-code | 用途 |
 |---|---|
 | SE38 / SE80 | ABAP 編輯器／物件導覽 |
-| SE11 / SE16N | 資料字典／看資料表內容 |
+| SE11 / SE16N | 資料字典（Data Dictionary）／看資料表內容 |
 | SE37 | Function Module |
 | SM30 | 維護表格資料（Table Maintenance） |
 | ST22 | Dump 分析（程式當掉紀錄） |
@@ -113,7 +113,7 @@ SAP 功能依業務領域切成模組（Module），這些縮寫是 SAP 圈的�
 | 角色 | 俗稱 | 負責 | 主要工具 |
 |---|---|---|---|
 | Application Consultant | 功能顧問（如 FI 顧問、SD 顧問） | 懂業務流程，用 **Customizing（SPRO 組態）** 把標準功能調成客戶要的樣子；寫功能規格（Spec）給開發 | SPRO、業務 T-code |
-| ABAP Developer | 開發顧問／RD（你） | 依 Spec 開發客製：報表、介面、增強、表單 | SE38/SE80、SE37、除錯器 |
+| ABAP Developer | 開發顧問／RD（你） | 依 Spec 開發客製：報表、介面、增強、表單 | SE38/SE80、SE37、除錯器（Debugger） |
 | Basis Consultant | 系統管理 | 系統安裝、效能、帳號權限、TR 搬版、資料庫與作業系統層 | SM 系列、STMS |
 | Key User / End User | 使用者 | 提需求、做 UAT 驗收 | 業務 T-code |
 
@@ -137,7 +137,7 @@ SAP 功能依業務領域切成模組（Module），這些縮寫是 SAP 圈的�
 | NetWeaver / ABAP Platform | SAP 的技術平台層，ABAP 執行環境的正式名稱 |
 | Customizing / Configuration | 功能顧問在 SPRO 做的組態設定（不寫程式的客製） |
 | IMG | Implementation Guide，SPRO 打開的那棵設定樹 |
-| Dump（Short Dump） | ABAP 程式執行期錯誤中止，紀錄在 ST22 |
+| Dump（Short Dump） | ABAP 程式執行期錯誤（Runtime Error）中止，紀錄在 ST22 |
 | Background Job | 排程在背景跑的程式（SM36 排、SM37 看） |
 | BAPI | 標準提供的業務 API（本質是 RFC-enabled Function Module） |
 | RFC | Remote Function Call，跨系統呼叫 FM 的協定 |

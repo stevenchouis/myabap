@@ -488,7 +488,7 @@ blockquote {
 }
 footer { color: #999; }
 ;" data-marpit-pagination-total="13">
-<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7value---%E5%A1%AB%E7%B5%90%E6%A7%8B">新式寫法對照：<code>VALUE #( )</code> 填結構</h2>
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7value--value-operator%E5%A1%AB%E7%B5%90%E6%A7%8B">新式寫法對照：<code>VALUE #( )</code>（Value Operator）填結構</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統：一個欄位一行
 gs_student-id    = 'S0001'.
 gs_student-name  = '王小明'.
@@ -700,7 +700,7 @@ blockquote {
 }
 footer { color: #999; }
 ;" data-marpit-pagination-total="13">
-<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7corresponding">新式寫法對照：<code>CORRESPONDING #( )</code></h2>
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7corresponding--component-operator">新式寫法對照：<code>CORRESPONDING #( )</code>（Component Operator）</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">MOVE-CORRESPONDING gs_full TO gs_lite.                    &quot; 傳統
 gs_lite = CORRESPONDING #( gs_full ).                     &quot; 新式
 gs_lite = CORRESPONDING #( BASE ( gs_lite ) gs_full ).    &quot; 新式＋保留原值

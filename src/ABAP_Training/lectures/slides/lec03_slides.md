@@ -130,7 +130,7 @@ WRITE: / gs_student-id, gs_student-name, gs_student-score.
 
 ---
 
-## 新式寫法對照：`VALUE #( )` 填結構
+## 新式寫法對照：`VALUE #( )`（Value Operator）填結構
 
 ```abap
 * 傳統：一個欄位一行
@@ -189,7 +189,7 @@ MOVE-CORRESPONDING gs_full TO gs_lite.   " 只搬同名欄位 id、name
 
 <!-- _class: compact -->
 
-## 新式寫法對照：`CORRESPONDING #( )`
+## 新式寫法對照：`CORRESPONDING #( )`（Component Operator）
 
 ```abap
 MOVE-CORRESPONDING gs_full TO gs_lite.                    " 傳統

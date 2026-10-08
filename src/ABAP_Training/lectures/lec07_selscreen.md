@@ -71,7 +71,7 @@ SELECT-OPTIONS s_carr FOR sflight-carrid.
 
 `TABLES dbtab.` 會宣告一個**跟 DDIC 表（或結構、View）同名、同結構的資料物件**，稱為「表工作區」（table work area），效果大約等於 `DATA sflight TYPE sflight.`。它就是一個跟表同名的結構變數，不是表本身，也不會去讀資料庫。
 
-`TABLES` 後面放的是 DDIC 裡「有欄位結構」的物件：透明表、Structure、View 都可以。這個關鍵字叫 `TABLES` 是歷史名稱，不代表只能放資料表。例如：
+`TABLES` 後面放的是 DDIC 裡「有欄位結構」的物件：透明表（Transparent Table）、Structure、View 都可以。這個關鍵字叫 `TABLES` 是歷史名稱，不代表只能放資料表。例如：
 
 | 寫法 | 後面放的是 |
 |---|---|
@@ -218,7 +218,7 @@ INITIALIZATION.
 
 ### 5.2 框標題要能多語言：用 Text Symbol
 
-⚠️ 上面 `t_b1 = '查詢條件'.` 把中文寫死在程式裡，不管用哪種語言登入都顯示「查詢條件」。正式程式要用 **Text Symbol**（文字符號，講義 22 詳解），它可以依登入語言各自維護一份文字：
+⚠️ 上面 `t_b1 = '查詢條件'.` 把中文寫死在程式裡，不管用哪種語言登入都顯示「查詢條件」。正式程式要用 **Text Symbol**（文字符號，講義 22 詳解），它可以依登入語言（Logon Language）各自維護一份文字：
 
 ```abap
 " 寫法一：標題直接用 Text Symbol，不需要 INITIALIZATION

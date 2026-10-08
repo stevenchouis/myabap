@@ -11,17 +11,17 @@
 
 ## 事前準備
 
-物件都建在套件 `$TMP`。名稱請照下表（多人共用系統時把 `TR23` 換成 `TR23_<縮寫>`，並同步調整程式中的表名）。
+物件都建在套件（Package） `$TMP`。名稱請照下表（多人共用系統時把 `TR23` 換成 `TR23_<縮寫>`，並同步調整程式中的表名）。
 
 ## 第一部分：SE11 建 DDIC 物件
 
-1. **Domain** `ZTR23_ORDNO`：Data Type `CHAR`，Length `10`（不設值域）→ 啟用
+1. **Domain** `ZTR23_ORDNO`：Data Type `CHAR`，Length `10`（不設值域（Value Range））→ 啟用
 2. **Data Element** `ZTR23_ORDNO`：參考上面的 Domain；Field Label 填「訂單號」→ 啟用（**這個 DE 稍後會同時用在 Header 和 Detail 兩張表的訂單號欄位**，示範 DE 共用）
 3. **Domain** `ZTR23_CUSTOMER`：Data Type `CHAR`，Length `40`（不設值域）→ 啟用
 4. **Data Element** `ZTR23_CUSTOMER`：參考上面的 Domain；Field Label 填「客戶」→ 啟用（這個欄位之後會是 Search Help 的顯示參數，**一定要有 DE**——ex21 踩過的坑：內建型別欄位當 Search Help Parameter 會導致 Activate 失敗）
-5. **Domain** `ZTR23_STATUS`：Data Type `CHAR`，Length `1`；這次改用**固定值清單**（跟 ex21 `ZTR21_SCORE` 的「區間」是不同技巧）：Value Range 頁籤逐筆加入 `N`（New）、`R`（Released/Confirmed）、`C`（Cancelled）三個固定值 → 啟用
+5. **Domain** `ZTR23_STATUS`：Data Type `CHAR`，Length `1`；這次改用**固定值（Fixed Value）清單**（跟 ex21 `ZTR21_SCORE` 的「區間」是不同技巧）：Value Range 頁籤逐筆加入 `N`（New）、`R`（Released/Confirmed）、`C`（Cancelled）三個固定值 → 啟用
 6. **Data Element** `ZTR23_STATUS`：參考上面的 Domain；Field Label 填「訂單狀態」→ 啟用
-7. **新透明表** `ZTR23_ORDH`（Header／訂單主檔）：
+7. **新透明表（Transparent Table）** `ZTR23_ORDH`（Header／訂單主檔）：
 
 | 欄位 | Key | 型別來源 | 說明 |
 |---|---|---|---|
@@ -43,11 +43,11 @@
 | ITEMNO | ✔ | 內建型別 `NUMC` 3 | 序號 |
 | PRODUCT | | 內建型別 `CHAR` 20 | 產品（純描述用欄位，**故意不建 DE**，對照 ex21 講過的「純技術/非查詢欄位可省事用內建型別」） |
 | QTY | | 內建型別 `INT4` | 數量 |
-| PRICE | | 內建型別 `DEC` 9,2 | 單價（先不處理幣別，教學簡化） |
+| PRICE | | 內建型別 `DEC` 9,2 | 單價（先不處理幣別（Currency），教學簡化） |
 | UPDUSER | | Data Element `SYUNAME` | 異動者 |
 | UPDDATE | | Data Element `SYDATUM` | 異動日 |
 
-   - `ORDNO` 欄位的 **Foreign Key** 對話框：Check Table 填 `ZTR23_ORDH`，基數（Cardinality）填 `1 : CN`（每筆明細屬於一張訂單、每張訂單任意多筆明細，見講義 21 §3.1）；Foreign key field type 選 **Key fields/candidates**（`ORDNO` 是明細表主鍵的一部分），開啟 **Screen Check**——注意這次外鍵欄位本身就是 Key，跟 ex21 的 `KLASSE`（非 Key 外鍵）不一樣，是更貼近 SAP 官方文件範例（`SPFLI` 外鍵到 `SCARR`）的寫法
+   - `ORDNO` 欄位的 **Foreign Key** 對話框：Check Table 填 `ZTR23_ORDH`，基數（Cardinality）填 `1 : CN`（每筆明細屬於一張訂單、每張訂單任意多筆明細，見講義 21 §3.1）；Foreign key field type 選 **Key fields/candidates**（`ORDNO` 是明細表主鍵（Primary Key）的一部分），開啟 **Screen Check**——注意這次外鍵欄位本身就是 Key，跟 ex21 的 `KLASSE`（非 Key 外鍵）不一樣，是更貼近 SAP 官方文件範例（`SPFLI` 外鍵到 `SCARR`）的寫法
    - Delivery Class `A`；Technical Settings 同上 → 啟用
 9. **維護畫面**：至少幫 `ZTR23_ORDH` 產生 Table Maintenance Generator（Authorization Group `&NC&`、Function Group 自訂如 `ZFG_TR23`）；`ZTR23_ORDI` 的維護畫面視情況決定要不要做
 10. **Search Help** `ZTR23_ORDHSH`（SE11 → Search Help → Elementary Search Help）：

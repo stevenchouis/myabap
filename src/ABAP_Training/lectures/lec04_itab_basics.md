@@ -5,7 +5,7 @@
 ## 本講重點
 
 - 三個角色的分工：資料庫表、internal table（多筆）、work area（一筆）
-- `TYPES ... TYPE STANDARD TABLE OF` 定義表格型別
+- `TYPES ... TYPE STANDARD TABLE OF` 定義表格型別（Table Type）
 - `APPEND` 加資料、`LOOP AT ... INTO` 逐筆處理
 - `READ TABLE ... WITH KEY / INDEX` 讀單筆
 - **鐵律：讀完就檢查 `sy-subrc`**；認識 `sy-tabix`
@@ -44,7 +44,7 @@ DATA: gt_students TYPE tt_student,     " internal table：多筆
 | 類別 | 特性 | 適用 |
 |---|---|---|
 | `STANDARD TABLE` | 依附加順序排列，用 INDEX 或循序搜尋 | 一般報表（本課程） |
-| `SORTED TABLE` | 永遠依 KEY 排序，二分搜尋 | 需要一直用 KEY 查 |
+| `SORTED TABLE` | 永遠依 KEY 排序，二分搜尋（Binary Search） | 需要一直用 KEY 查 |
 | `HASHED TABLE` | 雜湊，KEY 查詢速度與筆數無關，**必須 UNIQUE KEY** | 大量單筆查詢 |
 
 ## 3. APPEND：加一筆到表尾
@@ -137,7 +137,7 @@ IF sy-subrc = 0.
 ENDIF.
 ```
 
-**新式寫法對照（7.40 之後）：表格運算式 `itab[ ]` 與 `line_exists( )`**
+**新式寫法對照（7.40 之後）：表格運算式（Table Expression）`itab[ ]` 與 `line_exists( )`**
 
 ```abap
 * 傳統寫法

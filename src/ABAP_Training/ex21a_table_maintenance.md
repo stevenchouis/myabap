@@ -5,12 +5,12 @@
 ## 學習目標
 
 - 會建 Maintenance View，並用 `Read only` 做成查詢專用
-- 會用 LEFT OUTER JOIN 串 Header／Detail 兩張 Z 表，並找出外鍵沒擋住的髒資料
+- 會用 LEFT OUTER JOIN 串 Header／Detail 兩張 Z 表，並找出外鍵（Foreign Key）沒擋住的髒資料
 
 ## 事前準備
 
 - 已完成練習 21：`ZTR21_STUD`、`ZTR21_CLASS`、Search Help `ZTR21_CLASSH`、Function Group `ZFG_TR21` 的 SM30 維護畫面都已完成，也跑過 `ZR_TR21_ZTABLE`（表裡有 `S0001`～`S0006`、`S9001` 與班級 `S101`）。
-- 物件都建在套件 `$TMP`。多人共用系統時，照課程慣例把 `TR21` 換成 `TR21_<縮寫>`。
+- 物件都建在套件（Package） `$TMP`。多人共用系統時，照課程慣例把 `TR21` 換成 `TR21_<縮寫>`。
 
 ## 第一部分：唯讀的 Maintenance View
 

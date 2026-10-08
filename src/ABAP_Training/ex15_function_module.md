@@ -15,7 +15,7 @@
 
 ## 事前準備
 
-1. SE80 建 Function Group `ZFG_TR15_<縮寫>`（套件 `$TMP`）——FM 一定要掛在某個 Function Group 下
+1. SE80 建 Function Group `ZFG_TR15_<縮寫>`（套件（Package） `$TMP`）——FM 一定要掛在某個 Function Group 下
 2. 依團隊命名慣例：Function Group `ZFG_xxx`、FM `Z_xxx`
 
 ## 題目需求
@@ -100,7 +100,7 @@ AA  0017 1,200.00    30 =>  36,000.00 USD
 1. `EXCEPTIONS invalid_input = 1` 的 `1` 是什麼意思？呼叫端不寫 EXCEPTIONS 區塊、FM 又 RAISE 了會發生什麼事？（會 dump——動手試一次，認識 RAISE_EXCEPTION 這個 dump）
 2. 在 SE37 打開一支 SAP 標準 FM（例如 `CONVERSION_EXIT_ALPHA_INPUT`，數字補前導零），只看介面頁籤：哪些是 IMPORTING、哪些是 EXPORTING？不看原始碼，你能寫出呼叫它的 `CALL FUNCTION` 嗎？
 3. FM 的 IMPORTING 參數為什麼慣用 `VALUE(...)`（傳值）？跟 FORM USING 預設傳參考的差異是什麼？
-4. Part 4 的 `CT_FLIGHTS` 型別為什麼不能直接用函式群組 Top Include 裡宣告的本地 `TYPES`，一定要走 DDIC Table Type？（提示：FM 介面型別要能被**呼叫端獨立語法檢查**，不依賴這支 FM 所屬 Function Group 有沒有被載入）
+4. Part 4 的 `CT_FLIGHTS` 型別為什麼不能直接用函式群組（Function Group） Top Include 裡宣告的本地 `TYPES`，一定要走 DDIC Table Type？（提示：FM 介面型別要能被**呼叫端獨立語法檢查**，不依賴這支 FM 所屬 Function Group 有沒有被載入）
 5. （Part 5）把 `GET_TOTAL` 建到**另一個** Function Group，還讀得到 `ADD_REVENUE` 累加的值嗎？為什麼？（提示：全域變數只在同一個 group 內共用）
 6. （Part 5）呼叫端在同一支程式裡先累加三筆、**沒有 RESET** 就再累加同樣三筆，`GET_TOTAL` 會回傳多少？這說明了 Function Group 全域變數的什麼特性？
 

@@ -49,7 +49,7 @@ SELECT f~carrid f~connid f~fldate c~carrname
 - `ON` 是**串表條件**（兩表怎麼對上），`WHERE` 是**過濾條件**——語意不同，別混在一起。ON 可以多條件：`ON f~carrid = c~carrid AND f~connid = c~connid`。
 - INNER JOIN 的語意：**兩邊都對得上才輸出**。SFLIGHT 有但 SCARR 沒有的公司代碼，那些航班整筆消失。
 
-**新式寫法對照（7.40 之後）：JOIN 加行內宣告**
+**新式寫法對照（7.40 之後）：JOIN 加行內宣告（Inline Declaration）**
 
 ```abap
 * 新式寫法：不用先寫 TYPES／DATA
@@ -60,9 +60,9 @@ SELECT f~carrid, f~connid, f~fldate, c~carrname
   INTO TABLE @DATA(gt_flights).
 ```
 
-- 規則跟講義 6 §3.6 一樣：欄位用逗號、`INTO` 放最後、宿主變數加 `@`（例如 `WHERE f~carrid IN @s_carrid`）。
+- 規則跟講義 6 §3.6 一樣：欄位用逗號、`INTO` 放最後、宿主變數（Host Variable）加 `@`（例如 `WHERE f~carrid IN @s_carrid`）。
 - 最大的好處在 JOIN：傳統寫法要先定義一個「東拼西湊」的結構 `ty_flight`，新式寫法用 `@DATA(gt_flights)` 讓系統依 SELECT 清單自動產生結構，欄位名就是 `carrid`、`connid`、`fldate`、`carrname`（不含別名前綴），後面照樣寫 `gs_flight-carrname`。
-- 結果要放進既有的內表時，照樣可以寫 `INTO CORRESPONDING FIELDS OF TABLE @gt_flights`。
+- 結果要放進既有的內表（Internal Table）時，照樣可以寫 `INTO CORRESPONDING FIELDS OF TABLE @gt_flights`。
 
 練習 11 的新式寫法版本見答案程式 `ZR_TR11_JOIN_NEW`（INNER JOIN、LEFT OUTER JOIN 都改用 `@DATA( )`，輸出跟原版逐行比對相同）。
 
@@ -92,7 +92,7 @@ SELECT carrid carrname connid cityfrom cityto fldate seatsmax seatsocc
 | JOIN 定義在哪 | 每支程式自己寫 | DDIC，寫一次大家共用 |
 | JOIN 種類 | INNER、LEFT OUTER 都可以 | **只有 INNER JOIN** |
 | 可以做什麼 | 讀取 | 讀取；SE16 也能直接看資料；只有一張基礎表時還能寫入 |
-| 建立方式 | 寫在程式裡 | SE11 → View → Database view：Table/Join Conditions 填表與條件（有外鍵時可按 Relationships 帶出）→ View Fields 選欄位 → 啟用 |
+| 建立方式 | 寫在程式裡 | SE11 → View → Database view：Table/Join Conditions 填表與條件（有外鍵（Foreign Key）時可按 Relationships 帶出）→ View Fields 選欄位 → 啟用 |
 
 選擇的原則：**只有一支程式用，直接在程式裡 JOIN；很多程式都要同一組 JOIN，才建 View**。S/4HANA 之後新開發改用 **CDS View**（CDS 課程），它能做 OUTER JOIN、計算欄位、關聯等 Database View 做不到的事；傳統 Database View 主要在維護舊程式時會遇到。
 
@@ -115,6 +115,19 @@ SELECT c~carrid c~carrname f~connid f~fldate
 
 限制：LEFT OUTER JOIN 的 WHERE 對**右表**欄位下條件會把 NULL 列過濾掉，效果變回 INNER——右表條件盡量放在 ON。
 
+**新式寫法對照（7.40 之後）：`COALESCE`（Coalesce Function），沒對到的欄位給預設值**
+
+LEFT OUTER JOIN 沒對到時，右表欄位在資料庫裡是 NULL，撈回 ABAP 變成初始值（空白）。新式寫法可以用 `COALESCE` 直接換成看得懂的預設值：
+
+```abap
+SELECT a~carrid, coalesce( b~connid, '----' ) AS connid
+  FROM scarr AS a
+  LEFT OUTER JOIN spfli AS b ON a~carrid = b~carrid
+  INTO TABLE @DATA(gt_carr).
+```
+
+`coalesce( 欄位, 預設值 )`：欄位有值就用欄位，是 NULL 就用預設值。本系統 `SCARR` 有一家沒有航線的 `AB`，結果是 `AB ----`；有航線的 `LH` 照常列出 `0400`、`0401`……（2026-10-08 用驗證程式 `ZR_TR06_OSQL_CHK` 在本系統 7.54 實測）。
+
 ## 4. INTO 的兩種對應方式
 
 | 寫法 | 對應規則 | 風險 |
@@ -136,6 +149,21 @@ SELECT bukrs belnr gjahr buzei ... saknr AS hkont ...   " 這張表的科目欄�
 
 `AS` 在這裡的用途跟 JOIN 一樣：來源欄位名跟內表欄位名不同時，用別名讓 `CORRESPONDING FIELDS` 對得上。
 
+**新式寫法對照（7.50 之後）：`UNION`（集合運算，Set Operator），一句合併兩個 SELECT**
+
+`APPENDING` 是「執行兩次 SELECT，結果接在同一張內表」；`UNION` 是在資料庫端把兩個 SELECT 的結果合成一份再回傳：
+
+```abap
+SELECT carrid, connid FROM spfli WHERE cityfrom = 'FRANKFURT'
+UNION
+SELECT carrid, connid FROM spfli WHERE cityto = 'FRANKFURT'
+  INTO TABLE @DATA(gt_frankfurt).
+```
+
+- 兩個 SELECT 的欄位數量、順序、型別要對得上；`INTO` 寫在最後一個 SELECT 之後。
+- `UNION` 會去掉完全重複的列；要保留重複的列寫 `UNION ALL`。
+- 本系統實測：從法蘭克福出發或抵達的航線共 15 筆（2026-10-08 用驗證程式 `ZR_TR06_OSQL_CHK` 在本系統 7.54 實測）。
+
 ## 5. FOR ALL ENTRIES（先認識，維護會遇到）
 
 JOIN 之外的另一種跨表手法：先撈第一張表進內表，再用內表內容當第二張表的條件：
@@ -155,6 +183,21 @@ ENDIF.
 - 結果會自動去除完全重複的列。
 
 新程式優先 JOIN；FOR ALL ENTRIES 用在 JOIN 不方便的場景（如來源是加工過的內表），舊程式裡極常見。
+
+**新式寫法對照（7.40 之後）：FOR ALL ENTRIES**
+
+```abap
+IF gt_keys IS NOT INITIAL.                          " 空表陷阱一樣存在
+  SELECT carrid, connid, fldate
+    FROM sflight
+    FOR ALL ENTRIES IN @gt_keys
+    WHERE carrid = @gt_keys-carrid
+      AND connid = @gt_keys-connid
+    INTO TABLE @DATA(gt_flights).
+ENDIF.
+```
+
+規則跟其他新式寫法一樣：驅動內表和它的欄位都是宿主變數，要加 `@`（`IN @gt_keys`、`@gt_keys-carrid`）。空表會全表撈回的陷阱不變，前面的 `IF` 照樣不能少。
 
 ## 6. 效能觀念小結
 

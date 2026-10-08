@@ -10,7 +10,7 @@
 
 ## 事前準備
 
-在 SE38 建立自己的程式，命名 `ZR_TR01_<你的姓名縮寫>`（例：`ZR_TR01_ABC`），類型 Executable Program，套件 `$TMP`（Local Object）。
+在 SE38 建立自己的程式，命名 `ZR_TR01_<你的姓名縮寫>`（例：`ZR_TR01_ABC`），類型 Executable Program，套件（Package） `$TMP`（Local Object）。
 
 ## 題目需求
 

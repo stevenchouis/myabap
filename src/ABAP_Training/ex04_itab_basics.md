@@ -3,14 +3,14 @@
 ## 學習目標
 
 - 理解 internal table（多筆）與 work area（一筆）的分工
-- 會用 `TYPES ... TYPE STANDARD TABLE OF ...` 定義表格型別
+- 會用 `TYPES ... TYPE STANDARD TABLE OF ...` 定義表格型別（Table Type）
 - 會用 `APPEND` 加資料、`LOOP AT ... INTO` 逐筆處理
 - 會用 `READ TABLE ... WITH KEY / INDEX` 讀單筆，並**養成檢查 `sy-subrc` 的習慣**
 - 認識 `sy-tabix`（迴圈中目前筆數）
 
 ## 事前準備
 
-建立程式 `ZR_TR04_<你的姓名縮寫>`，套件 `$TMP`。
+建立程式 `ZR_TR04_<你的姓名縮寫>`，套件（Package） `$TMP`。
 
 ## 題目需求
 
@@ -43,4 +43,4 @@ INDEX 3 讀到的是： 陳大文
 
 見 `zr_tr04_itab_basics.prog.abap`（SAP 端程式 `ZR_TR04_ITAB_BASICS`）。
 
-新式寫法版本見 `zr_tr04_itab_basics_new.prog.abap`（SAP 端程式 `ZR_TR04_ITAB_BASICS_NEW`），只有最後一行不同（表格運算式不設 `sy-subrc`，見講義 4 §5）；新舊寫法的對照說明見講義 4 §3～§5的「新式寫法對照」。
+新式寫法版本見 `zr_tr04_itab_basics_new.prog.abap`（SAP 端程式 `ZR_TR04_ITAB_BASICS_NEW`），只有最後一行不同（表格運算式（Table Expression）不設 `sy-subrc`，見講義 4 §5）；新舊寫法的對照說明見講義 4 §3～§5的「新式寫法對照」。

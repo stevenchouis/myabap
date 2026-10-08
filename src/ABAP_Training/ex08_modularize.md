@@ -1,6 +1,6 @@
-# 練習 8：模組化——FORM 副程式
+# 練習 8：模組化（Modularization）——FORM 副程式（Subroutine）
 
-> 授課順序：接在練習 8a（Package 與傳輸請求）之後、練習 15（Function Module）之前——FORM 與 FM 兩種模組化手段連著學。講義見 [lec08](lectures/lec08_modularize.md)。
+> 授課順序：接在練習 8a（Package 與傳輸請求（Transport Request））之後、練習 15（Function Module）之前——FORM 與 FM 兩種模組化手段連著學。講義見 [lec08](lectures/lec08_modularize.md)。
 
 ## 學習目標
 
@@ -11,7 +11,7 @@
 
 ## 事前準備
 
-建立程式 `ZR_TR08_<你的姓名縮寫>`，套件 `$TMP`。
+建立程式 `ZR_TR08_<你的姓名縮寫>`，套件（Package） `$TMP`。
 
 ## 題目需求
 

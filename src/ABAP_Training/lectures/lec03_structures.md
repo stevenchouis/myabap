@@ -39,7 +39,7 @@ TYPES: BEGIN OF ty_student,
 語法要點：
 
 - `BEGIN OF 名稱` 開始、`END OF 名稱` 結束，中間每行是一個欄位（component），格式同 DATA 的型別描述。
-- 慣例：結構型別取名 `ty_` 開頭；之後的表格型別取 `tt_` 開頭。
+- 慣例：結構型別取名 `ty_` 開頭；之後的表格型別（Table Type）取 `tt_` 開頭。
 - 定義在程式開頭（宣告區），這種只在本程式看得到的型別叫 **Local Type**。多支程式要共用時，型別改定義在資料字典（SE11 的 Structure / Table Type），那叫 **Global Type**（講義 6 第 1.1 節詳解）；本講先用 Local Type 學結構語法。另外，結構裡代表業務資料的欄位，實務上同樣是引用資料字典的欄位型別（如 `carrid TYPE scarr-carrid`），本講範例為了不依賴資料表才寫成內建型別。
 
 ## 3. TYPES vs DATA：模具與產品
@@ -73,7 +73,7 @@ WRITE: / gs_student-id, gs_student-name, gs_student-score.
 
 `結構-欄位` 是 ABAP 最高頻的寫法之一。也因此**變數命名不要含連字號**，避免與欄位存取混淆。
 
-**新式寫法對照（7.40 之後）：`VALUE #( )` 填結構**
+**新式寫法對照（7.40 之後）：`VALUE #( )`（值運算子，Value Operator）填結構**
 
 ```abap
 * 傳統寫法：一個欄位一行
@@ -130,7 +130,7 @@ MOVE-CORRESPONDING gs_full TO gs_lite.   " 只搬同名欄位 id、name
 
 規則：**欄位名相同**就搬（逐欄轉換），目的端沒有的欄位丟掉，目的端多的欄位不動。欄位名拼錯就默默不搬——不會報錯，要自己核對。
 
-**新式寫法對照（7.40 之後）：`CORRESPONDING #( )`**
+**新式寫法對照（7.40 之後）：`CORRESPONDING #( )`（元件運算子，Component Operator）**
 
 ```abap
 * 傳統寫法

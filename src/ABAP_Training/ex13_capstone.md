@@ -19,16 +19,16 @@
 
 ## 事前準備
 
-建立程式 `ZR_TR13_<你的姓名縮寫>`，套件 `$TMP`；確認 SFLIGHT 有資料。
+建立程式 `ZR_TR13_<你的姓名縮寫>`，套件（Package） `$TMP`；確認 SFLIGHT 有資料。
 
 ## 需求規格（試著只看規格寫，卡住再看答案）
 
 1. **頁面**：寬機點矩陣＋11 吋連續紙 → `NO STANDARD PAGE HEADING LINE-SIZE 132 LINE-COUNT 65(3)`
-2. **選擇畫面**：航空公司範圍、航班日期範圍（`TABLES sflight` + `FOR sflight-欄位`）、「排除未售出航班」checkbox 預設勾選；BLOCK 標題在 `INITIALIZATION` 給值
+2. **選擇畫面（Selection Screen）**：航空公司範圍、航班日期範圍（`TABLES sflight` + `FOR sflight-欄位`）、「排除未售出航班」checkbox 預設勾選；BLOCK 標題在 `INITIALIZATION` 給值
 3. **取數**（FORM `get_data`）：SFLIGHT INNER JOIN SCARR 取公司名稱；依 checkbox 刪除 `seatsocc = 0`；LOOP 計算 `revenue = price × seatsocc` 後 `MODIFY` 寫回
 4. **輸出**（FORM `display_data`）：`|` 表格線對齊（公司/名稱/航線/日期/已售/票價/營收/幣別），金額欄 `CURRENCY gs_rev-currency`；查無資料要有訊息；結尾輸出合計筆數
-5. **頁首**（`TOP-OF-PAGE`）：程式名/使用者/置中標題/日期/時間/頁次 `x/###` + 欄位標題列
-6. **頁尾**（`END-OF-PAGE`）：橫線 + 「製表：財務部／主管簽核」
+5. **頁首（Page Header）**（`TOP-OF-PAGE`）：程式名/使用者/置中標題/日期/時間/頁次 `x/###` + 欄位標題列
+6. **頁尾（Page Footer）**（`END-OF-PAGE`）：橫線 + 「製表：財務部／主管簽核」
 7. **總頁數回填**（`END-OF-SELECTION` → FORM `update_total_pages`）：`DO sy-pagno TIMES` → `READ LINE 2 OF PAGE sy-index` → `REPLACE '###'` → `MODIFY LINE`
 
 ## List Buffer 觀念（本題的核心）

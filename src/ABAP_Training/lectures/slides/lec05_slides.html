@@ -470,7 +470,7 @@ blockquote {
 }
 footer { color: #999; }
 ;" data-marpit-pagination-total="12">
-<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7filter-%E7%AF%A9%E5%87%BA%E6%96%B0%E8%A1%A8">新式寫法對照：<code>FILTER</code> 篩出新表</h2>
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7filterfilter-operator%E7%AF%A9%E5%87%BA%E6%96%B0%E8%A1%A8">新式寫法對照：<code>FILTER</code>（Filter Operator）篩出新表</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統：保留原表，另外蒐集符合的列
 LOOP AT gt_item INTO gs_item WHERE qty &gt;= 10.
   APPEND gs_item TO gt_item_big.
@@ -681,7 +681,7 @@ blockquote {
 }
 footer { color: #999; }
 ;" data-marpit-pagination-total="12">
-<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7%E5%B7%A2%E7%8B%80-value-%E8%88%87-reduce">新式寫法對照：巢狀 <code>VALUE</code> 與 <code>REDUCE</code></h2>
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7%E5%B7%A2%E7%8B%80-value-%E8%88%87-reducereduction-operator">新式寫法對照：巢狀 <code>VALUE</code> 與 <code>REDUCE</code>（Reduction Operator）</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* VALUE 可以巢狀：結構裡的 items 欄位是一張表
 gs_order = VALUE #( ordno = 'SO0001' customer = 'ACME'
                     items = VALUE #( ( posnr = 10 matnr = 'MAT-A' qty = 5 )

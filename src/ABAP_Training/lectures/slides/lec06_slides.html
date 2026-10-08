@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>資料字典（DDIC）與透明表：SE11 看定義、SE16N 看資料</li>
@@ -187,7 +187,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="1-%E8%B3%87%E6%96%99%E5%AD%97%E5%85%B8%E8%88%87%E9%80%8F%E6%98%8E%E8%A1%A8">1. 資料字典與透明表</h2>
 <p>表定義集中在 <strong>DDIC</strong>；透明表 = 資料庫裡真實存在的表</p>
 <table>
@@ -270,7 +270,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="11-%E5%9E%8B%E5%88%A5%E5%BE%9E%E5%93%AA%E8%A3%A1%E4%BE%86">1.1 型別從哪裡來</h2>
 <table>
 <thead>
@@ -354,7 +354,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="12-%E7%82%BA%E4%BB%80%E9%BA%BC%E5%BC%95%E7%94%A8%E4%B8%8D%E8%A6%81%E5%AF%AB%E6%AD%BB">1.2 為什麼引用，不要寫死</h2>
 <p>物料號碼 <code>MATNR</code>：舊版 18 碼 → S/4HANA <strong>40 碼</strong></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA lv_matnr TYPE mara-matnr.    &quot; 升級後自動變 40 碼，程式不用改
@@ -421,7 +421,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="2-%E8%88%AA%E7%8F%AD%E8%B3%87%E6%96%99%E6%A8%A1%E5%9E%8B%E8%A8%93%E7%B7%B4%E6%A8%99%E6%BA%96%E6%95%99%E6%9D%90">2. 航班資料模型（訓練標準教材）</h2>
 <table>
 <thead>
@@ -510,7 +510,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="s4hana-%E7%9A%84%E8%B3%87%E6%96%99%E8%A1%A8%E8%AE%8A%E5%8C%96%E8%88%8A%E8%A1%A8%E7%9A%84%E5%9B%9B%E7%A8%AE%E7%8B%80%E6%85%8B">S/4HANA 的資料表變化：舊表的四種狀態</h2>
 <table>
 <thead>
@@ -602,7 +602,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="3-select%E6%92%88%E5%A4%9A%E7%AD%86%E9%80%B2%E5%85%A7%E8%A1%A8%E6%9C%80%E5%B8%B8%E7%94%A8">3. SELECT：撈多筆進內表（最常用）</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">DATA gt_carriers TYPE STANDARD TABLE OF scarr.
 
@@ -669,7 +669,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="%E6%8C%87%E5%AE%9A%E6%AC%84%E4%BD%8D%E5%AF%A6%E5%8B%99%E5%BB%BA%E8%AD%B0">指定欄位（實務建議）</h2>
 <p>只撈需要的欄位，目的結構的<strong>順序與型別要對得上</strong>：</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">TYPES: BEGIN OF ty_carr,
@@ -741,7 +741,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="select-single-%E8%88%87-where">SELECT SINGLE 與 WHERE</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 已知完整鍵、只要一筆：
 SELECT SINGLE * FROM scarr
@@ -814,7 +814,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="order-by%E8%AE%93%E8%B3%87%E6%96%99%E5%BA%AB%E6%8E%92%E5%A5%BD%E5%BA%8F%E5%86%8D%E5%9B%9E%E5%82%B3">ORDER BY：讓資料庫排好序再回傳</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT * FROM sflight
   INTO TABLE gt_flights
@@ -883,7 +883,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7new-open-sql">新式寫法對照：New Open SQL</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* 傳統
 SELECT * FROM scarr INTO TABLE gt_carriers
@@ -904,7 +904,7 @@ SELECT * FROM scarr
 </ol>
 <p><strong>一句裡不能混用</strong>新舊特徵，否則編譯錯誤</p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -931,7 +931,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="13" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="13" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -958,18 +958,22 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
-<h2 id="4-select--endselect%E7%9C%8B%E5%BE%97%E6%87%82%E5%8D%B3%E5%8F%AF">4. SELECT ... ENDSELECT（看得懂即可）</h2>
-<p>舊程式常見的逐筆撈取：</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT * FROM scarr INTO gs_carrier.
-  WRITE: / gs_carrier-carrid, gs_carrier-carrname.
-ENDSELECT.
+;" data-marpit-pagination-total="16">
+<h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7select-%E6%B8%85%E5%96%AE%E8%A3%A1%E7%9A%84%E9%81%8B%E7%AE%97%E5%BC%8Fsql-expression">新式寫法對照：SELECT 清單裡的運算式（SQL Expression）</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT carrid, connid,
+       price * seatsocc AS revenue,                 &quot; 四則運算
+       'X' AS flag,                                 &quot; 字面值
+       concat( carrid, connid ) AS code,            &quot; 字串函式
+       CASE WHEN price &lt; 500 THEN 'LOW'
+            ELSE 'HIGH' END AS level,               &quot; CASE
+       CAST( seatsocc AS DEC( 15, 2 ) ) AS seats_dec &quot; 型別轉換
+  FROM sflight
+  INTO TABLE @DATA(gt_flight).
 </code></pre>
 <ul>
-<li>每一圈跟資料庫要一筆，<strong>效能差</strong></li>
-<li>維護看得懂就好，新程式一律 <code>INTO TABLE</code> 一次撈回</li>
-<li><strong>絕對不要</strong>在 LOOP 裡對每筆再下 SELECT<br />
-（這個需求用 JOIN 解決——講義 11）</li>
+<li>字串函式還有 <code>substring( )</code>、<code>length( )</code>、<code>upper( )</code></li>
+<li>只能用在新式寫法；結果欄位名就是 <code>AS</code> 的別名</li>
+<li>進階：<code>UP TO 3 ROWS OFFSET 2</code> 跳過 2 筆再取 3 筆（分頁，要配 <code>ORDER BY</code>）</li>
 </ul>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-theme="default" data-style="section {
@@ -1026,7 +1030,75 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
+<h2 id="4-select--endselect%E7%9C%8B%E5%BE%97%E6%87%82%E5%8D%B3%E5%8F%AF">4. SELECT ... ENDSELECT（看得懂即可）</h2>
+<p>舊程式常見的逐筆撈取：</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT * FROM scarr INTO gs_carrier.
+  WRITE: / gs_carrier-carrid, gs_carrier-carrname.
+ENDSELECT.
+</code></pre>
+<ul>
+<li>每一圈跟資料庫要一筆，<strong>效能差</strong></li>
+<li>維護看得懂就好，新程式一律 <code>INTO TABLE</code> 一次撈回</li>
+<li><strong>絕對不要</strong>在 LOOP 裡對每筆再下 SELECT<br />
+（這個需求用 JOIN 解決——講義 11）</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="15" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="16">
 <h2 id="5-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">5. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -1063,7 +1135,7 @@ footer { color: #999; }
 </tbody>
 </table>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1090,7 +1162,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="15" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="16" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -1117,7 +1189,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="15">
+;" data-marpit-pagination-total="16">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex06</strong>：</p>
 <p>確認測試資料、SELECT SCARR 全表與指定欄位、<br />

@@ -105,7 +105,7 @@ ENDIF.
 
 <!-- _class: compact -->
 
-## 新式寫法對照：`COND`
+## 新式寫法對照：`COND`（Conditional Operator）
 
 ```abap
 * 傳統
@@ -181,7 +181,7 @@ ENDCASE.
 
 <!-- _class: compact -->
 
-## 新式寫法對照：`SWITCH`
+## 新式寫法對照：`SWITCH`（Conditional Operator）
 
 ```abap
 * 傳統

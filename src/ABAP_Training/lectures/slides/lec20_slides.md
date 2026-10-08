@@ -211,7 +211,7 @@ ENDAT.
 
 <!-- _class: compact -->
 
-## 新式寫法對照：`LOOP AT ... GROUP BY`
+## 新式寫法對照：`LOOP AT ... GROUP BY`（Grouping）
 
 ```abap
 LOOP AT gt_rev INTO DATA(gs_rev)

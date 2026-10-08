@@ -1,4 +1,4 @@
-# 講義 20a：SQL 聚合（Aggregate）與子查詢（Subquery）（授課順序：接在講義 13 之後；延續講義 20 的群組小計）
+# 講義 20a：SQL 聚合（Aggregate）與子查詢（Subquery）（授課順序：接在講義 13 之後；延續講義 20 的群組小計（Control Break））
 
 > 對應練習：[ex20a](../ex20a_sql_aggregate.md)｜答案程式：`ZR_TR20A_SQL_AGG`
 
@@ -12,7 +12,7 @@
 - 子查詢：`IN ( SELECT ... )`、`EXISTS`、`NOT EXISTS`
 - 什麼時候讓資料庫算、什麼時候撈回內表自己算
 
-> 本講全程使用傳統寫法（先宣告結構與內表、`INTO CORRESPONDING FIELDS OF TABLE`），跟講義 6、11 一致。新式寫法（`@DATA` 行內宣告等）留到講義 26 對照。
+> 本講全程使用傳統寫法（先宣告結構與內表、`INTO CORRESPONDING FIELDS OF TABLE`），跟講義 6、11 一致。新式寫法（`@DATA` 行內宣告（Inline Declaration）等）留到講義 26 對照。
 
 ## 1. 為什麼要在資料庫算
 
@@ -201,6 +201,43 @@ SELECT carrid,
 - 子查詢的寫法不變，只有外層 `SELECT` 要照新式規則。
 
 練習 20a 的新式寫法版本見答案程式 `ZR_TR20A_SQL_AGG_NEW`（輸出跟原版逐行比對相同），第 5 段「內表累加」順便改用 `REDUCE ... FOR d IN gt_det WHERE ( carrid = ... )`，只加符合條件的列。
+
+## 7.1 進階補充：CTE（通用表運算式，Common Table Expression）、`FROM @itab`、視窗函數（Window Function）
+
+下面三個功能都要用新式寫法，本系統 7.54 都能用（2026-10-08 用驗證程式 `ZR_TR06_OSQL_CHK` 在本系統 7.54 實測）。實務上比較少見，讀到時看得懂即可。
+
+**CTE（`WITH`）：先算出一個暫存結果，再拿來查**
+
+```abap
+WITH +lh AS ( SELECT carrid, connid, seatsocc FROM sflight WHERE carrid = 'LH' )
+SELECT connid, SUM( seatsocc ) AS seats
+  FROM +lh
+  GROUP BY connid
+  INTO TABLE @DATA(gt_seats).
+```
+
+`+lh` 是暫存結果的名稱（一定要 `+` 開頭），後面的 SELECT 把它當成一張表來用。適合「先篩選、再彙總」分好幾步的查詢，比層層巢狀的子查詢好讀。
+
+**`SELECT ... FROM @itab`：把內表當成資料來源（Internal Table as Data Source）**
+
+```abap
+SELECT carrid, connid FROM @gt_keys AS k
+  WHERE connid > '0400'
+  INTO TABLE @DATA(gt_sel).
+```
+
+用 SQL 的 `WHERE`、`GROUP BY` 處理一張已經在記憶體裡的內表。內表名稱前面要加 `@`，並給一個別名（`AS k`）。
+
+**視窗函數（Window Function）`OVER( )`：不用 `GROUP BY` 也能在每一列旁邊放小計**
+
+```abap
+SELECT carrid, connid, fldate, seatsocc,
+       SUM( seatsocc ) OVER( PARTITION BY carrid ) AS carr_total
+  FROM sflight
+  INTO TABLE @DATA(gt_detail).
+```
+
+`GROUP BY` 會把同一組壓成一列；`OVER( PARTITION BY carrid )`（`PARTITION BY` 叫分區，Partition）則是每一列保留明細，旁邊多一欄「這家公司的合計」。實測 LH 每一列的 `carr_total` 都是 17,114，跟講義 20 的 Control Break 小計相同。
 
 ## 8. 選擇準則：資料庫算 vs 內表算
 

@@ -1,14 +1,14 @@
 # 講義 22：Message Class 與多語言文字元素（Text Elements）（授課順序：接在講義 10 之後）
 
-> 對應練習：[ex22](../ex22_texts_messages.md)｜答案物件：訊息類別 `ZTR22`＋程式 `ZR_TR22_TEXTS`
+> 對應練習：[ex22](../ex22_texts_messages.md)｜答案物件：訊息類別（Message Class） `ZTR22`＋程式 `ZR_TR22_TEXTS`
 
 ## 本講重點
 
 - 為什麼文字不能寫死在程式裡：多語言與集中維護
 - Text Symbol（文字符號）：`text-nnn` 與 `'字面文字'(nnn)` 兩種寫法
-- Selection Texts：讓選擇畫面顯示欄位說明而不是變數名
-- Message Class（SE91）：集中管理訊息、`&` 佔位符、`MESSAGE` 完整語法
-- 翻譯機制：登入語言、Goto → Translation、SE63
+- Selection Texts：讓選擇畫面（Selection Screen）顯示欄位說明而不是變數名
+- Message Class（SE91）：集中管理訊息、`&` 佔位符（Placeholder）、`MESSAGE` 完整語法
+- 翻譯機制：登入語言（Logon Language）、Goto → Translation、SE63
 
 ## 1. 為什麼文字不能寫死
 
@@ -111,7 +111,7 @@ MESSAGE s001(00) WITH '...'.               " 括號寫了別的類別，以括�
 重點觀念：
 
 - **訊息型別（I/S/W/E/A，講義 10 的表）不屬於訊息本身**，是呼叫端決定的——同一則 001，可以 `e001(ztr22)` 也可以 `i001(ztr22)`，行為依當下型別與所在事件而定。
-- 訊息發出後，系統欄位記錄著它：`sy-msgid`（類別）、`sy-msgty`（型別）、`sy-msgno`（編號）、`sy-msgv1`～`sy-msgv4`（佔位符值）——除錯與寫 log 都用得到。
+- 訊息發出後，系統欄位（System Field）記錄著它：`sy-msgid`（類別）、`sy-msgty`（型別）、`sy-msgno`（編號）、`sy-msgv1`～`sy-msgv4`（佔位符值）——除錯與寫 log 都用得到。
 - CALL FUNCTION 的例外訊息、之後 BAPI 的回傳訊息（BAPIRET2）都是這套機制——現在建立的觀念直通實務。
 
 ### 4.2 什麼時候用哪種文字機制

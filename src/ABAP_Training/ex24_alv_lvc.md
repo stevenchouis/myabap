@@ -12,7 +12,7 @@
 
 ## 事前準備
 
-1. 建立程式 `ZR_TR24_<你的姓名縮寫>`，套件 `$TMP`；SCARR 要有資料（同 ex09）。
+1. 建立程式 `ZR_TR24_<你的姓名縮寫>`，套件（Package） `$TMP`；SCARR 要有資料（同 ex09）。
 2. **GUI Status（手動）**：SE80 開啟你的程式 → 右鍵 Create → GUI Status，名稱 `STANDARD`——建立時選「**複製**」來源：程式 `SAPLKKBL` 的 Status `STANDARD_FULLSCREEN`（全螢幕 ALV 的標準工具列），複製後在 Application Toolbar 找個空位加 Function Code `ZCONF`、文字「確認」，啟用。
    - 沒建這個 Status 就執行程式會 dump（`SET PF-STATUS` 找不到狀態）——講義 9 的陷阱表第一次實地體驗。
 
@@ -21,7 +21,7 @@
 情境：航空公司「確認作業」清單——勾選要確認的公司、可填備註，按「確認」後該列狀態變更並**反灰鎖定**，不能再勾、不能再改備註。
 
 1. 資料結構 `ty_row`：`sel`（c1，checkbox）、`carrid`、`carrname`、`remark`（c20，可編輯備註）、`status`（c10）、**`celltab TYPE lvc_t_styl`**（樣式表欄位）
-2. SELECT SCARR 進內表，`status` 先填「未確認」
+2. SELECT SCARR 進內表（Internal Table），`status` 先填「未確認」
 3. 用 MACRO（ex09 技能）建 **LVC fieldcat**：`SEL`（checkbox＋edit）、`CARRID`、`CARRNAME`、`REMARK`（edit）、`STATUS`——注意 `CELLTAB` **不放**進 fieldcat
 4. layout（`lvc_s_layo`）：`zebra`、`cwidth_opt`、**`stylefname = 'CELLTAB'`**
 5. **`i_grid_settings`（`lvc_s_glay`）：`edt_cll_cb = 'X'`**——離開已編輯儲存格觸發 DATA_CHANGED 的開關

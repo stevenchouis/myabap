@@ -6,7 +6,7 @@
 
 - 理解 SM30 原生權限檢查（`S_TABU_DIS`/`S_TABU_NAM`）只到表格層級，業務維度要自己包 Wrapper
 - 會在 SU21 建立自訂**權限物件**（`ACTVT`＋業務欄位），並知道 `AUTHORITY-CHECK` 怎麼呼叫
-- 理解 Lock Object 的鎖定範圍**不必等於表格主鍵**，要對應「使用者實際爭搶的資源邊界」
+- 理解 Lock Object 的鎖定範圍**不必等於表格主鍵（Primary Key）**，要對應「使用者實際爭搶的資源邊界」
 - 會用 `VIEW_MAINTENANCE_CALL` 從程式呼叫標準 Table Maintenance，並用 `dba_sellist` 依欄位篩選只顯示授權範圍內的資料
 - 理解「T-code 要指給 Wrapper 程式，不能指給裸的 SM30」這個設計為什麼重要
 - 會用 `SELECTION-SCREEN FUNCTION KEY` 在選取畫面加自訂按鈕，並理解「透過 Parameter Transaction 呼叫 SM30」跟「透過 Wrapper 正規呼叫」在保護程度上的差別
@@ -14,13 +14,13 @@
 
 ## 事前準備
 
-物件建在套件 `$TMP`。沿用練習 21 學過的 Z 表＋外鍵技巧，這次外鍵指向**標準表** `SCARR`（航空公司主檔），並沿用課程從頭到尾都在用的示範資料模型（`SCARR`/`SPFLI`/`SFLIGHT`）——這是本題跟先前版本最大的差異：先前用「工廠(WERKS)＋通用參數」設計，比較抽象；這一版改成「航空公司(CARRID)＋折扣百分比」，並且真的接了一支計算報表去使用這個折扣，貼近實務常見的「主檔維護 → 下游計算」場景。
+物件建在套件（Package） `$TMP`。沿用練習 21 學過的 Z 表＋外鍵（Foreign Key）技巧，這次外鍵指向**標準表** `SCARR`（航空公司主檔），並沿用課程從頭到尾都在用的示範資料模型（`SCARR`/`SPFLI`/`SFLIGHT`）——這是本題跟先前版本最大的差異：先前用「工廠(WERKS)＋通用參數」設計，比較抽象；這一版改成「航空公司(CARRID)＋折扣百分比」，並且真的接了一支計算報表去使用這個折扣，貼近實務常見的「主檔維護 → 下游計算」場景。
 
 > ⚠️ **2026-07-31 重大改版說明**：本題原本是「工廠(WERKS) + 通用參數(PARAM/PARVAL)」設計（`ZTR28_WPARM`／`ZTR28_WERK`／`EZTR28_WERKS`），使用者測試過 Lock 與篩選都正常後，覺得「參數維護完全沒有接到任何計算，教學意義有限」，因此決定整個改版成「航空公司折扣」設計。**這是整份講義的最終版本**，物件名稱、程式邏輯、GUI-only 步驟都已經是新設計；舊物件（`ZTR28_WPARM`／`ZTR28_WERK`／`EZTR28_WERKS`）留在系統裡當作 `$TMP` 殘留物，不影響新設計運作，也不需要特別清除。
 
 ## 第一部分：DDIC（已由 Claude 建立並啟用，可直接對照）
 
-1. Domain/DE `ZTR28_DISCPCT`（DEC 6,2，折扣百分比，值域 0~100，語法沿用練習 25「DEC Domain 值域上下限要用整數」的教訓）——`CARRID` 直接重用標準 DE `S_CARR_ID`（CHAR 3，`SCARR`/`SPFLI`/`SFLIGHT` 都用這個），`DISCTXT`（折扣說明）重用標準 DE `TEXT40`，不用另外自建（呼應練習 25「能重用標準就不要自己蓋」的判斷）
+1. Domain/DE `ZTR28_DISCPCT`（DEC 6,2，折扣百分比，值域（Value Range） 0~100，語法沿用練習 25「DEC Domain 值域上下限要用整數」的教訓）——`CARRID` 直接重用標準 DE `S_CARR_ID`（CHAR 3，`SCARR`/`SPFLI`/`SFLIGHT` 都用這個），`DISCTXT`（折扣說明）重用標準 DE `TEXT40`，不用另外自建（呼應練習 25「能重用標準就不要自己蓋」的判斷）
 2. 表 `ZTR28_CDISC`（Carrier Discount）：
 
 | 欄位 | Key | 型別來源 | 說明 |
@@ -95,7 +95,7 @@
 > ⚠️ **2026-07-31 再簡化：拿掉 `ZR_TR28_PARAM_LIST`**——這支「清單＋沒有保護的對照按鈕」程式，功能跟 `ZR_TR28_PRICE_CALC` 的按鈕完全重複（兩者都是「直接呼叫 `ZTR28_SM30` 跳進 SM30、不經過 Wrapper」），教學上不需要兩支程式各示範一次同一件事。本題最終只留兩支主程式：**`ZR_TR28_PARAM_MAINT`（維護入口）**與**`ZR_TR28_PRICE_CALC`（主要報表，選取畫面按鈕可直接跳去維護）**。`ZR_TR28_PARAM_LIST` 物件本身因為 ADT 沒有刪除 API 而留在系統裡，原始碼已改成說明性 stub（`WRITE` 一行棄用訊息），不算課程正式教材。
 
 - **`ZR_TR28_PARAM_MAINT`**（Wrapper，走完整保護流程）：選取畫面 `p_carrid`（航空公司，預設 `LH`）＋ `p_disp`（勾選＝只顯示）。依序：`AUTHORITY-CHECK OBJECT 'ZTR28_CARR'` → （維護模式才）`ENQUEUE_EZTR28_CARR` → `VIEW_MAINTENANCE_CALL`（帶 `dba_sellist` 篩選 `CARRID = p_carrid`，只顯示這家航空公司）→ （維護模式才）`DEQUEUE_EZTR28_CARR`
-- **`ZR_TR28_PRICE_CALC`**（主要報表：實際套用折扣的計算報表，展示「這個主檔真的會被拿去算錢」，**輸出用 ALV，選取畫面加了「維護主檔(SM30)」按鈕**）：輸入 `p_carrid`（航空公司，預設 `LH`）＋ `p_connid`（航班代碼，預設 `0400`），依序：`SELECT SINGLE` 查 `SPFLI` 確認航線存在（拿到起訖城市）→ `SELECT` 撈 `SFLIGHT` 該航線所有航班（票價、幣別）→ `SELECT SINGLE` 查 `ZTR28_CDISC` 拿這家航空公司的折扣（**查不到就當 0%，不擋報表執行**）→ 逐航班算 `final_price = price * (1 - discount_pct/100)`，用 `REUSE_ALV_GRID_DISPLAY` 顯示（9 欄：航空公司/航班代碼/起訖城市/日期/原價/幣別/折扣/最終票價）。選取畫面用 `SELECTION-SCREEN FUNCTION KEY 1` 加按鈕呼叫 `ZTR28_SM30`（不經過 Wrapper，直接跳進 SM30 維護畫面，沒有權限檢查、沒有 Lock、也沒有航空公司篩選），方便改完折扣馬上回來重跑本報表驗證連動——這顆按鈕本身就是跟 `ZR_TR28_PARAM_MAINT` 正規做法的對照，不需要另外一支清單程式重複示範。這支報表**完全不需要走權限/鎖定 Wrapper**（只是讀取，不是維護）。
+- **`ZR_TR28_PRICE_CALC`**（主要報表：實際套用折扣的計算報表，展示「這個主檔真的會被拿去算錢」，**輸出用 ALV，選取畫面加了「維護主檔(SM30)」按鈕**）：輸入 `p_carrid`（航空公司，預設 `LH`）＋ `p_connid`（航班代碼，預設 `0400`），依序：`SELECT SINGLE` 查 `SPFLI` 確認航線存在（拿到起訖城市）→ `SELECT` 撈 `SFLIGHT` 該航線所有航班（票價、幣別（Currency））→ `SELECT SINGLE` 查 `ZTR28_CDISC` 拿這家航空公司的折扣（**查不到就當 0%，不擋報表執行**）→ 逐航班算 `final_price = price * (1 - discount_pct/100)`，用 `REUSE_ALV_GRID_DISPLAY` 顯示（9 欄：航空公司/航班代碼/起訖城市/日期/原價/幣別/折扣/最終票價）。選取畫面用 `SELECTION-SCREEN FUNCTION KEY 1` 加按鈕呼叫 `ZTR28_SM30`（不經過 Wrapper，直接跳進 SM30 維護畫面，沒有權限檢查、沒有 Lock、也沒有航空公司篩選），方便改完折扣馬上回來重跑本報表驗證連動——這顆按鈕本身就是跟 `ZR_TR28_PARAM_MAINT` 正規做法的對照，不需要另外一支清單程式重複示範。這支報表**完全不需要走權限/鎖定 Wrapper**（只是讀取，不是維護）。
 - **`ZR_TR28_SEED_DEMO`**（一次性種子程式，方便測試）：`MODIFY` 兩筆示範資料進 `ZTR28_CDISC`（`LH` 15%、`AA` 10%），讓 `ZR_TR28_PRICE_CALC` 一開始執行就有非 0% 的資料可以測試，不用等 GUI-only 物件都建好、手動在 SM30 輸入才看得到效果。可以重複執行（`MODIFY` 不是 `INSERT`，不會因為 Key 重複而報錯）。
 
 ## 第六點五部分：Selection Texts（需使用者手動維護，無 ADT API）

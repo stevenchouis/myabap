@@ -22,7 +22,7 @@
 
 | 層 | 管什麼 | 例 |
 |---|---|---|
-| **Domain（值域）** | **技術屬性**：型別、長度、小數位、允許值清單（Value Range）、轉換常式 | INT4、值域 0～999 |
+| **Domain（值域）** | **技術屬性**：型別、長度、小數位、允許值清單（Value Range）、轉換常式（Conversion Routine） | INT4、值域 0～999 |
 | **Data Element（資料元素）** | **語意**：欄位標籤（F1 說明、畫面上的欄位名稱，可多語言） | 「學生成績」 |
 | 表格欄位 | 引用一個 Data Element（或直接用內建型別） | `SCORE TYPE ztr21_score` |
 
@@ -118,7 +118,7 @@ Fields 頁籤每個欄位最左邊的 **Key** 勾選框，勾起來的欄位合�
 
 **金額（`CURR` ＋ `CUKY`）**
 
-- 各幣別有幾位小數，設定在表 `TCURX`（欄位 `CURRDEC`，交易碼 `OB08` 相關設定）；**沒列在 `TCURX` 的幣別一律 2 位**。
+- 各幣別有幾位小數，設定在表 `TCURX`（欄位 `CURRDEC`，交易碼（Transaction Code） `OB08` 相關設定）；**沒列在 `TCURX` 的幣別一律 2 位**。
 - **最小單位**：每種幣別能細分到的最小金額，由它的小數位數決定。USD 是 2 位，最小單位是 1 美分（0.01 美元）；JPY 是 0 位，最小單位就是 1 日圓；KWD 是 3 位，最小單位是 1 fils（0.001 第納爾）。
 - **SAP 存金額的方式**：`CURR` 欄位的小數位在 DDIC 定義時就固定了（通常 2 位），不會因為每筆資料的幣別不同而改變。存的時候分兩步：
   1. 先算這筆金額是「幾個最小單位」：10,000 日圓＝10000 個日圓。
@@ -277,7 +277,7 @@ SE11 外鍵對話框的 **Semantic attributes** 區塊，除了基數還有一�
 | Key fields of a text table | 外鍵表是檢查表的**文字表** | 建「代碼＋各語言說明」的文字表時 | `MAKT-MATNR`（物料說明，`MARA` 的文字表，見下方）；`T005T-LAND1`（國家名稱，`T005` 的文字表） |
 
 - 前兩種（Non-key、Key）**只是文件用途**，不影響系統行為，讓看表的人知道這個外鍵欄位的角色。
-- **Key fields of a text table 會真的改變系統行為**：系統把這張表當成檢查表的文字表，F4 選單會自動帶出說明文字，Maintenance View 也能自動只取登入語言的那一筆（講義 21a）。條件是：外鍵表的主鍵要跟檢查表一樣，再多一個 `LANG` 型別的語言欄位；每張檢查表只能有一張文字表。
+- **Key fields of a text table 會真的改變系統行為**：系統把這張表當成檢查表的文字表，F4 選單會自動帶出說明文字，Maintenance View 也能自動只取登入語言（Logon Language）的那一筆（講義 21a）。條件是：外鍵表的主鍵要跟檢查表一樣，再多一個 `LANG` 型別的語言欄位；每張檢查表只能有一張文字表。
 - 本課程的練習照實際關係選即可，例如學生表的 `KLASSE` 選 Non-key fields/candidates；選 Not Specified 也不影響功能。
 
 #### 文字表（Text Table）的實例：`MARA` 與 `MAKT`
@@ -396,7 +396,7 @@ F4 雖然是在單一欄位上按，但 Search Help 可以讀取同一個畫面�
 
 **SDis 搭配 IMP：亮出條件，但不讓改**
 
-SDis 欄位不能輸入，所以它的值一定是系統帶進來的：IMP 從畫面帶入，或 Default value 欄填的固定值。顯示在條件區，是讓使用者知道「清單只有這些，是因為已經套用了這個條件」。本系統所有勾 SDis 的參數約 2,830 個，其中 2,505 個同時勾了 IMP，其餘大多填了 Default value（2026-10-05 查 `DD32S`）。沒有 IMP 也沒有預設值、單獨勾 SDis，只會得到一個永遠空白又不能填的欄位。
+SDis 欄位不能輸入，所以它的值一定是系統帶進來的：IMP 從畫面帶入，或 Default value 欄填的固定值（Fixed Value）。顯示在條件區，是讓使用者知道「清單只有這些，是因為已經套用了這個條件」。本系統所有勾 SDis 的參數約 2,830 個，其中 2,505 個同時勾了 IMP，其餘大多填了 Default value（2026-10-05 查 `DD32S`）。沒有 IMP 也沒有預設值、單獨勾 SDis，只會得到一個永遠空白又不能填的欄位。
 
 | 設定 | 條件區的效果 | 例子 |
 |---|---|---|
@@ -404,7 +404,7 @@ SDis 欄位不能輸入，所以它的值一定是系統帶進來的：IMP 從�
 | IMP＋SDis | 帶入畫面上的值，**不能改** | Business Place 的 `H_BUPLA` 的 `BUKRS`：Business Place 依公司代碼定義，條件區顯示畫面上的公司代碼並鎖住，只能在這家公司的範圍內挑 |
 | Default value＋SDis | 顯示固定值，不能改 | 這個 Search Help 永遠只查某一類資料 |
 
-**在自己的選擇畫面上也會連動**：兩個欄位都參考有外鍵的表格欄位即可，不用另外寫程式：
+**在自己的選擇畫面（Selection Screen）上也會連動**：兩個欄位都參考有外鍵的表格欄位即可，不用另外寫程式：
 
 ```abap
 PARAMETERS: p_werks TYPE mard-werks,
@@ -413,7 +413,7 @@ PARAMETERS: p_werks TYPE mard-werks,
 
 先在 `p_werks` 填 `1010`（不必按 Enter），再在 `p_lgort` 按 F4：F4 視窗上方條件區的 Plant 自動帶入 `1010`，清單只列出 `1010` 的儲存地點。畫面欄位雖然叫 `P_WERKS`，不叫 `MARD-WERKS`，一樣對得上。`SELECT-OPTIONS ... FOR mard-werks`、加 `MEMORY ID` 的寫法也一樣會連動（2026-10-05 用驗證程式 `ZR_TR21_SHLP_DEP` 實測）。
 
-> 驗證程式裡還有第 4 種寫法：在 `AT SELECTION-SCREEN ON VALUE-REQUEST`（講義 10）自己讀畫面上的工廠、`SELECT` 出該工廠的倉別，再交給 FM `F4IF_INT_TABLE_VALUE_REQUEST` 顯示。清單一樣正確，但 F4 視窗上方的條件區是空的：篩選在程式裡就做完了，這支 FM 只負責顯示傳進去的內表，條件區是它依內表欄位自動產生的，沒有任何 IMP 設定。這種自己寫 F4 的做法，留給沒有現成 Check Table／Search Help 可用的欄位。
+> 驗證程式裡還有第 4 種寫法：在 `AT SELECTION-SCREEN ON VALUE-REQUEST`（講義 10）自己讀畫面上的工廠、`SELECT` 出該工廠的倉別，再交給 FM `F4IF_INT_TABLE_VALUE_REQUEST` 顯示。清單一樣正確，但 F4 視窗上方的條件區是空的：篩選在程式裡就做完了，這支 FM 只負責顯示傳進去的內表（Internal Table），條件區是它依內表欄位自動產生的，沒有任何 IMP 設定。這種自己寫 F4 的做法，留給沒有現成 Check Table／Search Help 可用的欄位。
 
 除了在 SM30 按 F4（第 4 節），也可以寫一支只有選擇畫面的小程式，參數參考這個 Data Element（講義 7）來測：
 
@@ -500,7 +500,7 @@ UPDATE ztr21_stud SET score   = 90,
   WHERE id = 'S0001'.
 ```
 
-- 跟 SELECT 一樣（講義 6 §3.6），寫入指令裡的程式變數也是宿主變數，新式寫法要加 `@`。
+- 跟 SELECT 一樣（講義 6 §3.6），寫入指令裡的程式變數也是宿主變數（Host Variable），新式寫法要加 `@`。
 - 來源是 `VALUE #( )` 這類運算式時，要用 `@( )` 包起來；`#` 的型別取自目標資料表的列。
 - `UPDATE ... SET` 有好幾個欄位時，新式寫法要用逗號分隔，傳統寫法則是空格。
 - `DELETE FROM ... WHERE`、`COMMIT WORK` 沒有新舊之分。
@@ -537,7 +537,7 @@ COMMIT WORK.                    " 整包確認：全部永久生效
 | 自己塞 MANDT | 不用，系統自動處理（跟 SELECT 一樣） |
 | 以為外鍵能擋住程式寫入的髒資料 | 外鍵（screenCheck）只管畫面輸入，Open SQL 不受影響（見 3.2） |
 | SM30 說表不能維護 | 建表時 Data Browser/Table View Maint. 選了不允許，或沒產 Maintenance 畫面 |
-| Table Maintenance Generator 產生失敗 | Function Group 還沒建，或建在別的套件 |
+| Table Maintenance Generator 產生失敗 | Function Group 還沒建，或建在別的套件（Package） |
 | SM30 輸入不存在的班級沒被擋 | 外鍵沒打開 Screen Check，或表改完沒重新啟用 |
 | DE 掛了 Search Help 但 F4 還是沒選單 | Search Help 本身沒啟用，或掛的是舊版本；兩邊都要各自啟用一次 |
 | Search Help 存檔/Activate 失敗 | Selection Method 表裡的欄位（如 `KLNAME`）沒引用 Data Element，只用了內建型別 |

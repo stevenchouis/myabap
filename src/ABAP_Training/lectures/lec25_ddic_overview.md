@@ -22,7 +22,7 @@
 | Domain（值域） | 技術屬性：型別、長度、小數位、值域清單 | Data Element |
 | Data Element（資料元素） | 語意：標籤、F1 說明、Search Help 掛勾（講義 21 三層件） | 表格欄位、程式變數 |
 | Structure（結構） | 純欄位組合，**不對應資料庫表**（如畫面用的暫存結構） | 程式、畫面 |
-| Table（透明表） | 對應資料庫的真實表 | Open SQL、SM30、程式 |
+| Table（透明表（Transparent Table）） | 對應資料庫的真實表 | Open SQL、SM30、程式 |
 | Table Type | 表格型別（「很多列」的定義），可跨程式共用 | 方法/FM 的表格參數 |
 | View（檢視） | 把一張或多張表的欄位「組合」起來看，本身不存資料（四種，見 1.1） | 程式、SM30、Search Help |
 | Search Help | F4 選單來源 | 畫面欄位、Data Element |
@@ -52,7 +52,7 @@
 | 誰在用 | 怎麼引用 | 拿到什麼 |
 |---|---|---|
 | 程式變數 | `DATA gv_carrid TYPE s_carr_id.`（Data Element）或 `TYPE scarr-carrid`（表格欄位） | 型別、長度自動是 CHAR 3 |
-| 選擇畫面 | `PARAMETERS p_carr TYPE s_carr_id.`（Data Element）或 `TYPE scarr-carrid`（表格欄位） | 型別、長度，加上 F1 說明、F4 選單，不用自己寫 |
+| 選擇畫面（Selection Screen） | `PARAMETERS p_carr TYPE s_carr_id.`（Data Element）或 `TYPE scarr-carrid`（表格欄位） | 型別、長度，加上 F1 說明、F4 選單，不用自己寫 |
 | 表格欄位 | `SCARR-CARRID`、`SPFLI-CARRID`、`SFLIGHT-CARRID` 在 SE11 都指定 Data Element `S_CARR_ID` | 同一個型別，JOIN 時兩邊保證對得上 |
 | SM30 維護畫面 | 系統依表格欄位自動產生 | 欄位標題、F1、F4 都從欄位的 Data Element 帶出來 |
 
@@ -151,7 +151,7 @@ DDIC 還多了一些**帶語意**的型別。技術上一樣對應到 `c`、`n`�
 | `QUAN` | `p` | **數量**，必須指定一個 `UNIT` 型別的參考欄位；顯示時依該欄位的單位決定小數位 |
 | `UNIT` | `c` LENGTH 2～3 | 單位（`PC`、`KG`），給 `QUAN` 參考 |
 | `CLNT` | `c` LENGTH 3 | Client；表格第一欄用它，Open SQL 就會自動處理 client（講義 6） |
-| `LANG` | `c` LENGTH 1 | 語言代碼；文字表靠它依登入語言取說明 |
+| `LANG` | `c` LENGTH 1 | 語言代碼；文字表靠它依登入語言（Logon Language）取說明 |
 | `ACCP` | `n` LENGTH 6 | 會計期間 YYYYMM |
 
 講義 2 的 `p` 只是一個數字，不知道自己是金額；DDIC 的 `CURR` 知道自己是金額，所以一定要有幣別欄位配對。講義 15 建結構 `ZTR15_FLIGHT_REV` 時，金額欄位沒有指定參考幣別就無法啟用，就是這個規則。
@@ -207,7 +207,7 @@ SE11 畫面上還會看到這些相關名詞，先認得中英文，之後操作
 | Foreign Key Table | 外鍵表 | 帶外鍵欄位的那張表（例如學生表） |
 | Check Table | 檢查表 | 被參考、提供合法值的那張表（例如班級表） |
 | Cardinality | 基數 | 兩表資料是幾對幾，例如 `1 : CN`＝每個學生一個班級、每個班級任意多個學生（意義與填法見講義 21 §3.1） |
-| Foreign key field type | 外鍵欄位類型 | 外鍵欄位在外鍵表裡是不是主鍵；選 text table 時外鍵表會被當成檢查表的文字表（講義 21 §3.1） |
+| Foreign key field type | 外鍵欄位類型 | 外鍵欄位在外鍵表裡是不是主鍵（Primary Key）；選 text table 時外鍵表會被當成檢查表的文字表（講義 21 §3.1） |
 | Screen Check | 畫面檢查 | 外鍵的開關；打開後畫面輸入才會被檢查 |
 | Value Table | 值表 | 設在 Domain 上的建議檢查表；建外鍵時系統會先帶出來當預設 |
 | F4 Help／Value Help | F4 說明／值說明 | 在欄位上按 F4 跳出的選單 |
@@ -244,7 +244,7 @@ DATA gv_carrid TYPE scarr-carrid.     " 透過表格路徑引用（兩者型別�
 
 ### 6.2 第三種 Global Type 模式：重用標準 Domain、自己補標籤
 
-`ACTIVE`（是否啟用加成）圖方便的話很容易直接用內建型別 `CHAR 1` 打發——**這是個陷阱**：SE11 建表時該欄位沒有任何 Data Element 可以提供標籤，SM30 產生的維護畫面欄位標題會顯示成通用符號 `+`，而且完全沒有 F4 下拉選單（沒有 Domain 固定值清單可以參考）。
+`ACTIVE`（是否啟用加成）圖方便的話很容易直接用內建型別 `CHAR 1` 打發——**這是個陷阱**：SE11 建表時該欄位沒有任何 Data Element 可以提供標籤，SM30 產生的維護畫面欄位標題會顯示成通用符號 `+`，而且完全沒有 F4 下拉選單（沒有 Domain 固定值（Fixed Value）清單可以參考）。
 
 正確做法：SAP 標準已經有一個通用的「是／否」值域 **Domain `XFELD`**，內建 `X`＝是、空白＝否兩個固定值——但它掛的標準 Data Element `XFELD` 本身**故意不帶任何標籤**（設計上就是留給每張表自己命名，因為「是／否」用在哪張表都語意不同）。所以我們建一個新 Data Element `ZTR25_ACTIVE`，**Domain 選標準的 `XFELD`（不自建 Domain），只補上自己的標籤**「加成啟用」：
 
@@ -304,7 +304,7 @@ key carrid : s_carr_id not null
 
 ### 6.4 建 SM30 維護畫面、驗證「免費拿到」的東西
 
-- **先建 Function Group**：SE80 → 下拉選 **Function Group** → 輸入 `ZFG_TR25` → Enter → Yes → 填 Short Text → 套件 `$TMP`。Table Maintenance Generator 產生的維護畫面程式要放進一個**已經存在**的 Function Group，所以要先建好（Function Group 是 FM 的容器，講義 15 會細講）
+- **先建 Function Group**：SE80 → 下拉選 **Function Group** → 輸入 `ZFG_TR25` → Enter → Yes → 填 Short Text → 套件（Package） `$TMP`。Table Maintenance Generator 產生的維護畫面程式要放進一個**已經存在**的 Function Group，所以要先建好（Function Group 是 FM 的容器，講義 15 會細講）
 - Utilities → Table Maintenance Generator：Authorization Group `&NC&`、Function Group `ZFG_TR25`、one step → 產生
 - SM30 → `ZTR25_SURCHG` → 新增兩筆：`AA`／啟用／`15.00`、`LH`／啟用／`10.00`
 - **驗證重用標準型別的三個免費好處**：
@@ -316,7 +316,7 @@ key carrid : s_carr_id not null
 
 ### 6.5 程式讀取：Global Type 宣告 + 加成營收試算
 
-本講排在 FORM（講義 8）與 JOIN（講義 11）之前，所以程式全部寫在 `START-OF-SELECTION`，用前面學過的「三張表各自讀進內表、再用 `READ TABLE` 對照」完成：
+本講排在 FORM（講義 8）與 JOIN（講義 11）之前，所以程式全部寫在 `START-OF-SELECTION`，用前面學過的「三張表各自讀進內表（Internal Table）、再用 `READ TABLE` 對照」完成：
 
 ```abap
 DATA: gt_surchg TYPE ztr25_tt_surchg,             " DDIC Table Type（見 6.6）

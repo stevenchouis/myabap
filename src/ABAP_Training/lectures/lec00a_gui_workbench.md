@@ -12,7 +12,7 @@
 
 ## 1. SAP GUI 安裝
 
-SAP GUI（俗稱前端、Logon）是連 SAP 的用戶端程式，Windows 版本目前常見 7.70 / 8.00。
+SAP GUI（俗稱前端、Logon）是連 SAP 的用戶端（Client）程式，Windows 版本目前常見 7.70 / 8.00。
 
 - **安裝來源**：企業環境一律跟公司 IT 或 Basis 要安裝包（版本、修正檔等級要跟公司統一）；原廠下載在 SAP Support Portal（要 S-user 帳號），自己不要亂裝來路不明的版本。
 - 安裝時勾選預設元件即可；裝完桌面會有 **SAP Logon** 圖示——它是「連線管理器」，真正的 GUI 視窗由它啟動。
@@ -76,11 +76,11 @@ ABAP Workbench 是開發工具的總稱（T-code 家族 SE 開頭為主）。兩
 | T-code | 名稱 | 用途與本課程用法 |
 |---|---|---|
 | SE38 | ABAP Editor | 建立/修改/執行程式——**每一講都用** |
-| SE80 | Object Navigator | 總覽套件下所有物件；看程式＋INCLUDE 結構（講義 14）最方便 |
+| SE80 | Object Navigator | 總覽套件（Package）下所有物件；看程式＋INCLUDE 結構（講義 14）最方便 |
 | SE11 | ABAP Dictionary | 看資料表定義、Data Element、Domain（講義 6 起） |
 | SE16N | Data Browser | 直接看表內容、下條件查資料（驗證程式撈的數對不對） |
 | SE37 | Function Builder | 建立/單測 Function Module（講義 15） |
-| SE91 | Message Maintenance | 訊息類別維護（MESSAGE 進階用法） |
+| SE91 | Message Maintenance | 訊息類別（Message Class）維護（MESSAGE 進階用法） |
 | ST22 | Dump Analysis | 程式當掉（runtime error）的完整紀錄——除錯第一站 |
 | SM37 | Job Monitor | 背景執行的程式在這看結果 |
 
@@ -95,11 +95,11 @@ ABAP Workbench 是開發工具的總稱（T-code 家族 SE 開頭為主）。兩
 |---|---|---|
 | 語法檢查 | `Ctrl+F2` | 寫完先檢查，訊息會標行號 |
 | 啟用 Activate | `Ctrl+F3` | **存檔 ≠ 啟用**，執行的是 active 版本（見講義 1） |
-| 執行 | `F8` | 直接跑；有選擇畫面會先停在畫面 |
+| 執行 | `F8` | 直接跑；有選擇畫面（Selection Screen）會先停在畫面 |
 | Pretty Printer | `Shift+F1` | 自動排版（縮排、大小寫），寫完習慣按一下 |
 | 顯示/修改切換 | `Ctrl+F1` | 眼鏡/鉛筆圖示；唯讀模式防手滑 |
 | 版本管理 | Utilities → Versions | 比對/還原歷史版本（正式物件搭配 TR 產生版本） |
-| 除錯 | 命令欄輸入 `/h` 再執行，或程式裡設中斷點 | 單步 F5、跳過 F6、跑到底 F8——課堂先會「開得起來、看得到變數值」即可，深入用法隨練習累積 |
+| 除錯 | 命令欄輸入 `/h` 再執行，或程式裡設中斷點（Breakpoint） | 單步 F5、跳過 F6、跑到底 F8——課堂先會「開得起來、看得到變數值」即可，深入用法隨練習累積 |
 
 另外認識兩個編輯器設定（New Front-End Editor）：行號顯示、程式碼補全（Ctrl+Space），在編輯器右下角工具鈕裡。
 

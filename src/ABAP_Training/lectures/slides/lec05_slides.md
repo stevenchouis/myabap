@@ -137,7 +137,7 @@ DELETE ADJACENT DUPLICATES FROM gt_students COMPARING id.
 
 <!-- _class: compact -->
 
-## 新式寫法對照：`FILTER` 篩出新表
+## 新式寫法對照：`FILTER`（Filter Operator）篩出新表
 
 ```abap
 * 傳統：保留原表，另外蒐集符合的列
@@ -198,7 +198,7 @@ WRITE: / '倖存', lines( gt_students ), '人'.
 
 <!-- _class: compact -->
 
-## 新式寫法對照：巢狀 `VALUE` 與 `REDUCE`
+## 新式寫法對照：巢狀 `VALUE` 與 `REDUCE`（Reduction Operator）
 
 ```abap
 * VALUE 可以巢狀：結構裡的 items 欄位是一張表

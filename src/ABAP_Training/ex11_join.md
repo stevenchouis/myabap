@@ -17,7 +17,7 @@
 
 ## 事前準備
 
-建立程式 `ZR_TR11_<你的姓名縮寫>`，套件 `$TMP`；確認 SPFLI/SCARR 有資料。
+建立程式 `ZR_TR11_<你的姓名縮寫>`，套件（Package） `$TMP`；確認 SPFLI/SCARR 有資料。
 
 ## 題目需求
 

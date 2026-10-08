@@ -1,4 +1,4 @@
-# 練習 7：選擇畫面——PARAMETERS 與 SELECT-OPTIONS
+# 練習 7：選擇畫面（Selection Screen）——PARAMETERS 與 SELECT-OPTIONS
 
 ## 學習目標
 
@@ -10,7 +10,7 @@
 
 ## 事前準備
 
-- 建立程式 `ZR_TR07_<你的姓名縮寫>`，套件 `$TMP`
+- 建立程式 `ZR_TR07_<你的姓名縮寫>`，套件（Package） `$TMP`
 - 延伸教材：執行 `ZR_SELSCREEN_DEMO`（示範程式）看更多選擇畫面元件——按鈕、同列排版、radio button 群組
 
 ## 題目需求
@@ -19,7 +19,7 @@
 2. 選擇畫面一個 BLOCK（有框、有標題）內含：
    - `p_title`：報表標題，預設「學生成績清單」
    - `s_score`：成績範圍（`SELECT-OPTIONS`）
-   - `p_desc`：核取方塊，勾選＝由高到低排序
+   - `p_desc`：核取方塊（Checkbox），勾選＝由高到低排序
 3. 依畫面條件輸出：標題 → 橫線（`ULINE`）→ 符合成績範圍的學生（用 `LOOP ... WHERE score IN s_score`）
 4. 一筆都沒有時輸出「沒有符合條件的資料」（`LOOP` 後檢查 `sy-subrc`）
 

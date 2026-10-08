@@ -6,9 +6,9 @@
 
 - Field-Symbol 的本質：**別名（指向本尊），不是複本**
 - `FIELD-SYMBOLS` 宣告與 `ASSIGN`
-- `LOOP AT ... ASSIGNING` / `READ TABLE ... ASSIGNING`：就地修改內表
+- `LOOP AT ... ASSIGNING` / `READ TABLE ... ASSIGNING`：就地修改內表（Internal Table）
 - `ASSIGN COMPONENT ... OF STRUCTURE`：動態逐欄存取
-- `IS ASSIGNED` / `UNASSIGN` 與執行期錯誤 GETWA_NOT_ASSIGNED
+- `IS ASSIGNED` / `UNASSIGN` 與執行期錯誤（Runtime Error） GETWA_NOT_ASSIGNED
 
 ## 1. 本質：別名不是複本
 
@@ -74,7 +74,7 @@ LOOP AT gt_students ASSIGNING <ls_student>.
 ENDLOOP.
 ```
 
-上面是傳統寫法：**先用 `FIELD-SYMBOLS` 宣告，再 `ASSIGNING <ls_student>`**。7.40 之後的行內宣告寫法 `ASSIGNING FIELD-SYMBOL(<ls_student>)`，跟本講其他用法的新寫法一起整理在第 7 節。
+上面是傳統寫法：**先用 `FIELD-SYMBOLS` 宣告，再 `ASSIGNING <ls_student>`**。7.40 之後的行內宣告（Inline Declaration）寫法 `ASSIGNING FIELD-SYMBOL(<ls_student>)`，跟本講其他用法的新寫法一起整理在第 7 節。
 
 READ TABLE 也有對應版本，單筆就地修改：
 
@@ -144,7 +144,7 @@ ENDDO.
 | ASSIGN COMPONENT | `FIELD-SYMBOLS <fs_comp> TYPE any.`<br>`ASSIGN COMPONENT sy-index OF STRUCTURE gs_student TO <fs_comp>.` | `ASSIGN COMPONENT sy-index OF STRUCTURE gs_student TO FIELD-SYMBOL(<fs_comp>).` |
 | 指向表格的某一列 | `READ TABLE gt_students ASSIGNING <ls_hit> WITH KEY id = 'S0004'.` | `ASSIGN gt_students[ id = 'S0004' ] TO FIELD-SYMBOL(<ls_hit>).` |
 
-最後一列用的是講義 4 的表格運算式 `itab[ ]`。跟直接取值不同的是：**`ASSIGN` 一個找不到的列不會發生例外，而是設定 `sy-subrc = 4`**，所以後面照樣用 `IF sy-subrc = 0.` 判斷即可（`ZR_TR16_FIELD_SYMBOLS_NEW` 實測）。
+最後一列用的是講義 4 的表格運算式（Table Expression）`itab[ ]`。跟直接取值不同的是：**`ASSIGN` 一個找不到的列不會發生例外，而是設定 `sy-subrc = 4`**，所以後面照樣用 `IF sy-subrc = 0.` 判斷即可（`ZR_TR16_FIELD_SYMBOLS_NEW` 實測）。
 
 ```abap
 * 行內宣告版的完整範例：少了獨立的 FIELD-SYMBOLS 宣告，其餘邏輯完全相同

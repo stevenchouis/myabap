@@ -40,13 +40,13 @@ APPEND gs_fieldcat TO gt_fieldcat.
 
 | fieldcat 欄位 | 用途 |
 |---|---|
-| `fieldname` | 對應資料內表的欄位名，**必須大寫**，打錯該欄直接不顯示 |
+| `fieldname` | 對應資料內表（Internal Table）的欄位名，**必須大寫**，打錯該欄直接不顯示 |
 | `seltext_l` / `seltext_m` / `seltext_s` | 長／中／短欄位標題（ALV 依欄寬挑用） |
 | `outputlen` | 顯示寬度 |
 | `key` | `'X'` = 鍵欄位（固定不捲動、上色） |
 | `do_sum` | `'X'` = 數值欄自動加總 |
 | `no_out` | `'X'` = 先隱藏（使用者可自行叫出） |
-| `currency` / `cfieldname` | 金額欄位的幣別（固定值／參考欄位） |
+| `currency` / `cfieldname` | 金額欄位的幣別（固定值（Fixed Value）／參考欄位） |
 
 > 若資料內表直接用 DDIC 結構（如 `TYPE TABLE OF scarr`），也可以呼叫 `REUSE_ALV_FIELDCATALOG_MERGE` 自動產生 fieldcat；自訂結構則手工建——兩種都會遇到。
 
@@ -71,7 +71,7 @@ mc_add_field 'CURRCODE' '幣別'         6.
 
 MACRO 的本質是**編譯前的文字展開**（把 &n 換成實參後原地貼上），因此：
 
-- **不能下中斷點**、除錯時單步直接跳過整個 MACRO——出錯很難查。
+- **不能下中斷點（Breakpoint）**、除錯時單步直接跳過整個 MACRO——出錯很難查。
 - 只在定義它的程式內有效，必須先定義後使用。
 - 新程式碼**不要寫 MACRO**（用 FORM / Method 取代），但舊程式極常見（本專案 ZDQM0001F01 的 gui_download 就是），**必須看得懂**。
 
@@ -92,7 +92,7 @@ IF sy-subrc <> 0.
 ENDIF.
 ```
 
-- `i_callback_program` 給 `sy-repid`（目前程式名），ALV 事件回呼（如自訂頁首、雙擊）都靠它找回你的程式。
+- `i_callback_program` 給 `sy-repid`（目前程式名），ALV 事件回呼（如自訂頁首（Page Header）、雙擊）都靠它找回你的程式。
 - `REUSE_ALV_GRID_DISPLAY` 就是一支標準 FM：`EXPORTING` 傳入設定與欄位目錄、`TABLES` 傳入資料表（舊式參數，講義 15 第 3.1 節說明過為何新 FM 不再這樣設計）、`EXCEPTIONS` 對應錯誤——講義 15 學過的呼叫語法全部適用，呼叫後一樣要檢查 `sy-subrc`。
 
 ### 4.1 layout：整體版面
@@ -198,9 +198,9 @@ LOOP AT gt_data ASSIGNING <ls_row> WHERE sel = 'X'.
 ENDLOOP.
 ```
 
-> **補充**：`ASSIGNING <ls_row>` 也可以寫成行內宣告 `ASSIGNING FIELD-SYMBOL(<ls_row>)`（7.40 之後的新寫法，省掉上面 `FIELD-SYMBOLS` 那一行），見講義 16 §7。
+> **補充**：`ASSIGNING <ls_row>` 也可以寫成行內宣告（Inline Declaration） `ASSIGNING FIELD-SYMBOL(<ls_row>)`（7.40 之後的新寫法，省掉上面 `FIELD-SYMBOLS` 那一行），見講義 16 §7。
 
-刷新畫面後（`selfield-refresh = 'X'`，見 8.3），這些列的 checkbox／備註就是灰的。常用樣式常數還有 `mc_style_enabled`（解鎖）、`mc_style_hotspot`。`celltab` 欄位本身**不要**放進 fieldcat。
+刷新畫面後（`selfield-refresh = 'X'`，見 8.3），這些列的 checkbox／備註就是灰的。常用樣式常數（Constant）還有 `mc_style_enabled`（解鎖）、`mc_style_hotspot`。`celltab` 欄位本身**不要**放進 fieldcat。
 
 ### 8.3 自訂按鈕：PF-STATUS 與 USER_COMMAND 回呼
 

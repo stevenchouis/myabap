@@ -10,9 +10,9 @@
 
 ## 事前準備
 
-1. 建立程式 `ZR_TR06_<你的姓名縮寫>`，套件 `$TMP`
+1. 建立程式 `ZR_TR06_<你的姓名縮寫>`，套件（Package） `$TMP`
 2. **講師課前確認**：SE16 看 `SCARR` 是否有資料；沒有的話先執行報表 `SAPBC_DATA_GENERATOR`（SE38）產生航班訓練資料
-3. 學員先用 SE11 看 `SCARR` 的欄位定義、SE16 看實際資料，認識 `CARRID`（代碼）、`CARRNAME`（名稱）、`CURRCODE`（幣別）三個欄位
+3. 學員先用 SE11 看 `SCARR` 的欄位定義、SE16 看實際資料，認識 `CARRID`（代碼）、`CARRNAME`（名稱）、`CURRCODE`（幣別（Currency））三個欄位
 
 ## 題目需求
 

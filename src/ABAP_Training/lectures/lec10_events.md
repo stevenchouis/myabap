@@ -22,13 +22,13 @@ Report 程式由一塊塊「事件區塊」組成：事件關鍵字出現到下�
 | 順序 | 事件 | 觸發時機 | 典型用途 |
 |---|---|---|---|
 | 1 | `LOAD-OF-PROGRAM` | 程式載入（最早） | 少用，先認識 |
-| 2 | `INITIALIZATION` | 選擇畫面顯示**之前** | 給選擇畫面預設值、框標題 |
+| 2 | `INITIALIZATION` | 選擇畫面（Selection Screen）顯示**之前** | 給選擇畫面預設值、框標題 |
 | 3 | `AT SELECTION-SCREEN OUTPUT` | 選擇畫面每次顯示前 | 動態調整畫面（進階） |
 | 4 | `AT SELECTION-SCREEN` | 使用者按執行後、主邏輯**之前** | **驗證輸入**，擋下錯誤條件 |
 | 5 | `START-OF-SELECTION` | 驗證通過後 | **主處理**：取數、加工、輸出 |
 | 6 | `END-OF-SELECTION` | 主處理結束 | 總結、合計、（期末）總頁數回填 |
-| - | `TOP-OF-PAGE` | 基本清單每頁開頭（由該頁第一個 WRITE 觸發） | 頁首、表頭 |
-| - | `END-OF-PAGE` | 每頁到達保留行區（需 LINE-COUNT n(m)） | 頁尾 |
+| - | `TOP-OF-PAGE` | 基本清單每頁開頭（由該頁第一個 WRITE 觸發） | 頁首（Page Header）、表頭 |
+| - | `END-OF-PAGE` | 每頁到達保留行區（需 LINE-COUNT n(m)） | 頁尾（Page Footer） |
 | - | `AT LINE-SELECTION` | 使用者雙擊清單行（或 F2） | 互動明細（第二層清單） |
 
 ## 3. 各事件重點與範例
@@ -89,7 +89,7 @@ START-OF-SELECTION.
   ENDIF.
 ```
 
-注意 `STOP` 不是「整支程式直接結束」：官方文件（`STOP`）規定，它會離開目前的 `START-OF-SELECTION`（或 `AT SELECTION-SCREEN`）區塊，然後**照樣觸發 `END-OF-SELECTION`**。所以 END-OF-SELECTION 裡的輸出邏輯仍然會跑，要能承受「內表是空的」這個狀況（ZRFI0004 的 `LOOP AT t_dochd` 遇到空表就什麼都不印，剛好沒問題）。`STOP` 只能用在報表程式的這幾個事件，寫在 FORM 裡時要確定它是從這些事件呼叫的。
+注意 `STOP` 不是「整支程式直接結束」：官方文件（`STOP`）規定，它會離開目前的 `START-OF-SELECTION`（或 `AT SELECTION-SCREEN`）區塊，然後**照樣觸發 `END-OF-SELECTION`**。所以 END-OF-SELECTION 裡的輸出邏輯仍然會跑，要能承受「內表（Internal Table）是空的」這個狀況（ZRFI0004 的 `LOOP AT t_dochd` 遇到空表就什麼都不印，剛好沒問題）。`STOP` 只能用在報表程式的這幾個事件，寫在 FORM 裡時要確定它是從這些事件呼叫的。
 
 ### 3.4 TOP-OF-PAGE：每頁表頭
 
@@ -227,7 +227,7 @@ AT LINE-SELECTION.
 > - 第 1 條：寫在 `WRITE` 之前的 HIDE，綁到的是上一行——所以 S0001 那一行取回的是「下一筆」S0002。
 > - 第 4 條：S0003 那一行沒有 `gv_before` 的 HIDE，雙擊時系統不寫回它，`gv_before` 保留**上一次雙擊 S0002 時寫回的 S0003**。殘留的不只是迴圈最後一筆，連前一次雙擊的值都會留著。
 
-### 4.5 多層清單與相關系統欄位
+### 4.5 多層清單與相關系統欄位（System Field）
 
 在 `AT LINE-SELECTION` 裡輸出明細時**再 HIDE 一次**，使用者就可以在明細清單上再雙擊，往下鑽到第三層——每一層清單都有自己獨立的隱藏區，互不干擾。
 
@@ -241,7 +241,7 @@ AT LINE-SELECTION.
 
 ### 4.6 延伸：雙擊後串到另一支報表
 
-明細如果已經有現成的報表，`AT LINE-SELECTION` 裡可以不自己 `WRITE`，改成呼叫那支報表，並把 HIDE 取回的鍵值當選擇條件傳過去：
+明細如果已經有現成的報表，`AT LINE-SELECTION` 裡可以不自己 `WRITE`，改成呼叫那支報表，並把 HIDE 取回的鍵值當選擇條件（Selection Criteria）傳過去：
 
 ```abap
 AT LINE-SELECTION.

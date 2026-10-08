@@ -122,7 +122,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="%E6%9C%AC%E8%AC%9B%E9%87%8D%E9%BB%9E">本講重點</h2>
 <ul>
 <li>只要小計時，別把全部明細撈回內表</li>
@@ -190,7 +190,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="1-%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E5%9C%A8%E8%B3%87%E6%96%99%E5%BA%AB%E7%AE%97">1. 為什麼要在資料庫算</h2>
 <p>講義 20：撈<strong>全部</strong>明細 → 內表 → <code>AT END OF</code> + <code>SUM</code></p>
 <p>只要「每家公司一行」時，明細用不到：</p>
@@ -255,7 +255,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="2-%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B8">2. 聚合函數</h2>
 <table>
 <thead>
@@ -347,7 +347,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="3-group-by%E5%88%86%E7%B5%84">3. GROUP BY：分組</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT c~carrid c~carrname
        COUNT( * )        AS cnt
@@ -418,7 +418,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="4-having%E9%81%8E%E6%BF%BE%E5%88%86%E7%B5%84%E5%BE%8C%E7%9A%84%E7%B5%90%E6%9E%9C">4. HAVING：過濾分組後的結果</h2>
 <table>
 <thead>
@@ -504,7 +504,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="5-distinct%E4%B8%8D%E9%87%8D%E8%A4%87%E5%80%BC">5. DISTINCT：不重複值</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT DISTINCT airpfrom FROM spfli
   INTO TABLE gt_airp
@@ -572,7 +572,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="6-%E5%AD%90%E6%9F%A5%E8%A9%A2select-%E8%A3%A1%E9%9D%A2%E5%86%8D%E6%94%BE-select">6. 子查詢：SELECT 裡面再放 SELECT</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* IN：有航線從 FRA 起飛的公司
 SELECT carrid FROM scarr INTO TABLE gt_carr
@@ -644,7 +644,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="7-%E5%82%B3%E7%B5%B1%E5%AF%AB%E6%B3%95%E7%9A%84%E9%82%8A%E7%95%8C">7. 傳統寫法的邊界</h2>
 <p>聚合裡<strong>不能放算式</strong>：</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT carrid SUM( price * seatsocc ) AS revenue ...
@@ -711,7 +711,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h2 id="%E6%96%B0%E5%BC%8F%E5%AF%AB%E6%B3%95%E5%B0%8D%E7%85%A7%E8%81%9A%E5%90%88%E8%A3%A1%E6%94%BE%E7%AE%97%E5%BC%8F">新式寫法對照：聚合裡放算式</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">SELECT carrid,
        SUM( price * seatsocc ) AS revenue
@@ -727,7 +727,7 @@ footer { color: #999; }
 <li>子查詢寫法不變，只有外層照新式規則</li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-class="compact" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -754,7 +754,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" data-marpit-pagination="11" style="--paginate:true;--theme:default;--style:section {
+" lang="en-US" class="compact" data-marpit-pagination="11" style="--paginate:true;--class:compact;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -781,35 +781,23 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
-<h2 id="8-%E8%B3%87%E6%96%99%E5%BA%AB%E7%AE%97-vs-%E5%85%A7%E8%A1%A8%E7%AE%97">8. 資料庫算 vs 內表算</h2>
-<table>
-<thead>
-<tr>
-<th>情境</th>
-<th>建議</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>只要統計結果、不要明細</td>
-<td><code>GROUP BY</code> + 聚合</td>
-</tr>
-<tr>
-<td>要明細，又要每組小計／總計</td>
-<td>撈明細 + Control Break（講義 20）</td>
-</tr>
-<tr>
-<td>算式很複雜（要用 ABAP 函數）</td>
-<td>撈回內表用 ABAP 算</td>
-</tr>
-<tr>
-<td>只判斷「有沒有符合的資料」</td>
-<td><code>EXISTS</code> 或 <code>SELECT SINGLE</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>能讓資料庫算完再回傳的，就不要搬資料回來算</strong></p>
+;" data-marpit-pagination-total="14">
+<h2 id="%E9%80%B2%E9%9A%8E%E8%A3%9C%E5%85%85ctecommon-table-expressionfrom-itab%E8%A6%96%E7%AA%97%E5%87%BD%E6%95%B8window-function">進階補充：CTE（Common Table Expression）、<code>FROM @itab</code>、視窗函數（Window Function）</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-abap">* CTE：先算暫存結果（名稱 + 開頭），再拿來查
+WITH +lh AS ( SELECT carrid, connid, seatsocc FROM sflight WHERE carrid = 'LH' )
+SELECT connid, SUM( seatsocc ) AS seats FROM +lh
+  GROUP BY connid INTO TABLE @DATA(gt_seats).
+
+* FROM @itab：把內表當資料來源
+SELECT carrid, connid FROM @gt_keys AS k
+  WHERE connid &gt; '0400' INTO TABLE @DATA(gt_sel).
+
+* 視窗函數：保留明細，每列旁邊放「該公司合計」
+SELECT carrid, connid, seatsocc,
+       SUM( seatsocc ) OVER( PARTITION BY carrid ) AS carr_total
+  FROM sflight INTO TABLE @DATA(gt_detail).
+</code></pre>
+<p>本系統 7.54 實測都能用；讀到時看得懂即可</p>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
@@ -865,7 +853,91 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
+<h2 id="8-%E8%B3%87%E6%96%99%E5%BA%AB%E7%AE%97-vs-%E5%85%A7%E8%A1%A8%E7%AE%97">8. 資料庫算 vs 內表算</h2>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>建議</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>只要統計結果、不要明細</td>
+<td><code>GROUP BY</code> + 聚合</td>
+</tr>
+<tr>
+<td>要明細，又要每組小計／總計</td>
+<td>撈明細 + Control Break（講義 20）</td>
+</tr>
+<tr>
+<td>算式很複雜（要用 ABAP 函數）</td>
+<td>撈回內表用 ABAP 算</td>
+</tr>
+<tr>
+<td>只判斷「有沒有符合的資料」</td>
+<td><code>EXISTS</code> 或 <code>SELECT SINGLE</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>能讓資料庫算完再回傳的，就不要搬資料回來算</strong></p>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-theme="default" data-style="section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+" lang="en-US" data-marpit-pagination="13" style="--paginate:true;--theme:default;--style:section {
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+  font-size: 26px;
+  padding: 60px;
+}
+section.lead {
+  text-align: center;
+  justify-content: center;
+}
+section.lead h1 { font-size: 56px; }
+code, pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+pre {
+  font-size: 21px;
+  line-height: 1.45;
+}
+table { font-size: 23px; }
+section.compact pre { font-size: 19px; }
+section.compact table { font-size: 20px; }
+blockquote {
+  border-left: 6px solid #0a6ed1;
+  padding-left: 16px;
+  color: #333;
+  background: #eef6fc;
+}
+footer { color: #999; }
+;" data-marpit-pagination-total="14">
 <h2 id="9-%E5%B8%B8%E8%A6%8B%E9%8C%AF%E8%AA%A4%E8%88%87%E9%99%B7%E9%98%B1">9. 常見錯誤與陷阱</h2>
 <table>
 <thead>
@@ -899,7 +971,7 @@ footer { color: #999; }
 </table>
 <p>判斷有沒有資料 → 看 <code>COUNT( * )</code>，不要看 <code>sy-subrc</code></p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-class="lead" data-theme="default" data-style="section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -926,7 +998,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-" lang="en-US" class="lead" data-marpit-pagination="13" style="--paginate:true;--class:lead;--theme:default;--style:section {
+" lang="en-US" class="lead" data-marpit-pagination="14" style="--paginate:true;--class:lead;--theme:default;--style:section {
   font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
   font-size: 26px;
   padding: 60px;
@@ -953,7 +1025,7 @@ blockquote {
   background: #eef6fc;
 }
 footer { color: #999; }
-;" data-marpit-pagination-total="13">
+;" data-marpit-pagination-total="14">
 <h1 id="%E8%AA%B2%E5%A0%82%E7%B7%B4%E7%BF%92">課堂練習</h1>
 <p>完成 <strong>ex20a</strong>：</p>
 <p><code>GROUP BY</code> 統計各公司、<code>HAVING</code>、<code>DISTINCT</code>、<br />

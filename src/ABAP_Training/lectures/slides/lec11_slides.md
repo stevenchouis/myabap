@@ -96,7 +96,7 @@ SELECT f~carrid f~connid f~fldate c~carrname
 
 ---
 
-## 新式寫法對照：JOIN 加行內宣告
+## 新式寫法對照：JOIN 加行內宣告（Inline Declaration）
 
 ```abap
 SELECT f~carrid, f~connid, f~fldate, c~carrname
@@ -193,6 +193,31 @@ ENDIF.
   `IS NOT INITIAL` 檢查**不是可選的**
 - 結果自動去除完全重複的列
 - 新程式優先 JOIN；FOR ALL ENTRIES 用在 JOIN 不便的場景
+
+---
+
+<!-- _class: compact -->
+
+## 新式寫法對照：`COALESCE`、`UNION`、FOR ALL ENTRIES
+
+```abap
+* COALESCE：LEFT JOIN 沒對到的欄位給預設值（AB 沒航線 → ----）
+SELECT a~carrid, coalesce( b~connid, '----' ) AS connid
+  FROM scarr AS a LEFT OUTER JOIN spfli AS b ON a~carrid = b~carrid
+  INTO TABLE @DATA(gt_carr).
+
+* UNION：兩個 SELECT 在資料庫端合併（UNION ALL 保留重複）
+SELECT carrid, connid FROM spfli WHERE cityfrom = 'FRANKFURT'
+UNION
+SELECT carrid, connid FROM spfli WHERE cityto = 'FRANKFURT'
+  INTO TABLE @DATA(gt_fra).
+
+* FOR ALL ENTRIES：驅動內表加 @，空表陷阱不變
+SELECT carrid, connid, fldate FROM sflight
+  FOR ALL ENTRIES IN @gt_keys
+  WHERE carrid = @gt_keys-carrid AND connid = @gt_keys-connid
+  INTO TABLE @DATA(gt_flights).
+```
 
 ---
 

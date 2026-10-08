@@ -26,7 +26,7 @@ CONCATENATE 'A' 'B' 'C' INTO gv_path SEPARATED BY '-'.
 
 - 尾端空白被忽略是 `c` 型別的特性；**真的需要保留空白**時加 `RESPECTING BLANKS`（少用）。
 
-**新式寫法對照（7.40 之後）：字串模板 `|...|` 與 `&&`**
+**新式寫法對照（7.40 之後）：字串模板（String Template）`|...|` 與 `&&`（串接運算子，Concatenation Operator）**
 
 ```abap
 * 傳統寫法
@@ -58,7 +58,7 @@ SPLIT gv_csv AT ',' INTO gv_id gv_name gv_score.
 ```
 
 - 接收變數比片段少：**最後一個變數收下剩餘全部**（含分隔符）。
-- 片段數不固定時拆進內表：`SPLIT gv_csv AT ',' INTO TABLE lt_parts.`——處理上傳檔案每一行的標準手法。
+- 片段數不固定時拆進內表（Internal Table）：`SPLIT gv_csv AT ',' INTO TABLE lt_parts.`——處理上傳檔案每一行的標準手法。
 
 **新式寫法對照（7.40 之後）：`segment( )`**
 
@@ -73,7 +73,7 @@ SPLIT gv_csv AT ',' INTO DATA(lv_id) DATA(lv_name) DATA(lv_score).
 gv_name = segment( val = gv_csv index = 2 sep = ',' ).
 ```
 
-語法拆解：`segment( val = 來源 index = 第幾段 sep = 分隔符 )` 是一個**字串函式**，回傳第 `index` 段（從 1 起算）。函式寫法用 `參數名 = 值` 傳參數，可以直接放在賦值右邊或其他運算式裡。只要其中一段時用 `segment( )` 比較方便；要一次拆成好幾個變數，`SPLIT` 仍然最直接。
+語法拆解：`segment( val = 來源 index = 第幾段 sep = 分隔符 )` 是一個**字串函式（String Function）**，回傳第 `index` 段（從 1 起算）。函式寫法用 `參數名 = 值` 傳參數，可以直接放在賦值右邊或其他運算式裡。只要其中一段時用 `segment( )` 比較方便；要一次拆成好幾個變數，`SPLIT` 仍然最直接。
 
 ## 3. CONDENSE / REPLACE / TRANSLATE
 
@@ -91,7 +91,7 @@ TRANSLATE gv_text TO UPPER CASE.  " 轉大寫（TO LOWER CASE 轉小寫）
 
 實務備註：使用者輸入拿去跟資料庫比對前，常見前處理就是 `CONDENSE` + `TRANSLATE TO UPPER CASE`（資料庫多存大寫，講義 6 提過）。
 
-**新式寫法對照（7.40 之後）：字串函式**
+**新式寫法對照（7.40 之後）：字串函式（String Function）**
 
 傳統指令是「直接改掉變數本身」；字串函式則是「回傳處理後的結果」，原變數不動，要自己賦值回去：
 
@@ -174,7 +174,7 @@ gv_last = gv_last - 1.
 ```
 
 - 拆年月日就用位移：`gv_today+0(4)` 年、`gv_today+4(2)` 月、`gv_today+6(2)` 日。
-- **`WRITE` 日期要注意輸出長度**：自己宣告的 `TYPE d` 預設只佔 8 格，放不下分隔符號，`WRITE gv_today.` 印出 `20261008`；給 10 格（`WRITE (10) gv_today.`），或改用字典型別宣告（如 `TYPE sydatum`、`TYPE sflight-fldate`），就會依使用者設定加上分隔符號，例如 `2026/10/08`（2026-10-08 實測，`ZR_TR18_DATE_CHK`）。要固定格式就自己用位移拼，或用字串模板 `|{ gv_today DATE = ISO }|` 印成 `2026-10-08`。`WRITE ... TO` 的接收變數不能行內宣告（`WRITE gv_today TO DATA(gv_text)` 編譯錯誤），要事先宣告。
+- **`WRITE` 日期要注意輸出長度（Output Length）**：自己宣告的 `TYPE d` 預設只佔 8 格，放不下分隔符號，`WRITE gv_today.` 印出 `20261008`；給 10 格（`WRITE (10) gv_today.`），或改用字典型別宣告（如 `TYPE sydatum`、`TYPE sflight-fldate`），就會依使用者設定加上分隔符號，例如 `2026/10/08`（2026-10-08 實測，`ZR_TR18_DATE_CHK`）。要固定格式就自己用位移拼，或用字串模板 `|{ gv_today DATE = ISO }|` 印成 `2026-10-08`。`WRITE ... TO` 的接收變數不能行內宣告（`WRITE gv_today TO DATA(gv_text)` 編譯錯誤），要事先宣告。
 - 想要「跟畫面上 WRITE 出來一樣的格式」、但先放進變數再用：`WRITE gv_today TO gv_text.`（`gv_text` 是 `c LENGTH 10`）。`WRITE ... TO` 不輸出到清單，只把格式化後的文字放進變數，日期、金額、數字都適用；加 `LEFT-JUSTIFIED` 可以靠左、去掉前面的空白（講義 13 的 ZRFI0004 用它組「頁碼 3/&」）。
 - 時間 `t`（HHMMSS）同理可加減秒數；`sy-uzeit` 是現在時間。
 - 星期幾、加「工作日」、民國年轉換等進階需求：標準 FM 都有（如 `DATE_COMPUTE_DAY`），講義 15 學會 CALL FUNCTION 後就能用——先記得「日期難題先找標準 FM」。

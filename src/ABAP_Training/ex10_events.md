@@ -9,7 +9,7 @@
 
 | 事件 | 時機 | 典型用途 |
 |---|---|---|
-| `INITIALIZATION` | 選擇畫面顯示前 | 給預設值 |
+| `INITIALIZATION` | 選擇畫面（Selection Screen）顯示前 | 給預設值 |
 | `AT SELECTION-SCREEN` | 按執行後、主程式前 | 驗證輸入（E 訊息擋在畫面） |
 | `START-OF-SELECTION` | 主處理 | 取數、運算、輸出 |
 | `END-OF-SELECTION` | 主處理結束 | 總結、統計 |
@@ -21,7 +21,7 @@
 
 ## 事前準備
 
-建立程式 `ZR_TR10_<你的姓名縮寫>`，套件 `$TMP`。
+建立程式 `ZR_TR10_<你的姓名縮寫>`，套件（Package） `$TMP`。
 
 ## 題目需求
 
